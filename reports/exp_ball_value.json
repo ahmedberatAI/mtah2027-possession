@@ -1,0 +1,47 @@
+{
+ "v2": {
+  "alive_seen": 0.9342228337705711,
+  "team_acc": 0.8913856774213211,
+  "alive_dead": 0.9801515206583399,
+  "spell_pen20": 0.5577552303560448,
+  "spell_best": 0.5873999815925518,
+  "best": {
+   "temp_d": 1.0,
+   "temp_t": 1.0,
+   "pen_team": 4,
+   "pen_dead": 64,
+   "min_poss": 5,
+   "min_dead": 25
+  }
+ },
+ "a0": {
+  "alive_seen": 0.9743377796900913,
+  "team_acc": 0.8941589757400178,
+  "alive_dead": 0.9880716155859466,
+  "spell_pen20": 0.5675118123034385,
+  "spell_best": 0.6059940325096366,
+  "best": {
+   "temp_d": 1.0,
+   "temp_t": 1.0,
+   "pen_team": 4,
+   "pen_dead": 64,
+   "min_poss": 5,
+   "min_dead": 25
+  }
+ },
+ "ah": {
+  "alive_seen": 0.9616152846283237,
+  "team_acc": 0.8932743234080377,
+  "alive_dead": 0.9838362368200722,
+  "spell_pen20": 0.5628597117839721,
+  "spell_best": 0.5971229152328558,
+  "best": {
+   "temp_d": 1.0,
+   "temp_t": 1.0,
+   "pen_team": 4,
+   "pen_dead": 64,
+   "min_poss": 5,
+   "min_dead": 25
+  }
+ }
+}

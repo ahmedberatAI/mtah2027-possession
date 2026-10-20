@@ -58,6 +58,10 @@ Skorlar: public = ilk 5 dk (17 possession, spellF1 bootstrap aralığı ~0.27–
 | sim.V2 ile yeniden eğitilen takım modeli + v5 (pen_team 8/12/20) | public spellF1 0.542/0.552/**0.578**, macroF1 ~0.89–0.90; tam maç 277/258/236 poss; v5 ile kare uyumu %98 | aday: **v2 model + pen 20** (Metrica'nın önerisiyle tutarlı, public'i de cezalandırmıyor); karar elle etiketle |
 | sim.V2 ile ölü-top LightGBM | DFL CV'de iyi (0.980), BAR-ATH public'te hâlâ zayıf (0.766) | ❌ kurallar kalıyor |
 
+| YOLO11s ince ayar (ATD sözde-etiketleri, 640 doğal karolar, 16k+5.6k kırpıntı) | 18 epoch'ta val mAP50 ~0.08'de takıldı | ❌ durduruldu (ağırlık `cache/ball_yolo/train/weights/last.pt`) |
+| **Top izinin değeri (GPU'suz, DFL CV, eşli)**: oyun içi top eksikliği %6.5 → %3.3 → %0 | takım doğruluğu 0.8914 → 0.8933 → 0.8942; spellF1 (pen20) 0.558 → 0.563 → 0.568; ayarlı 0.587 → 0.597 → 0.606 | ❌ mükemmel top bile <+0.02 → **video top tespiti ertelendi**; darboğaz top izi değil |
+| ATD kısa boşluk doldurma şüphesi | 27–128 karelik boşluk sadece 1; ~%3 görünür kare olağandışı pürüzsüz, orada iki kamera farkı 1.22 m (normal 0.74 m) | ATD kısa boşlukları tahminle dolduruyor; sözde-etiket kullanılırsa pürüzsüz koşular + boşluk kenarları çıkarılmalı |
+
 ## Dış veri
 - IDSSE/Open DFL (7 maç, CC BY): ölü-top istatistikleri çok benzer; possession bayrağı GT'den ~2× sık dönüyor.
 - Metrica örnek (3 maç, kaynak belirtilmeli), SkillCorner open data (20 maç, MIT, henüz kullanılmadı).

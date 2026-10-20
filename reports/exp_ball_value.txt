@@ -1,0 +1,5 @@
+built a0
+built ah
+v2  in-play ball seen 0.934 | team acc 0.8914 | alive/dead acc 0.9802 | spellF1 pen20 0.5578 | tuned 0.5874 {'temp_d': 1.0, 'temp_t': 1.0, 'pen_team': 4, 'pen_dead': 64, 'min_poss': 5, 'min_dead': 25}
+a0  in-play ball seen 0.974 | team acc 0.8942 | alive/dead acc 0.9881 | spellF1 pen20 0.5675 | tuned 0.6060 {'temp_d': 1.0, 'temp_t': 1.0, 'pen_team': 4, 'pen_dead': 64, 'min_poss': 5, 'min_dead': 25}
+ah  in-play ball seen 0.962 | team acc 0.8933 | alive/dead acc 0.9838 | spellF1 pen20 0.5629 | tuned 0.5971 {'temp_d': 1.0, 'temp_t': 1.0, 'pen_team': 4, 'pen_dead': 64, 'min_poss': 5, 'min_dead': 25}
