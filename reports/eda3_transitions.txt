@@ -1,0 +1,12 @@
+H<->A, R=1.0 m: first new-team close frame - GT frame: n=10 mean=-8.30 p0=-50.00 p25=-33.25 p50=-14.50 p75=10.75 p100=58.00
+              last old-team close frame - GT frame:  n=7 mean=-7.71 p0=-45.00 p25=-37.50 p50=-35.00 p75=13.50 p100=74.00
+H<->A, R=1.5 m: first new-team close frame - GT frame: n=10 mean=-11.60 p0=-50.00 p25=-38.25 p50=-18.00 p75=8.75 p100=55.00
+              last old-team close frame - GT frame:  n=8 mean=-6.75 p0=-45.00 p25=-38.75 p50=-21.00 p75=11.00 p100=74.00
+H<->A, R=2.5 m: first new-team close frame - GT frame: n=11 mean=-12.55 p0=-50.00 p25=-42.00 p50=-14.00 p75=4.00 p100=51.00
+              last old-team close frame - GT frame:  n=8 mean=-4.75 p0=-45.00 p25=-35.75 p50=-19.00 p75=16.50 p100=74.00
+alive->D: first ball-outside frame - GT frame: n=1 mean=-2.00 p0=-2.00 p50=-2.00 p100=-2.00
+alive->D: first ball-missing frame - GT frame: n=1 mean=-20.00 p0=-20.00 p50=-20.00 p100=-20.00
+D->alive: first ball speed > 2.0 m/s frame - GT frame: n=4 mean=-67.50 p0=-125.00 p50=-68.00 p100=-9.00; nearest team == restarting team 3/4
+D->alive: first ball speed > 4.0 m/s frame - GT frame: n=4 mean=-43.25 p0=-125.00 p50=-19.50 p100=-9.00; nearest team == restarting team 3/4
+GT H: frames with a player <=1.5 m: 1620, of which nearest is other team 10.6%
+GT A: frames with a player <=1.5 m: 1019, of which nearest is other team 12.2%

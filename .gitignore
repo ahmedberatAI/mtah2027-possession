@@ -1,0 +1,25 @@
+# match data and anything derived from it at frame level -- never commit (terms of use)
+data/
+cache/
+submissions/
+*.npz
+*.parquet
+*.mp4
+.venv/
+__pycache__/
+external/
+external_data/
+data_zip_staging/
+data_dl_test/
+# frame-level outputs of the official scorer (transition lists with frame numbers)
+reports/official_*/
+# weights, audio, pickles, any local artefacts
+*.pkl
+*.pt
+*.pth
+*.pth.tar
+*.wav
+*.npy
+*.nbi
+*.nbc
+runs/

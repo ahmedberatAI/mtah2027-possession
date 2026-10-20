@@ -1,0 +1,48 @@
+C:\Users\omen\Desktop\barcahackathon\src\eda2.py:75: RuntimeWarning: Mean of empty slice
+  mean_spd = np.nanmean(np.where(np.isnan(P[:, :, 2]), np.nan, P[:, :, 2]), axis=1)
+====================================================================================================
+1. BALL SPEED CHANNEL
+ball speed present on 20971 frames; of which ball position present: 47.3%
+minutes of video containing a ball speed value: 37 distinct minutes
+corr(ball speed channel, speed from positions) = -0.097; ratio median 3.90
+player speed channel vs position-derived speed (m/s): corr 0.900; median ratio 1.006
+position-derived player speed (m/s, graded): n=3253351 mean=1.75 p5=0.07 p50=1.36 p95=4.68 p99=6.58
+====================================================================================================
+2. BALL GAPS IN GRADED PLAY
+gaps bounded by visible ball on both sides: 147
+ball displacement across a gap (m): n=147 mean=15.68 p10=2.71 p25=4.65 p50=10.20 p75=22.48 p90=35.52
+distance of last-seen ball to nearest pitch line (m), negative = outside: n=147 mean=8.54 p10=-0.92 p25=1.28 p50=6.01 p75=13.45 p90=22.71
+distance of first-seen ball after gap to nearest line (m): n=147 mean=8.46 p10=-4.37 p25=1.05 p50=7.09 p75=13.74 p90=24.87
+share of gaps whose last-seen ball is within 2 m of a line or outside: 28.6%
+share of gaps whose first-seen ball is within 2 m of a line or outside: 26.5%
+share of gaps whose first-seen ball is inside a penalty box: 29.9%
+mean player speed during gaps (m/s): n=147 mean=1.54 p10=0.80 p25=0.97 p50=1.31 p75=1.75 p90=2.71
+mean player speed while ball visible (m/s): n=94214 mean=2.16 p10=1.06 p25=1.44 p50=2.00 p75=2.73 p90=3.47
+public window GT H: 0.1% of its frames are inside ball gaps
+public window GT A: 15.0% of its frames are inside ball gaps
+public window GT D: 33.6% of its frames are inside ball gaps
+public window gap frames by GT label: H 0.6% A 43.6% D 55.8%
+====================================================================================================
+3. GOALKEEPER SLOTS
+slot 23 team 0: occupancy 92.9%, x (m) n=147627 mean=49.88 p5=2.45 p50=18.11 p95=102.49
+slot 45 team 1: occupancy 92.5%, x (m) n=146907 mean=52.67 p5=1.53 p50=82.97 p95=103.39
+====================================================================================================
+4. DEAD-BALL SIGNATURES OVER THE WHOLE MATCH (no labels)
+  slow stretches (mean speed < 0.9 m/s, >= 3 s):  65  covering   1087 s
+  slow stretches (mean speed < 0.9 m/s, >= 5 s):  53  covering   1041 s
+  slow stretches (mean speed < 0.9 m/s, >= 10 s):  35  covering    906 s
+  slow stretches (mean speed < 1.1 m/s, >= 3 s):  85  covering   1663 s
+  slow stretches (mean speed < 1.1 m/s, >= 5 s):  67  covering   1594 s
+  slow stretches (mean speed < 1.1 m/s, >= 10 s):  48  covering   1452 s
+  slow stretches (mean speed < 1.3 m/s, >= 3 s): 113  covering   2291 s
+  slow stretches (mean speed < 1.3 m/s, >= 5 s):  92  covering   2212 s
+  slow stretches (mean speed < 1.3 m/s, >= 10 s):  65  covering   2024 s
+  slow stretches (mean speed < 1.5 m/s, >= 3 s): 131  covering   2879 s
+  slow stretches (mean speed < 1.5 m/s, >= 5 s): 103  covering   2767 s
+  slow stretches (mean speed < 1.5 m/s, >= 10 s):  74  covering   2555 s
+smoothed (+-2 s) mean speed in public GT H: n=3454 mean=2.22 p10=1.36 p50=2.10 p90=3.28
+smoothed (+-2 s) mean speed in public GT A: n=2577 mean=2.58 p10=1.67 p50=2.44 p90=3.54
+smoothed (+-2 s) mean speed in public GT D: n=1469 mean=1.45 p10=0.94 p50=1.21 p90=2.64
+
+ball-outside-pitch episodes (>=0.2 s): 67  total 157 s
+frames ball visible & nearest player > 15 m: 1.33%

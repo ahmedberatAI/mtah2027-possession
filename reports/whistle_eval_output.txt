@@ -1,0 +1,104 @@
+====================================================================================================
+naive:tonal_ex   (2880 peaks in graded frames)
+  kickoff 11185: peak -1.08 s, z 6.1, pct 99.91, rank 56 | kickoff 113742: peak -1.24 s, z 5.1, pct 99.61, rank 184
+  GT D start n=4  mean z in -5..-3,-3..-2,-2..-1,-1..0,0..1,1..2,2..3,3..5: +0.50 +0.16 +0.62 +1.32 +0.07 +0.17 +0.17 +0.35 | top-N peak in [-2,+1]s: N50=1 N100=1 N200=1
+  GT D end   n=4  mean z in -5..-3,-3..-2,-2..-1,-1..0,0..1,1..2,2..3,3..5: +0.38 -0.56 -0.60 -0.43 -0.07 +0.29 -0.27 +0.43 | top-N peak in [-2,+1]s: N50=0 N100=0 N200=0
+  v5 D start [-3,+1]s: N50  4/118=0.03 (rand 0.03/alive 0.03, lift 1.1, p=5.0e-01) | N100  6/118=0.05 (rand 0.06/alive 0.05, lift 0.8, p=7.2e-01) | N200  8/118=0.07 (rand 0.12/alive 0.10, lift 0.6, p=9.7e-01)
+  v5 D start [-1,+1]s: N50  3/118=0.03 (rand 0.02/alive 0.02, lift 1.6, p=2.9e-01) | N100  4/118=0.03 (rand 0.03/alive 0.03, lift 1.1, p=5.2e-01) | N200  5/118=0.04 (rand 0.06/alive 0.05, lift 0.7, p=8.7e-01)
+  v5 D end   [-4,+1]s: N50  8/117=0.07 (rand 0.04/alive 0.04, lift 1.8, p=8.0e-02) | N100 14/117=0.12 (rand 0.07/alive 0.07, lift 1.6, p=5.1e-02) | N200 28/117=0.24 (rand 0.14/alive 0.12, lift 1.7, p=2.5e-03)
+  top-50 peaks: 0.08 near a D start (chance 0.08), 0.16 before a D end (chance 0.09), 0.52 inside predicted D (D share 0.50)
+  top-100 peaks: 0.06 near a D start (chance 0.08), 0.15 before a D end (chance 0.09), 0.56 inside predicted D (D share 0.50)
+  top-200 peaks: 0.04 near a D start (chance 0.08), 0.15 before a D end (chance 0.09), 0.57 inside predicted D (D share 0.50)
+  top-100 peak offset to nearest v5 D start (1 s bins -6..+6 s): 2 1 4 2 0 3 1 1 1 0 2 5  (chance/bin 1.9)
+  peaks in v5-alive: 44, next D start in 0-1/1-2/2-3/3-5/5-10/>10 s: 3 0 2 5 8 26 | peaks in v5-D: 56, since D start: 1 1 1 2 7 44, to D end: 4 3 1 7 11 30
+====================================================================================================
+sed:Whistle   (2150 peaks in graded frames)
+  kickoff 11185: peak -1.80 s, z 2.7, pct 97.30, rank 196 | kickoff 113742: peak -1.60 s, z 3.0, pct 98.06, rank 147
+  GT D start n=4  mean z in -5..-3,-3..-2,-2..-1,-1..0,0..1,1..2,2..3,3..5: +0.77 +0.22 +1.99 +1.59 +0.92 +0.37 +0.49 -0.79 | top-N peak in [-2,+1]s: N50=0 N100=2 N200=3
+  GT D end   n=4  mean z in -5..-3,-3..-2,-2..-1,-1..0,0..1,1..2,2..3,3..5: +0.41 -0.76 -1.09 -0.45 +0.82 +0.94 -0.55 -0.30 | top-N peak in [-2,+1]s: N50=0 N100=0 N200=0
+  v5 D start [-3,+1]s: N50  3/118=0.03 (rand 0.03/alive 0.02, lift 0.8, p=7.2e-01) | N100  7/118=0.06 (rand 0.06/alive 0.05, lift 1.0, p=5.7e-01) | N200 15/118=0.13 (rand 0.12/alive 0.10, lift 1.1, p=4.1e-01)
+  v5 D start [-1,+1]s: N50  3/118=0.03 (rand 0.02/alive 0.01, lift 1.6, p=2.9e-01) | N100  5/118=0.04 (rand 0.03/alive 0.03, lift 1.3, p=3.3e-01) | N200  9/118=0.08 (rand 0.06/alive 0.05, lift 1.2, p=3.3e-01)
+  v5 D end   [-4,+1]s: N50  4/117=0.03 (rand 0.04/alive 0.02, lift 0.9, p=6.6e-01) | N100  8/117=0.07 (rand 0.07/alive 0.06, lift 0.9, p=6.3e-01) | N200 18/117=0.15 (rand 0.14/alive 0.12, lift 1.1, p=3.8e-01)
+  top-50 peaks: 0.06 near a D start (chance 0.08), 0.08 before a D end (chance 0.09), 0.72 inside predicted D (D share 0.50)
+  top-100 peaks: 0.07 near a D start (chance 0.08), 0.09 before a D end (chance 0.09), 0.61 inside predicted D (D share 0.50)
+  top-200 peaks: 0.08 near a D start (chance 0.08), 0.11 before a D end (chance 0.09), 0.60 inside predicted D (D share 0.50)
+  top-100 peak offset to nearest v5 D start (1 s bins -6..+6 s): 3 0 4 1 1 3 1 3 1 1 0 2  (chance/bin 1.9)
+  peaks in v5-alive: 39, next D start in 0-1/1-2/2-3/3-5/5-10/>10 s: 2 2 1 4 9 21 | peaks in v5-D: 61, since D start: 1 3 1 1 6 49, to D end: 3 2 2 5 11 38
+====================================================================================================
+clip16:Whistle@exc   (2057 peaks in graded frames)
+  kickoff 11185: peak -3.00 s, z 1.7, pct 88.76, rank 589 | kickoff 113742: peak +0.20 s, z 2.1, pct 92.86, rank 431
+  GT D start n=4  mean z in -5..-3,-3..-2,-2..-1,-1..0,0..1,1..2,2..3,3..5: +0.43 -0.15 +0.85 +0.90 +0.37 +0.80 +0.50 +0.60 | top-N peak in [-2,+1]s: N50=0 N100=1 N200=1
+  GT D end   n=4  mean z in -5..-3,-3..-2,-2..-1,-1..0,0..1,1..2,2..3,3..5: +0.02 -0.32 +0.03 -0.48 +0.61 +0.43 -0.72 -0.55 | top-N peak in [-2,+1]s: N50=1 N100=1 N200=1
+  v5 D start [-3,+1]s: N50  4/118=0.03 (rand 0.03/alive 0.02, lift 1.1, p=5.1e-01) | N100 12/118=0.10 (rand 0.06/alive 0.04, lift 1.7, p=5.9e-02) | N200 26/118=0.22 (rand 0.12/alive 0.08, lift 1.9, p=1.1e-03)
+  v5 D start [-1,+1]s: N50  4/118=0.03 (rand 0.02/alive 0.01, lift 2.1, p=1.2e-01) | N100  8/118=0.07 (rand 0.03/alive 0.02, lift 2.1, p=3.6e-02) | N200 19/118=0.16 (rand 0.06/alive 0.05, lift 2.5, p=1.7e-04)
+  v5 D end   [-4,+1]s: N50  5/117=0.04 (rand 0.04/alive 0.03, lift 1.1, p=4.8e-01) | N100  9/117=0.08 (rand 0.08/alive 0.05, lift 1.0, p=5.3e-01) | N200 20/117=0.17 (rand 0.14/alive 0.10, lift 1.2, p=2.2e-01)
+  top-50 peaks: 0.08 near a D start (chance 0.08), 0.10 before a D end (chance 0.09), 0.62 inside predicted D (D share 0.50)
+  top-100 peaks: 0.13 near a D start (chance 0.08), 0.09 before a D end (chance 0.09), 0.63 inside predicted D (D share 0.50)
+  top-200 peaks: 0.14 near a D start (chance 0.08), 0.10 before a D end (chance 0.09), 0.62 inside predicted D (D share 0.50)
+  top-100 peak offset to nearest v5 D start (1 s bins -6..+6 s): 2 2 1 2 3 5 3 3 4 2 5 2  (chance/bin 1.9)
+  peaks in v5-alive: 37, next D start in 0-1/1-2/2-3/3-5/5-10/>10 s: 4 3 3 3 10 14 | peaks in v5-D: 63, since D start: 3 3 4 7 8 38, to D end: 1 0 3 6 13 40
+====================================================================================================
+clip32:Whistle   (2130 peaks in graded frames)
+  kickoff 11185: peak -1.24 s, z 4.9, pct 99.64, rank 35 | kickoff 113742: peak -0.88 s, z 5.1, pct 99.68, rank 30
+  GT D start n=4  mean z in -5..-3,-3..-2,-2..-1,-1..0,0..1,1..2,2..3,3..5: +1.24 +0.55 +1.22 +2.42 +1.60 +0.60 +0.84 +0.59 | top-N peak in [-2,+1]s: N50=1 N100=2 N200=2
+  GT D end   n=4  mean z in -5..-3,-3..-2,-2..-1,-1..0,0..1,1..2,2..3,3..5: -0.08 -0.33 -0.23 -0.07 +0.25 +0.64 +0.35 +0.21 | top-N peak in [-2,+1]s: N50=0 N100=0 N200=0
+  v5 D start [-3,+1]s: N50  6/118=0.05 (rand 0.03/alive 0.02, lift 1.6, p=1.7e-01) | N100 11/118=0.09 (rand 0.06/alive 0.05, lift 1.5, p=1.1e-01) | N200 21/118=0.18 (rand 0.12/alive 0.09, lift 1.5, p=4.3e-02)
+  v5 D start [-1,+1]s: N50  4/118=0.03 (rand 0.02/alive 0.01, lift 2.1, p=1.2e-01) | N100  7/118=0.06 (rand 0.03/alive 0.03, lift 1.9, p=8.5e-02) | N200 15/118=0.13 (rand 0.06/alive 0.05, lift 2.0, p=8.3e-03)
+  v5 D end   [-4,+1]s: N50  7/117=0.06 (rand 0.04/alive 0.03, lift 1.5, p=1.7e-01) | N100 10/117=0.09 (rand 0.08/alive 0.06, lift 1.1, p=4.0e-01) | N200 25/117=0.21 (rand 0.15/alive 0.12, lift 1.5, p=3.1e-02)
+  top-50 peaks: 0.12 near a D start (chance 0.08), 0.14 before a D end (chance 0.09), 0.62 inside predicted D (D share 0.50)
+  top-100 peaks: 0.11 near a D start (chance 0.08), 0.11 before a D end (chance 0.09), 0.59 inside predicted D (D share 0.50)
+  top-200 peaks: 0.11 near a D start (chance 0.08), 0.14 before a D end (chance 0.09), 0.60 inside predicted D (D share 0.50)
+  top-100 peak offset to nearest v5 D start (1 s bins -6..+6 s): 2 3 1 0 4 5 1 3 6 0 0 1  (chance/bin 1.9)
+  peaks in v5-alive: 41, next D start in 0-1/1-2/2-3/3-5/5-10/>10 s: 5 4 0 4 7 21 | peaks in v5-D: 59, since D start: 1 3 6 0 5 44, to D end: 5 0 3 4 14 33
+====================================================================================================
+ref:s1   (3007 peaks in graded frames)
+  kickoff 11185: peak -1.08 s, z 50.7, pct 100.00, rank 1 | kickoff 113742: peak -1.24 s, z 37.8, pct 99.99, rank 5
+  GT D start n=4  mean z in -5..-3,-3..-2,-2..-1,-1..0,0..1,1..2,2..3,3..5: +1.64 +3.61 +0.74 +3.78 +3.32 +0.21 +1.30 +0.81 | top-N peak in [-2,+1]s: N50=1 N100=2 N200=2
+  GT D end   n=4  mean z in -5..-3,-3..-2,-2..-1,-1..0,0..1,1..2,2..3,3..5: +0.63 +0.53 +0.36 +0.64 +0.38 +0.58 +0.11 +2.37 | top-N peak in [-2,+1]s: N50=0 N100=0 N200=0
+  v5 D start [-3,+1]s: N50  9/118=0.08 (rand 0.03/alive 0.02, lift 2.4, p=1.2e-02) | N100 15/118=0.13 (rand 0.06/alive 0.04, lift 2.1, p=5.6e-03) | N200 25/118=0.21 (rand 0.12/alive 0.08, lift 1.8, p=2.4e-03)
+  v5 D start [-1,+1]s: N50  6/118=0.05 (rand 0.02/alive 0.01, lift 3.2, p=1.2e-02) | N100 10/118=0.08 (rand 0.03/alive 0.02, lift 2.7, p=4.6e-03) | N200 17/118=0.14 (rand 0.06/alive 0.04, lift 2.3, p=1.2e-03)
+  v5 D end   [-4,+1]s: N50 10/117=0.09 (rand 0.04/alive 0.02, lift 2.2, p=1.7e-02) | N100 20/117=0.17 (rand 0.07/alive 0.05, lift 2.3, p=4.2e-04) | N200 26/117=0.22 (rand 0.14/alive 0.10, lift 1.6, p=1.2e-02)
+  top-50 peaks: 0.18 near a D start (chance 0.08), 0.20 before a D end (chance 0.09), 0.80 inside predicted D (D share 0.50)
+  top-100 peaks: 0.15 near a D start (chance 0.08), 0.23 before a D end (chance 0.09), 0.74 inside predicted D (D share 0.50)
+  top-200 peaks: 0.13 near a D start (chance 0.08), 0.15 before a D end (chance 0.09), 0.66 inside predicted D (D share 0.50)
+  top-100 peak offset to nearest v5 D start (1 s bins -6..+6 s): 0 0 2 3 2 6 4 5 7 0 2 1  (chance/bin 1.9)
+  peaks in v5-alive: 26, next D start in 0-1/1-2/2-3/3-5/5-10/>10 s: 5 3 3 2 3 10 | peaks in v5-D: 74, since D start: 4 5 7 2 5 51, to D end: 10 3 5 5 13 38
+====================================================================================================
+ref:s2   (2997 peaks in graded frames)
+  kickoff 11185: peak -1.08 s, z 43.1, pct 99.99, rank 9 | kickoff 113742: peak -1.20 s, z 54.0, pct 100.00, rank 2
+  GT D start n=4  mean z in -5..-3,-3..-2,-2..-1,-1..0,0..1,1..2,2..3,3..5: +1.42 +2.60 +0.30 +5.20 +3.83 +0.06 +0.91 +0.56 | top-N peak in [-2,+1]s: N50=1 N100=2 N200=3
+  GT D end   n=4  mean z in -5..-3,-3..-2,-2..-1,-1..0,0..1,1..2,2..3,3..5: +0.47 +0.46 +0.25 +0.48 +0.23 +0.37 +0.23 +1.82 | top-N peak in [-2,+1]s: N50=0 N100=0 N200=0
+  v5 D start [-3,+1]s: N50  9/118=0.08 (rand 0.03/alive 0.01, lift 2.5, p=1.1e-02) | N100 16/118=0.14 (rand 0.06/alive 0.03, lift 2.3, p=2.0e-03) | N200 28/118=0.24 (rand 0.12/alive 0.08, lift 2.0, p=1.7e-04)
+  v5 D start [-1,+1]s: N50  6/118=0.05 (rand 0.02/alive 0.01, lift 3.2, p=1.1e-02) | N100 12/118=0.10 (rand 0.03/alive 0.01, lift 3.2, p=3.7e-04) | N200 19/118=0.16 (rand 0.06/alive 0.04, lift 2.6, p=1.4e-04)
+  v5 D end   [-4,+1]s: N50 13/117=0.11 (rand 0.04/alive 0.02, lift 2.9, p=5.2e-04) | N100 19/117=0.16 (rand 0.07/alive 0.04, lift 2.2, p=1.0e-03) | N200 29/117=0.25 (rand 0.14/alive 0.10, lift 1.8, p=1.6e-03)
+  top-50 peaks: 0.18 near a D start (chance 0.08), 0.26 before a D end (chance 0.09), 0.88 inside predicted D (D share 0.50)
+  top-100 peaks: 0.17 near a D start (chance 0.08), 0.21 before a D end (chance 0.09), 0.81 inside predicted D (D share 0.50)
+  top-200 peaks: 0.15 near a D start (chance 0.08), 0.17 before a D end (chance 0.09), 0.69 inside predicted D (D share 0.50)
+  top-100 peak offset to nearest v5 D start (1 s bins -6..+6 s): 1 0 2 2 3 6 6 5 9 0 2 1  (chance/bin 1.9)
+  peaks in v5-alive: 19, next D start in 0-1/1-2/2-3/3-5/5-10/>10 s: 6 3 2 2 3 3 | peaks in v5-D: 81, since D start: 6 5 9 2 4 55, to D end: 10 3 4 7 16 41
+====================================================================================================
+ref:s   (2974 peaks in graded frames)
+  kickoff 11185: peak -1.08 s, z 42.2, pct 100.00, rank 5 | kickoff 113742: peak -0.92 s, z 40.5, pct 99.99, rank 8
+  GT D start n=4  mean z in -5..-3,-3..-2,-2..-1,-1..0,0..1,1..2,2..3,3..5: +1.60 +3.23 +0.57 +4.33 +3.39 +0.14 +1.17 +0.72 | top-N peak in [-2,+1]s: N50=1 N100=2 N200=2
+  GT D end   n=4  mean z in -5..-3,-3..-2,-2..-1,-1..0,0..1,1..2,2..3,3..5: +0.54 +0.47 +0.31 +0.48 +0.26 +0.50 +0.20 +2.17 | top-N peak in [-2,+1]s: N50=0 N100=0 N200=0
+  v5 D start [-3,+1]s: N50  9/118=0.08 (rand 0.03/alive 0.01, lift 2.5, p=1.2e-02) | N100 16/118=0.14 (rand 0.06/alive 0.03, lift 2.3, p=1.9e-03) | N200 23/118=0.19 (rand 0.12/alive 0.08, lift 1.7, p=9.5e-03)
+  v5 D start [-1,+1]s: N50  6/118=0.05 (rand 0.02/alive 0.01, lift 3.2, p=1.2e-02) | N100 12/118=0.10 (rand 0.03/alive 0.02, lift 3.2, p=3.7e-04) | N200 16/118=0.14 (rand 0.06/alive 0.04, lift 2.2, p=3.1e-03)
+  v5 D end   [-4,+1]s: N50 12/117=0.10 (rand 0.04/alive 0.02, lift 2.7, p=1.9e-03) | N100 19/117=0.16 (rand 0.07/alive 0.04, lift 2.2, p=8.8e-04) | N200 27/117=0.23 (rand 0.14/alive 0.10, lift 1.6, p=6.2e-03)
+  top-50 peaks: 0.18 near a D start (chance 0.08), 0.24 before a D end (chance 0.09), 0.84 inside predicted D (D share 0.50)
+  top-100 peaks: 0.17 near a D start (chance 0.08), 0.21 before a D end (chance 0.09), 0.74 inside predicted D (D share 0.50)
+  top-200 peaks: 0.12 near a D start (chance 0.08), 0.15 before a D end (chance 0.09), 0.67 inside predicted D (D share 0.50)
+  top-100 peak offset to nearest v5 D start (1 s bins -6..+6 s): 0 0 3 2 3 7 5 5 7 0 2 2  (chance/bin 1.9)
+  peaks in v5-alive: 26, next D start in 0-1/1-2/2-3/3-5/5-10/>10 s: 6 4 2 3 1 10 | peaks in v5-D: 74, since D start: 5 5 7 2 5 50, to D end: 9 3 5 5 13 39
+====================================================================================================
+ref:r30   (2945 peaks in graded frames)
+  kickoff 11185: peak -1.08 s, z 29.2, pct 99.94, rank 29 | kickoff 113742: peak -1.04 s, z 37.6, pct 99.99, rank 7
+  GT D start n=4  mean z in -5..-3,-3..-2,-2..-1,-1..0,0..1,1..2,2..3,3..5: +1.45 +2.53 +0.36 +5.59 +3.86 +0.09 +1.25 +0.72 | top-N peak in [-2,+1]s: N50=2 N100=2 N200=2
+  GT D end   n=4  mean z in -5..-3,-3..-2,-2..-1,-1..0,0..1,1..2,2..3,3..5: +0.42 +0.40 +0.31 +0.25 +0.22 +0.40 +0.16 +1.75 | top-N peak in [-2,+1]s: N50=0 N100=0 N200=0
+  v5 D start [-3,+1]s: N50 10/118=0.08 (rand 0.03/alive 0.01, lift 2.8, p=3.5e-03) | N100 18/118=0.15 (rand 0.06/alive 0.04, lift 2.5, p=2.6e-04) | N200 23/118=0.19 (rand 0.11/alive 0.08, lift 1.7, p=6.8e-03)
+  v5 D start [-1,+1]s: N50  7/118=0.06 (rand 0.02/alive 0.01, lift 3.8, p=2.8e-03) | N100 14/118=0.12 (rand 0.03/alive 0.02, lift 3.8, p=2.4e-05) | N200 15/118=0.13 (rand 0.06/alive 0.04, lift 2.0, p=6.7e-03)
+  v5 D end   [-4,+1]s: N50 11/117=0.09 (rand 0.04/alive 0.02, lift 2.5, p=5.0e-03) | N100 18/117=0.15 (rand 0.07/alive 0.05, lift 2.1, p=2.5e-03) | N200 28/117=0.24 (rand 0.14/alive 0.10, lift 1.7, p=2.1e-03)
+  top-50 peaks: 0.20 near a D start (chance 0.08), 0.22 before a D end (chance 0.09), 0.82 inside predicted D (D share 0.50)
+  top-100 peaks: 0.18 near a D start (chance 0.08), 0.19 before a D end (chance 0.09), 0.71 inside predicted D (D share 0.50)
+  top-200 peaks: 0.12 near a D start (chance 0.08), 0.16 before a D end (chance 0.09), 0.67 inside predicted D (D share 0.50)
+  top-100 peak offset to nearest v5 D start (1 s bins -6..+6 s): 1 0 2 2 2 8 6 5 8 0 2 1  (chance/bin 1.9)
+  peaks in v5-alive: 29, next D start in 0-1/1-2/2-3/3-5/5-10/>10 s: 7 3 2 2 2 13 | peaks in v5-D: 71, since D start: 6 5 8 2 4 46, to D end: 7 4 4 5 12 39

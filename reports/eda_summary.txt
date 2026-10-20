@@ -1,0 +1,143 @@
+C:\Users\omen\Desktop\barcahackathon\src\eda.py:169: RuntimeWarning: Mean of empty slice
+  mean_spd = np.nanmean(spd, axis=1)
+====================================================================================================
+A. TRACKING COVERAGE AND QUALITY (tactical)
+frames 199319  graded 158857  slots 46 (home 24, away 22)
+ball present: all 56.9%  graded 59.3%  half1 59.3%  half2 59.3%
+
+ball gaps inside graded play: 150 gaps, total 64643 frames
+  gap    1-2          frames:     2 gaps    0.0% of missing frames
+  gap    2-5          frames:    11 gaps    0.0% of missing frames
+  gap    5-13         frames:     3 gaps    0.0% of missing frames
+  gap   13-25         frames:     1 gaps    0.0% of missing frames
+  gap   25-50         frames:     0 gaps    0.0% of missing frames
+  gap   50-125        frames:     1 gaps    0.2% of missing frames
+  gap  125-250        frames:    53 gaps   14.5% of missing frames
+  gap  250-750        frames:    60 gaps   41.4% of missing frames
+  gap  750-inf        frames:    19 gaps   43.8% of missing frames
+  gap length (frames): n=150 mean=430.95 p5=2.00 p25=152.25 p50=268.00 p75=526.50 p95=1269.90
+
+tracked players per graded frame: total n=158857 mean=20.49 p5=14.00 p25=21.00 p50=22.00 p75=22.00 p95=22.00
+  home n=158857 mean=10.20 p5=6.00 p25=10.00 p50=11.00 p75=11.00 p95=12.00
+  away n=158857 mean=10.29 p5=7.00 p25=10.00 p50=11.00 p75=11.00 p95=11.00
+  frames with >11 home: 8.13%  >11 away: 4.74%  <9 home: 9.63%  <9 away: 8.05%
+
+slot tracklets inside graded play: 1219 tracklets; per slot n=46 mean=26.50 p5=1.75 p25=19.50 p50=28.00 p75=34.75 p95=43.00
+  tracklet length (s): n=1219 mean=106.79 p5=1.72 p25=7.92 p50=35.52 p75=145.32 p95=401.36
+  slot occupancy over graded frames: n=46 mean=0.45 p5=0.02 p25=0.29 p50=0.44 p75=0.62 p95=0.81
+  position_type values per team: home {'Unknown': 23, 'Goalkeeper': 1}  away {'Unknown': 21, 'Goalkeeper': 1}
+
+player speed km/h (graded, observed): n=2995575 mean=1.82 p5=0.17 p25=0.87 p50=1.41 p75=2.52 p95=4.66
+ball speed km/h (graded, observed):   n=13953 mean=1.39 p5=0.11 p25=0.62 p50=1.13 p75=1.61 p95=3.85 p99=5.26
+ball outside [0,1]^2 on 4.19% of graded ball-present frames
+ball x (m): n=94214 mean=51.16 p0.5=-0.00 p5=7.47 p50=52.92 p95=93.87 p99.5=102.11
+ball y (m): n=94214 mean=37.24 p0.5=-0.86 p5=5.09 p50=36.94 p95=66.28 p99.5=76.59
+player positions outside the pitch (>1% margin): 0.43%
+ball step between consecutive observed frames (m): n=94065 mean=0.27 p50=0.20 p90=0.57 p99=0.98 p99.9=2.18
+  steps > 2 m (> 180 km/h): 119 (0.127%)
+
+nearest player to ball (m), graded ball-present: n=94214 mean=3.11 p5=0.27 p25=0.89 p50=1.91 p75=4.06 p90=7.02 p95=9.56
+====================================================================================================
+B. PUBLIC GROUND TRUTH (5 min) AGAINST THE TRACKING
+GT H:  3454 frames  ball present 99.9%
+GT A:  2577 frames  ball present 85.0%
+GT D:  1469 frames  ball present 66.4%
+
+nearest-player team == GT team on alive ball-present frames: 77.8%
+  nearest dist <=    1 m: coverage 32.9%  agreement 90.6%
+  nearest dist <=  1.5 m: coverage 46.8%  agreement 88.8%
+  nearest dist <=    2 m: coverage 56.1%  agreement 87.3%
+  nearest dist <=    3 m: coverage 67.4%  agreement 84.7%
+  nearest dist <=    5 m: coverage 83.6%  agreement 79.9%
+  nearest dist <=   10 m: coverage 99.9%  agreement 77.8%
+nearest distance on GT-alive frames: n=5640 mean=2.54 p10=0.42 p25=0.81 p50=1.65 p75=3.89 p90=6.02
+nearest distance on GT-dead frames:  n=975 mean=4.01 p10=0.19 p25=0.65 p50=2.89 p75=6.55 p90=9.68
+mean player speed in GT H: n=3454 mean=2.21 p10=1.21 p50=2.05 p90=3.42
+mean player speed in GT A: n=2577 mean=2.61 p10=1.63 p50=2.47 p90=3.81
+mean player speed in GT D: n=1469 mean=1.42 p10=0.90 p50=1.19 p90=2.59
+ball speed in GT H: n=0
+ball speed in GT A: n=0
+ball speed in GT D: n=0
+ball outside pitch in GT H: 0.0%
+ball outside pitch in GT A: 0.1%
+ball outside pitch in GT D: 10.7%
+
+GT transitions: 20
+  A>D: n=3  ball visible in +-0.5 s window: mean 67%
+  A>H: n=6  ball visible in +-0.5 s window: mean 100%
+  D>A: n=2  ball visible in +-0.5 s window: mean 100%
+  D>H: n=2  ball visible in +-0.5 s window: mean 96%
+  H>A: n=6  ball visible in +-0.5 s window: mean 100%
+  H>D: n=1  ball visible in +-0.5 s window: mean 100%
+raw nearest-team flips on GT-alive ball-present frames: 123 over 5640 frames
+====================================================================================================
+C. SMART TAGGING
+instances 638, columns ['code', 'Team', 'Type', 'Half', 'Max Players in the box', 'Side', 'Direction of ball entry', 'dur']
+                               n  mean_s  median_s  max_s
+code                                                     
+PLAYERS IN THE BOX            97    35.5      27.7   83.7
+BALL IN FINAL THIRD           93    30.1      27.0   70.8
+BALL IN THE BOX               72    18.1      17.4   32.5
+DEFENDING IN MIDDLE THIRD     66    18.9      17.6   37.1
+PROGRESSION                   66    18.9      17.6   37.1
+SET PIECES                    59    31.9      35.0   35.0
+DEFENDING IN DEFENSIVE THIRD  30    30.0      30.0   30.0
+CREATING CHANCES              30    30.0      30.0   30.0
+LONG BALL                     29    13.1      12.4   22.2
+ATTACKING TRANSITION          24    15.5      15.4   22.0
+DEFENSIVE TRANSITION          24    15.5      15.4   22.0
+BUILD UP                      22    20.0      20.5   28.6
+DEFENDING IN ATTACKING THIRD  22    20.0      20.5   28.6
+GOALS                          4   165.0     169.3  250.7
+
+Team tag: {'Barcelona': 314, 'Atletic Club': 288, 'N/A': 36}
+set pieces by Type: {'Throw-in': 26, 'Corner Kick': 12, 'Goal Kick': 10, 'Free Kick': 5, 'Kick Off (After Goal)': 4, 'Kick Off (Start)': 2}
+set pieces Team by Type:
+Team                   Atletic Club  Barcelona  N/A
+Type                                               
+Corner Kick                       5          7    0
+Free Kick                         3          2    0
+Goal Kick                         3          7    0
+Kick Off (After Goal)             0          0    4
+Kick Off (Start)                  0          0    2
+Throw-in                          0          0   26
+
+graded frames covered by >=1 tag: 82.3%; by >=2: 58.1%
+tags starting in each half: {'1st Half': 320, '2nd Half': 318}
+
+agreement with public GT inside the 5-min window (frames of tag interval):
+  BALL IN FINAL THIRD              frames  3875  GT==tag team 42.1%  GT dead 21.6%
+  DEFENDING IN MIDDLE THIRD        frames  2707  GT==tag team 27.4%  GT dead  0.0%
+  PROGRESSION                      frames  2707  GT==tag team 72.6%  GT dead  0.0%
+  PLAYERS IN THE BOX               frames  2650  GT==tag team 32.3%  GT dead 29.6%
+  BALL IN THE BOX                  frames  1377  GT==tag team 30.9%  GT dead 29.9%
+  SET PIECES                       frames  1277  GT==tag team 38.0%  GT dead 57.6%
+  CREATING CHANCES                 frames   750  GT==tag team 25.2%  GT dead 74.8%
+  DEFENDING IN DEFENSIVE THIRD     frames   750  GT==tag team  0.0%  GT dead 74.8%
+  BUILD UP                         frames   326  GT==tag team 90.8%  GT dead  9.2%
+  DEFENDING IN ATTACKING THIRD     frames   326  GT==tag team  0.0%  GT dead  9.2%
+  ATTACKING TRANSITION             frames   277  GT==tag team 67.1%  GT dead  0.0%
+  DEFENSIVE TRANSITION             frames   277  GT==tag team 32.9%  GT dead  0.0%
+  LONG BALL                        frames   184  GT==tag team 90.2%  GT dead  0.0%
+
+GT D->alive transitions in window: 4
+  restarts with a set-piece tag within +-5 s: 2/4; tag team == restarting team: 2
+  tag start offset vs restart (frames): n=2 mean=-187.00 p0=-305.00 p50=-187.00 p100=-69.00
+  tag end offset vs restart (frames):   n=2 mean=688.00 p0=570.00 p50=688.00 p100=806.00
+====================================================================================================
+D. HOMOGRAPHY (tactical)
+rows 199319 valid 100.0%  reprojection error graded: n=158857 mean=0.30 p50=0.23 p90=0.31 p99=4.30
+image centre projected on pitch vs ball (m): n=94214 mean=24.08 p25=17.15 p50=23.60 p75=30.76 p90=37.36 p95=40.55
+  along-length error (m): n=94214 mean=13.09 p50=12.10 p90=25.56
+camera-centre speed (m/s) in GT H: n=3454 mean=0.95 p10=0.04 p50=0.58 p90=2.39
+camera-centre speed (m/s) in GT A: n=2577 mean=1.59 p10=0.05 p50=1.05 p90=4.03
+camera-centre speed (m/s) in GT D: n=1469 mean=1.49 p10=0.03 p50=0.83 p90=4.16
+view width at centre row (m), graded: n=158857 mean=63.56 p5=52.24 p50=62.38 p95=76.49
+  view width in GT H: n=3454 mean=63.99 p10=57.79 p50=62.52 p90=72.45
+  view width in GT A: n=2577 mean=60.44 p10=54.28 p50=60.58 p90=70.16
+  view width in GT D: n=1469 mean=65.70 p10=54.93 p50=62.68 p90=79.38
+====================================================================================================
+E. BROADCAST
+frames 164488  homography valid 65.8%  ball present 50.5%  ball present & valid 50.2%
+invalid stretches: 123  duration (s): n=123 mean=18.29 p10=4.76 p50=11.16 p90=39.10 p100=108.76
+tracked players per frame (valid frames): n=108248 mean=16.69 p5=6.00 p25=15.00 p50=18.00 p75=20.00 p95=22.00

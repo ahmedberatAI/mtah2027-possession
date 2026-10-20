@@ -1,0 +1,15 @@
+BAR-ATH team model on v5-alive frames: median |logit p_home| 2.93  share p>0.9 0.612
+pen_team  2 | full match: n_poss 341 (6.44 per alive min)  median 5.56 s  mean 9.32 s  <2s 0.223  dead share 0.500 | public window: spellF1 0.4914  macroF1 0.8968  n_pred 18/17
+pen_team  3 | full match: n_poss 321 (6.06 per alive min)  median 5.92 s  mean 9.90 s  <2s 0.187  dead share 0.500 | public window: spellF1 0.5548  macroF1 0.9023  n_pred 14/17
+pen_team  4 | full match: n_poss 305 (5.77 per alive min)  median 6.48 s  mean 10.40 s  <2s 0.157  dead share 0.501 | public window: spellF1 0.5548  macroF1 0.9023  n_pred 14/17
+pen_team  5 | full match: n_poss 295 (5.58 per alive min)  median 6.76 s  mean 10.76 s  <2s 0.139  dead share 0.501 | public window: spellF1 0.5548  macroF1 0.9023  n_pred 14/17
+pen_team  6 | full match: n_poss 282 (5.33 per alive min)  median 7.06 s  mean 11.25 s  <2s 0.117  dead share 0.501 | public window: spellF1 0.5548  macroF1 0.9023  n_pred 14/17
+pen_team  8 | full match: n_poss 261 (4.94 per alive min)  median 8.08 s  mean 12.15 s  <2s 0.077  dead share 0.501 | public window: spellF1 0.5655  macroF1 0.9010  n_pred 12/17
+pen_team 10 | full match: n_poss 253 (4.79 per alive min)  median 8.32 s  mean 12.54 s  <2s 0.067  dead share 0.501 | public window: spellF1 0.5655  macroF1 0.9010  n_pred 12/17
+pen_team 12 | full match: n_poss 252 (4.77 per alive min)  median 8.36 s  mean 12.59 s  <2s 0.063  dead share 0.501 | public window: spellF1 0.5655  macroF1 0.9010  n_pred 12/17
+pen_team 16 | full match: n_poss 228 (4.31 per alive min)  median 8.98 s  mean 13.91 s  <2s 0.035  dead share 0.501 | public window: spellF1 0.4444  macroF1 0.8957  n_pred 10/17
+pen_team 20 | full match: n_poss 218 (4.13 per alive min)  median 9.70 s  mean 14.54 s  <2s 0.023  dead share 0.501 | public window: spellF1 0.4480  macroF1 0.8854  n_pred 8/17
+pen_team 24 | full match: n_poss 209 (3.96 per alive min)  median 10.12 s  mean 15.15 s  <2s 0.005  dead share 0.502 | public window: spellF1 0.4480  macroF1 0.8854  n_pred 8/17
+pen_team 32 | full match: n_poss 201 (3.82 per alive min)  median 10.56 s  mean 15.71 s  <2s 0.005  dead share 0.503 | public window: spellF1 0.4480  macroF1 0.8854  n_pred 8/17
+pen_team 48 | full match: n_poss 183 (3.49 per alive min)  median 12.16 s  mean 17.21 s  <2s 0.005  dead share 0.504 | public window: spellF1 0.4480  macroF1 0.8854  n_pred 8/17
+pen_team 64 | full match: n_poss 178 (3.39 per alive min)  median 12.60 s  mean 17.69 s  <2s 0.000  dead share 0.504 | public window: spellF1 0.4480  macroF1 0.8854  n_pred 8/17

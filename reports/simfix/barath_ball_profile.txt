@@ -1,0 +1,25 @@
+
+BAR-ATH, merged ball (model input)
+| set | alive miss | dead miss | spill/alive | a-start/alive | D share | restarts | miss@restart | >1s | >3s | >10s | carry med s | carry p90 s | carry mean s | d-runs past | miss@D-entry | lead med s | lead p90 s | runs/D seg | a-runs/min | a-run med s | a-runs->D | miss run med | seen run med |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| public GT window (5 min) | 0.039 | 0.336 | 0.000 | 0.039 | 0.196 | 4 | 0.000 | 0.000 | 0.000 | 0.000 | nan | nan | 0.00 | 0.000 | 0.250 | 0.8 | 0.8 | 0.50 | 0.99 | 3.0 | 0.250 | 5.9 | 34.4 |
+| v5 pen_team 8 (current) | 0.066 | 0.691 | 0.019 | 0.047 | 0.491 | 116 | 0.216 | 0.164 | 0.052 | 0.000 | 1.7 | 5.8 | 0.56 | 0.264 | 0.237 | 2.9 | 6.9 | 1.02 | 0.78 | 9.3 | 0.683 | 11.2 | 15.9 |
+| v5 pen_team 20 | 0.065 | 0.690 | 0.019 | 0.046 | 0.492 | 116 | 0.216 | 0.164 | 0.052 | 0.000 | 1.7 | 5.8 | 0.56 | 0.261 | 0.229 | 3.0 | 7.0 | 1.02 | 0.76 | 9.4 | 0.675 | 11.2 | 15.9 |
+| v5, ball-presence cues off | 0.076 | 0.672 | 0.023 | 0.053 | 0.498 | 115 | 0.226 | 0.191 | 0.070 | 0.017 | 2.2 | 5.8 | 0.67 | 0.264 | 0.239 | 2.7 | 8.5 | 1.03 | 0.79 | 9.3 | 0.659 | 11.2 | 15.9 |
+| v3 alive/dead, ball cues off | 0.091 | 0.681 | 0.019 | 0.071 | 0.478 | 115 | 0.235 | 0.200 | 0.070 | 0.009 | 2.2 | 5.1 | 0.63 | 0.275 | 0.274 | 2.4 | 10.1 | 1.00 | 0.88 | 9.6 | 0.604 | 11.2 | 15.9 |
+| v3 alive/dead, ball + out cues off | 0.092 | 0.690 | 0.016 | 0.075 | 0.470 | 109 | 0.266 | 0.220 | 0.073 | 0.009 | 2.0 | 5.0 | 0.68 | 0.273 | 0.315 | 2.4 | 9.7 | 1.05 | 0.93 | 9.6 | 0.627 | 11.2 | 15.9 |
+
+BAR-ATH, tactical ball
+| set | alive miss | dead miss | spill/alive | a-start/alive | D share | restarts | miss@restart | >1s | >3s | >10s | carry med s | carry p90 s | carry mean s | d-runs past | miss@D-entry | lead med s | lead p90 s | runs/D seg | a-runs/min | a-run med s | a-runs->D | miss run med | seen run med |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| public GT window (5 min) | 0.065 | 0.336 | 0.000 | 0.065 | 0.196 | 4 | 0.000 | 0.000 | 0.000 | 0.000 | nan | nan | 0.00 | 0.000 | 0.250 | 0.8 | 0.8 | 0.50 | 1.24 | 5.3 | 0.200 | 5.6 | 23.6 |
+| v5 pen_team 8 (current) | 0.107 | 0.726 | 0.017 | 0.089 | 0.491 | 116 | 0.293 | 0.207 | 0.060 | 0.009 | 1.9 | 5.4 | 0.68 | 0.352 | 0.305 | 2.9 | 6.2 | 0.95 | 1.32 | 7.5 | 0.514 | 10.7 | 13.7 |
+| v5 pen_team 20 | 0.106 | 0.726 | 0.017 | 0.089 | 0.492 | 116 | 0.293 | 0.207 | 0.060 | 0.009 | 1.7 | 5.4 | 0.67 | 0.347 | 0.297 | 3.0 | 6.3 | 0.95 | 1.31 | 7.6 | 0.507 | 10.7 | 13.7 |
+| v5, ball-presence cues off | 0.117 | 0.708 | 0.021 | 0.096 | 0.498 | 115 | 0.278 | 0.235 | 0.078 | 0.017 | 2.3 | 6.0 | 0.80 | 0.333 | 0.308 | 2.9 | 8.0 | 0.97 | 1.32 | 7.3 | 0.507 | 10.7 | 13.7 |
+| v3 alive/dead, ball cues off | 0.131 | 0.717 | 0.016 | 0.115 | 0.478 | 115 | 0.296 | 0.243 | 0.078 | 0.009 | 2.2 | 4.9 | 0.77 | 0.349 | 0.350 | 2.4 | 8.9 | 0.93 | 1.44 | 8.1 | 0.487 | 10.7 | 13.7 |
+| v3 alive/dead, ball + out cues off | 0.133 | 0.724 | 0.015 | 0.118 | 0.470 | 109 | 0.339 | 0.266 | 0.092 | 0.009 | 2.2 | 4.4 | 0.84 | 0.377 | 0.387 | 2.4 | 8.5 | 0.98 | 1.45 | 8.6 | 0.500 | 10.7 | 13.7 |
+alive/dead agreement with public GT in the window, v5 pen_team 8 (current): 0.958
+alive/dead agreement with public GT in the window, v5 pen_team 20: 0.958
+alive/dead agreement with public GT in the window, v5, ball-presence cues off: 0.950
+alive/dead agreement with public GT in the window, v3 alive/dead, ball cues off: 0.941
+alive/dead agreement with public GT in the window, v3 alive/dead, ball + out cues off: 0.935

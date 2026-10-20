@@ -1,0 +1,47 @@
+fold J03WMX 51s
+fold J03WN1 96s
+fold J03WOH 155s
+fold J03WOY 224s
+fold J03WPY 266s
+fold J03WQQ 302s
+fold J03WR9 332s
+  J03WMX frame acc 0.921  alive/dead acc 0.981  team acc (alive) 0.890
+  J03WN1 frame acc 0.918  alive/dead acc 0.980  team acc (alive) 0.861
+  J03WOH frame acc 0.930  alive/dead acc 0.982  team acc (alive) 0.894
+  J03WOY frame acc 0.908  alive/dead acc 0.974  team acc (alive) 0.872
+  J03WPY frame acc 0.934  alive/dead acc 0.985  team acc (alive) 0.900
+  J03WQQ frame acc 0.924  alive/dead acc 0.978  team acc (alive) 0.905
+  J03WR9 frame acc 0.935  alive/dead acc 0.980  team acc (alive) 0.918
+temp_d 1.0 temp_t 0.5 pen_team   4 pen_dead   8 min 5/25 | spellF1 0.5785 (min 0.518) macroF1 0.9105  n_gt 3061 n_pred 2018
+temp_d 1.0 temp_t 0.5 pen_team   4 pen_dead  16 min 5/25 | spellF1 0.5812 (min 0.519) macroF1 0.9110  n_gt 3061 n_pred 2000
+temp_d 1.0 temp_t 0.5 pen_team   4 pen_dead  32 min 5/25 | spellF1 0.5811 (min 0.517) macroF1 0.9109  n_gt 3061 n_pred 1989
+temp_d 1.0 temp_t 0.5 pen_team   4 pen_dead  64 min 5/25 | spellF1 0.5822 (min 0.516) macroF1 0.9113  n_gt 3061 n_pred 1977
+temp_d 1.0 temp_t 0.5 pen_team   8 pen_dead   8 min 5/25 | spellF1 0.5618 (min 0.489) macroF1 0.9095  n_gt 3061 n_pred 1842
+temp_d 1.0 temp_t 0.5 pen_team   8 pen_dead  16 min 5/25 | spellF1 0.5641 (min 0.490) macroF1 0.9100  n_gt 3061 n_pred 1826
+temp_d 1.0 temp_t 0.5 pen_team   8 pen_dead  32 min 5/25 | spellF1 0.5639 (min 0.488) macroF1 0.9099  n_gt 3061 n_pred 1816
+temp_d 1.0 temp_t 0.5 pen_team   8 pen_dead  64 min 5/25 | spellF1 0.5642 (min 0.488) macroF1 0.9102  n_gt 3061 n_pred 1803
+temp_d 1.0 temp_t 0.5 pen_team  16 pen_dead   8 min 5/25 | spellF1 0.5322 (min 0.473) macroF1 0.9063  n_gt 3061 n_pred 1646
+temp_d 1.0 temp_t 0.5 pen_team  16 pen_dead  16 min 5/25 | spellF1 0.5343 (min 0.474) macroF1 0.9069  n_gt 3061 n_pred 1627
+temp_d 1.0 temp_t 0.5 pen_team  16 pen_dead  32 min 5/25 | spellF1 0.5345 (min 0.472) macroF1 0.9069  n_gt 3061 n_pred 1618
+temp_d 1.0 temp_t 0.5 pen_team  16 pen_dead  64 min 5/25 | spellF1 0.5349 (min 0.471) macroF1 0.9073  n_gt 3061 n_pred 1606
+temp_d 1.0 temp_t 0.5 pen_team  32 pen_dead   8 min 5/25 | spellF1 0.4850 (min 0.421) macroF1 0.9008  n_gt 3061 n_pred 1445
+temp_d 1.0 temp_t 0.5 pen_team  32 pen_dead  16 min 5/25 | spellF1 0.4872 (min 0.422) macroF1 0.9014  n_gt 3061 n_pred 1427
+temp_d 1.0 temp_t 0.5 pen_team  32 pen_dead  32 min 5/25 | spellF1 0.4870 (min 0.422) macroF1 0.9014  n_gt 3061 n_pred 1418
+temp_d 1.0 temp_t 0.5 pen_team  32 pen_dead  64 min 5/25 | spellF1 0.4875 (min 0.421) macroF1 0.9018  n_gt 3061 n_pred 1407
+temp_d 1.0 temp_t 1.0 pen_team   4 pen_dead   8 min 5/25 | spellF1 0.5841 (min 0.517) macroF1 0.9112  n_gt 3061 n_pred 2144
+temp_d 1.0 temp_t 1.0 pen_team   4 pen_dead  16 min 5/25 | spellF1 0.5863 (min 0.518) macroF1 0.9116  n_gt 3061 n_pred 2130
+temp_d 1.0 temp_t 1.0 pen_team   4 pen_dead  32 min 5/25 | spellF1 0.5868 (min 0.516) macroF1 0.9117  n_gt 3061 n_pred 2118
+temp_d 1.0 temp_t 1.0 pen_team   4 pen_dead  64 min 5/25 | spellF1 0.5874 (min 0.515) macroF1 0.9119  n_gt 3061 n_pred 2107
+temp_d 1.0 temp_t 1.0 pen_team   8 pen_dead   8 min 5/25 | spellF1 0.5789 (min 0.519) macroF1 0.9107  n_gt 3061 n_pred 2010
+temp_d 1.0 temp_t 1.0 pen_team   8 pen_dead  16 min 5/25 | spellF1 0.5811 (min 0.519) macroF1 0.9111  n_gt 3061 n_pred 1996
+temp_d 1.0 temp_t 1.0 pen_team   8 pen_dead  32 min 5/25 | spellF1 0.5816 (min 0.518) macroF1 0.9112  n_gt 3061 n_pred 1984
+temp_d 1.0 temp_t 1.0 pen_team   8 pen_dead  64 min 5/25 | spellF1 0.5822 (min 0.517) macroF1 0.9114  n_gt 3061 n_pred 1973
+temp_d 1.0 temp_t 1.0 pen_team  16 pen_dead   8 min 5/25 | spellF1 0.5624 (min 0.488) macroF1 0.9096  n_gt 3061 n_pred 1829
+temp_d 1.0 temp_t 1.0 pen_team  16 pen_dead  16 min 5/25 | spellF1 0.5644 (min 0.489) macroF1 0.9100  n_gt 3061 n_pred 1816
+temp_d 1.0 temp_t 1.0 pen_team  16 pen_dead  32 min 5/25 | spellF1 0.5647 (min 0.487) macroF1 0.9101  n_gt 3061 n_pred 1805
+temp_d 1.0 temp_t 1.0 pen_team  16 pen_dead  64 min 5/25 | spellF1 0.5646 (min 0.486) macroF1 0.9102  n_gt 3061 n_pred 1793
+temp_d 1.0 temp_t 1.0 pen_team  32 pen_dead   8 min 5/25 | spellF1 0.5330 (min 0.478) macroF1 0.9065  n_gt 3061 n_pred 1639
+temp_d 1.0 temp_t 1.0 pen_team  32 pen_dead  16 min 5/25 | spellF1 0.5347 (min 0.474) macroF1 0.9069  n_gt 3061 n_pred 1624
+temp_d 1.0 temp_t 1.0 pen_team  32 pen_dead  32 min 5/25 | spellF1 0.5347 (min 0.472) macroF1 0.9071  n_gt 3061 n_pred 1610
+temp_d 1.0 temp_t 1.0 pen_team  32 pen_dead  64 min 5/25 | spellF1 0.5350 (min 0.471) macroF1 0.9073  n_gt 3061 n_pred 1600
+BEST (np.float64(0.5873999815925518), {'temp_d': 1.0, 'temp_t': 1.0, 'pen_team': 4, 'pen_dead': 64, 'min_poss': 5, 'min_dead': 25})
