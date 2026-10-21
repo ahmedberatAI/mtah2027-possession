@@ -62,6 +62,9 @@ Skorlar: public = ilk 5 dk (17 possession, spellF1 bootstrap aralığı ~0.27–
 | **Top izinin değeri (GPU'suz, DFL CV, eşli)**: oyun içi top eksikliği %6.5 → %3.3 → %0 | takım doğruluğu 0.8914 → 0.8933 → 0.8942; spellF1 (pen20) 0.558 → 0.563 → 0.568; ayarlı 0.587 → 0.597 → 0.606 | ❌ mükemmel top bile <+0.02 → **video top tespiti ertelendi**; darboğaz top izi değil |
 | ATD kısa boşluk doldurma şüphesi | 27–128 karelik boşluk sadece 1; ~%3 görünür kare olağandışı pürüzsüz, orada iki kamera farkı 1.22 m (normal 0.74 m) | ATD kısa boşlukları tahminle dolduruyor; sözde-etiket kullanılırsa pürüzsüz koşular + boşluk kenarları çıkarılmalı |
 
+| Resmi skorlayıcı, public 5 dk, 1000 bootstrap (21 Eki) | v6 0.908/0.566 [0.36–0.76]; v5 0.901/0.566 [0.36–0.76]; v5 pen20 0.885/0.448 [0.21–0.65]; v3 0.878/0.459; resmi 0.621/0.326 [0.21–0.45] | v5/v6 resmi baseline'dan net iyi; v5 / v5-pen20 / v6 farkları güven aralığı içinde |
+| Dikkat sinyalleri (oyuncu hareketi topa dönük mü) DFL'de ölü top ayrımı | AUC: hız 0.929 → hız+dikkat 0.944 (doğrusal), 4 pencere + LightGBM 0.974 (hız tek başına 0.950) | ✅ umut verici; v5'e eklenmesi bekliyor |
+
 ## Dış veri
 - IDSSE/Open DFL (7 maç, CC BY): ölü-top istatistikleri çok benzer; possession bayrağı GT'den ~2× sık dönüyor.
 - Metrica örnek (3 maç, kaynak belirtilmeli), SkillCorner open data (20 maç, MIT, henüz kullanılmadı).

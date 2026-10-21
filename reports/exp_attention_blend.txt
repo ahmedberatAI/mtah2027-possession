@@ -1,0 +1,4 @@
+speed, 1 window              logistic AUC 0.9292 | LightGBM AUC 0.9289
+speed+attention, 1 window    logistic AUC 0.9440 | LightGBM AUC 0.9568
+speed, 4 windows             logistic AUC 0.9437 | LightGBM AUC 0.9497
+speed+attention, 4 windows   logistic AUC 0.9588 | LightGBM AUC 0.9743
