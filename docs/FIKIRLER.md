@@ -285,3 +285,146 @@ varsayılan kapalı): `candidate_v7c.csv` (temizlik), `candidate_v7cw.csv` (temi
 **Tur 6 özeti**: 0. adım kayıp havuzlarını netleştirdi (kısa possession'lar ve sahteler en büyük; ölü top SC'de büyük,
 BAR-ATH'ta kurallar güçlü). Planın fikirlerinden 1, 2, 3, 4, 7, 10, 11 ≈/❌; N26 ≈; 8 BAR-ATH'a özgü küçük artı (seçenek).
 Kısa possession havuzunu açmanın yolu dekoder değil, daha iyi kare kanıtı (takım modeli o anlarda hiç dönmüyor).
+
+### Tur 7 — 22 Ekim (geniş araştırma → oyuncu düzeyinde kontrolcü modeli)
+
+**Araştırma** (5 Codex alt ajanı, yalnız web; ajanlara yalnız genel problem tanımı verildi, veri / dosya paylaşılmadı):
+R1 benzer yarışmaların kazanan çözümleri (SoccerNet BAS, NFL contact detection, DFL shootout), R2 tracking'den
+possession / kontrol çıkarımı, R3 zamansal segmentasyon (MS-TCN, ASFormer, ASRF, DiffAct…), R4 alan uyumu /
+simülasyon / etiket gürültüsü, R5 video (top tespiti, pass/drive spotting, takım ataması). Birden çok raporun
+birleştiği öneriler (öncelik sırasıyla):
+
+| # | Öneri | Kaynak | Bizdeki karşılığı |
+|---|---|---|---|
+| R-1 | **Oyuncu düzeyinde kontrolcü modeli**, baskı yapan rakip zor negatif; SkillCorner "player possession" denetimi | R2#1, R1#2, R5#8, R4#1 | bu tur (`src/ctrl_model.py`) |
+| R-2 | Takım modeli dönmese de **kısa possession adayı üreten bağımsız kanıt** + ekleme yapabilen aralık modeli (var olan spell'leri doğrulamak değil) | R3#1, R1#6, R5#3 | tur 6 fikir 3'ün dersi: aday bile yoktu → R-1'in kanıtıyla |
+| R-3 | Öğrenilmiş ölü top başlığı (oyuncu hareketi, restart geometrisi; kamera geçersizliği ≠ D) | R1#4, R2#3, R3#3, R4#6 | N1 ❌ (kurallarla harman); oyuncu-tabanlı ayrı model denenmedi |
+| R-4 | Konvansiyon denetimi + küçük bağımsız denetim seti (zor kesitler ayrı, temsilî kesitler ayrı) | R2#2, R4#1–2, R3#5 | SC pp etiketleri ✅; elle etiket (tools/labeler.html) kullanıcı kararı |
+| R-5 | Yapısal gözlem simülatörü (ardışık kopma patlamaları, duruma bağlı top kaybı) + gözlem yaşı / kalite bayrakları | R4#3–4, R2#7, R3#9, R1#9 | V3 (yumuşak gürültü); patlama / yaş bayrağı yok |
+| R-6 | Video: 2023 SoccerNet BAS birincisi pass/drive (MIT) → takıma atanmış kontrol çapaları; top: WASB / FootAndBall | R5#1–3, R1#1 | videolar Drive'da; Colab erişimi kullanıcı kararı |
+| R-7 | PathCRF (KDD 2026; DFL'de eğitilmiş, kod + checkpoint, MPL-2.0) sınırlı yeniden üretim | R2#4 | DFL checkpoint'i bizim DFL-CV'ye sızar → yalnız SC / Metrica'da |
+| R-8 | Spell dengeli eğitim (kısa spell'in her karesi daha ağır, tavanlı) + OOF zor örnek pencereleri | R1#5, R3#4 | N9 (top kaybı ağırlığı) ≈; spell dengeli denenmedi |
+| R-9 | OOF olasılıklar + seçili kanıt üzerinde küçük **residual** TCN (sıfırdan başlayan düzeltme) | R3#2, R1#10 | BiGRU ❌ (tek başına sınıflandırıcıydı); yalnız yeni kanıt işe yararsa |
+| R-10 | Dekoderde kontrol / transit / kontrolsüz durumları | R2#6 | B2 aynı işin bir kısmını yapıyor |
+
+Geriye bırakılanlar: UVAST, tam DiffAct, MBR (B3 tavanı küçük), DANN / entropi, global gecikme düzeltmesi (B6 ❌).
+R3'ün metrik notu: 2 sn'lik spell'in IoU 0.7'yi geçmesi için sınır hatası ≤ 0.35 sn (≈ 9 kare); 17 spell'lik public
+pencerede tek eşleşme F1'i 5.9 puan oynatır → parametre seçimi public'te yapılmaz (karar protokolü).
+
+**R-1 — oyuncu düzeyinde kontrolcü** (`src/ctrl_model.py`, `src/exp_ctrl.py`, `src/exp_ctrl2.py`, `src/ctrl_barath.py`):
+adaylar her takımın topa en yakın 3 oyuncusu (5 karede bir satır); özellikler AYNI oyuncuyu zamanda izler (mesafe,
+top–oyuncu göreli hızı, yaklaşma, topa yakın kalma süresi, son / sonraki 1 sn'de en yakın olma payı, 3 m içindeki
+rakipler) + top ipuçları. Denetim: SkillCorner "player possession" (kontrollü; blok / kontrolsüz dokunuş değil);
+baskı yapan rakip dahil diğer herkes negatif. Takım kanıtı q = 1 − Π(1 − p). SC'de 5-fold (maç): **AUC 0.988, kontrolcü
+varken ilk-1 0.946** — ama spellF1'e taşınmıyor:
+
+| v7'ye karşı (eşli) | SC pp öğr. D | SC pp gerçek D | SC faz öğr. D | SC faz gerçek D | DFL-trk | Metrica öğr. D | Metrica gerçek D |
+|---|---|---|---|---|---|---|---|
+| ham karışım α·log(q_H/q_A) (α 0.25) | −0.003…−0.005 | −0.002 | −0.003…+0.002 | ±0.001 | −0.004…−0.007 | −0.012…−0.015 | −0.010…−0.013 |
+| sınırlı karışım α·log((q_H+0.2)/(q_A+0.2)), α 0.5 | +0.006 (17/20) | +0.004 (13/20) | +0.006 (18/20) | +0.003 (16/20) | +0.000 (4/7) | −0.002 (5/9) | −0.001 (4/9) |
+| 14 kontrolcü özelliği takım modelinde (DFL'de yeniden eğitim) | +0.006 (13/20) | −0.000 (9/20) | +0.006 (14/20) | −0.000 (9/20) | **−0.008 (1/7)** | −0.003 (5/9) | −0.001 (5/9) |
+
+Kare takım doğruluğu: SC +0.002 (özellik), DFL −0.001, Metrica −0.001; karışım her yerde ≤ 0. Kontrolcünün
+görmediği alanlarda (DFL, Metrica) kazanç yok → SC'deki artı alan içi avantaj; BAR-ATH de kontrolcü için alan dışı.
+BAR-ATH (bilgi): özellik modeli public 0.652 → 0.667 (temiz topla 0.696 → 0.696, macroF1 0.937 → 0.940); karışım
+possession hızını 4.26 → 4.50/canlı dk (temiz topla 4.59) çıkarıyor, public aynı / temiz topla 0.696 → 0.682.
+→ ❌ benimsenmedi (dosyalar `cache/bench/ctrl/barath_probs_*.pkl`).
+
+**Kapsama teşhisi** (neden?): <4 sn gerçek spell'lerin yalnız %6–13'ünde v7'nin ham takım olasılığı doğru takımı hiç
+göstermiyor (DFL-trk %9, Metrica %6, SC %13) → kısa possession'ların çoğunu model *görüyor*, sorun gürültüden
+ayırmak. Kontrolcü kısa spell'lerin yalnız %19–37'sinde doğru takım için emin (q > 0.5, ≥ 3–10 kare; v7'nin hiç
+göstermediklerinin %0–5'inde), uzun spell'lerin içinde canlı dakikada 0.6–1.2 yanlış emin koşu üretiyor. SC'de kısa
+takım spell'lerinin yarısından fazlası tek dokunuş: içlerindeki oyuncu kontrol süresi medyan 0 sn (bütün player
+possession'ların %25'i < 0.3 sn, %41'i < 1 sn). Yani kısa possession'ı taşıyan şey "kontrol eden oyuncu" değil, tek
+dokunuşlu pas / müdahale; tracking'den oyuncu kontrolü bunu ayırt etmiyor.
+
+**Tur 7 özeti**: araştırmanın 1 numaralı tracking önerisi (R-1) SC içinde çalışıyor ama alan dışına taşınmıyor; kısa
+possession havuzu için tracking kanıtı doygun görünüyor. Sıradaki güçlü kaldıraçlar yeni gözlem kaynağı: video
+(R-6: taktik videodan top tespiti — temiz top seçeneğinin public'te +0.044 vermesi top kalitesinin BAR-ATH'ta önemli
+olduğunu gösteriyor; yayın videosundan pass/drive çapaları) ve BAR-ATH'ta küçük bir elle etiketli doğrulama seti
+(RULES.md: "Small amounts of hand-labelled data used to train or validate a model are fine"; gönderilen etiketler
+modelden gelmeli). İkisi de kullanıcı kararı (videonun Colab'a ulaşması / etiketleme zamanı).
+
+**Top gözlem sıklığı** (kullanıcı sorusu; `src/exp_ballrate.py`, `sim._ball_every`): model takibi zaten kare kare
+okuyor. Top yalnız her k karede görülse (aradaki kareler doğrusal) ne kaybederdik — her varyantta modeller yeniden
+eğitildi: 0.2 / 0.4 sn ±0.004 (gürültü), 0.6 sn'den itibaren her sette kayıp ve aralıkla büyüyor (1 sn −0.007…−0.025,
+2 sn −0.012…−0.043, 10 sn −0.025…−0.109; en çok öğrenilmiş ölü top). Aralıklı bakmanın artısı yok; video dedektörü
+çalıştırılırsa 0.2 sn adım hesap tasarrufu için kabul edilebilir.
+
+**Rol farkındalığı (numarasız)** (kullanıcı fikri; `src/roles.py`, `src/exp_role.py`, `src/exp_role_pen.py`):
+oyuncunun ±2.5 dk'lık ortalama derinliği (rakip kaleye doğru) ve takım içi derinlik sırası, genişliği → kaleci /
+stoper / bek / orta saha / forvet (4 en derin savunma, 2 en geniş savunmacı bek, 2 en ileri forvet). Metadata'ya karşı
+(bozulmuş girdide, oyuncu-devre çoğunluğu): DFL %84.5 (hat %87.5), SC %75 (kanat forvetleri orta saha sayılıyor —
+4-3-3'te 3 forvet). Topa en yakın oyuncuların rolü, "kendi ceza sahasında baskı altında savunmacı", "rakip yarı
+sahada forvet" vb. 16 takım-perspektifli özellik v7'ye eklendi: kare takım doğruluğu her sette artıyor
+(+0.001…+0.005) ama spellF1 SC'de +0.008…+0.011 (13–17/20), DFL-trk'te −0.013…−0.015 (1/7), Metrica'da −0.004…−0.006;
+ceza yeniden seçilince de en kötü durum pişmanlığında v7 pen 12 (0.0115) rol modelini (0.0126–0.0131) geçiyor →
+❌. Yorum: native (dokunuşta dönen) DFL etiketleriyle eğitilen model rol bilgisini dokunuş değişimlerini öğrenmek
+için kullanıyor; kontrollü konvansiyonda bunlar sahte spell. Forma numarası: ATD her izi kadrodaki bir oyuncuya
+(numara + ad) bağlıyor, yani kimlik zaten var; pozisyon bilgisi yok (kaleciler dışında "Unknown"). Dış veriden
+"rol × bölge × baskı → top kaybı" önseli (StatsBomb indirme gerektirir) ve maç içi kendi-tahmin istatistikleri
+denenmedi: rol özelliklerinin kendisi spellF1'e taşınmadığı için beklenen değer düşük.
+
+**R-6 video pilotu — pas / top sürme olayları** (`colab/bas_pilot.py`, `colab/run_bas.sh`, `src/bas_eval.py`):
+2023 SoccerNet ball-action-spotting birincisinin (R. Baikulov, MIT) tek fold modeli (fold 5), yayın videosunda
+Colab T4'te (2 vCPU, ~100 dk; video kullanıcının Drive'ından VM içinde okundu, yerel bağlantı kullanılmadı); çift
+kareler (modelin 12.5 fps adımı), yatay çevirme TTA. Pas tepeleri ≥0.2: 1284 (video dk başına 11.7), top sürme 1208.
+Takım ataması = olay anında topa en yakın oyuncu (≤3 m, taktik ATD + birleşik top, yayın→taktik gecikmesi).
+Public pencere (bilgi; 4 dk canlı): pas, tepe anında atanınca olay-takım doğruluğu 0.75–0.77 (v7 aynı karelerde
+0.91–0.93; ayrışmalarda olay 2–3 / v7 12–13 haklı) — tepe topun ayaktan çıkmasından sonra. 6 kare (0.24 sn) önce
+atanınca 0.94–0.95 (v7 0.94), ayrışma 5–7 (olay 3–4 / v7 2–3); tam maçta v7 ile uyum 0.665 → 0.829 (ofset public'e
+bakarak 9 değer içinden seçildi; fiziksel olarak da pası atan vuruştan önce topa en yakın). Top sürme 0.88–0.90
+(v7 0.93; ayrışmalarda v7 haklı). Yayın görüntüsü geçersiz karelerle sınırlamak fark yaratmıyor (olayların %99'u
+geçerli görüntüde). Sonuç: pas olayları v7 düzeyinde isabetli ama onu geçtiğine kanıt yok ve dış doğrulama
+imkânsız (DFL / Metrica / SkillCorner'ın videosu yok) → şimdilik entegre edilmedi; olası tek kullanım sınırlı,
+v7'nin kararsız olduğu anlarda zayıf kanıt (`cache/video/` altında skorlar duruyor). Maliyet ~3 Colab birimi.
+
+### Tur 8 — 22 Ekim (20 ajanlık araştırma filosu)
+
+20 Codex ajanı (yalnız web + temizlenmiş `brief/`: README, FIKIRLER, DENEMELER, analiz raporları; veri yok), her
+biri ayrı alan: takipten kontrollü possession, takipten olay tespiti, olay–takip senkronu, oyunculardan top izi, GNN /
+set modelleri vs GBM, öz-denetimli ön eğitim, diğer sporlar, ölü top / duran top, yayın yapısı, ses, video top tespiti,
+takıma atanmış aksiyon tespiti, oyun durumu yeniden kurulumu, forma numarası, yerel VLM'ler, gürültülü etiket,
+segment-IoU son işlemi, takip hata modeli, etiketsiz model seçimi, topsuz taktik bağlam. Ortak sonuçlar:
+
+- Hiçbir yayımlanmış yöntem kontrollü spell F1'de v7'yi geçtiğini göstermiyor; her ekleme **sınırlı**, "hiç etki
+  yok" ayarı içeren ve B2'yi sabit tutan bir düzeltme olmalı, en kötü durum pişmanlığından geçmeli.
+- **Önce tavan / kâhin, sonra inşa**: olay çapası kâhini (gerçek olaylarla kusursuz / bozulmuş çapalar → sınırlı
+  füzyonun kazancı ve gereken kesinlik), kısa spell kapsama kâhini, ölü top sınır karnesi.
+- **Top kaynağı / kalitesi**: simülatöre ATD tarzı uydurma (aşırı düzgün) top izleri + "son gerçek gözlemden beri
+  geçen süre" gibi kalite özellikleri → temiz top seçeneğinin ilk dış testi ve sahte 2–8 sn spell havuzu.
+- Video olayları (PASS / DRIVE) takıma atanmış seyrek çapa olarak, tekrar (replay) süzgeciyle; ekip-farkında hazır
+  model yalnız 2025 Team T-DEED (GPL, sol/sağ → ev/deplasman eşlemesi gerekir).
+- Yalnız oyunculara dayalı ölü top modeli (top / yayın girdisi yok) + yalnız sinyal zayıfken devreye giren füzyon:
+  denenmedi (R-3).
+- Model seçimi: eşli maç bootstrap'ı, Q95 pişmanlık, bir vekil seti dışarıda bırakarak seçicinin testi.
+- **Düzeltme (A18)**: DATA.md'ye göre ATD'de oyuncu kimliği yok — 46 "slot" iz yuvası, `ShirtNumber` = slot sırası;
+  izler kaybolup yeniden bulunurken kimlik değiştirir. v7'nin özellikleri kolektif (takım düzeyi; oyuncu bazında
+  yalnız ±1 karelik hız) → etkilenmiyor; BAR-ATH'ta kare başına >1 m sıçrama %0.009, iz yeniden başlama 11.2/dk
+  (simülasyon DFL 17.8, SC 26.2/dk — daha da parçalı). Oyuncu sürekliliğine dayanan kontrolcü ve rol özellikleri
+  BAR-ATH'ta ayrıca bozulurdu (benimsenmemişti).
+
+**Olay çapası kâhini** (`src/exp_anchor.py`; araştırma a02 / a07 / a12 / a17): GERÇEK pas olayları (Metrica PASS;
+SkillCorner pasla biten player possession) çapa sayılıp v7'ye sınırlı kanıt olarak eklendi (pasın 0.5 sn öncesi +
+0.12 sn sonrası, ±β, B2 pen 12). Etiketler aynı olaylardan türediği için iyimser üst sınır (SC faz etiketleri en
+az döngüsel). β=4'te: kusursuz çapalar Metrica +0.016 / +0.020 (9/9), SC pp +0.034 / +0.037, SC faz +0.028 (20/20);
+pilota benzer (geri çağırma 0.6, takım 0.94, ±3 kare, 1 sahte / canlı dk) Metrica +0.007 / +0.012, SC +0.013…+0.020;
+kötü (0.5, 0.85, ±5, 2 / dk) Metrica ≈0, SC +0.008…+0.013. → tavan küçük ama pozitif ve tutarlı.
+**BAR-ATH'ta pilotun çapaları** (`src/anchor_barath.py`; 820 atanmış pas, ≥0.35, 6 kare önce atama): possession hızı
+4.26 → 4.61 (β=2) / 4.90 (β=4) / canlı dk; public (bilgi) β=2 aynı (0.652; macroF1 +0.0015), β=4 0.613; temiz topla
+0.696 → 0.682 / 0.640. Kâhinden farkı: pilotun pasları tam maçta v7 ile %17 çelişiyor ve çelişkilerde olay / v7
+yaklaşık eşit haklı → her yanlış ekleme iki spell bozduğundan net ≈0 / eksi (a17'nin ΔM > (F/2)·ΔP koşulu). ❌
+varsayılan değil; dosyalar `cache/video/barath_probs_anchor_*.pkl`. Yeniden bakmak için koşul: çelişkilerde olayın
+isabetini yükselten daha iyi dedektör (7 fold topluluğu, "pası takım arkadaşı aldı" teyidi, tekrar süzgeci).
+
+**Temiz top seçeneğinin dış testi** (`src/exp_fab.py`, `sim.V5` / `V5C`; araştırma a01 / a04 / a18 / a19): V5 = V3 +
+görünen canlı oyunun %3'ü (medyan 0.8 sn'lik bölümler) iki uç arasında düz çizgiyle "uydurulmuş" (BAR-ATH: görülen
+karelerin %3.1'i; V5'te %3.3, sapma medyanı 1.3 m); V5C = aynısı + `ballclean.fabricated` ile silinmiş (dedektör
+V5'te geri çağırma 0.97, kesinlik 0.83; V3'te hiç kare işaretlemiyor). Eşli (A = V3 modelleri V5 girdisinde, yani
+v7'nin BAR-ATH durumu; öğrenilmiş / gerçek D):
+- uydurmanın maliyeti (V3 girdisine göre): DFL −0.003 / −0.002, Metrica −0.001 / −0.001, SC −0.000 / −0.001 → küçük;
+- temizlemek (B): DFL −0.003 / −0.001, Metrica −0.009 / 0.000, SC −0.000 / +0.001 → kazandırmıyor;
+- V5 ile eğitmek (C) ya da V5C ile eğitip çalıştırmak (D): −0.008…+0.001 → kazandırmıyor.
+BAR-ATH'ta uydurma kareler değişimlerin yakınında yalnız hafif yoğun (±1 sn 1.04×, ±2 sn 1.22×, temaslı anlarda
+1.15×) → düzgün yerleşim makul. **Sonuç: temiz top dış veride desteklenmiyor**; public'teki +0.044 (17 spell) büyük
+olasılıkla gürültü. Önerilen varsayılan v7cw'den **v7 (ya da v7w)**'ye çekildi; v7c / v7cw seçenek olarak kalır.

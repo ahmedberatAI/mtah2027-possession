@@ -23,3 +23,9 @@ colab stop -s mtah                             # always stop the VM when the job
 | job | what | script |
 |---|---|---|
 | `run_gru` | BiGRU team model vs v7's LightGBM (idea N25), true dead balls, B2 decoder | `src/seq_gru.py`, `src/exp_gru.py` |
+| `run_bas` | 2023 SoccerNet ball-action-spotting winner (MIT, one fold) on the BAR-ATH broadcast video: PASS / DRIVE scores (`/content/work/bas_raw_fold<k>.npz`, ~0.4 MB), evaluated locally by `src/bas_eval.py` | `colab/bas_pilot.py` |
+
+`run_bas` needs the match video on the VM without using the local connection: add a Drive shortcut to the shared
+match folder ("Add shortcut to My Drive"), then `colab drivemount -s <session>` (the user opens the printed Google
+URL, grants all permissions and presses Enter within ~2 minutes; every new VM asks again) and write the video's
+path under `/content/drive/.shortcut-targets-by-id/...` to `/content/bas_video.txt` before `launch.py`.

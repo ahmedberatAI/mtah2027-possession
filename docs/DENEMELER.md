@@ -112,6 +112,17 @@ Skorlar: public = ilk 5 dk (17 possession, spellF1 bootstrap aralığı ~0.27–
 | sim.V4 ön yumuşatma (N26) | SC +0.004, Metrica −0.004, BAR-ATH yapışkanlık aynı | ≈ |
 | **ATD uydurma top karelerini temizlemek (8)** | iki kamera farkı 1.66 m vs 0.75 m; public 0.652 → 0.696, takım 0.948 → 0.968; SC'de dış doğrulama yok | ✅ seçenek (`clean_ball`), varsayılan değil |
 
+| Oyuncu düzeyinde kontrolcü, SkillCorner player possession denetimli (R-1, tur 7; `src/ctrl_model.py`) | SC 5-fold AUC 0.988, ilk-1 0.946; ham karışım her sette −0.002…−0.11 | ❌ |
+| Kontrolcü: sınırlı karışım / takım modeline özellik (`src/exp_ctrl2.py`) | SC +0.003…+0.006 (13–18/20) ama DFL-trk +0.000 / −0.008 (1/7), Metrica −0.001…−0.003; BAR-ATH'ta karışım possession hızını 4.26 → 4.50 çıkarıyor | ❌ alan dışına taşınmıyor |
+| Kısa possession kapsama teşhisi | <4 sn spell'lerin %87–94'ünde v7 doğru takımı en az bir karede gösteriyor; kontrolcü yalnız %19–37'sinde emin, canlı dakikada 0.6–1.2 yanlış emin koşu; SC kısa spell'lerinde oyuncu kontrol süresi medyan 0 sn | ders: sorun görmek değil ayırt etmek |
+| Topu k karede bir görmek (`src/exp_ballrate.py`, kullanıcı sorusu: kare kare mi aralıklı mı) | 0.2–0.4 sn ±0.004 (tek sette artı, maçların yarısı); 0.6 sn −0.001…−0.013; 1 sn −0.007…−0.025; 2 sn −0.012…−0.043; 10 sn −0.025…−0.109 (öğrenilmiş D en çok) | ❌ kare kare en iyisi; aralık yalnız hesap tasarrufu |
+| Rol farkındalığı, numarasız (`src/roles.py`, `src/exp_role.py`; kullanıcı fikri) | rol çıkarımı metadata'ya karşı DFL %84.5 (hat %87.5), SC %75; v7'ye 16 rol özelliği: kare takım doğruluğu her sette +0.001…+0.005, spellF1 SC +0.008…+0.011 (13–17/20) ama DFL-trk −0.013…−0.015 (1/7), Metrica −0.004…−0.006 | ❌ |
+| Rol modeli için pen_team yeniden seçimi (`src/exp_role_pen.py`) | en kötü durum pişmanlığı: v7 pen 12 0.0115 (en iyi), rol modeli en iyi pen 16 / 32: 0.0126–0.0131 (DFL-trk'te en iyi cezada bile −0.012) | ❌ v7 kalıyor |
+| **Video pilotu: pas / top sürme olayları** (2023 SoccerNet BAS birincisi, tek fold, Colab T4; `colab/bas_pilot.py`, `src/bas_eval.py`) | public (bilgi): pas takımı tepe anında 0.77, 0.24 sn önce 0.94–0.95 (v7 0.94; ayrışma 5–7, olay 3–4 / v7 2–3); top sürme 0.88 (v7 0.93); tam maçta v7 ile uyum 0.83 | ≈ v7 düzeyinde, üstünlük kanıtı yok; dış doğrulama yok → entegre edilmedi |
+| Olay çapası kâhini (`src/exp_anchor.py`; gerçek paslar → sınırlı kanıt) | β=4: kusursuz +0.016…+0.037, pilota benzer +0.007…+0.020, kötü ≈0…+0.013 (iyimser: etiketler aynı olaylardan) | ✅ tavan küçük ama pozitif |
+| Pilot çapaları BAR-ATH'ta (`src/anchor_barath.py`) | possession hızı 4.26 → 4.61 / 4.90 dk⁻¹; public (bilgi) β=2 aynı, β=4 −0.039; temiz topla −0.015 / −0.056; çapalar v7 ile %17 çelişiyor | ❌ varsayılan değil |
+| **Temiz topun dış testi** (`sim.V5` uydurma top %3, `src/exp_fab.py`) | uydurmanın maliyeti ≤ −0.003; temizlemek DFL −0.003 / −0.001, Metrica −0.009 / 0.000, SC ±0.001; uydurmayla eğitmek de kazandırmıyor | ❌ dış veride desteklenmiyor → önerilen varsayılan v7 / v7w (v7cw değil) |
+
 ## Dış veri
 - IDSSE/Open DFL (7 maç, CC BY): ölü-top istatistikleri çok benzer; possession bayrağı GT'den ~2× sık dönüyor.
 - Metrica örnek (3 maç, kaynak belirtilmeli), SkillCorner open data (20 maç, MIT; tur 4'ten beri doğrulama seti,

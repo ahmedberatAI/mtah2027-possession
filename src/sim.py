@@ -33,6 +33,18 @@ V3 = dict(V2, noise_model="smooth", p_noise_s=1.0, ball_noise_s=0.5)
 # as smooth as BAR-ATH). Gaussian low-pass of the clean positions within finite runs (players 1.5 frames, ball
 # 4 frames) before the degradation; no random draws, so masks / noise equal V3's.
 V4 = dict(V3, presmooth_p=1.5, presmooth_b=4.0)
+# ball_every k (src/exp_ballrate.py, bench variants "v3b<k>"): the ball is observed only every k-th frame -- a ball
+# detector run at a stride -- and linearly interpolated between two consecutive observed samples; no random draws,
+# so the masks and noise equal the base variant's.
+# V5 (src/exp_fab.py; research a01 / a04 / a18): BAR-ATH's tactical ATD fills part of the ball track by prediction --
+# over-smooth runs, 3.1% of the seen frames, ~1.7 m off (src/ballclean.py). V5 = V3 plus short seen live-play
+# segments (lognormal, median fab_med frames, fab_min..fab_max) replaced by a straight line between their ends -- a
+# tracker that briefly lost the ball and predicted it -- until fab_share of the live frames are covered (own random
+# stream, so V3's masks / noise are unchanged). clean_fab: afterwards drop the over-smooth runs again
+# (ballclean.fabricated), as model_v7's clean_ball does on BAR-ATH (there is no broadcast ball to substitute).
+V5 = dict(V3, fab_share=0.03, fab_med=20, fab_sigma=0.6, fab_min=8, fab_max=75)
+V5C = dict(V5, clean_fab=True)
+V3C = dict(V3, clean_fab=True)
 
 
 def _smooth_runs(x, sigma):
@@ -52,6 +64,51 @@ def _smooth_unit(z, sigma_frames):
     from scipy.ndimage import gaussian_filter1d
     y = gaussian_filter1d(np.asarray(z, np.float64), sigma_frames, axis=0, mode="nearest")
     return y / max(float(y.std()), 1e-12)
+
+
+def _ball_every(Bn, k):
+    """Keep the ball on frames t % k == 0 only; linear in between where both neighbouring samples are seen."""
+    t = np.arange(len(Bn))
+    idx = t[::k]
+    keep = idx[np.isfinite(Bn[idx, 0])]
+    out = np.full_like(Bn, np.nan)
+    if len(keep) < 2:
+        out[keep] = Bn[keep]
+        return out
+    pos = np.searchsorted(keep, t, side="right")
+    left = keep[np.clip(pos - 1, 0, len(keep) - 1)]
+    right = keep[np.clip(pos, 0, len(keep) - 1)]
+    ok = ((pos > 0) & (pos < len(keep)) & (right - left <= k)) | np.isin(t, keep)
+    for c in range(Bn.shape[1]):
+        out[:, c] = np.interp(t, keep, Bn[keep, c])
+    out[~ok] = np.nan
+    return out
+
+
+def _fabricate(Bn, lab, p, rng):
+    """Replace short seen live-play segments by a straight line between their ends (a tracker predicting a briefly
+    lost ball) until fab_share of the live frames are covered."""
+    out = Bn.copy()
+    n = len(Bn)
+    ok = np.isfinite(Bn[:, 0]) & (lab < 2)
+    cand = np.flatnonzero(ok)
+    target = p["fab_share"] * int((lab < 2).sum())
+    done, tries = 0, 0
+    used = np.zeros(n, bool)
+    while done < target and tries < 20 * max(1, int(target / max(p["fab_med"], 1))) and len(cand):
+        tries += 1
+        a = int(cand[rng.integers(len(cand))])
+        ln = int(np.clip(round(rng.lognormal(np.log(p["fab_med"]), p["fab_sigma"])), p["fab_min"], p["fab_max"]))
+        b = a + ln
+        if a < 1 or b >= n or not ok[a - 1:b + 1].all() or used[a - 1:b + 1].any():
+            continue
+        w = np.arange(1, ln + 1) / float(ln + 1)
+        for c in range(Bn.shape[1]):
+            if np.isfinite(Bn[a - 1, c]) and np.isfinite(Bn[b, c]):
+                out[a:b, c] = Bn[a - 1, c] + w * (Bn[b, c] - Bn[a - 1, c])
+        used[a:b] = True
+        done += ln
+    return out
 
 
 def _lognormal_frames(rng, median_s, sigma, size=None):
@@ -257,6 +314,13 @@ def degrade(P, B, lab, pitch, seed=0, params=None):
         present = np.isfinite(B[:, 0])
         seen = ball_dropout_v2(lab, z, np.random.default_rng([seed, 2]), p, present) & present
     Bn[~seen, :] = np.nan
+    if p.get("fab_share", 0) > 0:
+        Bn = _fabricate(Bn, lab, p, np.random.default_rng([seed, 3]))
+    if p.get("clean_fab"):
+        import ballclean
+        Bn[ballclean.fabricated(Bn[:, :2] * np.array([L, W]))] = np.nan
+    if p.get("ball_every", 1) > 1:
+        Bn = _ball_every(Bn, int(p["ball_every"]))
     Pn = player_dropout(P, rng, p)
     if smooth:
         s_p = p["p_noise_s"] * FPS

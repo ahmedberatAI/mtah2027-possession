@@ -4,7 +4,7 @@ play (a control-based possession convention close to the public GT statistics). 
 soft minimum, per match, paired against base_native_v3 + standard decoder at its own best penalty.
 AGGREGATE output only.
 
-  python -I src/exp_sc.py [--oracle-dead] <tag> [<tag> ...]
+  python -I src/exp_sc.py [--oracle-dead] [--pp] <tag> [<tag> ...]     (--pp: player-possession labels)
 --oracle-dead decodes with the true D frames (the DFL dead-ball model transfers poorly to SkillCorner: frame
 accuracy 0.90, spellF1 0.58 vs 0.75 with true D), which isolates the team side.
 """
@@ -25,6 +25,7 @@ import exp_v7  # noqa: E402
 import train_dfl as td  # noqa: E402
 
 SRC = "sc@v3"
+CONV = ["phase"]          # set from --pp in main()
 REF = "base_native_v3"
 DEC = dict(pen_dead=30.0, min_poss=8, min_dead=50)        # model_v5's decoder settings
 PENS_STD = (8, 12, 20, 32, 48, 64, 96)
@@ -40,7 +41,7 @@ def team_probs(tag):
 def per_match(pdl, phl, spec):
     bl = bench.blocks(SRC)
     preds = [spec.decode(td.emissions(pd_, ph, 1.0, 1.0)).astype(np.int8) for pd_, ph in zip(pdl, phl)]
-    r = bench.spell_by_group(bl, bench.labels(SRC, "phase"), preds)
+    r = bench.spell_by_group(bl, bench.labels(SRC, CONV[0]), preds)
     return np.array([r[k][0] for k in sorted(r)]), np.array([r[k][1] for k in sorted(r)])
 
 
@@ -48,8 +49,10 @@ def main():
     sys.stdout.reconfigure(encoding="utf-8")
     warnings.filterwarnings("ignore")
     oracle = "--oracle-dead" in sys.argv
+    conv = "pp" if "--pp" in sys.argv else "phase"
+    CONV[0] = conv
     tags = [REF] + [t for t in sys.argv[1:] if t != REF and not t.startswith("--")]
-    labs = bench.labels(SRC, "phase")
+    labs = bench.labels(SRC, conv)
     pdl = ([np.where(lab == 2, 1 - 1e-4, 1e-4) for lab in labs] if oracle
            else bench.dead_ext("base", "v3", SRC))
     g = np.concatenate([lab < 3 for lab in labs])

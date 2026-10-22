@@ -2,7 +2,10 @@
 tracking) -> arrays in the same layout as dfl.parse(), at 25 fps, with per-frame H/A/D labels.
 
 Labels come from the "phases of play" file: phases are only defined while the ball is in play, so frames
-outside every phase are D; inside a phase the label is its team_in_possession (home -> H, away -> A).
+outside every phase are D; inside a phase the label is its team_in_possession (home -> H, away -> A). The
+"_labels_pp" variant keeps those D frames but takes the team from the dynamic events' player possessions
+(controlled possessions: the team changes when an opposing player's possession starts), since phases keep
+their team through brief disruptions and group short contested sequences.
 SkillCorner possessions are built from player possessions (a player controlling the ball), and the
 resulting spell statistics are close to the public ground truth (median 7.6 s, 13% of spells < 2 s; GT
 7.56 s, 2/17) -- a third possession convention next to DFL's flag and Metrica's events.
@@ -48,7 +51,7 @@ def parse(match, refresh=False):
     out_path = os.path.join(CACHE, "%s.npz" % match)
     if os.path.isfile(out_path) and not refresh:
         d = dict(np.load(out_path, allow_pickle=True))
-        if "h1_bdet" in d:
+        if "pid" in d:
             return d
     d = os.path.join(DATA, match)
     meta = json.load(open(os.path.join(d, "%s_match.json" % match), encoding="utf-8"))
@@ -66,7 +69,9 @@ def parse(match, refresh=False):
             if r["period"] in rows:
                 rows[r["period"]].append(r)
     ph = pd.read_csv(os.path.join(d, "%s_phases_of_play.csv" % match))
-    result = {"pitch": np.array([L, W], np.float32)}
+    ev = pd.read_csv(os.path.join(d, "%s_dynamic_events.csv" % match), low_memory=False,
+                     usecols=["event_type", "period", "frame_start", "frame_end", "team_id"])
+    result = {"pitch": np.array([L, W], np.float32), "pid": np.array(pid, np.int64)}
     for per in (1, 2):
         rr = rows[per]
         f10 = np.array([r["frame"] for r in rr], np.int64)
@@ -88,6 +93,28 @@ def parse(match, refresh=False):
         for p in ph[ph["period"] == per].itertuples():
             a, b = np.searchsorted(f10, p.frame_start), np.searchsorted(f10, p.frame_end, side="right")
             lab10[a:b] = H if p.team_in_possession_id == home else A
+        # player-possession labels: same dead-ball frames, but the team in possession is the team of the latest
+        # player possession start (SkillCorner's own rule: team possession persists between same-team player
+        # possessions and changes when an opposing player's possession starts); before the first one in an
+        # alive stretch, the phase team
+        pp = ev[(ev["event_type"] == "player_possession") & (ev["period"] == per)].sort_values("frame_start")
+        team_at = np.full(n10, -1, np.int8)
+        idx = np.clip(np.searchsorted(f10, pp["frame_start"].to_numpy()), 0, n10 - 1)
+        tm = np.where(pp["team_id"].to_numpy() == home, H, A).astype(np.int8)
+        last = np.full(n10, -1, np.int64)
+        np.maximum.at(last, idx, np.arange(len(idx)))
+        last = np.maximum.accumulate(last)
+        team_at = np.where(last >= 0, tm[np.maximum(last, 0)], -1)
+        alive = lab10 < 2
+        seg = np.diff(np.concatenate(([0], alive.astype(np.int8), [0])))
+        lab_pp = lab10.copy()
+        for a, b in zip(np.flatnonzero(seg == 1), np.flatnonzero(seg == -1)):
+            st = idx[(idx >= a) & (idx < b)]
+            if not len(st):
+                continue
+            first = st.min()
+            lab_pp[first:b] = team_at[first:b]       # from the first player possession of the stretch on
+        lab_pp[~alive] = D
         t10 = (f10 - f10[0]) / FPS_IN
         n25 = int(np.floor(t10[-1] * FPS)) + 1
         t25 = np.arange(n25) / FPS
@@ -103,6 +130,7 @@ def parse(match, refresh=False):
         result[tag + "_team"] = team
         result[tag + "_gk"] = gk
         result[tag + "_labels"] = lab10[near]
+        result[tag + "_labels_pp"] = lab_pp[near]
         result[tag + "_f0"] = np.array([f10[0]])
         result[tag + "_valid"] = valid10[near]      # broadcast view shows the pitch (cf. BAR-ATH b_valid)
         result[tag + "_ndet"] = ndet10[near]        # players detected on screen

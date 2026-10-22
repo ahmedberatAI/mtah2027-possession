@@ -56,6 +56,8 @@ DECODERS = {"dflcv": dict(pen_dead=32.0, min_poss=5, min_dead=25),   # DFL-CV tu
             "v5": dict(pen_dead=30.0, min_poss=8, min_dead=50)}      # model_v5's (inherited from v2)
 EPS = 1e-4
 VARIANTS = {"v2": sim.V2, "v3": sim.V3, "v4": sim.V4}   # degradations; "dfl" / "metrica" alone mean @v2
+VARIANTS.update({"v3b%d" % k: dict(sim.V3, ball_every=k) for k in (5, 10, 15, 25, 50, 250)})   # ball every k frames
+VARIANTS.update({"v5": sim.V5, "v5c": sim.V5C, "v3c": sim.V3C})   # ATD-like fabricated ball runs (+ cleaned)
 LGB_DEAD = dict(td.LGB_DEAD, num_threads=THREADS)
 
 
@@ -275,8 +277,12 @@ def labels(src, conv):
         per_game = {g: ms.gt_halves(g, conv) for g in ms.GAMES}
         _labels[key] = [per_game[g][h] for g in ms.GAMES for s in M_SEEDS for h in (0, 1)]
     elif src == "sc":
-        assert conv in ("phase", "native"), conv     # SkillCorner phases of play
-        _labels[key] = [b["lab"] for b in blocks("sc@v3")] if blocks("sc@v3") else []
+        if conv in ("phase", "native"):              # SkillCorner phases of play
+            _labels[key] = [b["lab"] for b in blocks("sc@v3")]
+        elif conv == "pp":                           # team from the dynamic events' player possessions
+            _labels[key] = [scr.parse(m)["h%d_labels_pp" % h] for m in scr.matches() for h in (1, 2)]
+        else:
+            raise ValueError(conv)
     else:
         raise ValueError(src)
     return _labels[key]
