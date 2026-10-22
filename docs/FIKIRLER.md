@@ -214,3 +214,74 @@ Değer = beklenen spellF1 kazancı × güven; maliyet = CPU zamanı + kod. Durum
   CPU'da model tarafında getiri azaldı: son iki turda hiçbir fikir v7'yi tutarlı biçimde geçmedi. Kalan en değerli
   adımlar CPU deneyi değil: (1) elle etiketlenmiş birkaç 5 dakikalık pencere (v5 / v7 / v7w kararı), (2) teslim
   hattının (v7 veya v7w) varsayılan yapılması ve teknik dokümana işlenmesi.
+
+### Karar protokolü: parametre seçimi (22 Ekim)
+Parametreler (ör. pen_team) public pencereye göre değil, **GT'ye benzeyen dış setlerde en kötü durum pişmanlığını
+en aza indiren** değerle seçilir: DFL-trk (7 maç), Metrica-ctrl (3 maç × 3 tohum), SkillCorner (20 maç; öğrenilmiş ve
+gerçek D). Ek akıl sağlığı kontrolü: BAR-ATH tam maç possession hızı ~3.8–4.2/canlı dk. Public yalnız bilgi amaçlı.
+v7 için pen_team: 4 → max pişmanlık 0.0127, 8 → 0.0068, **12 → 0.0016**, 20 → 0.0017 (public 4–32 arası aynı).
+
+### Tur 6 — 22 Ekim (kullanıcının planı: oracle merdiveni → kayıp havuzlarına göre fikir sırası)
+**0. adım — nereden kaybediyoruz** (`src/exp_oracle.py`; v7 + B2 pen 12; birikimli oracle merdiveni):
+
+| basamak | DFL-trk | Metrica-ctrl | SkillCorner |
+|---|---|---|---|
+| v7 | 0.760 | 0.815 | 0.582 |
+| + kusursuz ölü top | +0.022 | +0.057 | +0.164 |
+| + kusursuz restart takımı (2 sn) | +0.010 | +0.006 | +0.014 |
+| + kusursuz zamanlama (±1 sn) | +0.007 | +0.005 | +0.006 |
+| + kaçan <4 sn possession'lar | **+0.065** | **+0.040** | **+0.111** |
+| + sahte possession'lar silinince | **+0.086** | **+0.050** | **+0.068** |
+
+- Hata bütçesi (v7, DFL-trk; 5 IoU eşiği toplamı): kaçırılan %22 (çoğu <4 sn), kısmi örtüşme %61 (gerçek tarafı %29,
+  tahmin tarafı %32, her süre grubunda), sahte %17 (çoğu 2–8 sn). Metrica ve SC benzer.
+- Gecikme: bulunan el değişimlerinde top görünürken medyan +1 (DFL) / +3 (Metrica, SC) kare; resmi ölçüm medyan 0.
+  Top kayıpken +10…+12 kare ama vaka az. Gerçek el değişimlerinin yalnız ~%53'ü ±1 sn içinde bulunuyor.
+- **Sonuç**: fikir 1 (gecikme) ≈ 0 potansiyel; restart takımı (4) küçük (+0.006…+0.014); en büyük havuzlar kısa possession'ları
+  yakalamak ve sahteleri ayıklamak → önce fikir 2 (değişim modeli + zamana bağlı ceza), sonra 3 (possession düzeyinde
+  doğrulama). Ölü top: BAR-ATH'ta kurallar + broadcast zaten güçlü (public canlı/ölü F1 0.979).
+- Planın önceki turlarda denenmiş maddeleri: 5 (konvansiyon uyumu = A1, ❌), 6 (possession hafızası ≈ C2/C7, ❌ GT
+  benzeri konvansiyonlarda), 7'nin sıcaklık kısmı (≈), 11 (BiGRU) Colab'da çalışıyor.
+
+**Fikir 2 — el değişimi modeli + zamana bağlı ceza** (`src/exp_change.py`): LightGBM "±6 kare içinde el değişimi var mı?"
+(DFL trk, maç dışarıda; girdiler v7 özellikleri + takım olasılığının yönsüz değişim işaretleri). Ayırt edicilik yüksek:
+AUC DFL 0.912, Metrica 0.953, SC 0.881 (pozitif %2). Dekoderde takım geçişi maliyeti pen − λ·(logit p − b) (≥ 0),
+36 ayarlık ızgara, her sette en iyisi (iyimser): DFL-trk +0.0028 (4/7), Metrica +0.0010 (5/9), Metrica gerçek D +0.0017,
+SC +0.0016 (10/20), SC gerçek D +0.0013 (11/20) → **≈ gürültü**. Değişim bilgisi takım olasılıklarında zaten var.
+
+**Fikir 3 — kısa possession doğrulama** (`src/exp_shortpos.py`): ekleme adayları (düşük cezalı çözümün omurga içindeki
+karşı takım parçaları) yalnız %4–9 gerçek; sınıflandırıcı AUC 0.77–0.88 ama eklemek her sette kaybettiriyor (−0.0002…−0.006).
+Silme (8 sn'den kısa omurga spell'leri, %44–81 gerçek, AUC 0.70–0.74): öğrenilmiş D ile +0.001…+0.003, gerçek D ile
+−0.001…−0.002 → ≈/❌. Teşhis: kaçan kısa possession'ların çoğu aday bile olmuyor (takım modeli hiç dönmüyor) → havuz
+dekoderle değil, daha iyi kare kanıtıyla açılır.
+**Fikir 4 — restart takımı**: ölü toptan sonraki ilk 2 sn'de ham takım olasılığı zaten %95–98 doğru (çözülmüş: gerçek D ile
+%93–96.5). Restart spell'lerini B2'den muaf tutmak her sette kaybettiriyor (−0.001…−0.010) → B2'nin bastırdığı kısa restart
+spell'leri çoğunlukla gürültü. Ayrı restart modelinin tavanı küçük; ertelendi.
+**Fikir 7 (kalibrasyon yarısı)**: top yokken model hafif fazla temkinli (DFL conf−acc −0.029); görünürlüğe göre sıcaklık
+karışık (−0.002…+0.003) → ≈. **Fikir 10 (konsensüs)**: B2 ile 4–20 cezalı çözümler neredeyse aynı → oylama = pen 12, etkisiz.
+**Fikir 11 (BiGRU, Colab T4, `src/seq_gru.py`, `src/exp_gru.py`)**: gerçek D + B2 ile DFL-trk 0.676 vs LightGBM 0.776
+(−0.10), Metrica −0.09, SC −0.04; kare takım doğruluğu yakın (SC 0.896 vs 0.897; topluluk 0.902) ama sınırlar kötü → ❌
+(planın +0.03 koşulu sağlanmadı). Colab maliyeti ~1.5 birim.
+**Kendi çıktısına gecikme göstergesi** (1 sn kaydırmada spellF1): GT benzeri etiketler 0.76–0.85, v7 simülasyonda 0.88–0.89,
+**BAR-ATH'ta 0.93** (public pencerede GT 0.78, v7 0.98) → BAR-ATH'ta tahminler simülasyondakinden daha "yapışkan".
+Sebep adayı: DFL kare düzeyinde BAR-ATH'tan ~5× pürüzlü (canlı oyunda |2. fark| oyuncu 0.0105 vs 0.0020 m, top 0.06 vs 0.011 m;
+SC 0.0019 / 0.0103 ve Metrica 0.0027 / 0.0035 BAR-ATH kadar pürüzsüz) → **N26: sim.V4** = V3 + ön yumuşatma (oyuncu 1.5,
+top 4 kare; oyuncularda BAR-ATH'la birebir) — değerlendiriliyor.
+
+**N26 — sim.V4 (ön yumuşatma)** (`src/exp_v4.py`): DFL-trk (kendi bozulmasında) −0.006 (1/7); Metrica −0.004 (3–4/9);
+SC +0.004 (13/20) / +0.001 gerçek D; BAR-ATH yapışkanlık göstergesi değişmedi (0.926 → 0.930) → ≈, benimsenmedi.
+Yapışkanlığın sebebi pürüzsüzlük farkı değil.
+**Fikir 8 — ATD'nin uydurduğu top kareleri** (`src/ballclean.py`, `src/exp_fabball.py`, `src/exp_scfab.py`): taktik
+topta hareket ederken ivmesi < 2 mm olan ≥ 8 karelik koşular görünür karelerin %3.1'i; burada iki kamera arası fark
+medyan 1.66 m (≥ 25 karelik koşularda 3.15 m), diğer karelerde 0.75 m → kestirim. Bu kareler broadcast topuyla
+(geçerli + canlıysa) değiştirilip yoksa kayıp sayılınca (karelerin %0.2'si değişiyor): etiketsiz göstergeler aynı
+(229 possession, yapışkanlık 0.927), takım modeli bu karelerde daha emin (|logit| 3.11 → 3.57); public (bilgi)
+spellF1 0.652 → **0.696** [0.44–0.84], macroF1 0.924 → 0.937, takım 0.948 → 0.968 (IoU 0.7'de F1 0.52 → 0.67).
+SC dış kontrolü: dedektör SC'nin kendi kestirim bayraklarına karşı kesinlik 0.92 ama duyarlılık 0.01 (SC'nin
+kestirimleri "düz" değil); SC'nin kestirilen top karelerini kayıp saymak kazandırmıyor (gerçek D −0.003) → dış
+doğrulama yok, ama BAR-ATH'ta iki kamera farkı bağımsız kanıt. **Seçenek olarak eklendi** (`model_v7` `clean_ball`,
+varsayılan kapalı): `candidate_v7c.csv` (temizlik), `candidate_v7cw.csv` (temizlik + düdük; public 0.696 / macroF1 0.944).
+
+**Tur 6 özeti**: 0. adım kayıp havuzlarını netleştirdi (kısa possession'lar ve sahteler en büyük; ölü top SC'de büyük,
+BAR-ATH'ta kurallar güçlü). Planın fikirlerinden 1, 2, 3, 4, 7, 10, 11 ≈/❌; N26 ≈; 8 BAR-ATH'a özgü küçük artı (seçenek).
+Kısa possession havuzunu açmanın yolu dekoder değil, daha iyi kare kanıtı (takım modeli o anlarda hiç dönmüyor).

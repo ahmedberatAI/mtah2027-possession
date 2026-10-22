@@ -47,6 +47,7 @@ INP = os.path.join(CACHE, "inputs")
 REPORTS = os.path.join(ROOT, "reports", "bench")
 M_SEEDS = (0, 1, 2)
 THREADS = int(os.environ.get("BENCH_THREADS", "8"))
+PROCS = int(os.environ.get("BENCH_PROCS", "7"))       # worker processes for inputs / features / labels
 LGB_TEAM = dict(td.LGB_TEAM, num_threads=THREADS)
 ROUNDS = int(os.environ.get("BENCH_ROUNDS", "400"))
 STRIDE = int(os.environ.get("BENCH_STRIDE", "2"))
@@ -54,7 +55,7 @@ PEN_GRID = (2, 4, 6, 8, 12, 16, 20, 24, 32, 48, 64, 96)
 DECODERS = {"dflcv": dict(pen_dead=32.0, min_poss=5, min_dead=25),   # DFL-CV tuned
             "v5": dict(pen_dead=30.0, min_poss=8, min_dead=50)}      # model_v5's (inherited from v2)
 EPS = 1e-4
-VARIANTS = {"v2": sim.V2, "v3": sim.V3}   # degradations; "dfl" / "metrica" alone mean @v2
+VARIANTS = {"v2": sim.V2, "v3": sim.V3, "v4": sim.V4}   # degradations; "dfl" / "metrica" alone mean @v2
 LGB_DEAD = dict(td.LGB_DEAD, num_threads=THREADS)
 
 
@@ -142,10 +143,10 @@ def _sc_job(job):
     return out
 
 
-def build_sc_inputs(var="v3", procs=6):
+def build_sc_inputs(var="v3", procs=None):
     from multiprocessing import Pool
     os.makedirs(INP, exist_ok=True)
-    with Pool(procs) as pool:
+    with Pool(procs or PROCS) as pool:
         pool.map(_sc_job, [(mi, m, var) for mi, m in enumerate(scr.matches())])
 
 
@@ -167,14 +168,15 @@ def _barath_inputs():
     return out
 
 
-def build_inputs(var="v2", procs=7):
+def build_inputs(var="v2", procs=None):
     from multiprocessing import Pool
     os.makedirs(INP, exist_ok=True)
-    with Pool(procs) as pool:
+    with Pool(procs or PROCS) as pool:
         r1 = pool.map_async(_dfl_job, [(mi, m, var) for mi, m in enumerate(dfl.MATCHES)])
         r2 = pool.map_async(_metrica_job, [(g, s, var) for g in ms.GAMES for s in M_SEEDS])
         r1.get(), r2.get()
-    _barath_inputs()
+    if os.path.isfile(atd.paths()["meta"]):      # BAR-ATH data is local only (never on remote VMs)
+        _barath_inputs()
     print("inputs", var, "ready in", INP)
 
 
@@ -263,7 +265,7 @@ def labels(src, conv):
         path = os.path.join(CACHE, "dfl_conv.pkl")
         if not os.path.isfile(path):
             from multiprocessing import Pool
-            with Pool(7) as pool:
+            with Pool(PROCS) as pool:
                 _dump(dict(pool.map(_dfl_conv_job, dfl.MATCHES)), path)
         allc = _load(path)
         conv = "native" if conv == "events" else conv
@@ -333,13 +335,13 @@ def _safe(version):
     return version.replace(":", "-").replace("+", "__")
 
 
-def features(version, src, procs=7):
+def features(version, src, procs=None):
     bl = blocks(src)
     outs = [os.path.join(CACHE, "feat", _safe(version), b["key"].replace("/", "_") + ".pkl") for b in bl]
     todo = [(version, b, o) for b, o in zip(bl, outs) if not os.path.isfile(o)]
     if todo:
         from multiprocessing import Pool
-        with Pool(min(procs, len(todo))) as pool:
+        with Pool(min(procs or PROCS, len(todo))) as pool:
             pool.map(_block_feats, todo)
     return [_load(o) for o in outs]
 

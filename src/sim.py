@@ -28,6 +28,23 @@ V2_TACTICAL = dict(V2, v2_alive_missing=0.12, restart_missing=0.30, entry_missin
 # p_noise_s / ball_noise_s seconds: same masks and random stream as V2, positional error kept, velocity
 # error ~0.1-0.5 m/s.
 V3 = dict(V2, noise_model="smooth", p_noise_s=1.0, ball_noise_s=0.5)
+# V4 = V3 on pre-smoothed source tracks: open DFL is ~5x rougher frame to frame than BAR-ATH's filtered ATD
+# (median |2nd difference| in play: players 0.0105 vs 0.0020 m, ball 0.06 vs 0.011 m; SkillCorner and Metrica are
+# as smooth as BAR-ATH). Gaussian low-pass of the clean positions within finite runs (players 1.5 frames, ball
+# 4 frames) before the degradation; no random draws, so masks / noise equal V3's.
+V4 = dict(V3, presmooth_p=1.5, presmooth_b=4.0)
+
+
+def _smooth_runs(x, sigma):
+    """Gaussian low-pass of a 1-D track within its finite runs (NaN gaps stay)."""
+    from scipy.ndimage import gaussian_filter1d
+    out = np.array(x, np.float64, copy=True)
+    ok = np.isfinite(out)
+    e = np.diff(np.concatenate(([0], ok.astype(np.int8), [0])))
+    for a, b in zip(np.flatnonzero(e == 1), np.flatnonzero(e == -1)):
+        if b - a > 3:
+            out[a:b] = gaussian_filter1d(out[a:b], sigma, mode="nearest")
+    return out
 
 
 def _smooth_unit(z, sigma_frames):
@@ -212,6 +229,16 @@ def degrade(P, B, lab, pitch, seed=0, params=None):
         p.update(params)
     rng = np.random.default_rng(seed)
     L, W = pitch
+    if p.get("presmooth_p") or p.get("presmooth_b"):
+        P = P.copy()
+        B = B.copy()
+        if p.get("presmooth_p"):
+            for j in range(P.shape[1]):
+                for c in (0, 1):
+                    P[:, j, c] = _smooth_runs(P[:, j, c], p["presmooth_p"])
+        if p.get("presmooth_b"):
+            for c in [0, 1] + ([3] if B.shape[1] > 3 else []):
+                B[:, c] = _smooth_runs(B[:, c], p["presmooth_b"])
     Bn = B.copy()
     z = B[:, 3] if B.shape[1] > 3 else np.zeros(len(B))
     Bn[:, :2] = project_aerial(B[:, :2], z, pitch, p["cam"])

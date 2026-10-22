@@ -48,7 +48,7 @@ def parse(match, refresh=False):
     out_path = os.path.join(CACHE, "%s.npz" % match)
     if os.path.isfile(out_path) and not refresh:
         d = dict(np.load(out_path, allow_pickle=True))
-        if "h1_valid" in d:
+        if "h1_bdet" in d:
             return d
     d = os.path.join(DATA, match)
     meta = json.load(open(os.path.join(d, "%s_match.json" % match), encoding="utf-8"))
@@ -74,6 +74,7 @@ def parse(match, refresh=False):
         P10 = np.full((n10, len(pid), 2), np.nan, np.float32)
         B10 = np.full((n10, 3), np.nan, np.float32)
         valid10 = np.array([r["image_corners_projection"]["x_top_left"] is not None for r in rr])
+        bdet10 = np.array([bool(r["ball_data"]["is_detected"]) for r in rr])
         ndet10 = np.array([sum(1 for q in r["player_data"] if q["is_detected"]) for r in rr], np.int16)
         for i, r in enumerate(rr):
             for q in r["player_data"]:
@@ -105,6 +106,7 @@ def parse(match, refresh=False):
         result[tag + "_f0"] = np.array([f10[0]])
         result[tag + "_valid"] = valid10[near]      # broadcast view shows the pitch (cf. BAR-ATH b_valid)
         result[tag + "_ndet"] = ndet10[near]        # players detected on screen
+        result[tag + "_bdet"] = bdet10[near]        # ball detected (False: SkillCorner's own extrapolation)
     np.savez(out_path, **result)
     return result
 

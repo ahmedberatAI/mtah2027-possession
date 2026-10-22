@@ -102,6 +102,16 @@ Skorlar: public = ilk 5 dk (17 possession, spellF1 bootstrap aralığı ~0.27–
 | v7 + hakem düdüğü (N24, `wh_bonus` 30) | public macroF1 0.9244 → 0.9314, canlı/ölü F1 0.9788 → 0.9819, spellF1 aynı; karelerin %0.1'i değişiyor | ✅ küçük, düşük riskli; `candidate_v7w.csv` (yalnız BAR-ATH'ta ölçülebilir) |
 | Takım modeli hiperparametreleri (N23: yavaş öğrenme, büyük ağaç, düzenlileştirme, her kare) | hepsi v7 varsayılanının ±0.005'i içinde, tutarlı kazanan yok | ≈ varsayılan kalıyor |
 
+| **Oracle merdiveni + hata bütçesi** (`src/exp_oracle.py`) | kusursuz ölü top +0.022/+0.057/+0.164, restart takımı +0.006…+0.014, zamanlama +0.005…+0.007, kaçan <4 sn possession'lar +0.040…+0.111, sahteler +0.050…+0.086 (DFL-trk/Metrica/SC) | ✅ fikir sırası buna göre |
+| Gecikme düzeltmesi (fikir 1) | bulunan değişimlerde medyan +1…+3 kare; resmi medyan 0 | ❌ potansiyel yok |
+| El değişimi modeli + zamana bağlı ceza (fikir 2) | AUC 0.88–0.95 ama spellF1 +0.001…+0.003 (iyimser seçimle) | ≈ |
+| Kısa possession doğrulama (fikir 3) | ekleme adaylarının %4–9'u gerçek, eklemek kaybettiriyor; silme ±0.003 | ≈/❌ |
+| Restart spell'lerini B2'den muaf tutmak (fikir 4 yan dalı) | −0.001…−0.010 | ❌ |
+| Görünürlüğe göre sıcaklık (7) / konsensüs (10) | ±0.003 / etkisiz | ≈ / ❌ |
+| BiGRU takım modeli, Colab T4 (11) | gerçek D ile −0.04…−0.10 | ❌ |
+| sim.V4 ön yumuşatma (N26) | SC +0.004, Metrica −0.004, BAR-ATH yapışkanlık aynı | ≈ |
+| **ATD uydurma top karelerini temizlemek (8)** | iki kamera farkı 1.66 m vs 0.75 m; public 0.652 → 0.696, takım 0.948 → 0.968; SC'de dış doğrulama yok | ✅ seçenek (`clean_ball`), varsayılan değil |
+
 ## Dış veri
 - IDSSE/Open DFL (7 maç, CC BY): ölü-top istatistikleri çok benzer; possession bayrağı GT'den ~2× sık dönüyor.
 - Metrica örnek (3 maç, kaynak belirtilmeli), SkillCorner open data (20 maç, MIT; tur 4'ten beri doğrulama seti,
@@ -109,5 +119,11 @@ Skorlar: public = ilk 5 dk (17 possession, spellF1 bootstrap aralığı ~0.27–
 - WASB futbol ağırlıkları (MIT) — top tespiti için.
 
 ## Açık sorular
-- pen_team 8 mi 20 mi? → elle etiketlenmiş doğrulama seti.
+- ~~pen_team 8 mi 20 mi?~~ → **dış doğrulamayla karara bağlandı (22 Eki, v7 + B2):** GT'ye benzeyen dört dış set
+  (DFL-trk, Metrica-ctrl, SkillCorner öğrenilmiş D, SkillCorner gerçek D) üzerinde en kötü durum pişmanlığı
+  (en iyiye uzaklık) pen 4: 0.0127, **8: 0.0068**, **12: 0.0016**, 20: 0.0017 → **pen 12** (v7 varsayılanı). Tam maç
+  possession hızı pen 12'de 4.26/canlı dk (hedef ~3.8–4.2; simülasyonda en iyi tahmin/GT oranı 0.9–1.0). Public
+  pencere pen 4–32 arasında birebir aynı skoru veriyor → karar verdiremez. Kaynakların eskiden farklı değer
+  göstermesi konvansiyon farkıydı (DFL native sık döner → düşük ceza; kontrollü konvansiyonlar → yüksek) ve standart
+  dekoderin dik eğrisiydi; B2 eğriyi düzleştirdi.
 - Top tespiti: hazır WASB yetmiyor; ATD sözde-etiketleriyle ince ayar (doğal çözünürlükte karolar) Colab'da yapılacak.
