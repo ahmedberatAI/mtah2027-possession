@@ -1,0 +1,38 @@
+team probabilities base_native (model_v5 scores; decoder base pen_dead 30, min 8 / 50)
+  std                pen_team  4 | public spellF1 0.4970 macroF1 0.9004 team_acc 0.9284 n_pred 16/17 | full n_poss 314 (5.94/alive min) median 6.5 s <2s 52 | tag_team 0.8514 setpiece 0.889 (== model_v5.predict: True)
+  std                pen_team  8 | public spellF1 0.5290 macroF1 0.8980 team_acc 0.9250 n_pred 14/17 | full n_poss 280 (5.30/alive min) median 7.2 s <2s 28 | tag_team 0.8543 setpiece 0.926 (== model_v5.predict: True)
+  std                pen_team 12 | public spellF1 0.5778 macroF1 0.8925 team_acc 0.9165 n_pred 10/17 | full n_poss 254 (4.81/alive min) median 8.4 s <2s 17 | tag_team 0.8575 setpiece 0.852 (== model_v5.predict: True)
+  std                pen_team 16 | public spellF1 0.5778 macroF1 0.8925 team_acc 0.9165 n_pred 10/17 | full n_poss 238 (4.52/alive min) median 8.6 s <2s 9 | tag_team 0.8622 setpiece 0.852 (== model_v5.predict: True)
+  std                pen_team 20 | public spellF1 0.5778 macroF1 0.8925 team_acc 0.9165 n_pred 10/17 | full n_poss 228 (4.34/alive min) median 8.8 s <2s 5 | tag_team 0.8670 setpiece 0.852 (== model_v5.predict: True)
+  std                pen_team 32 | public spellF1 0.4480 macroF1 0.8875 team_acc 0.9097 n_pred 8/17 | full n_poss 206 (3.93/alive min) median 10.1 s <2s 1 | tag_team 0.8731 setpiece 0.852 (== model_v5.predict: True)
+  b2 D0 175 c 48     pen_team  4 | public spellF1 0.5846 macroF1 0.9008 team_acc 0.9141 n_pred 9/17 | full n_poss 218 (4.12/alive min) median 9.8 s <2s 2 | tag_team 0.8654 setpiece 0.852
+  b2 D0 175 c 48     pen_team  8 | public spellF1 0.5846 macroF1 0.9008 team_acc 0.9141 n_pred 9/17 | full n_poss 210 (3.96/alive min) median 10.1 s <2s 1 | tag_team 0.8657 setpiece 0.852
+  b2 D0 175 c 48     pen_team 12 | public spellF1 0.5846 macroF1 0.9008 team_acc 0.9141 n_pred 9/17 | full n_poss 203 (3.84/alive min) median 10.5 s <2s 1 | tag_team 0.8694 setpiece 0.815
+  b2 D0 175 c 48     pen_team 16 | public spellF1 0.5846 macroF1 0.9008 team_acc 0.9141 n_pred 9/17 | full n_poss 197 (3.73/alive min) median 10.8 s <2s 1 | tag_team 0.8704 setpiece 0.815
+  b2 D0 175 c 48     pen_team 20 | public spellF1 0.5846 macroF1 0.9008 team_acc 0.9141 n_pred 9/17 | full n_poss 194 (3.68/alive min) median 10.9 s <2s 1 | tag_team 0.8705 setpiece 0.815
+  b2 D0 175 c 48     pen_team 32 | public spellF1 0.4667 macroF1 0.8973 team_acc 0.9097 n_pred 7/17 | full n_poss 184 (3.49/alive min) median 11.4 s <2s 0 | tag_team 0.8748 setpiece 0.815
+  b2 D0 250 c 64 p2  pen_team  4 | public spellF1 0.6000 macroF1 0.9012 team_acc 0.9147 n_pred 9/17 | full n_poss 212 (4.00/alive min) median 10.1 s <2s 0 | tag_team 0.8650 setpiece 0.852
+  b2 D0 250 c 64 p2  pen_team  8 | public spellF1 0.6000 macroF1 0.9012 team_acc 0.9147 n_pred 9/17 | full n_poss 207 (3.91/alive min) median 10.2 s <2s 0 | tag_team 0.8657 setpiece 0.852
+  b2 D0 250 c 64 p2  pen_team 12 | public spellF1 0.6000 macroF1 0.9012 team_acc 0.9147 n_pred 9/17 | full n_poss 196 (3.71/alive min) median 10.8 s <2s 0 | tag_team 0.8697 setpiece 0.815
+  b2 D0 250 c 64 p2  pen_team 16 | public spellF1 0.6000 macroF1 0.9012 team_acc 0.9147 n_pred 9/17 | full n_poss 194 (3.68/alive min) median 10.9 s <2s 0 | tag_team 0.8705 setpiece 0.815
+  b2 D0 250 c 64 p2  pen_team 20 | public spellF1 0.6000 macroF1 0.9012 team_acc 0.9147 n_pred 9/17 | full n_poss 190 (3.60/alive min) median 11.0 s <2s 0 | tag_team 0.8721 setpiece 0.815
+  b2 D0 250 c 64 p2  pen_team 32 | public spellF1 0.4667 macroF1 0.8973 team_acc 0.9097 n_pred 7/17 | full n_poss 181 (3.43/alive min) median 11.9 s <2s 0 | tag_team 0.8768 setpiece 0.815
+team probabilities base_native_v3 (model_v5 scores; decoder base pen_dead 30, min 8 / 50)
+  std                pen_team  4 | public spellF1 0.5793 macroF1 0.9050 team_acc 0.9343 n_pred 12/17 | full n_poss 293 (5.52/alive min) median 6.9 s <2s 34 | tag_team 0.8642 setpiece 0.926 (== model_v5.predict: True)
+  std                pen_team  8 | public spellF1 0.5793 macroF1 0.9050 team_acc 0.9343 n_pred 12/17 | full n_poss 266 (5.02/alive min) median 7.9 s <2s 19 | tag_team 0.8683 setpiece 0.926 (== model_v5.predict: True)
+  std                pen_team 12 | public spellF1 0.5793 macroF1 0.9050 team_acc 0.9343 n_pred 12/17 | full n_poss 256 (4.83/alive min) median 8.2 s <2s 13 | tag_team 0.8688 setpiece 0.926 (== model_v5.predict: True)
+  std                pen_team 16 | public spellF1 0.5793 macroF1 0.9050 team_acc 0.9343 n_pred 12/17 | full n_poss 245 (4.63/alive min) median 8.7 s <2s 8 | tag_team 0.8706 setpiece 0.889 (== model_v5.predict: True)
+  std                pen_team 20 | public spellF1 0.5793 macroF1 0.9050 team_acc 0.9343 n_pred 12/17 | full n_poss 238 (4.50/alive min) median 8.9 s <2s 6 | tag_team 0.8722 setpiece 0.889 (== model_v5.predict: True)
+  std                pen_team 32 | public spellF1 0.5793 macroF1 0.9050 team_acc 0.9343 n_pred 12/17 | full n_poss 216 (4.10/alive min) median 9.7 s <2s 3 | tag_team 0.8782 setpiece 0.889 (== model_v5.predict: True)
+  b2 D0 175 c 48     pen_team  4 | public spellF1 0.6667 macroF1 0.9213 team_acc 0.9441 n_pred 10/17 | full n_poss 224 (4.21/alive min) median 9.5 s <2s 1 | tag_team 0.8729 setpiece 0.926
+  b2 D0 175 c 48     pen_team  8 | public spellF1 0.6667 macroF1 0.9213 team_acc 0.9441 n_pred 10/17 | full n_poss 224 (4.21/alive min) median 9.5 s <2s 1 | tag_team 0.8729 setpiece 0.926
+  b2 D0 175 c 48     pen_team 12 | public spellF1 0.6667 macroF1 0.9213 team_acc 0.9441 n_pred 10/17 | full n_poss 219 (4.12/alive min) median 9.6 s <2s 1 | tag_team 0.8729 setpiece 0.926
+  b2 D0 175 c 48     pen_team 16 | public spellF1 0.6667 macroF1 0.9213 team_acc 0.9441 n_pred 10/17 | full n_poss 213 (4.01/alive min) median 9.7 s <2s 0 | tag_team 0.8746 setpiece 0.926
+  b2 D0 175 c 48     pen_team 20 | public spellF1 0.6667 macroF1 0.9213 team_acc 0.9441 n_pred 10/17 | full n_poss 209 (3.94/alive min) median 9.9 s <2s 0 | tag_team 0.8759 setpiece 0.926
+  b2 D0 175 c 48     pen_team 32 | public spellF1 0.6667 macroF1 0.9213 team_acc 0.9441 n_pred 10/17 | full n_poss 200 (3.78/alive min) median 10.4 s <2s 0 | tag_team 0.8814 setpiece 0.926
+  b2 D0 250 c 64 p2  pen_team  4 | public spellF1 0.6667 macroF1 0.9215 team_acc 0.9441 n_pred 10/17 | full n_poss 224 (4.21/alive min) median 9.6 s <2s 1 | tag_team 0.8726 setpiece 0.926
+  b2 D0 250 c 64 p2  pen_team  8 | public spellF1 0.6667 macroF1 0.9215 team_acc 0.9441 n_pred 10/17 | full n_poss 221 (4.16/alive min) median 9.7 s <2s 0 | tag_team 0.8726 setpiece 0.926
+  b2 D0 250 c 64 p2  pen_team 12 | public spellF1 0.6667 macroF1 0.9215 team_acc 0.9441 n_pred 10/17 | full n_poss 216 (4.07/alive min) median 9.8 s <2s 0 | tag_team 0.8726 setpiece 0.926
+  b2 D0 250 c 64 p2  pen_team 16 | public spellF1 0.6667 macroF1 0.9215 team_acc 0.9441 n_pred 10/17 | full n_poss 209 (3.94/alive min) median 9.9 s <2s 0 | tag_team 0.8759 setpiece 0.926
+  b2 D0 250 c 64 p2  pen_team 20 | public spellF1 0.6667 macroF1 0.9215 team_acc 0.9441 n_pred 10/17 | full n_poss 207 (3.91/alive min) median 10.0 s <2s 0 | tag_team 0.8773 setpiece 0.926
+  b2 D0 250 c 64 p2  pen_team 32 | public spellF1 0.6667 macroF1 0.9215 team_acc 0.9441 n_pred 10/17 | full n_poss 196 (3.71/alive min) median 10.7 s <2s 0 | tag_team 0.8814 setpiece 0.852

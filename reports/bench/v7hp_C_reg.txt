@@ -1,0 +1,11 @@
+== v7hp_C_reg  (features base+feat_fix:own_half+feat_ctrl:control+feat_team2:c145, sim v3, trained on DFL native labels, 400 rounds, 141 s)
+  DFL-CV  vs native team acc 0.8966 | spellF1 best  4 0.6095 | 4:0.6095 8:0.6002 12:0.5883 20:0.5702 32:0.5473
+  DFL-CV  vs trk    team acc 0.9019 | spellF1 best 64 0.7545 | 4:0.6712 8:0.6962 12:0.7086 20:0.7338 32:0.7452
+  Metrica vs ctrl   dec v5    | spellF1 best 48 0.8075 | 4:0.7316 8:0.7562 12:0.7721 20:0.7905 32:0.8038
+  Metrica vs ctrl   dec dflcv | spellF1 best 48 0.8064 | 4:0.7303 8:0.7548 12:0.7706 20:0.7890 32:0.8024
+  Metrica vs events dec v5    | spellF1 best  8 0.6541 | 4:0.6477 8:0.6541 12:0.6449 20:0.6346 32:0.6154
+  Metrica vs events dec dflcv | spellF1 best  8 0.6536 | 4:0.6472 8:0.6536 12:0.6444 20:0.6341 32:0.6146
+  Metrica team acc: ctrl 0.9393 events 0.9319
+  BAR-ATH v5 pen_team  8 | public spellF1 0.5750 macroF1 0.9188 team_acc 0.9549 n_pred 15/17 | full n_poss 296 (5.58/alive min) median 6.9 s | tag_team 0.8581 setpiece 0.926
+  BAR-ATH v5 pen_team 12 | public spellF1 0.6429 macroF1 0.9180 team_acc 0.9535 n_pred 11/17 | full n_poss 270 (5.09/alive min) median 7.7 s | tag_team 0.8637 setpiece 0.889
+  BAR-ATH v5 pen_team 20 | public spellF1 0.6429 macroF1 0.9180 team_acc 0.9535 n_pred 11/17 | full n_poss 254 (4.81/alive min) median 8.2 s | tag_team 0.8687 setpiece 0.889

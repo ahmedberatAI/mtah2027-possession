@@ -1,0 +1,15 @@
+== base__feat_fix-own_half__feat_ctrl-control__feat_team2-c145_trk_v3  (features base+feat_fix:own_half+feat_ctrl:control+feat_team2:c145, sim v3, trained on DFL trk labels, 400 rounds, 844 s)
+  DFL-CV  vs native team acc 0.8733 | spellF1 best  2 0.5032 | 4:0.4990 8:0.4977 12:0.4961 20:0.4874 32:0.4813
+  DFL-CV  vs trk    team acc 0.9151 | spellF1 best 24 0.7490 | 4:0.7302 8:0.7422 12:0.7460 20:0.7474 32:0.7481
+  Metrica vs ctrl   dec v5    | spellF1 best 24 0.8003 | 4:0.7809 8:0.7906 12:0.7953 20:0.7994 32:0.7953
+  Metrica vs ctrl   dec dflcv | spellF1 best 24 0.7989 | 4:0.7798 8:0.7892 12:0.7939 20:0.7980 32:0.7940
+  Metrica vs events dec v5    | spellF1 best  2 0.5987 | 4:0.5976 8:0.5951 12:0.5915 20:0.5870 32:0.5747
+  Metrica vs events dec dflcv | spellF1 best  2 0.5987 | 4:0.5976 8:0.5950 12:0.5914 20:0.5868 32:0.5746
+  Metrica team acc: ctrl 0.9502 events 0.9239
+  BAR-ATH v5 pen_team  8 | public spellF1 0.6429 macroF1 0.9177 team_acc 0.9461 n_pred 11/17 | full n_poss 219 (4.09/alive min) median 10.2 s | tag_team 0.8854 setpiece 0.926
+  BAR-ATH v5 pen_team 12 | public spellF1 0.6429 macroF1 0.9177 team_acc 0.9461 n_pred 11/17 | full n_poss 218 (4.08/alive min) median 10.2 s | tag_team 0.8854 setpiece 0.926
+  BAR-ATH v5 pen_team 20 | public spellF1 0.6429 macroF1 0.9177 team_acc 0.9461 n_pred 11/17 | full n_poss 206 (3.85/alive min) median 10.6 s | tag_team 0.8854 setpiece 0.926
+  BAR-ATH learned-dead pen_team  4 | public spellF1 0.5455 macroF1 0.7221 adF1 0.9185 team_acc 0.9286 n_pred 16/17 | full n_poss 273 dead share 0.422 D segs 128
+  BAR-ATH learned-dead pen_team  8 | public spellF1 0.5935 macroF1 0.7250 adF1 0.9185 team_acc 0.9331 n_pred 14/17 | full n_poss 259 dead share 0.423 D segs 128
+  BAR-ATH learned-dead pen_team 20 | public spellF1 0.6345 macroF1 0.7257 adF1 0.9185 team_acc 0.9331 n_pred 12/17 | full n_poss 238 dead share 0.423 D segs 129
+  BAR-ATH learned-dead raw (p<0.5 alive) public alive F1 0.9148, predicted dead share full 0.404

@@ -21,6 +21,20 @@ DEFAULT = dict(alive_missing=0.12, dead_missing=0.70, miss_median_s=10.7, alive_
 V2 = dict(ball_model="v2", v2_alive_missing=0.065, v2_dead_missing=0.70, restart_missing=0.22,
           carry_median_s=2.0, carry_sigma=0.8, entry_missing=0.24, lead_median_s=2.7, lead_sigma=0.75)
 V2_TACTICAL = dict(V2, v2_alive_missing=0.12, restart_missing=0.30, entry_missing=0.30)
+# noise_model "smooth" (V3): the default i.i.d. per-frame position noise (players 0.15 m, ball 0.35 m) turns
+# into ~2.6 / ~6 m/s of velocity noise after differencing -- degraded DFL had median player speed 3.8 m/s
+# (clean DFL 1.9-2.1, BAR-ATH ATD 1.95 in play) and a perfectly separable domain (src/exp_advval.py). BAR-ATH
+# tracks are smooth (median |2nd difference| 0.002 m), so V3 low-passes the same random draws over
+# p_noise_s / ball_noise_s seconds: same masks and random stream as V2, positional error kept, velocity
+# error ~0.1-0.5 m/s.
+V3 = dict(V2, noise_model="smooth", p_noise_s=1.0, ball_noise_s=0.5)
+
+
+def _smooth_unit(z, sigma_frames):
+    """Gaussian low-pass of i.i.d. draws along time, rescaled to unit standard deviation."""
+    from scipy.ndimage import gaussian_filter1d
+    y = gaussian_filter1d(np.asarray(z, np.float64), sigma_frames, axis=0, mode="nearest")
+    return y / max(float(y.std()), 1e-12)
 
 
 def _lognormal_frames(rng, median_s, sigma, size=None):
@@ -201,8 +215,14 @@ def degrade(P, B, lab, pitch, seed=0, params=None):
     Bn = B.copy()
     z = B[:, 3] if B.shape[1] > 3 else np.zeros(len(B))
     Bn[:, :2] = project_aerial(B[:, :2], z, pitch, p["cam"])
-    Bn[:, 0] += rng.normal(0, p["ball_noise"] / L, len(B))
-    Bn[:, 1] += rng.normal(0, p["ball_noise"] / W, len(B))
+    smooth = p.get("noise_model", "iid") == "smooth"
+    if smooth:
+        s_b = p["ball_noise_s"] * FPS
+        Bn[:, 0] += _smooth_unit(rng.normal(0, 1, len(B)), s_b) * p["ball_noise"] / L
+        Bn[:, 1] += _smooth_unit(rng.normal(0, 1, len(B)), s_b) * p["ball_noise"] / W
+    else:
+        Bn[:, 0] += rng.normal(0, p["ball_noise"] / L, len(B))
+        Bn[:, 1] += rng.normal(0, p["ball_noise"] / W, len(B))
     seen = ball_dropout(lab, z, rng, p) & np.isfinite(B[:, 0])
     if p.get("ball_model", "v1") == "v2":
         # the v1 draw above still runs, so the player dropout and noise below get exactly the v1
@@ -211,6 +231,11 @@ def degrade(P, B, lab, pitch, seed=0, params=None):
         seen = ball_dropout_v2(lab, z, np.random.default_rng([seed, 2]), p, present) & present
     Bn[~seen, :] = np.nan
     Pn = player_dropout(P, rng, p)
-    Pn[:, :, 0] += rng.normal(0, p["p_noise"] / L, Pn.shape[:2]).astype(np.float32)
-    Pn[:, :, 1] += rng.normal(0, p["p_noise"] / W, Pn.shape[:2]).astype(np.float32)
+    if smooth:
+        s_p = p["p_noise_s"] * FPS
+        Pn[:, :, 0] += (_smooth_unit(rng.normal(0, 1, Pn.shape[:2]), s_p) * p["p_noise"] / L).astype(np.float32)
+        Pn[:, :, 1] += (_smooth_unit(rng.normal(0, 1, Pn.shape[:2]), s_p) * p["p_noise"] / W).astype(np.float32)
+    else:
+        Pn[:, :, 0] += rng.normal(0, p["p_noise"] / L, Pn.shape[:2]).astype(np.float32)
+        Pn[:, :, 1] += rng.normal(0, p["p_noise"] / W, Pn.shape[:2]).astype(np.float32)
     return Pn, Bn

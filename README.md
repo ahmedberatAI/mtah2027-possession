@@ -21,6 +21,8 @@ src/
   decode.py               min-duration Viterbi (numba)
   model_v1.py .. v4.py    rule/evidence models + decoding
   mlfeat.py, sim.py, dfl.py, train_dfl.py   learned emissions from degraded open DFL data
+  bench.py, paired.py     shared CPU test bench for model ideas (DFL / Metrica / BAR-ATH aggregates)
+  feat_*.py, decode2.py   idea plugins (features, generalised decoder); model_v7.py candidate
   evaluate.py, proxy.py   official metric on the public window + label-free full-match checks
   make_submission.py      end-to-end submission
   eda*.py, align_*.py     analysis (aggregate output only)
@@ -43,6 +45,12 @@ python external/more-than-a-hack-2027/evaluation/validate_submission.py submissi
 LightGBM team model trained on degraded open DFL data, decoded with a min-duration Viterbi per half.
 `--model model_v3` reproduces the tracking-only baseline. The pipeline is deterministic (identical
 MD5 on re-run, including retraining the DFL models from scratch).
+
+Candidate `model_v7` (`--model model_v7 --out submissions/candidate_v7.csv`): same alive/dead evidence,
+team model trained on DFL degraded with `sim.V3` (smooth tracking noise) with pressure-aware control,
+set-piece formation, team shape and movement features, decoded with a soft minimum possession length
+(`src/decode2.py`). Ideas, the shared CPU test bench (`src/bench.py`) and every result: `docs/FIKIRLER.md`,
+`docs/DENEMELER.md`.
 
 ## Tools
 

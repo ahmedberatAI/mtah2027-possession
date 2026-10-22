@@ -1,0 +1,28 @@
+variant (b1, sim v2)                                           | metrica|ctrl               | dfl|trk                    | dfl|native                 | metrica|events            
+{"c_same": -0.506, "c_switch": 0.529, "kind": "b1", "lam": 12. | best 40 0.8110 @32 0.8075 @48 0.8045 | best 48 0.7560 @32 0.7506 @48 0.7560 | best  4 0.5919 @32 0.5378 @48 0.5099 | best  8 0.6471 @32 0.6111 @48 0.5932
+{"kind": "b1", "lam": 12.0, "restart_tab": {"0": [-2.25, 2.771 | best 40 0.8106 @32 0.8092 @48 0.8037 | best 48 0.7574 @32 0.7524 @48 0.7574 | best  4 0.5854 @32 0.5375 @48 0.5104 | best  8 0.6437 @32 0.6102 @48 0.5921
+{"c_same": -1.013, "c_switch": 1.057, "kind": "b1", "lam": 24. | best 40 0.8105 @32 0.8076 @48 0.8041 | best 48 0.7564 @32 0.7520 @48 0.7564 | best  4 0.5908 @32 0.5375 @48 0.5093 | best  8 0.6451 @32 0.6113 @48 0.5929
+{"kind": "b1", "lam": 24.0, "restart_tab": {"0": [-4.5, 5.543] | best 40 0.8088 @32 0.8076 @48 0.8033 | best 48 0.7564 @32 0.7504 @48 0.7564 | best  8 0.5784 @32 0.5353 @48 0.5106 | best 12 0.6388 @32 0.6097 @48 0.5908
+{"c_same": -2.026, "c_switch": 2.115, "kind": "b1", "lam": 48. | best 40 0.8088 @32 0.8082 @48 0.8034 | best 48 0.7565 @32 0.7528 @48 0.7565 | best  4 0.5853 @32 0.5370 @48 0.5095 | best  8 0.6433 @32 0.6105 @48 0.5923
+{"kind": "b1", "lam": 48.0, "restart_tab": {"0": [-9.0, 11.086 | best 40 0.8075 @32 0.8034 @48 0.8020 | best 48 0.7527 @32 0.7464 @48 0.7527 | best  4 0.5692 @32 0.5352 @48 0.5093 | best 12 0.6262 @32 0.6072 @48 0.5887
+{"c_same": 0.649, "c_switch": -0.616, "kind": "b1", "lam": 12. | best 40 0.8104 @32 0.8085 @48 0.8031 | best 48 0.7555 @32 0.7512 @48 0.7555 | best  4 0.5935 @32 0.5381 @48 0.5095 | best  8 0.6479 @32 0.6115 @48 0.5928
+{"kind": "b1", "lam": 12.0, "restart_tab": {"0": [-1.865, 2.20 | best 40 0.8114 @32 0.8087 @48 0.8037 | best 48 0.7561 @32 0.7516 @48 0.7561 | best  4 0.5877 @32 0.5374 @48 0.5101 | best  8 0.6432 @32 0.6114 @48 0.5921
+{"c_same": 1.298, "c_switch": -1.231, "kind": "b1", "lam": 24. | best 40 0.8110 @32 0.8079 @48 0.8033 | best 48 0.7548 @32 0.7518 @48 0.7548 | best  4 0.5934 @32 0.5392 @48 0.5094 | best  8 0.6486 @32 0.6129 @48 0.5928
+{"kind": "b1", "lam": 24.0, "restart_tab": {"0": [-3.73, 4.418 | best 40 0.8110 @32 0.8089 @48 0.8036 | best 48 0.7557 @32 0.7472 @48 0.7557 | best  4 0.5827 @32 0.5348 @48 0.5103 | best 12 0.6405 @32 0.6116 @48 0.5915
+{"c_same": 2.595, "c_switch": -2.462, "kind": "b1", "lam": 48. | best 40 0.8103 @32 0.8082 @48 0.8041 | best 48 0.7551 @32 0.7511 @48 0.7551 | best  4 0.5910 @32 0.5397 @48 0.5103 | best  8 0.6488 @32 0.6137 @48 0.5928
+{"kind": "b1", "lam": 48.0, "restart_tab": {"0": [-7.46, 8.836 | best 40 0.8078 @32 0.8030 @48 0.8035 | best 48 0.7524 @32 0.7483 @48 0.7524 | best  4 0.5755 @32 0.5347 @48 0.5096 | best 12 0.6325 @32 0.6081 @48 0.5897
+{"kind": "b1"}                                                 | best 40 0.8102 @32 0.8084 @48 0.8038 | best 48 0.7560 @32 0.7514 @48 0.7560 | best  4 0.5924 @32 0.5380 @48 0.5099 | best  8 0.6477 @32 0.6115 @48 0.5930
+delta of best vs reference (std):
+  {"c_same": -0.506, "c_switch": 0.529, "kind": "b1", "lam": 1 metrica|ctrl +0.0008  dfl|trk +0.0000  dfl|native -0.0005  metrica|events -0.0006
+  {"kind": "b1", "lam": 12.0, "restart_tab": {"0": [-2.25, 2.7 metrica|ctrl +0.0004  dfl|trk +0.0014  dfl|native -0.0071  metrica|events -0.0041
+  {"c_same": -1.013, "c_switch": 1.057, "kind": "b1", "lam": 2 metrica|ctrl +0.0003  dfl|trk +0.0004  dfl|native -0.0017  metrica|events -0.0026
+  {"kind": "b1", "lam": 24.0, "restart_tab": {"0": [-4.5, 5.54 metrica|ctrl -0.0014  dfl|trk +0.0004  dfl|native -0.0140  metrica|events -0.0089
+  {"c_same": -2.026, "c_switch": 2.115, "kind": "b1", "lam": 4 metrica|ctrl -0.0014  dfl|trk +0.0005  dfl|native -0.0072  metrica|events -0.0044
+  {"kind": "b1", "lam": 48.0, "restart_tab": {"0": [-9.0, 11.0 metrica|ctrl -0.0027  dfl|trk -0.0033  dfl|native -0.0232  metrica|events -0.0215
+  {"c_same": 0.649, "c_switch": -0.616, "kind": "b1", "lam": 1 metrica|ctrl +0.0002  dfl|trk -0.0005  dfl|native +0.0011  metrica|events +0.0001
+  {"kind": "b1", "lam": 12.0, "restart_tab": {"0": [-1.865, 2. metrica|ctrl +0.0012  dfl|trk +0.0001  dfl|native -0.0048  metrica|events -0.0045
+  {"c_same": 1.298, "c_switch": -1.231, "kind": "b1", "lam": 2 metrica|ctrl +0.0008  dfl|trk -0.0012  dfl|native +0.0010  metrica|events +0.0009
+  {"kind": "b1", "lam": 24.0, "restart_tab": {"0": [-3.73, 4.4 metrica|ctrl +0.0008  dfl|trk -0.0003  dfl|native -0.0097  metrica|events -0.0073
+  {"c_same": 2.595, "c_switch": -2.462, "kind": "b1", "lam": 4 metrica|ctrl +0.0001  dfl|trk -0.0009  dfl|native -0.0014  metrica|events +0.0011
+  {"kind": "b1", "lam": 48.0, "restart_tab": {"0": [-7.46, 8.8 metrica|ctrl -0.0024  dfl|trk -0.0036  dfl|native -0.0169  metrica|events -0.0152
+  {"kind": "b1"}                                               metrica|ctrl +0.0000  dfl|trk +0.0000  dfl|native +0.0000  metrica|events +0.0000

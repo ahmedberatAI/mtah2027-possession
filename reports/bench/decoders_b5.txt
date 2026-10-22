@@ -1,0 +1,50 @@
+variant (b5, sim v2)                                           | metrica|ctrl               | dfl|trk                    | dfl|native                 | metrica|events            
+{"kind": "b5", "w_far": 0.25, "w_unseen": 0.0}                 | best 40 0.8106 @32 0.8090 @48 0.8042 | best 40 0.7575 @32 0.7534 @48 0.7563 | best  4 0.5918 @32 0.5316 @48 0.5084 | best  8 0.6486 @32 0.6125 @48 0.5938
+{"kind": "b5", "w_far": 0.5, "w_unseen": 0.0}                  | best 40 0.8107 @32 0.8088 @48 0.8044 | best 40 0.7596 @32 0.7546 @48 0.7577 | best  4 0.5920 @32 0.5284 @48 0.5082 | best  8 0.6488 @32 0.6124 @48 0.5939
+{"kind": "b5", "w_far": 1.0, "w_unseen": 0.0}                  | best 40 0.8109 @32 0.8089 @48 0.8046 | best 40 0.7603 @32 0.7584 @48 0.7570 | best  4 0.5908 @32 0.5272 @48 0.5073 | best  8 0.6490 @32 0.6125 @48 0.5941
+{"kind": "b5", "w_far": 0.0, "w_unseen": 0.25}                 | best 40 0.8106 @32 0.8090 @48 0.8034 | best 48 0.7542 @32 0.7514 @48 0.7542 | best  4 0.5926 @32 0.5378 @48 0.5083 | best  8 0.6482 @32 0.6119 @48 0.5928
+{"kind": "b5", "w_far": 0.25, "w_unseen": 0.25}                | best 40 0.8110 @32 0.8096 @48 0.8039 | best 40 0.7578 @32 0.7533 @48 0.7539 | best  4 0.5919 @32 0.5313 @48 0.5064 | best  8 0.6489 @32 0.6128 @48 0.5935
+{"kind": "b5", "w_far": 0.5, "w_unseen": 0.25}                 | best 40 0.8111 @32 0.8094 @48 0.8040 | best 40 0.7599 @32 0.7547 @48 0.7552 | best  4 0.5921 @32 0.5282 @48 0.5061 | best  8 0.6491 @32 0.6127 @48 0.5936
+{"kind": "b5", "w_far": 1.0, "w_unseen": 0.25}                 | best 40 0.8113 @32 0.8095 @48 0.8042 | best 40 0.7606 @32 0.7592 @48 0.7545 | best  4 0.5910 @32 0.5268 @48 0.5052 | best  8 0.6494 @32 0.6127 @48 0.5938
+{"kind": "b5", "w_far": 0.0, "w_unseen": 0.5}                  | best 40 0.8105 @32 0.8094 @48 0.8033 | best 48 0.7551 @32 0.7518 @48 0.7551 | best  4 0.5924 @32 0.5380 @48 0.5074 | best  8 0.6487 @32 0.6121 @48 0.5924
+{"kind": "b5", "w_far": 0.25, "w_unseen": 0.5}                 | best 40 0.8109 @32 0.8099 @48 0.8038 | best 40 0.7562 @32 0.7537 @48 0.7550 | best  4 0.5917 @32 0.5315 @48 0.5056 | best  8 0.6494 @32 0.6131 @48 0.5931
+{"kind": "b5", "w_far": 0.5, "w_unseen": 0.5}                  | best 40 0.8110 @32 0.8098 @48 0.8039 | best 40 0.7587 @32 0.7557 @48 0.7567 | best  4 0.5919 @32 0.5290 @48 0.5059 | best  4 0.6498 @32 0.6129 @48 0.5932
+{"kind": "b5", "w_far": 1.0, "w_unseen": 0.5}                  | best 40 0.8112 @32 0.8099 @48 0.8041 | best 32 0.7607 @32 0.7607 @48 0.7560 | best  4 0.5908 @32 0.5277 @48 0.5050 | best  4 0.6501 @32 0.6130 @48 0.5933
+{"kind": "b5", "w_far": 0.0, "w_unseen": 1.0}                  | best 40 0.8102 @32 0.8089 @48 0.8030 | best 48 0.7544 @32 0.7497 @48 0.7544 | best  4 0.5919 @32 0.5361 @48 0.5067 | best  4 0.6492 @32 0.6117 @48 0.5921
+{"kind": "b5", "w_far": 0.25, "w_unseen": 1.0}                 | best 40 0.8106 @32 0.8097 @48 0.8035 | best 40 0.7563 @32 0.7516 @48 0.7541 | best  4 0.5913 @32 0.5295 @48 0.5047 | best  4 0.6501 @32 0.6127 @48 0.5928
+{"kind": "b5", "w_far": 0.5, "w_unseen": 1.0}                  | best 40 0.8109 @32 0.8095 @48 0.8041 | best 40 0.7588 @32 0.7536 @48 0.7557 | best  4 0.5915 @32 0.5271 @48 0.5049 | best  4 0.6515 @32 0.6126 @48 0.5931
+{"kind": "b5", "w_far": 1.0, "w_unseen": 1.0}                  | best 40 0.8111 @32 0.8096 @48 0.8043 | best 40 0.7595 @32 0.7584 @48 0.7549 | best  4 0.5903 @32 0.5257 @48 0.5040 | best  4 0.6519 @32 0.6126 @48 0.5933
+{"kind": "b5", "w_far": 0.0, "w_unseen": 2.0}                  | best 40 0.8104 @32 0.8092 @48 0.8029 | best 48 0.7542 @32 0.7495 @48 0.7542 | best  4 0.5922 @32 0.5355 @48 0.5064 | best  4 0.6503 @32 0.6118 @48 0.5921
+{"kind": "b5", "w_far": 0.25, "w_unseen": 2.0}                 | best 40 0.8108 @32 0.8098 @48 0.8034 | best 40 0.7555 @32 0.7514 @48 0.7537 | best  4 0.5916 @32 0.5290 @48 0.5043 | best  4 0.6510 @32 0.6128 @48 0.5927
+{"kind": "b5", "w_far": 0.5, "w_unseen": 2.0}                  | best 40 0.8109 @32 0.8096 @48 0.8040 | best 40 0.7580 @32 0.7534 @48 0.7553 | best  4 0.5919 @32 0.5266 @48 0.5045 | best  4 0.6524 @32 0.6126 @48 0.5930
+{"kind": "b5", "w_far": 1.0, "w_unseen": 2.0}                  | best 40 0.8115 @32 0.8101 @48 0.8042 | best 40 0.7586 @32 0.7581 @48 0.7545 | best  4 0.5908 @32 0.5252 @48 0.5036 | best  4 0.6528 @32 0.6129 @48 0.5933
+{"kind": "b5", "w_near": 0.25}                                 | best 48 0.8104 @32 0.8027 @48 0.8104 | best 64 0.7564 @32 0.7507 @48 0.7549 | best  4 0.5949 @32 0.5448 @48 0.5229 | best  8 0.6505 @32 0.6216 @48 0.6073
+{"kind": "b5", "w_near": 0.5}                                  | best 64 0.8097 @32 0.7929 @48 0.8038 | best 64 0.7584 @32 0.7429 @48 0.7527 | best  4 0.5965 @32 0.5526 @48 0.5380 | best  8 0.6516 @32 0.6344 @48 0.6227
+{"kind": "b5", "w_near": 0.75}                                 | best 96 0.8041 @32 0.7732 @48 0.7830 | best 96 0.7540 @32 0.7239 @48 0.7348 | best  8 0.5942 @32 0.5692 @48 0.5544 | best 16 0.6533 @32 0.6483 @48 0.6429
+{"kind": "b5", "w_near": 0.5, "w_unseen": 0.5}                 | best 64 0.8102 @32 0.7937 @48 0.8038 | best 64 0.7580 @32 0.7431 @48 0.7501 | best  4 0.5962 @32 0.5525 @48 0.5354 | best  8 0.6525 @32 0.6349 @48 0.6225
+{"kind": "b5", "w_near": 0.5, "w_unseen": 1.0}                 | best 64 0.8100 @32 0.7939 @48 0.8038 | best 64 0.7580 @32 0.7407 @48 0.7502 | best  4 0.5957 @32 0.5505 @48 0.5354 | best  8 0.6521 @32 0.6347 @48 0.6224
+delta of best vs reference (std):
+  {"kind": "b5", "w_far": 0.25, "w_unseen": 0.0}               metrica|ctrl +0.0004  dfl|trk +0.0015  dfl|native -0.0007  metrica|events +0.0009
+  {"kind": "b5", "w_far": 0.5, "w_unseen": 0.0}                metrica|ctrl +0.0005  dfl|trk +0.0036  dfl|native -0.0004  metrica|events +0.0011
+  {"kind": "b5", "w_far": 1.0, "w_unseen": 0.0}                metrica|ctrl +0.0007  dfl|trk +0.0042  dfl|native -0.0016  metrica|events +0.0013
+  {"kind": "b5", "w_far": 0.0, "w_unseen": 0.25}               metrica|ctrl +0.0004  dfl|trk -0.0018  dfl|native +0.0001  metrica|events +0.0005
+  {"kind": "b5", "w_far": 0.25, "w_unseen": 0.25}              metrica|ctrl +0.0008  dfl|trk +0.0018  dfl|native -0.0005  metrica|events +0.0012
+  {"kind": "b5", "w_far": 0.5, "w_unseen": 0.25}               metrica|ctrl +0.0009  dfl|trk +0.0039  dfl|native -0.0003  metrica|events +0.0014
+  {"kind": "b5", "w_far": 1.0, "w_unseen": 0.25}               metrica|ctrl +0.0011  dfl|trk +0.0046  dfl|native -0.0015  metrica|events +0.0017
+  {"kind": "b5", "w_far": 0.0, "w_unseen": 0.5}                metrica|ctrl +0.0003  dfl|trk -0.0009  dfl|native -0.0000  metrica|events +0.0009
+  {"kind": "b5", "w_far": 0.25, "w_unseen": 0.5}               metrica|ctrl +0.0007  dfl|trk +0.0002  dfl|native -0.0007  metrica|events +0.0017
+  {"kind": "b5", "w_far": 0.5, "w_unseen": 0.5}                metrica|ctrl +0.0008  dfl|trk +0.0027  dfl|native -0.0005  metrica|events +0.0020
+  {"kind": "b5", "w_far": 1.0, "w_unseen": 0.5}                metrica|ctrl +0.0010  dfl|trk +0.0047  dfl|native -0.0016  metrica|events +0.0024
+  {"kind": "b5", "w_far": 0.0, "w_unseen": 1.0}                metrica|ctrl +0.0000  dfl|trk -0.0016  dfl|native -0.0006  metrica|events +0.0015
+  {"kind": "b5", "w_far": 0.25, "w_unseen": 1.0}               metrica|ctrl +0.0004  dfl|trk +0.0003  dfl|native -0.0011  metrica|events +0.0023
+  {"kind": "b5", "w_far": 0.5, "w_unseen": 1.0}                metrica|ctrl +0.0007  dfl|trk +0.0028  dfl|native -0.0009  metrica|events +0.0038
+  {"kind": "b5", "w_far": 1.0, "w_unseen": 1.0}                metrica|ctrl +0.0009  dfl|trk +0.0035  dfl|native -0.0021  metrica|events +0.0042
+  {"kind": "b5", "w_far": 0.0, "w_unseen": 2.0}                metrica|ctrl +0.0002  dfl|trk -0.0018  dfl|native -0.0002  metrica|events +0.0025
+  {"kind": "b5", "w_far": 0.25, "w_unseen": 2.0}               metrica|ctrl +0.0006  dfl|trk -0.0005  dfl|native -0.0008  metrica|events +0.0032
+  {"kind": "b5", "w_far": 0.5, "w_unseen": 2.0}                metrica|ctrl +0.0007  dfl|trk +0.0020  dfl|native -0.0005  metrica|events +0.0047
+  {"kind": "b5", "w_far": 1.0, "w_unseen": 2.0}                metrica|ctrl +0.0013  dfl|trk +0.0026  dfl|native -0.0016  metrica|events +0.0050
+  {"kind": "b5", "w_near": 0.25}                               metrica|ctrl +0.0002  dfl|trk +0.0004  dfl|native +0.0025  metrica|events +0.0028
+  {"kind": "b5", "w_near": 0.5}                                metrica|ctrl -0.0005  dfl|trk +0.0024  dfl|native +0.0041  metrica|events +0.0038
+  {"kind": "b5", "w_near": 0.75}                               metrica|ctrl -0.0061  dfl|trk -0.0020  dfl|native +0.0017  metrica|events +0.0056
+  {"kind": "b5", "w_near": 0.5, "w_unseen": 0.5}               metrica|ctrl +0.0000  dfl|trk +0.0020  dfl|native +0.0037  metrica|events +0.0048
+  {"kind": "b5", "w_near": 0.5, "w_unseen": 1.0}               metrica|ctrl -0.0002  dfl|trk +0.0020  dfl|native +0.0032  metrica|events +0.0044

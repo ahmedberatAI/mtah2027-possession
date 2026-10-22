@@ -1,0 +1,22 @@
+variant (b2d, sim v3)                                          | metrica|ctrl               | dfl|trk                    | dfl|native                 | metrica|events            
+{"D0": 175, "c_short": 48.0, "kind": "b2"}                     | best 12 0.8072 @32 0.8006 @48 nan | best 12 0.7587 @32 0.7529 @48 nan | best  4 0.5389 @32 0.5002 @48 nan | best  4 0.6163 @32 0.5775 @48 nan
+{"D0": 175, "D0_dead": 50, "c_dead": 8.0, "c_short": 48.0, "ki | best 12 0.8072 @32 0.8006 @48 nan | best 12 0.7587 @32 0.7529 @48 nan | best  4 0.5389 @32 0.5002 @48 nan | best  4 0.6163 @32 0.5775 @48 nan
+{"D0": 175, "D0_dead": 50, "c_dead": 16.0, "c_short": 48.0, "k | best 12 0.8072 @32 0.8006 @48 nan | best 12 0.7587 @32 0.7529 @48 nan | best  4 0.5389 @32 0.5002 @48 nan | best  4 0.6163 @32 0.5775 @48 nan
+{"D0": 175, "D0_dead": 50, "c_dead": 32.0, "c_short": 48.0, "k | best 12 0.8072 @32 0.8006 @48 nan | best 12 0.7587 @32 0.7529 @48 nan | best  4 0.5389 @32 0.5002 @48 nan | best  4 0.6163 @32 0.5775 @48 nan
+{"D0": 175, "D0_dead": 100, "c_dead": 8.0, "c_short": 48.0, "k | best 12 0.8077 @32 0.8010 @48 nan | best 12 0.7592 @32 0.7533 @48 nan | best  4 0.5392 @32 0.5005 @48 nan | best  4 0.6164 @32 0.5774 @48 nan
+{"D0": 175, "D0_dead": 100, "c_dead": 16.0, "c_short": 48.0, " | best 12 0.8074 @32 0.8011 @48 nan | best 12 0.7584 @32 0.7534 @48 nan | best  4 0.5392 @32 0.5004 @48 nan | best  4 0.6161 @32 0.5775 @48 nan
+{"D0": 175, "D0_dead": 100, "c_dead": 32.0, "c_short": 48.0, " | best 12 0.8079 @32 0.8017 @48 nan | best 12 0.7592 @32 0.7547 @48 nan | best  4 0.5398 @32 0.5008 @48 nan | best  4 0.6165 @32 0.5778 @48 nan
+{"D0": 175, "D0_dead": 150, "c_dead": 8.0, "c_short": 48.0, "k | best 12 0.8074 @32 0.8007 @48 nan | best 12 0.7591 @32 0.7531 @48 nan | best  4 0.5391 @32 0.5004 @48 nan | best  4 0.6162 @32 0.5772 @48 nan
+{"D0": 175, "D0_dead": 150, "c_dead": 16.0, "c_short": 48.0, " | best 12 0.8074 @32 0.8011 @48 nan | best 12 0.7591 @32 0.7541 @48 nan | best  4 0.5397 @32 0.5009 @48 nan | best  4 0.6162 @32 0.5772 @48 nan
+{"D0": 175, "D0_dead": 150, "c_dead": 32.0, "c_short": 48.0, " | best 12 0.8082 @32 0.8019 @48 nan | best 12 0.7596 @32 0.7543 @48 nan | best  4 0.5399 @32 0.5005 @48 nan | best  4 0.6169 @32 0.5777 @48 nan
+delta of best vs reference (std):
+  {"D0": 175, "c_short": 48.0, "kind": "b2"}                   metrica|ctrl +0.0087  dfl|trk +0.0129  dfl|native -0.0496  metrica|events -0.0314
+  {"D0": 175, "D0_dead": 50, "c_dead": 8.0, "c_short": 48.0, " metrica|ctrl +0.0087  dfl|trk +0.0129  dfl|native -0.0496  metrica|events -0.0314
+  {"D0": 175, "D0_dead": 50, "c_dead": 16.0, "c_short": 48.0,  metrica|ctrl +0.0087  dfl|trk +0.0129  dfl|native -0.0496  metrica|events -0.0314
+  {"D0": 175, "D0_dead": 50, "c_dead": 32.0, "c_short": 48.0,  metrica|ctrl +0.0087  dfl|trk +0.0129  dfl|native -0.0496  metrica|events -0.0314
+  {"D0": 175, "D0_dead": 100, "c_dead": 8.0, "c_short": 48.0,  metrica|ctrl +0.0092  dfl|trk +0.0134  dfl|native -0.0493  metrica|events -0.0312
+  {"D0": 175, "D0_dead": 100, "c_dead": 16.0, "c_short": 48.0, metrica|ctrl +0.0089  dfl|trk +0.0127  dfl|native -0.0493  metrica|events -0.0315
+  {"D0": 175, "D0_dead": 100, "c_dead": 32.0, "c_short": 48.0, metrica|ctrl +0.0094  dfl|trk +0.0135  dfl|native -0.0487  metrica|events -0.0311
+  {"D0": 175, "D0_dead": 150, "c_dead": 8.0, "c_short": 48.0,  metrica|ctrl +0.0089  dfl|trk +0.0133  dfl|native -0.0494  metrica|events -0.0314
+  {"D0": 175, "D0_dead": 150, "c_dead": 16.0, "c_short": 48.0, metrica|ctrl +0.0089  dfl|trk +0.0133  dfl|native -0.0488  metrica|events -0.0314
+  {"D0": 175, "D0_dead": 150, "c_dead": 32.0, "c_short": 48.0, metrica|ctrl +0.0097  dfl|trk +0.0138  dfl|native -0.0486  metrica|events -0.0308

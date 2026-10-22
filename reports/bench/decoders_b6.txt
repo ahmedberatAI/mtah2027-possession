@@ -1,0 +1,15 @@
+matched transitions (typed 'to', tol 25 frames): latency pred - GT, frames
+dfl      trk     pen 48 | H->A n 214 med +1 mean +1.0 | H->D n 256 med +0 mean -1.0 | A->H n 225 med -1 mean -0.3 | A->D n 249 med +0 mean -0.0 | D->H n 285 med +0 mean -0.3 | D->A n 293 med +0 mean -0.3
+dfl      native  pen 4 | H->A n 446 med +0 mean +0.9 | H->D n 180 med +0 mean -0.4 | A->H n 440 med +0 mean +0.5 | A->D n 171 med +0 mean +1.6 | D->H n 290 med +0 mean -0.2 | D->A n 298 med +0 mean -0.1
+metrica  ctrl    pen 40 | H->A n 360 med +2 mean +2.0 | H->D n 284 med +1 mean +0.6 | A->H n 358 med +2 mean +1.7 | A->D n 240 med +1 mean +2.6 | D->H n 386 med +0 mean +1.6 | D->A n 314 med +0 mean +1.9
+metrica  events  pen 8 | H->A n 551 med +2 mean +1.2 | H->D n 190 med +1 mean +1.5 | A->H n 550 med +1 mean +1.1 | A->D n 205 med +1 mean +2.1 | D->H n 396 med +0 mean +1.6 | D->A n 321 med +0 mean +2.1
+variant (b6, sim v2)                                           | metrica|ctrl               | dfl|trk                    | dfl|native                 | metrica|events            
+{"kind": "std", "scale": 0.5, "shift_json": {"0,1": 0, "1,0":  | best 40 0.8102 @32 0.8084 @48 0.8038 | best 48 0.7560 @32 0.7514 @48 0.7560 | best  4 0.5924 @32 0.5380 @48 0.5099 | best  8 0.6477 @32 0.6115 @48 0.5930
+{"kind": "std", "scale": 1.0, "shift_json": {"0,1": -1, "1,0": | best 40 0.8105 @32 0.8089 @48 0.8040 | best 48 0.7557 @32 0.7513 @48 0.7557 | best  4 0.5927 @32 0.5385 @48 0.5103 | best  8 0.6472 @32 0.6116 @48 0.5930
+{"kind": "std", "scale": 0.5, "shift_json": {"0,1": -1, "0,2": | best 40 0.8112 @32 0.8094 @48 0.8046 | best 48 0.7554 @32 0.7510 @48 0.7554 | best  4 0.5915 @32 0.5381 @48 0.5097 | best  8 0.6480 @32 0.6125 @48 0.5938
+{"kind": "std", "scale": 1.0, "shift_json": {"0,1": -2, "0,2": | best 40 0.8113 @32 0.8096 @48 0.8049 | best 48 0.7550 @32 0.7502 @48 0.7550 | best  4 0.5908 @32 0.5377 @48 0.5097 | best  8 0.6477 @32 0.6125 @48 0.5938
+delta of best vs reference (std):
+  {"kind": "std", "scale": 0.5, "shift_json": {"0,1": 0, "1,0" metrica|ctrl +0.0000  dfl|trk +0.0000  dfl|native +0.0000  metrica|events +0.0000
+  {"kind": "std", "scale": 1.0, "shift_json": {"0,1": -1, "1,0 metrica|ctrl +0.0003  dfl|trk -0.0003  dfl|native +0.0003  metrica|events -0.0005
+  {"kind": "std", "scale": 0.5, "shift_json": {"0,1": -1, "0,2 metrica|ctrl +0.0010  dfl|trk -0.0006  dfl|native -0.0009  metrica|events +0.0003
+  {"kind": "std", "scale": 1.0, "shift_json": {"0,1": -2, "0,2 metrica|ctrl +0.0012  dfl|trk -0.0010  dfl|native -0.0016  metrica|events -0.0001

@@ -1,0 +1,5 @@
+restart team == pre-stoppage team (internal D segments between two alive spells)
+dfl      trk     n  696  same 0.522 | side line n 255 same 0.604 | goal line n 114 same 0.219 | inside n 246 same 0.561 | no ball n 81 same 0.568
+dfl      native  n  696  same 0.297 | side line n 255 same 0.216 | goal line n 114 same 0.211 | inside n 246 same 0.407 | no ball n 81 same 0.346
+metrica  ctrl    n  304  same 0.474 | side line n 111 same 0.586 | goal line n 49 same 0.143 | inside n 115 same 0.522 | no ball n 29 same 0.414
+metrica  events  n  304  same 0.270 | side line n 111 same 0.099 | goal line n 49 same 0.163 | inside n 115 same 0.496 | no ball n 29 same 0.207

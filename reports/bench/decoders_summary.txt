@@ -1,0 +1,34 @@
+Decoder track (docs/FIKIRLER.md B/G) - src/decode2.py (generalised decoder; std_spec == decode.viterbi_min_dur
+on the test blocks), src/exp_decoders.py (driver). Aggregates only. Each variant at its own best pen_team
+(grid 2-96); deltas are vs the standard decoder at ITS best pen. Metrica = 3 games x 3 seeds, DFL = 7 matches LOMO.
+
+sim V2 (bench base_native probabilities)
+variant                                   best pen   Metrica-ctrl   DFL-trk         DFL-native   Metrica-events
+std (dflcv on DFL, v5 on Metrica)         40 / 48    0.8102         0.7560          0.5924 (4)   0.6477 (8)
+B4 enter-D / leave-D penalties (25)       -          <= +0.0014     <= +0.0013      -            -
+B5 switch x(1 + 2 far + 0.5 unseen)       40 / 32    +0.0010 (6/9)  +0.0064 (6/7)   -0.0014      +0.0028
+B1 D|H, D|A + restart prior (lam 1-48)    -          <= +0.0012     <= +0.0014      <= 0         <= 0
+B2 soft min: 48 (1 - d/175) d < 7 s       16 / 20    +0.0055 (7/9)  +0.0074 (6/7)   -0.0476      -0.0285
+B2 64 (1 - d/250)^2                       12 / 16    +0.0069 (6/9)  +0.0075 (5/7)   -0.0533      -0.0323
+B6 lag shift (median lag 0-2 frames)      -          <= +0.0012     <= 0            -            -
+G1 / G2 short-spell / short-D merges      -          <= +0.0006     <= 0            down         down
+B3 MBR                                    not run: per-match oracle pen headroom only +0.0036 / +0.0053
+
+sim V3 (bench base_native_v3 probabilities)
+std                                       40 / 40    0.7985         0.7458          0.5885 (4)   0.6477 (8)
+B5 switch x(1 + 2 far + 0.5 unseen)       32 / 32    +0.0014 (4/9)  +0.0020 (4/7)   -            -
+B2 48 (1 - d/175)                         12 / 12    +0.0087 (9/9)  +0.0129 (5/7)   -0.0496      -0.0314
+B2 64 (1 - d/250)^2                        8 /  8    +0.0107 (8/9)  +0.0134 (5/7)   -0.0539      -0.0342
+B2 plateau (D0 150-375 frames, c 48-96)   2 - 24     +0.008..0.0125 +0.0096..0.0134
+B2 + dead soft min (150 frames, 32)       -          +0.0097        +0.0138         (adds <= +0.001)
+
+restart statistics (internal stoppages; context = ball nearest in time to the restart, degraded data)
+same team restarts: DFL-trk 0.52 (side line 0.60, goal line 0.22, inside 0.56) | Metrica-ctrl 0.47 (0.59 / 0.14 / 0.52)
+                    DFL-native 0.30 | Metrica-events 0.27
+
+BAR-ATH (model_v5 scores = v3 rule alive/dead + bench team probabilities; v5 decoder base pen_dead 30, min 8/50)
+probs V2  std pen 12-20: public spellF1 0.5778 macroF1 0.8925, full 228-254 poss (4.34-4.81 / alive min)
+          B2 175/48 pen 4-20: 0.5846 / 0.9008, 194-218 poss (3.68-4.12); B2 250/64 sq: 0.6000 / 0.9012
+probs V3  std pen 4-32: 0.5793 / 0.9050 team_acc 0.9343, 216-293 poss
+          B2 175/48 and 250/64 sq, every pen 4-32: 0.6667 / 0.921 team_acc 0.944; pen 4-8: 224 poss (4.21 / alive min,
+          public GT 4.23), <2 s spells 1; tag_team 0.873 (std 0.868)

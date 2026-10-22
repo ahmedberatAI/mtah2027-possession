@@ -1,0 +1,11 @@
+== base_native  (features base, trained on DFL native labels, 400 rounds, 192 s)
+  DFL-CV  vs native team acc 0.8918 | spellF1 best  4 0.5924 | 4:0.5924 8:0.5824 12:0.5729 20:0.5554 32:0.5380
+  DFL-CV  vs trk    team acc 0.9033 | spellF1 best 48 0.7560 | 4:0.6839 8:0.7051 12:0.7203 20:0.7387 32:0.7514
+  Metrica vs ctrl   dec v5    | spellF1 best 32 0.8084 | 4:0.7353 8:0.7648 12:0.7766 20:0.7951 32:0.8084
+  Metrica vs ctrl   dec dflcv | spellF1 best 32 0.8083 | 4:0.7352 8:0.7647 12:0.7764 20:0.7949 32:0.8083
+  Metrica vs events dec v5    | spellF1 best  8 0.6477 | 4:0.6462 8:0.6477 12:0.6439 20:0.6299 32:0.6115
+  Metrica vs events dec dflcv | spellF1 best  8 0.6475 | 4:0.6461 8:0.6475 12:0.6437 20:0.6297 32:0.6112
+  Metrica team acc: ctrl 0.9398 events 0.9300
+  BAR-ATH v5 pen_team  8 | public spellF1 0.5290 macroF1 0.8980 team_acc 0.9250 n_pred 14/17 | full n_poss 280 (5.30/alive min) median 7.2 s | tag_team 0.8543 setpiece 0.926
+  BAR-ATH v5 pen_team 12 | public spellF1 0.5778 macroF1 0.8925 team_acc 0.9165 n_pred 10/17 | full n_poss 254 (4.81/alive min) median 8.4 s | tag_team 0.8575 setpiece 0.852
+  BAR-ATH v5 pen_team 20 | public spellF1 0.5778 macroF1 0.8925 team_acc 0.9165 n_pred 10/17 | full n_poss 228 (4.34/alive min) median 8.8 s | tag_team 0.8670 setpiece 0.852
