@@ -1,0 +1,4993 @@
+[
+  {
+    "match": "10502",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 176818,
+      "duplicate_rows": 849
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 70027,
+        "start_seconds": 179.08,
+        "end_seconds": 2980.12,
+        "shared_alignment_events": 680,
+        "alignment_offset_median": 5.499999986113835e-06,
+        "alignment_residual_p95": 0.0004905499998983486,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.7856112642266554,
+        "native_counts": [
+          16751,
+          29828,
+          21949,
+          1499
+        ],
+        "controlled_counts": [
+          16048,
+          30531,
+          21949,
+          1499
+        ],
+        "native_control_disagree": 0.022091500461581398,
+        "confirmed_control_groups": 565,
+        "noncontrolling_groups_held": 35,
+        "invalid_groups": 31
+      },
+      {
+        "period": 2,
+        "n": 76758,
+        "start_seconds": 3020.88,
+        "end_seconds": 6091.16,
+        "shared_alignment_events": 728,
+        "alignment_offset_median": 9.950000003300374e-05,
+        "alignment_residual_p95": 0.0324141999998119,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6882409651111285,
+        "native_counts": [
+          20629,
+          22811,
+          31966,
+          1352
+        ],
+        "controlled_counts": [
+          20784,
+          22656,
+          31966,
+          1352
+        ],
+        "native_control_disagree": 0.021800184162062614,
+        "confirmed_control_groups": 594,
+        "noncontrolling_groups_held": 36,
+        "invalid_groups": 27
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "10503",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 179620,
+      "duplicate_rows": 823
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 70575,
+        "start_seconds": 160.8,
+        "end_seconds": 2983.76,
+        "shared_alignment_events": 790,
+        "alignment_offset_median": 5.400000009103678e-05,
+        "alignment_residual_p95": 0.0007695499998760624,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.7720297555791711,
+        "native_counts": [
+          29436,
+          18769,
+          21727,
+          643
+        ],
+        "controlled_counts": [
+          29473,
+          18732,
+          21727,
+          643
+        ],
+        "native_control_disagree": 0.01935483870967742,
+        "confirmed_control_groups": 659,
+        "invalid_groups": 42,
+        "noncontrolling_groups_held": 31
+      },
+      {
+        "period": 2,
+        "n": 78570,
+        "start_seconds": 3018.12,
+        "end_seconds": 6160.88,
+        "shared_alignment_events": 748,
+        "alignment_offset_median": 0.03340149999985442,
+        "alignment_residual_p95": 0.0005697000006875894,
+        "applied_shift": 0.03340149999985442,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6816723940435281,
+        "native_counts": [
+          25594,
+          16177,
+          32702,
+          4097
+        ],
+        "controlled_counts": [
+          26069,
+          15677,
+          32702,
+          4122
+        ],
+        "native_control_disagree": 0.0234034398505246,
+        "confirmed_control_groups": 595,
+        "noncontrolling_groups_held": 35,
+        "invalid_groups": 46
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "10504",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 182612,
+      "duplicate_rows": 604
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 70526,
+        "start_seconds": 189.04,
+        "end_seconds": 3010.04,
+        "shared_alignment_events": 701,
+        "alignment_offset_median": 4.3000000005122274e-05,
+        "alignment_residual_p95": 0.0005590000000665896,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.7415279471400619,
+        "native_counts": [
+          23324,
+          20690,
+          24045,
+          2467
+        ],
+        "controlled_counts": [
+          23512,
+          20502,
+          24045,
+          2467
+        ],
+        "native_control_disagree": 0.026082610078611353,
+        "confirmed_control_groups": 576,
+        "invalid_groups": 35,
+        "noncontrolling_groups_held": 38
+      },
+      {
+        "period": 2,
+        "n": 81298,
+        "start_seconds": 3042.68,
+        "end_seconds": 6294.56,
+        "shared_alignment_events": 670,
+        "alignment_offset_median": 1.1999999969702912e-05,
+        "alignment_residual_p95": 0.0004961000001003411,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6548008561096214,
+        "native_counts": [
+          22937,
+          20261,
+          36380,
+          1720
+        ],
+        "controlled_counts": [
+          22993,
+          20205,
+          36380,
+          1720
+        ],
+        "native_control_disagree": 0.017500810222695496,
+        "confirmed_control_groups": 573,
+        "noncontrolling_groups_held": 22,
+        "invalid_groups": 35
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "10505",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 176158,
+      "duplicate_rows": 613
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 72646,
+        "start_seconds": 94.52,
+        "end_seconds": 3000.32,
+        "shared_alignment_events": 652,
+        "alignment_offset_median": 4.5999999997548e-05,
+        "alignment_residual_p95": 0.0007268999998700564,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6798584918646587,
+        "native_counts": [
+          26225,
+          15100,
+          29707,
+          1614
+        ],
+        "controlled_counts": [
+          26499,
+          14826,
+          29707,
+          1614
+        ],
+        "native_control_disagree": 0.019503932244404113,
+        "confirmed_control_groups": 531,
+        "invalid_groups": 37,
+        "noncontrolling_groups_held": 30
+      },
+      {
+        "period": 2,
+        "n": 73787,
+        "start_seconds": 3035.68,
+        "end_seconds": 5987.12,
+        "shared_alignment_events": 658,
+        "alignment_offset_median": 1.849999989644857e-05,
+        "alignment_residual_p95": 0.0005141499997534986,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6887798663721252,
+        "native_counts": [
+          23304,
+          17534,
+          31618,
+          1331
+        ],
+        "controlled_counts": [
+          23193,
+          17645,
+          31618,
+          1331
+        ],
+        "native_control_disagree": 0.01902639698320192,
+        "confirmed_control_groups": 547,
+        "noncontrolling_groups_held": 22,
+        "invalid_groups": 39
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "10506",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 234265,
+      "duplicate_rows": 1245
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 71443,
+        "start_seconds": 68.84,
+        "end_seconds": 2926.52,
+        "shared_alignment_events": 732,
+        "alignment_offset_median": 5.8000000024094334e-05,
+        "alignment_residual_p95": 0.0005832000001767288,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.7607743235866355,
+        "native_counts": [
+          18612,
+          26194,
+          23469,
+          3168
+        ],
+        "controlled_counts": [
+          18569,
+          26237,
+          23469,
+          3168
+        ],
+        "native_control_disagree": 0.02443869124670803,
+        "confirmed_control_groups": 611,
+        "noncontrolling_groups_held": 34,
+        "invalid_groups": 32
+      },
+      {
+        "period": 2,
+        "n": 73523,
+        "start_seconds": 2968.64,
+        "end_seconds": 5909.52,
+        "shared_alignment_events": 629,
+        "alignment_offset_median": 5.0999999984924216e-05,
+        "alignment_residual_p95": 0.01978679999992964,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.689838553921902,
+        "native_counts": [
+          15335,
+          19979,
+          34975,
+          3234
+        ],
+        "controlled_counts": [
+          15490,
+          19824,
+          34975,
+          3234
+        ],
+        "native_control_disagree": 0.017641728492948972,
+        "confirmed_control_groups": 509,
+        "noncontrolling_groups_held": 25,
+        "invalid_groups": 35
+      },
+      {
+        "period": 3,
+        "n": 25432,
+        "start_seconds": 5969.56,
+        "end_seconds": 6986.8,
+        "shared_alignment_events": 222,
+        "alignment_offset_median": 0.03337299999975585,
+        "alignment_residual_p95": 0.03276230000005853,
+        "applied_shift": 0.03337299999975585,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6721846492607738,
+        "native_counts": [
+          5284,
+          8220,
+          11014,
+          914
+        ],
+        "controlled_counts": [
+          5533,
+          7971,
+          11014,
+          914
+        ],
+        "native_control_disagree": 0.03902547393364929,
+        "confirmed_control_groups": 179,
+        "noncontrolling_groups_held": 10,
+        "invalid_groups": 13
+      },
+      {
+        "period": 4,
+        "n": 23976,
+        "start_seconds": 7144.48,
+        "end_seconds": 8103.48,
+        "shared_alignment_events": 238,
+        "alignment_offset_median": 1.9499999780236976e-05,
+        "alignment_residual_p95": 0.0004892000004929283,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.8222389055722389,
+        "native_counts": [
+          6255,
+          8643,
+          8967,
+          111
+        ],
+        "controlled_counts": [
+          6033,
+          8864,
+          8967,
+          112
+        ],
+        "native_control_disagree": 0.029469020608176143,
+        "confirmed_control_groups": 205,
+        "noncontrolling_groups_held": 15,
+        "invalid_groups": 5
+      }
+    ],
+    "event_periods": [
+      1,
+      2,
+      3,
+      4
+    ]
+  },
+  {
+    "match": "10507",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 178414,
+      "duplicate_rows": 442
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 74995,
+        "start_seconds": 92.48,
+        "end_seconds": 3092.24,
+        "shared_alignment_events": 744,
+        "alignment_offset_median": 2.1000000060666935e-05,
+        "alignment_residual_p95": 0.0005020000000968139,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6656043736249083,
+        "native_counts": [
+          24797,
+          18466,
+          29617,
+          2115
+        ],
+        "controlled_counts": [
+          24538,
+          18725,
+          29617,
+          2115
+        ],
+        "native_control_disagree": 0.014862584656635,
+        "confirmed_control_groups": 615,
+        "noncontrolling_groups_held": 26,
+        "invalid_groups": 48
+      },
+      {
+        "period": 2,
+        "n": 73461,
+        "start_seconds": 3159.56,
+        "end_seconds": 6097.96,
+        "shared_alignment_events": 742,
+        "alignment_offset_median": 0.03338499999972555,
+        "alignment_residual_p95": 0.000496949999546814,
+        "applied_shift": 0.03338499999972555,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.7148691142238739,
+        "native_counts": [
+          21795,
+          21697,
+          28778,
+          1191
+        ],
+        "controlled_counts": [
+          21836,
+          21623,
+          28778,
+          1224
+        ],
+        "native_control_disagree": 0.022503969258381464,
+        "confirmed_control_groups": 627,
+        "noncontrolling_groups_held": 32,
+        "invalid_groups": 45
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "10508",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 235670,
+      "duplicate_rows": 796
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 69021,
+        "start_seconds": 39.8,
+        "end_seconds": 2800.6,
+        "shared_alignment_events": 721,
+        "alignment_offset_median": 2.199999994445534e-05,
+        "alignment_residual_p95": 0.0004920000003494351,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.7508149693571522,
+        "native_counts": [
+          13524,
+          28365,
+          24447,
+          2685
+        ],
+        "controlled_counts": [
+          13653,
+          28236,
+          24447,
+          2685
+        ],
+        "native_control_disagree": 0.008952230895939267,
+        "confirmed_control_groups": 588,
+        "invalid_groups": 62,
+        "noncontrolling_groups_held": 20
+      },
+      {
+        "period": 2,
+        "n": 75295,
+        "start_seconds": 2854.8,
+        "end_seconds": 5866.56,
+        "shared_alignment_events": 629,
+        "alignment_offset_median": 0.03338499999972555,
+        "alignment_residual_p95": 0.0005099999998492422,
+        "applied_shift": 0.03338499999972555,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6424729397702371,
+        "native_counts": [
+          8953,
+          28885,
+          35864,
+          1593
+        ],
+        "controlled_counts": [
+          8696,
+          29142,
+          35864,
+          1593
+        ],
+        "native_control_disagree": 0.011707806966541572,
+        "confirmed_control_groups": 538,
+        "noncontrolling_groups_held": 15,
+        "invalid_groups": 31
+      },
+      {
+        "period": 3,
+        "n": 24493,
+        "start_seconds": 5924.04,
+        "end_seconds": 6903.72,
+        "shared_alignment_events": 243,
+        "alignment_offset_median": 3.80000001314329e-05,
+        "alignment_residual_p95": 0.0005196000004616507,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.7438043522639122,
+        "native_counts": [
+          3756,
+          10094,
+          10410,
+          233
+        ],
+        "controlled_counts": [
+          3686,
+          10164,
+          10410,
+          233
+        ],
+        "native_control_disagree": 0.02772563176895307,
+        "confirmed_control_groups": 198,
+        "noncontrolling_groups_held": 14,
+        "invalid_groups": 15
+      },
+      {
+        "period": 4,
+        "n": 27113,
+        "start_seconds": 7053.36,
+        "end_seconds": 8137.84,
+        "shared_alignment_events": 236,
+        "alignment_offset_median": 0.03342399999974077,
+        "alignment_residual_p95": 0.0005295000003116002,
+        "applied_shift": 0.03342399999974077,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.608785453472504,
+        "native_counts": [
+          3060,
+          10948,
+          12185,
+          920
+        ],
+        "controlled_counts": [
+          3042,
+          10966,
+          12185,
+          920
+        ],
+        "native_control_disagree": 0.01499143346659052,
+        "confirmed_control_groups": 194,
+        "noncontrolling_groups_held": 14,
+        "invalid_groups": 16
+      }
+    ],
+    "event_periods": [
+      1,
+      2,
+      3,
+      4
+    ]
+  },
+  {
+    "match": "10509",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 176708,
+      "duplicate_rows": 407
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 73438,
+        "start_seconds": 78.48,
+        "end_seconds": 3015.96,
+        "shared_alignment_events": 660,
+        "alignment_offset_median": 7.500000037907739e-06,
+        "alignment_residual_p95": 0.000494649999836838,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.693060813202974,
+        "native_counts": [
+          21357,
+          19937,
+          30002,
+          2142
+        ],
+        "controlled_counts": [
+          21348,
+          19946,
+          30002,
+          2142
+        ],
+        "native_control_disagree": 0.01973652346587882,
+        "confirmed_control_groups": 552,
+        "invalid_groups": 38,
+        "noncontrolling_groups_held": 26
+      },
+      {
+        "period": 2,
+        "n": 73625,
+        "start_seconds": 3061.0,
+        "end_seconds": 6005.96,
+        "shared_alignment_events": 616,
+        "alignment_offset_median": 1.500000053056283e-05,
+        "alignment_residual_p95": 0.0004904999996142578,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6205365025466894,
+        "native_counts": [
+          14962,
+          21339,
+          35966,
+          1358
+        ],
+        "controlled_counts": [
+          14782,
+          21493,
+          35966,
+          1384
+        ],
+        "native_control_disagree": 0.019627842866988283,
+        "confirmed_control_groups": 508,
+        "invalid_groups": 46,
+        "noncontrolling_groups_held": 19
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "10510",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 171128,
+      "duplicate_rows": 411
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 69125,
+        "start_seconds": 180.32,
+        "end_seconds": 2945.28,
+        "shared_alignment_events": 712,
+        "alignment_offset_median": 1.900000000887303e-05,
+        "alignment_residual_p95": 0.0004964500000028238,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.7549511754068716,
+        "native_counts": [
+          22032,
+          22362,
+          22410,
+          2321
+        ],
+        "controlled_counts": [
+          21984,
+          22387,
+          22410,
+          2344
+        ],
+        "native_control_disagree": 0.01379279258975457,
+        "confirmed_control_groups": 593,
+        "noncontrolling_groups_held": 30,
+        "invalid_groups": 45
+      },
+      {
+        "period": 2,
+        "n": 73280,
+        "start_seconds": 2981.2,
+        "end_seconds": 5912.36,
+        "shared_alignment_events": 751,
+        "alignment_offset_median": 0.033400000000256114,
+        "alignment_residual_p95": 0.0004920000005768088,
+        "applied_shift": 0.033400000000256114,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.7355349344978166,
+        "native_counts": [
+          24374,
+          24165,
+          23279,
+          1462
+        ],
+        "controlled_counts": [
+          24205,
+          24334,
+          23279,
+          1462
+        ],
+        "native_control_disagree": 0.02276519911823482,
+        "confirmed_control_groups": 629,
+        "invalid_groups": 38,
+        "noncontrolling_groups_held": 36
+      }
+    ],
+    "event_periods": [
+      1,
+      2,
+      3,
+      4
+    ]
+  },
+  {
+    "match": "10511",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 196098,
+      "duplicate_rows": 630
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 76560,
+        "start_seconds": 90.72,
+        "end_seconds": 3153.08,
+        "shared_alignment_events": 677,
+        "alignment_offset_median": 7.000000010748408e-06,
+        "alignment_residual_p95": 0.0004902000002459772,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.717358934169279,
+        "native_counts": [
+          23426,
+          18373,
+          31148,
+          3613
+        ],
+        "controlled_counts": [
+          23702,
+          18097,
+          31148,
+          3613
+        ],
+        "native_control_disagree": 0.026507811191655302,
+        "confirmed_control_groups": 556,
+        "noncontrolling_groups_held": 30,
+        "invalid_groups": 49
+      },
+      {
+        "period": 2,
+        "n": 86491,
+        "start_seconds": 3219.92,
+        "end_seconds": 6679.52,
+        "shared_alignment_events": 643,
+        "alignment_offset_median": 0.03340299999990748,
+        "alignment_residual_p95": 0.000529999999798747,
+        "applied_shift": 0.03340299999990748,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.5936108959313686,
+        "native_counts": [
+          22591,
+          16455,
+          45540,
+          1905
+        ],
+        "controlled_counts": [
+          22981,
+          16065,
+          45540,
+          1905
+        ],
+        "native_control_disagree": 0.01762024279055473,
+        "confirmed_control_groups": 513,
+        "noncontrolling_groups_held": 20,
+        "invalid_groups": 50
+      }
+    ],
+    "event_periods": [
+      1,
+      2,
+      3,
+      4
+    ]
+  },
+  {
+    "match": "10512",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 181528,
+      "duplicate_rows": 643
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 71382,
+        "start_seconds": 109.32,
+        "end_seconds": 2964.56,
+        "shared_alignment_events": 662,
+        "alignment_offset_median": 2.700000001709668e-05,
+        "alignment_residual_p95": 0.0005098500000315197,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.7031464514863691,
+        "native_counts": [
+          14105,
+          26673,
+          28931,
+          1673
+        ],
+        "controlled_counts": [
+          13902,
+          26876,
+          28931,
+          1673
+        ],
+        "native_control_disagree": 0.013708372161459611,
+        "confirmed_control_groups": 551,
+        "noncontrolling_groups_held": 22,
+        "invalid_groups": 41
+      },
+      {
+        "period": 2,
+        "n": 79504,
+        "start_seconds": 3013.04,
+        "end_seconds": 6193.16,
+        "shared_alignment_events": 642,
+        "alignment_offset_median": 5.249999981060682e-05,
+        "alignment_residual_p95": 0.0005491499998242939,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6176293016703562,
+        "native_counts": [
+          9936,
+          28091,
+          38669,
+          2808
+        ],
+        "controlled_counts": [
+          9512,
+          28515,
+          38669,
+          2808
+        ],
+        "native_control_disagree": 0.021668814263549583,
+        "confirmed_control_groups": 521,
+        "invalid_groups": 42,
+        "noncontrolling_groups_held": 30
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "10513",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 190254,
+      "duplicate_rows": 847
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 74813,
+        "start_seconds": 104.6,
+        "end_seconds": 3097.08,
+        "shared_alignment_events": 690,
+        "alignment_offset_median": 1.1000000085914508e-05,
+        "alignment_residual_p95": 0.0004909999999085813,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.7302741502145349,
+        "native_counts": [
+          27288,
+          19167,
+          26452,
+          1906
+        ],
+        "controlled_counts": [
+          27546,
+          18909,
+          26452,
+          1906
+        ],
+        "native_control_disagree": 0.01859864384888602,
+        "confirmed_control_groups": 588,
+        "noncontrolling_groups_held": 18,
+        "invalid_groups": 40
+      },
+      {
+        "period": 2,
+        "n": 83183,
+        "start_seconds": 3131.8,
+        "end_seconds": 6459.08,
+        "shared_alignment_events": 553,
+        "alignment_offset_median": 7.899999945948366e-05,
+        "alignment_residual_p95": 0.03285560000022088,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.5245663176370172,
+        "native_counts": [
+          19129,
+          14057,
+          45838,
+          4159
+        ],
+        "controlled_counts": [
+          19128,
+          14056,
+          45838,
+          4161
+        ],
+        "native_control_disagree": 0.014374397299903568,
+        "confirmed_control_groups": 432,
+        "noncontrolling_groups_held": 13,
+        "invalid_groups": 40
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "10514",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 178822,
+      "duplicate_rows": 382
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 73806,
+        "start_seconds": 92.16,
+        "end_seconds": 3044.36,
+        "shared_alignment_events": 719,
+        "alignment_offset_median": -3.999999989900971e-06,
+        "alignment_residual_p95": 0.0004850000000487853,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6870850608351624,
+        "native_counts": [
+          17472,
+          24700,
+          30693,
+          941
+        ],
+        "controlled_counts": [
+          17063,
+          25044,
+          30693,
+          1006
+        ],
+        "native_control_disagree": 0.02486522430949723,
+        "confirmed_control_groups": 600,
+        "invalid_groups": 26,
+        "noncontrolling_groups_held": 35
+      },
+      {
+        "period": 2,
+        "n": 75041,
+        "start_seconds": 3126.6,
+        "end_seconds": 6128.2,
+        "shared_alignment_events": 691,
+        "alignment_offset_median": 0.03340699999989738,
+        "alignment_residual_p95": 0.0005189999994854588,
+        "applied_shift": 0.03340699999989738,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.658986420756653,
+        "native_counts": [
+          16324,
+          23991,
+          30875,
+          3851
+        ],
+        "controlled_counts": [
+          15935,
+          24344,
+          30875,
+          3887
+        ],
+        "native_control_disagree": 0.02460339134536607,
+        "confirmed_control_groups": 562,
+        "noncontrolling_groups_held": 28,
+        "invalid_groups": 37
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "10515",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 178997,
+      "duplicate_rows": 520
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 72405,
+        "start_seconds": 162.4,
+        "end_seconds": 3058.56,
+        "shared_alignment_events": 631,
+        "alignment_offset_median": 6.000000212225132e-06,
+        "alignment_residual_p95": 0.00049049999998374,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6830191285132242,
+        "native_counts": [
+          19030,
+          23220,
+          28826,
+          1329
+        ],
+        "controlled_counts": [
+          18502,
+          23578,
+          28826,
+          1499
+        ],
+        "native_control_disagree": 0.027328897338403043,
+        "confirmed_control_groups": 517,
+        "noncontrolling_groups_held": 26,
+        "invalid_groups": 44
+      },
+      {
+        "period": 2,
+        "n": 76473,
+        "start_seconds": 3092.64,
+        "end_seconds": 6151.52,
+        "shared_alignment_events": 707,
+        "alignment_offset_median": 0.03338400000029651,
+        "alignment_residual_p95": 0.0004984000001059029,
+        "applied_shift": 0.03338400000029651,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.677781700730977,
+        "native_counts": [
+          15379,
+          26461,
+          32468,
+          2165
+        ],
+        "controlled_counts": [
+          14992,
+          26848,
+          32468,
+          2165
+        ],
+        "native_control_disagree": 0.024880497131931165,
+        "confirmed_control_groups": 551,
+        "noncontrolling_groups_held": 26,
+        "invalid_groups": 55
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "10516",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 176882,
+      "duplicate_rows": 519
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 70412,
+        "start_seconds": 179.68,
+        "end_seconds": 2996.12,
+        "shared_alignment_events": 654,
+        "alignment_offset_median": 3.90000000152213e-05,
+        "alignment_residual_p95": 0.0005003499999872929,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.697409532466057,
+        "native_counts": [
+          23877,
+          16231,
+          29184,
+          1120
+        ],
+        "controlled_counts": [
+          24278,
+          15644,
+          29184,
+          1306
+        ],
+        "native_control_disagree": 0.021015981163268374,
+        "confirmed_control_groups": 556,
+        "noncontrolling_groups_held": 17,
+        "invalid_groups": 37
+      },
+      {
+        "period": 2,
+        "n": 76702,
+        "start_seconds": 3057.12,
+        "end_seconds": 6125.16,
+        "shared_alignment_events": 691,
+        "alignment_offset_median": 2.89999998130952e-05,
+        "alignment_residual_p95": 0.000814000000445958,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6741545200907408,
+        "native_counts": [
+          18122,
+          23846,
+          33304,
+          1430
+        ],
+        "controlled_counts": [
+          17931,
+          24037,
+          33304,
+          1430
+        ],
+        "native_control_disagree": 0.02218356843309188,
+        "confirmed_control_groups": 557,
+        "noncontrolling_groups_held": 29,
+        "invalid_groups": 43
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "10517",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 255182,
+      "duplicate_rows": 940
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 78819,
+        "start_seconds": 154.52,
+        "end_seconds": 3307.24,
+        "shared_alignment_events": 691,
+        "alignment_offset_median": 4.799999999249849e-05,
+        "alignment_residual_p95": 0.0005399999998871863,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6265113741610525,
+        "native_counts": [
+          21397,
+          15050,
+          38098,
+          4274
+        ],
+        "controlled_counts": [
+          21136,
+          15311,
+          38098,
+          4274
+        ],
+        "native_control_disagree": 0.02483057590473839,
+        "confirmed_control_groups": 563,
+        "invalid_groups": 44,
+        "noncontrolling_groups_held": 26
+      },
+      {
+        "period": 2,
+        "n": 80413,
+        "start_seconds": 3344.68,
+        "end_seconds": 6561.16,
+        "shared_alignment_events": 684,
+        "alignment_offset_median": 0.03336650000028385,
+        "alignment_residual_p95": 0.0005217499999389476,
+        "applied_shift": 0.03336650000028385,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6047902702299379,
+        "native_counts": [
+          16788,
+          19927,
+          40529,
+          3169
+        ],
+        "controlled_counts": [
+          16175,
+          20509,
+          40529,
+          3200
+        ],
+        "native_control_disagree": 0.03595573001853669,
+        "confirmed_control_groups": 525,
+        "noncontrolling_groups_held": 39,
+        "invalid_groups": 43
+      },
+      {
+        "period": 3,
+        "n": 24130,
+        "start_seconds": 6591.32,
+        "end_seconds": 7556.48,
+        "shared_alignment_events": 212,
+        "alignment_offset_median": 2.8500000553322025e-05,
+        "alignment_residual_p95": 0.0005037500005528272,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6681723995026937,
+        "native_counts": [
+          7080,
+          5313,
+          10871,
+          866
+        ],
+        "controlled_counts": [
+          7208,
+          5185,
+          10871,
+          866
+        ],
+        "native_control_disagree": 0.022593399499717583,
+        "confirmed_control_groups": 168,
+        "noncontrolling_groups_held": 7,
+        "invalid_groups": 19
+      },
+      {
+        "period": 4,
+        "n": 28715,
+        "start_seconds": 7695.28,
+        "end_seconds": 8843.84,
+        "shared_alignment_events": 183,
+        "alignment_offset_median": 0.03339799999957904,
+        "alignment_residual_p95": 0.032502000000022235,
+        "applied_shift": 0.03339799999957904,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.4482326310290789,
+        "native_counts": [
+          5439,
+          3974,
+          19037,
+          265
+        ],
+        "controlled_counts": [
+          5621,
+          3771,
+          19037,
+          286
+        ],
+        "native_control_disagree": 0.0381175468483816,
+        "confirmed_control_groups": 134,
+        "invalid_groups": 17,
+        "noncontrolling_groups_held": 17
+      }
+    ],
+    "event_periods": [
+      1,
+      2,
+      3,
+      4
+    ]
+  },
+  {
+    "match": "3812",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 185746,
+      "duplicate_rows": 889
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 71567,
+        "start_seconds": 141.04,
+        "end_seconds": 3003.68,
+        "shared_alignment_events": 632,
+        "alignment_offset_median": 7.850000019971048e-05,
+        "alignment_residual_p95": 0.0007041499999417044,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.727667779842665,
+        "native_counts": [
+          19026,
+          20349,
+          30086,
+          2106
+        ],
+        "controlled_counts": [
+          18987,
+          20408,
+          30086,
+          2086
+        ],
+        "native_control_disagree": 0.01434920634920635,
+        "confirmed_control_groups": 524,
+        "noncontrolling_groups_held": 19,
+        "invalid_groups": 41
+      },
+      {
+        "period": 2,
+        "n": 82633,
+        "start_seconds": 3040.36,
+        "end_seconds": 6345.64,
+        "shared_alignment_events": 611,
+        "alignment_offset_median": 1.7999999727180693e-05,
+        "alignment_residual_p95": 0.0007135000000744185,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6106519187249646,
+        "native_counts": [
+          16396,
+          19043,
+          44817,
+          2377
+        ],
+        "controlled_counts": [
+          16489,
+          18991,
+          44817,
+          2336
+        ],
+        "native_control_disagree": 0.02392844041874771,
+        "confirmed_control_groups": 473,
+        "invalid_groups": 52,
+        "noncontrolling_groups_held": 25
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3813",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 211146,
+      "duplicate_rows": 559
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 88543,
+        "start_seconds": 180.4,
+        "end_seconds": 3722.08,
+        "shared_alignment_events": 680,
+        "alignment_offset_median": 3.90000000152213e-05,
+        "alignment_residual_p95": 0.0005240500000468273,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.5846989598274285,
+        "native_counts": [
+          31893,
+          8000,
+          47586,
+          1064
+        ],
+        "controlled_counts": [
+          31899,
+          7994,
+          47586,
+          1064
+        ],
+        "native_control_disagree": 0.017747474494272178,
+        "confirmed_control_groups": 569,
+        "noncontrolling_groups_held": 23,
+        "invalid_groups": 30
+      },
+      {
+        "period": 2,
+        "n": 87121,
+        "start_seconds": 3804.68,
+        "end_seconds": 7289.48,
+        "shared_alignment_events": 725,
+        "alignment_offset_median": 4.600000011123484e-05,
+        "alignment_residual_p95": 0.0005354000002625979,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6243844767622043,
+        "native_counts": [
+          28522,
+          12599,
+          44833,
+          1167
+        ],
+        "controlled_counts": [
+          28528,
+          12593,
+          44833,
+          1167
+        ],
+        "native_control_disagree": 0.027236691714695654,
+        "confirmed_control_groups": 609,
+        "noncontrolling_groups_held": 26,
+        "invalid_groups": 32
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3814",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 181037,
+      "duplicate_rows": 594
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 75017,
+        "start_seconds": 109.04,
+        "end_seconds": 3109.68,
+        "shared_alignment_events": 603,
+        "alignment_offset_median": 4.999999998744897e-05,
+        "alignment_residual_p95": 0.0008212000000639799,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6119146326832584,
+        "native_counts": [
+          15089,
+          18438,
+          40711,
+          779
+        ],
+        "controlled_counts": [
+          15349,
+          18118,
+          40711,
+          839
+        ],
+        "native_control_disagree": 0.020796605611497893,
+        "confirmed_control_groups": 477,
+        "invalid_groups": 50,
+        "noncontrolling_groups_held": 23
+      },
+      {
+        "period": 2,
+        "n": 75500,
+        "start_seconds": 3206.04,
+        "end_seconds": 6226.0,
+        "shared_alignment_events": 667,
+        "alignment_offset_median": 0.03337000000010448,
+        "alignment_residual_p95": 0.0004879999999957363,
+        "applied_shift": 0.03337000000010448,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6841456953642384,
+        "native_counts": [
+          20739,
+          19471,
+          34035,
+          1255
+        ],
+        "controlled_counts": [
+          20844,
+          19366,
+          34035,
+          1255
+        ],
+        "native_control_disagree": 0.026088037801541904,
+        "confirmed_control_groups": 557,
+        "noncontrolling_groups_held": 31,
+        "invalid_groups": 35
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3815",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 187981,
+      "duplicate_rows": 57
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 73450,
+        "start_seconds": 107.88,
+        "end_seconds": 3045.84,
+        "shared_alignment_events": 704,
+        "alignment_offset_median": 2.4000000053092663e-05,
+        "alignment_residual_p95": 0.0005144000000314009,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.7501021102791015,
+        "native_counts": [
+          28976,
+          15838,
+          28022,
+          614
+        ],
+        "controlled_counts": [
+          29249,
+          15565,
+          28022,
+          614
+        ],
+        "native_control_disagree": 0.019882179675994108,
+        "confirmed_control_groups": 606,
+        "noncontrolling_groups_held": 31,
+        "invalid_groups": 24
+      },
+      {
+        "period": 2,
+        "n": 83309,
+        "start_seconds": 3085.0,
+        "end_seconds": 6417.32,
+        "shared_alignment_events": 708,
+        "alignment_offset_median": 0.03337749999991502,
+        "alignment_residual_p95": 0.021396699999694832,
+        "applied_shift": 0.03337749999991502,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6302080207420567,
+        "native_counts": [
+          20345,
+          20529,
+          41113,
+          1322
+        ],
+        "controlled_counts": [
+          19978,
+          20887,
+          41113,
+          1331
+        ],
+        "native_control_disagree": 0.03142053101676251,
+        "confirmed_control_groups": 561,
+        "noncontrolling_groups_held": 39,
+        "invalid_groups": 38
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3816",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 199012,
+      "duplicate_rows": 870
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 77048,
+        "start_seconds": 102.0,
+        "end_seconds": 3183.88,
+        "shared_alignment_events": 643,
+        "alignment_offset_median": 5.29999999798747e-05,
+        "alignment_residual_p95": 0.000799599999976408,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.639419582597861,
+        "native_counts": [
+          25067,
+          13006,
+          36695,
+          2280
+        ],
+        "controlled_counts": [
+          24938,
+          13135,
+          36695,
+          2280
+        ],
+        "native_control_disagree": 0.016678486066241168,
+        "confirmed_control_groups": 512,
+        "noncontrolling_groups_held": 31,
+        "invalid_groups": 51
+      },
+      {
+        "period": 2,
+        "n": 88233,
+        "start_seconds": 3230.44,
+        "end_seconds": 6759.72,
+        "shared_alignment_events": 664,
+        "alignment_offset_median": 3.399999991415825e-05,
+        "alignment_residual_p95": 0.0326167000002215,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6045810524406968,
+        "native_counts": [
+          25933,
+          10562,
+          49206,
+          2532
+        ],
+        "controlled_counts": [
+          26433,
+          9943,
+          49206,
+          2651
+        ],
+        "native_control_disagree": 0.02501649439190675,
+        "confirmed_control_groups": 530,
+        "invalid_groups": 43,
+        "noncontrolling_groups_held": 21
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3817",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 183903,
+      "duplicate_rows": 54
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 74517,
+        "start_seconds": 100.44,
+        "end_seconds": 3081.08,
+        "shared_alignment_events": 686,
+        "alignment_offset_median": -1.0999999858540832e-05,
+        "alignment_residual_p95": 0.0005159999998340936,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6848772763262074,
+        "native_counts": [
+          23079,
+          17537,
+          32644,
+          1257
+        ],
+        "controlled_counts": [
+          23063,
+          17490,
+          32644,
+          1320
+        ],
+        "native_control_disagree": 0.022193179296229625,
+        "confirmed_control_groups": 586,
+        "noncontrolling_groups_held": 31,
+        "invalid_groups": 24
+      },
+      {
+        "period": 2,
+        "n": 78843,
+        "start_seconds": 3122.96,
+        "end_seconds": 6276.64,
+        "shared_alignment_events": 719,
+        "alignment_offset_median": 0.03337199999987206,
+        "alignment_residual_p95": 0.0005879999996068366,
+        "applied_shift": 0.03337199999987206,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6623035653133442,
+        "native_counts": [
+          26301,
+          17667,
+          32674,
+          2201
+        ],
+        "controlled_counts": [
+          26360,
+          17608,
+          32674,
+          2201
+        ],
+        "native_control_disagree": 0.019718886462882095,
+        "confirmed_control_groups": 583,
+        "invalid_groups": 47,
+        "noncontrolling_groups_held": 32
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3818",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 179305,
+      "duplicate_rows": 721
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 70588,
+        "start_seconds": 55.2,
+        "end_seconds": 2878.68,
+        "shared_alignment_events": 636,
+        "alignment_offset_median": 1.5499999904022843e-05,
+        "alignment_residual_p95": 0.0005037499998934436,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.7344874482914943,
+        "native_counts": [
+          24672,
+          16070,
+          27507,
+          2339
+        ],
+        "controlled_counts": [
+          24853,
+          15808,
+          27507,
+          2420
+        ],
+        "native_control_disagree": 0.021150488182779568,
+        "confirmed_control_groups": 518,
+        "invalid_groups": 34,
+        "noncontrolling_groups_held": 32
+      },
+      {
+        "period": 2,
+        "n": 78380,
+        "start_seconds": 3023.76,
+        "end_seconds": 6158.92,
+        "shared_alignment_events": 613,
+        "alignment_offset_median": 0.033386999999947875,
+        "alignment_residual_p95": 0.0005173999998987711,
+        "applied_shift": 0.033386999999947875,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.661061495279408,
+        "native_counts": [
+          22106,
+          16364,
+          38144,
+          1766
+        ],
+        "controlled_counts": [
+          21872,
+          16598,
+          38144,
+          1766
+        ],
+        "native_control_disagree": 0.027190018195996882,
+        "confirmed_control_groups": 475,
+        "noncontrolling_groups_held": 33,
+        "invalid_groups": 40
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3819",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 186361,
+      "duplicate_rows": 438
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 76820,
+        "start_seconds": 99.44,
+        "end_seconds": 3172.2,
+        "shared_alignment_events": 774,
+        "alignment_offset_median": 4.499999931795173e-06,
+        "alignment_residual_p95": 0.0004952000001651411,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.7083832335329341,
+        "native_counts": [
+          27901,
+          21619,
+          26919,
+          381
+        ],
+        "controlled_counts": [
+          27707,
+          21813,
+          26919,
+          381
+        ],
+        "native_control_disagree": 0.0154281098546042,
+        "confirmed_control_groups": 672,
+        "noncontrolling_groups_held": 17,
+        "invalid_groups": 35
+      },
+      {
+        "period": 2,
+        "n": 78270,
+        "start_seconds": 3255.08,
+        "end_seconds": 6385.84,
+        "shared_alignment_events": 744,
+        "alignment_offset_median": 0.03336949999902572,
+        "alignment_residual_p95": 0.0004863499994598897,
+        "applied_shift": 0.03336949999902572,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6713555640730804,
+        "native_counts": [
+          27688,
+          17221,
+          32143,
+          1218
+        ],
+        "controlled_counts": [
+          27894,
+          17015,
+          32143,
+          1218
+        ],
+        "native_control_disagree": 0.019906922888507872,
+        "confirmed_control_groups": 621,
+        "invalid_groups": 45,
+        "noncontrolling_groups_held": 25
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3820",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 176774,
+      "duplicate_rows": 673
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 70448,
+        "start_seconds": 109.28,
+        "end_seconds": 2927.16,
+        "shared_alignment_events": 743,
+        "alignment_offset_median": 3.100000003541936e-05,
+        "alignment_residual_p95": 0.0006792999999788658,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.7527679990915285,
+        "native_counts": [
+          18280,
+          24933,
+          25561,
+          1674
+        ],
+        "controlled_counts": [
+          17949,
+          25264,
+          25561,
+          1674
+        ],
+        "native_control_disagree": 0.029597574803878462,
+        "confirmed_control_groups": 588,
+        "invalid_groups": 51,
+        "noncontrolling_groups_held": 40
+      },
+      {
+        "period": 2,
+        "n": 76449,
+        "start_seconds": 3090.76,
+        "end_seconds": 6148.68,
+        "shared_alignment_events": 655,
+        "alignment_offset_median": 5.000000010113581e-05,
+        "alignment_residual_p95": 0.0011637999998128927,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6436317021805387,
+        "native_counts": [
+          12175,
+          26387,
+          35771,
+          2116
+        ],
+        "controlled_counts": [
+          12456,
+          26106,
+          35771,
+          2116
+        ],
+        "native_control_disagree": 0.02274259633836419,
+        "confirmed_control_groups": 545,
+        "noncontrolling_groups_held": 25,
+        "invalid_groups": 34
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3821",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 187348,
+      "duplicate_rows": 56
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 76472,
+        "start_seconds": 118.72,
+        "end_seconds": 3177.56,
+        "shared_alignment_events": 766,
+        "alignment_offset_median": 4.200000012133387e-05,
+        "alignment_residual_p95": 0.0005350000001271837,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6942148760330579,
+        "native_counts": [
+          35847,
+          9718,
+          29244,
+          1663
+        ],
+        "controlled_counts": [
+          36248,
+          9317,
+          29244,
+          1663
+        ],
+        "native_control_disagree": 0.019598375946450128,
+        "confirmed_control_groups": 643,
+        "noncontrolling_groups_held": 31,
+        "invalid_groups": 47
+      },
+      {
+        "period": 2,
+        "n": 79759,
+        "start_seconds": 3244.28,
+        "end_seconds": 6434.6,
+        "shared_alignment_events": 681,
+        "alignment_offset_median": 3.100000049016671e-05,
+        "alignment_residual_p95": 0.0007029999997030245,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6252460537368824,
+        "native_counts": [
+          22149,
+          14142,
+          42528,
+          940
+        ],
+        "controlled_counts": [
+          22362,
+          13929,
+          42528,
+          940
+        ],
+        "native_control_disagree": 0.026921275247306496,
+        "confirmed_control_groups": 531,
+        "noncontrolling_groups_held": 32,
+        "invalid_groups": 66
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3822",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 186008,
+      "duplicate_rows": 549
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 75083,
+        "start_seconds": 45.6,
+        "end_seconds": 3048.88,
+        "shared_alignment_events": 846,
+        "alignment_offset_median": 8.499999921696144e-06,
+        "alignment_residual_p95": 0.0004875000001618446,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.7613441125154828,
+        "native_counts": [
+          39160,
+          9659,
+          25289,
+          975
+        ],
+        "controlled_counts": [
+          39419,
+          9400,
+          25289,
+          975
+        ],
+        "native_control_disagree": 0.012310780638685757,
+        "confirmed_control_groups": 742,
+        "noncontrolling_groups_held": 21,
+        "invalid_groups": 35
+      },
+      {
+        "period": 2,
+        "n": 79618,
+        "start_seconds": 3114.08,
+        "end_seconds": 6298.76,
+        "shared_alignment_events": 773,
+        "alignment_offset_median": 4.1000000237545464e-05,
+        "alignment_residual_p95": 0.0005172000002858111,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.7103921223843854,
+        "native_counts": [
+          37334,
+          11177,
+          29800,
+          1307
+        ],
+        "controlled_counts": [
+          37348,
+          11163,
+          29800,
+          1307
+        ],
+        "native_control_disagree": 0.008863968996722394,
+        "confirmed_control_groups": 680,
+        "noncontrolling_groups_held": 19,
+        "invalid_groups": 32
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3823",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 180340,
+      "duplicate_rows": 493
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 74974,
+        "start_seconds": 116.52,
+        "end_seconds": 3115.44,
+        "shared_alignment_events": 703,
+        "alignment_offset_median": 2.499999982319423e-05,
+        "alignment_residual_p95": 0.0005080000000560858,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.7137407634646677,
+        "native_counts": [
+          22401,
+          19090,
+          31749,
+          1734
+        ],
+        "controlled_counts": [
+          22112,
+          19379,
+          31749,
+          1734
+        ],
+        "native_control_disagree": 0.021233520522522958,
+        "confirmed_control_groups": 562,
+        "invalid_groups": 48,
+        "noncontrolling_groups_held": 33
+      },
+      {
+        "period": 2,
+        "n": 75047,
+        "start_seconds": 3198.72,
+        "end_seconds": 6200.56,
+        "shared_alignment_events": 642,
+        "alignment_offset_median": 0.033433500000001004,
+        "alignment_residual_p95": 0.0008620999998129259,
+        "applied_shift": 0.033433500000001004,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.7097418950790838,
+        "native_counts": [
+          20566,
+          19977,
+          32291,
+          2213
+        ],
+        "controlled_counts": [
+          20746,
+          19797,
+          32291,
+          2213
+        ],
+        "native_control_disagree": 0.023925215203610982,
+        "confirmed_control_groups": 526,
+        "invalid_groups": 46,
+        "noncontrolling_groups_held": 29
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3824",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 178975,
+      "duplicate_rows": 667
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 71754,
+        "start_seconds": 100.08,
+        "end_seconds": 2970.2,
+        "shared_alignment_events": 736,
+        "alignment_offset_median": 1.3500000022759195e-05,
+        "alignment_residual_p95": 0.0005067499999995562,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.8007219109736042,
+        "native_counts": [
+          24397,
+          24290,
+          21909,
+          1158
+        ],
+        "controlled_counts": [
+          24229,
+          24458,
+          21909,
+          1158
+        ],
+        "native_control_disagree": 0.013720294945262597,
+        "confirmed_control_groups": 639,
+        "noncontrolling_groups_held": 21,
+        "invalid_groups": 20
+      },
+      {
+        "period": 2,
+        "n": 76983,
+        "start_seconds": 3005.16,
+        "end_seconds": 6084.44,
+        "shared_alignment_events": 643,
+        "alignment_offset_median": 5.99999930273043e-06,
+        "alignment_residual_p95": 0.0004919000001791573,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6971409272176974,
+        "native_counts": [
+          19515,
+          22557,
+          33748,
+          1163
+        ],
+        "controlled_counts": [
+          19756,
+          22316,
+          33748,
+          1163
+        ],
+        "native_control_disagree": 0.01304905875641757,
+        "confirmed_control_groups": 539,
+        "noncontrolling_groups_held": 23,
+        "invalid_groups": 25
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3825",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 178734,
+      "duplicate_rows": 1003
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 69064,
+        "start_seconds": 186.76,
+        "end_seconds": 2949.28,
+        "shared_alignment_events": 664,
+        "alignment_offset_median": 4.150000017943967e-05,
+        "alignment_residual_p95": 0.000626349999856759,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6887379821614734,
+        "native_counts": [
+          18816,
+          20545,
+          28524,
+          1179
+        ],
+        "controlled_counts": [
+          18447,
+          20802,
+          28524,
+          1291
+        ],
+        "native_control_disagree": 0.0225738235369054,
+        "confirmed_control_groups": 551,
+        "noncontrolling_groups_held": 33,
+        "invalid_groups": 30
+      },
+      {
+        "period": 2,
+        "n": 79192,
+        "start_seconds": 2996.68,
+        "end_seconds": 6164.32,
+        "shared_alignment_events": 696,
+        "alignment_offset_median": 0.03344250000009197,
+        "alignment_residual_p95": 0.0325764999997773,
+        "applied_shift": 0.03344250000009197,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6719365592484089,
+        "native_counts": [
+          26408,
+          16791,
+          35294,
+          699
+        ],
+        "controlled_counts": [
+          26268,
+          16931,
+          35294,
+          699
+        ],
+        "native_control_disagree": 0.015602213014190144,
+        "confirmed_control_groups": 584,
+        "invalid_groups": 27,
+        "noncontrolling_groups_held": 22
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3826",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 184287,
+      "duplicate_rows": 681
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 70495,
+        "start_seconds": 97.04,
+        "end_seconds": 2916.8,
+        "shared_alignment_events": 733,
+        "alignment_offset_median": 6.999999641266186e-06,
+        "alignment_residual_p95": 0.0004959999996572151,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.7835165614582594,
+        "native_counts": [
+          30793,
+          14421,
+          24191,
+          1090
+        ],
+        "controlled_counts": [
+          30935,
+          14279,
+          24191,
+          1090
+        ],
+        "native_control_disagree": 0.013668332817268987,
+        "confirmed_control_groups": 623,
+        "invalid_groups": 32,
+        "noncontrolling_groups_held": 21
+      },
+      {
+        "period": 2,
+        "n": 82662,
+        "start_seconds": 2958.64,
+        "end_seconds": 6265.08,
+        "shared_alignment_events": 636,
+        "alignment_offset_median": 0.033358500000076674,
+        "alignment_residual_p95": 0.0005024999999250213,
+        "applied_shift": 0.033358500000076674,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.5821417338075536,
+        "native_counts": [
+          20136,
+          18105,
+          43054,
+          1367
+        ],
+        "controlled_counts": [
+          20144,
+          18097,
+          43054,
+          1367
+        ],
+        "native_control_disagree": 0.01992625715854711,
+        "confirmed_control_groups": 525,
+        "noncontrolling_groups_held": 20,
+        "invalid_groups": 31
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3827",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 177109,
+      "duplicate_rows": 633
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 69036,
+        "start_seconds": 168.84,
+        "end_seconds": 2930.24,
+        "shared_alignment_events": 711,
+        "alignment_offset_median": -6.000000212225132e-06,
+        "alignment_residual_p95": 0.0004830000002584711,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.7526797612839677,
+        "native_counts": [
+          24092,
+          19072,
+          23495,
+          2377
+        ],
+        "controlled_counts": [
+          24757,
+          18231,
+          23495,
+          2553
+        ],
+        "native_control_disagree": 0.026655182046745506,
+        "confirmed_control_groups": 598,
+        "invalid_groups": 31,
+        "noncontrolling_groups_held": 28
+      },
+      {
+        "period": 2,
+        "n": 78173,
+        "start_seconds": 2965.44,
+        "end_seconds": 6092.32,
+        "shared_alignment_events": 686,
+        "alignment_offset_median": 0.03338649999977861,
+        "alignment_residual_p95": 0.000510749999421023,
+        "applied_shift": 0.03338649999977861,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.631292134112801,
+        "native_counts": [
+          24197,
+          15847,
+          36913,
+          1216
+        ],
+        "controlled_counts": [
+          23898,
+          16146,
+          36913,
+          1216
+        ],
+        "native_control_disagree": 0.027994206372989713,
+        "confirmed_control_groups": 557,
+        "noncontrolling_groups_held": 39,
+        "invalid_groups": 34
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3828",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 192530,
+      "duplicate_rows": 957
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 74122,
+        "start_seconds": 104.84,
+        "end_seconds": 3069.68,
+        "shared_alignment_events": 635,
+        "alignment_offset_median": 2.199999994445534e-05,
+        "alignment_residual_p95": 0.0005155999999487903,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6664687946898357,
+        "native_counts": [
+          23455,
+          14994,
+          34263,
+          1410
+        ],
+        "controlled_counts": [
+          23779,
+          14616,
+          34263,
+          1464
+        ],
+        "native_control_disagree": 0.0214871728089595,
+        "confirmed_control_groups": 531,
+        "invalid_groups": 29,
+        "noncontrolling_groups_held": 21
+      },
+      {
+        "period": 2,
+        "n": 85681,
+        "start_seconds": 3098.84,
+        "end_seconds": 6526.04,
+        "shared_alignment_events": 654,
+        "alignment_offset_median": 5.050000004303001e-05,
+        "alignment_residual_p95": 0.03254109999961656,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6366639044829075,
+        "native_counts": [
+          22325,
+          17010,
+          45004,
+          1342
+        ],
+        "controlled_counts": [
+          22080,
+          17255,
+          45004,
+          1342
+        ],
+        "native_control_disagree": 0.035973051989322484,
+        "confirmed_control_groups": 516,
+        "invalid_groups": 35,
+        "noncontrolling_groups_held": 38
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3829",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 185952,
+      "duplicate_rows": 597
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 78106,
+        "start_seconds": 195.24,
+        "end_seconds": 3319.44,
+        "shared_alignment_events": 663,
+        "alignment_offset_median": 7.999999979801942e-06,
+        "alignment_residual_p95": 0.0004987999999912062,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6964381737638594,
+        "native_counts": [
+          16452,
+          25878,
+          34346,
+          1430
+        ],
+        "controlled_counts": [
+          16550,
+          25780,
+          34346,
+          1430
+        ],
+        "native_control_disagree": 0.023151429246397355,
+        "confirmed_control_groups": 546,
+        "noncontrolling_groups_held": 27,
+        "invalid_groups": 40
+      },
+      {
+        "period": 2,
+        "n": 76509,
+        "start_seconds": 3348.72,
+        "end_seconds": 6409.04,
+        "shared_alignment_events": 642,
+        "alignment_offset_median": -6.999999641266186e-06,
+        "alignment_residual_p95": 0.0004939999994121536,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6590597184644944,
+        "native_counts": [
+          21904,
+          18933,
+          34539,
+          1133
+        ],
+        "controlled_counts": [
+          21722,
+          19115,
+          34539,
+          1133
+        ],
+        "native_control_disagree": 0.01503538457771139,
+        "confirmed_control_groups": 540,
+        "invalid_groups": 38,
+        "noncontrolling_groups_held": 25
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3830",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 181021,
+      "duplicate_rows": 921
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 73507,
+        "start_seconds": 74.72,
+        "end_seconds": 3014.96,
+        "shared_alignment_events": 711,
+        "alignment_offset_median": -2.1000000003823516e-05,
+        "alignment_residual_p95": 0.0005094999999499805,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.7011169004312514,
+        "native_counts": [
+          20949,
+          21524,
+          29843,
+          1191
+        ],
+        "controlled_counts": [
+          20648,
+          21825,
+          29843,
+          1191
+        ],
+        "native_control_disagree": 0.01330256869069762,
+        "confirmed_control_groups": 579,
+        "noncontrolling_groups_held": 29,
+        "invalid_groups": 54
+      },
+      {
+        "period": 2,
+        "n": 76725,
+        "start_seconds": 3112.4,
+        "end_seconds": 6181.36,
+        "shared_alignment_events": 639,
+        "alignment_offset_median": 0.03342999999949825,
+        "alignment_residual_p95": 0.03280980000108684,
+        "applied_shift": 0.03342999999949825,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.5971195829260345,
+        "native_counts": [
+          21861,
+          13870,
+          40040,
+          954
+        ],
+        "controlled_counts": [
+          21828,
+          13903,
+          40040,
+          954
+        ],
+        "native_control_disagree": 0.030701631636394167,
+        "confirmed_control_groups": 501,
+        "invalid_groups": 48,
+        "noncontrolling_groups_held": 26
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3831",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 173190,
+      "duplicate_rows": 615
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 69569,
+        "start_seconds": 79.28,
+        "end_seconds": 2862.0,
+        "shared_alignment_events": 666,
+        "alignment_offset_median": 3.700000002027082e-05,
+        "alignment_residual_p95": 0.0005320000000494929,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.7887852348028576,
+        "native_counts": [
+          26713,
+          17514,
+          24397,
+          945
+        ],
+        "controlled_counts": [
+          26826,
+          17401,
+          24397,
+          945
+        ],
+        "native_control_disagree": 0.022181020643498316,
+        "confirmed_control_groups": 566,
+        "invalid_groups": 21,
+        "noncontrolling_groups_held": 26
+      },
+      {
+        "period": 2,
+        "n": 74386,
+        "start_seconds": 2921.44,
+        "end_seconds": 5896.84,
+        "shared_alignment_events": 667,
+        "alignment_offset_median": 3.199999991920777e-05,
+        "alignment_residual_p95": 0.0008448999996289719,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.7685048261769688,
+        "native_counts": [
+          21958,
+          23471,
+          28316,
+          641
+        ],
+        "controlled_counts": [
+          21665,
+          23741,
+          28316,
+          664
+        ],
+        "native_control_disagree": 0.016407523234814782,
+        "confirmed_control_groups": 557,
+        "noncontrolling_groups_held": 32,
+        "invalid_groups": 19
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3832",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 183291,
+      "duplicate_rows": 1124
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 75042,
+        "start_seconds": 210.68,
+        "end_seconds": 3212.32,
+        "shared_alignment_events": 671,
+        "alignment_offset_median": 4.4999999772699084e-05,
+        "alignment_residual_p95": 0.03269000000017286,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6036886010500786,
+        "native_counts": [
+          17062,
+          16073,
+          40963,
+          944
+        ],
+        "controlled_counts": [
+          17268,
+          15965,
+          40963,
+          846
+        ],
+        "native_control_disagree": 0.04406216991097027,
+        "confirmed_control_groups": 508,
+        "invalid_groups": 44,
+        "noncontrolling_groups_held": 42
+      },
+      {
+        "period": 2,
+        "n": 76913,
+        "start_seconds": 3273.48,
+        "end_seconds": 6349.96,
+        "shared_alignment_events": 703,
+        "alignment_offset_median": 2.299999960087007e-05,
+        "alignment_residual_p95": 0.032458200000655774,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6623847724051851,
+        "native_counts": [
+          26255,
+          14045,
+          30216,
+          6397
+        ],
+        "controlled_counts": [
+          26544,
+          13756,
+          30216,
+          6397
+        ],
+        "native_control_disagree": 0.02990074441687345,
+        "confirmed_control_groups": 550,
+        "noncontrolling_groups_held": 35,
+        "invalid_groups": 52
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3833",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 193235,
+      "duplicate_rows": 654
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 82536,
+        "start_seconds": 140.68,
+        "end_seconds": 3442.08,
+        "shared_alignment_events": 639,
+        "alignment_offset_median": 1.6000000016447302e-05,
+        "alignment_residual_p95": 0.000506100000029619,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.5713627992633518,
+        "native_counts": [
+          14734,
+          20693,
+          45316,
+          1793
+        ],
+        "controlled_counts": [
+          14847,
+          20580,
+          45316,
+          1793
+        ],
+        "native_control_disagree": 0.023005052643464023,
+        "confirmed_control_groups": 508,
+        "invalid_groups": 52,
+        "noncontrolling_groups_held": 30
+      },
+      {
+        "period": 2,
+        "n": 78107,
+        "start_seconds": 3486.92,
+        "end_seconds": 6611.16,
+        "shared_alignment_events": 646,
+        "alignment_offset_median": 0.0333504999998695,
+        "alignment_residual_p95": 0.03262650000033318,
+        "applied_shift": 0.0333504999998695,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6259618216036975,
+        "native_counts": [
+          13157,
+          24357,
+          39832,
+          761
+        ],
+        "controlled_counts": [
+          12112,
+          25119,
+          39832,
+          1044
+        ],
+        "native_control_disagree": 0.02798742982998039,
+        "confirmed_control_groups": 515,
+        "invalid_groups": 36,
+        "noncontrolling_groups_held": 28
+      }
+    ],
+    "event_periods": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3834",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 180875,
+      "duplicate_rows": 677
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 72054,
+        "start_seconds": 94.0,
+        "end_seconds": 2976.12,
+        "shared_alignment_events": 720,
+        "alignment_offset_median": 5.8500000022831955e-05,
+        "alignment_residual_p95": 0.0005516000000284293,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.7115774280400811,
+        "native_counts": [
+          20534,
+          22692,
+          26383,
+          2445
+        ],
+        "controlled_counts": [
+          20513,
+          22609,
+          26383,
+          2549
+        ],
+        "native_control_disagree": 0.018065024813320348,
+        "confirmed_control_groups": 608,
+        "invalid_groups": 37,
+        "noncontrolling_groups_held": 18
+      },
+      {
+        "period": 2,
+        "n": 78260,
+        "start_seconds": 3038.64,
+        "end_seconds": 6169.0,
+        "shared_alignment_events": 700,
+        "alignment_offset_median": 8.099999968180782e-05,
+        "alignment_residual_p95": 0.000550049999355906,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6658062867365193,
+        "native_counts": [
+          23665,
+          20917,
+          32546,
+          1132
+        ],
+        "controlled_counts": [
+          23117,
+          21465,
+          32546,
+          1132
+        ],
+        "native_control_disagree": 0.024987663182450316,
+        "confirmed_control_groups": 588,
+        "noncontrolling_groups_held": 27,
+        "invalid_groups": 34
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3835",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 184106,
+      "duplicate_rows": 794
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 75697,
+        "start_seconds": 100.44,
+        "end_seconds": 3128.28,
+        "shared_alignment_events": 609,
+        "alignment_offset_median": 1.1000000085914508e-05,
+        "alignment_residual_p95": 0.0007824000001392055,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6457455381322906,
+        "native_counts": [
+          22279,
+          12759,
+          39112,
+          1547
+        ],
+        "controlled_counts": [
+          22649,
+          12389,
+          39112,
+          1547
+        ],
+        "native_control_disagree": 0.019521662195330785,
+        "confirmed_control_groups": 502,
+        "invalid_groups": 34,
+        "noncontrolling_groups_held": 20
+      },
+      {
+        "period": 2,
+        "n": 77215,
+        "start_seconds": 3163.64,
+        "end_seconds": 6252.2,
+        "shared_alignment_events": 685,
+        "alignment_offset_median": 0.03343300000005911,
+        "alignment_residual_p95": 0.01332019999945232,
+        "applied_shift": 0.03343300000005911,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.67568477627404,
+        "native_counts": [
+          21023,
+          18106,
+          35769,
+          2317
+        ],
+        "controlled_counts": [
+          21114,
+          18015,
+          35769,
+          2317
+        ],
+        "native_control_disagree": 0.025888727031102253,
+        "confirmed_control_groups": 534,
+        "invalid_groups": 54,
+        "noncontrolling_groups_held": 29
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3836",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 175496,
+      "duplicate_rows": 549
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 68950,
+        "start_seconds": 97.52,
+        "end_seconds": 2855.48,
+        "shared_alignment_events": 748,
+        "alignment_offset_median": 2.4499999966565156e-05,
+        "alignment_residual_p95": 0.0004931499999997868,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.8164612037708484,
+        "native_counts": [
+          19618,
+          27558,
+          20851,
+          923
+        ],
+        "controlled_counts": [
+          19210,
+          27966,
+          20851,
+          923
+        ],
+        "native_control_disagree": 0.02051890791928099,
+        "confirmed_control_groups": 642,
+        "invalid_groups": 34,
+        "noncontrolling_groups_held": 26
+      },
+      {
+        "period": 2,
+        "n": 76984,
+        "start_seconds": 2938.64,
+        "end_seconds": 6017.96,
+        "shared_alignment_events": 655,
+        "alignment_offset_median": 2.2000000171829015e-05,
+        "alignment_residual_p95": 0.0005508999998710345,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6770108074405071,
+        "native_counts": [
+          27976,
+          10935,
+          36607,
+          1466
+        ],
+        "controlled_counts": [
+          28321,
+          10590,
+          36607,
+          1466
+        ],
+        "native_control_disagree": 0.024029194829225668,
+        "confirmed_control_groups": 538,
+        "noncontrolling_groups_held": 27,
+        "invalid_groups": 31
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3837",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 178577,
+      "duplicate_rows": 605
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 73047,
+        "start_seconds": 207.08,
+        "end_seconds": 3128.92,
+        "shared_alignment_events": 643,
+        "alignment_offset_median": 4.4000000116284355e-05,
+        "alignment_residual_p95": 0.00051780000007966,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6969485399811081,
+        "native_counts": [
+          26181,
+          13879,
+          32254,
+          733
+        ],
+        "controlled_counts": [
+          26863,
+          13197,
+          32254,
+          733
+        ],
+        "native_control_disagree": 0.021667498751872193,
+        "confirmed_control_groups": 549,
+        "noncontrolling_groups_held": 26,
+        "invalid_groups": 33
+      },
+      {
+        "period": 2,
+        "n": 75410,
+        "start_seconds": 3159.84,
+        "end_seconds": 6176.2,
+        "shared_alignment_events": 699,
+        "alignment_offset_median": 2.89999998130952e-05,
+        "alignment_residual_p95": 0.0005457000004298611,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6690889802413473,
+        "native_counts": [
+          23531,
+          17364,
+          31894,
+          2621
+        ],
+        "controlled_counts": [
+          23696,
+          17199,
+          31894,
+          2621
+        ],
+        "native_control_disagree": 0.010050128377552267,
+        "confirmed_control_groups": 566,
+        "invalid_groups": 55,
+        "noncontrolling_groups_held": 21
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3838",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 182311,
+      "duplicate_rows": 607
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 75020,
+        "start_seconds": 94.08,
+        "end_seconds": 3094.84,
+        "shared_alignment_events": 740,
+        "alignment_offset_median": 2.4500000108673703e-05,
+        "alignment_residual_p95": 0.0005147000000079059,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.7055318581711544,
+        "native_counts": [
+          23304,
+          20239,
+          28469,
+          3008
+        ],
+        "controlled_counts": [
+          23201,
+          20323,
+          28469,
+          3027
+        ],
+        "native_control_disagree": 0.017898171123977576,
+        "confirmed_control_groups": 610,
+        "invalid_groups": 33,
+        "noncontrolling_groups_held": 26
+      },
+      {
+        "period": 2,
+        "n": 76550,
+        "start_seconds": 3167.64,
+        "end_seconds": 6229.6,
+        "shared_alignment_events": 660,
+        "alignment_offset_median": 4.200000012133387e-05,
+        "alignment_residual_p95": 0.0008132500001011065,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6883213585891574,
+        "native_counts": [
+          16789,
+          24465,
+          33575,
+          1721
+        ],
+        "controlled_counts": [
+          17013,
+          24167,
+          33575,
+          1795
+        ],
+        "native_control_disagree": 0.0263234579893152,
+        "confirmed_control_groups": 528,
+        "invalid_groups": 32,
+        "noncontrolling_groups_held": 28
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3839",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 176979,
+      "duplicate_rows": 576
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 70960,
+        "start_seconds": 83.36,
+        "end_seconds": 2921.72,
+        "shared_alignment_events": 732,
+        "alignment_offset_median": 1.0500000030333467e-05,
+        "alignment_residual_p95": 0.0005029500001000997,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.7402762119503946,
+        "native_counts": [
+          26655,
+          14420,
+          28366,
+          1519
+        ],
+        "controlled_counts": [
+          27065,
+          14010,
+          28366,
+          1519
+        ],
+        "native_control_disagree": 0.02317711503347535,
+        "confirmed_control_groups": 603,
+        "noncontrolling_groups_held": 37,
+        "invalid_groups": 47
+      },
+      {
+        "period": 2,
+        "n": 76188,
+        "start_seconds": 2991.64,
+        "end_seconds": 6039.12,
+        "shared_alignment_events": 637,
+        "alignment_offset_median": 0.03339400000004389,
+        "alignment_residual_p95": 0.0005051999999523104,
+        "applied_shift": 0.03339400000004389,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6617840079802594,
+        "native_counts": [
+          21518,
+          16489,
+          37231,
+          950
+        ],
+        "controlled_counts": [
+          21443,
+          16564,
+          37231,
+          950
+        ],
+        "native_control_disagree": 0.020654090036045993,
+        "confirmed_control_groups": 516,
+        "noncontrolling_groups_held": 26,
+        "invalid_groups": 39
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3840",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 187312,
+      "duplicate_rows": 999
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 78588,
+        "start_seconds": 125.28,
+        "end_seconds": 3268.76,
+        "shared_alignment_events": 610,
+        "alignment_offset_median": 2.2999999941930582e-05,
+        "alignment_residual_p95": 0.0007808500000237443,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.5255128009365297,
+        "native_counts": [
+          14550,
+          18527,
+          43676,
+          1835
+        ],
+        "controlled_counts": [
+          14490,
+          18505,
+          43676,
+          1917
+        ],
+        "native_control_disagree": 0.026003939990907714,
+        "confirmed_control_groups": 476,
+        "invalid_groups": 49,
+        "noncontrolling_groups_held": 21
+      },
+      {
+        "period": 2,
+        "n": 76827,
+        "start_seconds": 3302.48,
+        "end_seconds": 6375.52,
+        "shared_alignment_events": 664,
+        "alignment_offset_median": 0.03340200000002369,
+        "alignment_residual_p95": 0.0006580000001577,
+        "applied_shift": 0.03340200000002369,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6042537128873964,
+        "native_counts": [
+          16799,
+          23307,
+          34010,
+          2711
+        ],
+        "controlled_counts": [
+          17169,
+          22901,
+          34010,
+          2747
+        ],
+        "native_control_disagree": 0.02300973296730721,
+        "confirmed_control_groups": 514,
+        "invalid_groups": 57,
+        "noncontrolling_groups_held": 24
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3841",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 191422,
+      "duplicate_rows": 845
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 75107,
+        "start_seconds": 190.28,
+        "end_seconds": 3194.52,
+        "shared_alignment_events": 670,
+        "alignment_offset_median": 5.050000009987343e-05,
+        "alignment_residual_p95": 0.0006181499999513506,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6818938314671069,
+        "native_counts": [
+          22447,
+          18002,
+          33873,
+          785
+        ],
+        "controlled_counts": [
+          22531,
+          17918,
+          33873,
+          785
+        ],
+        "native_control_disagree": 0.019629657099063016,
+        "confirmed_control_groups": 561,
+        "noncontrolling_groups_held": 26,
+        "invalid_groups": 23
+      },
+      {
+        "period": 2,
+        "n": 83865,
+        "start_seconds": 3227.68,
+        "end_seconds": 6582.24,
+        "shared_alignment_events": 665,
+        "alignment_offset_median": 0.03340600000046834,
+        "alignment_residual_p95": 0.02685019999935204,
+        "applied_shift": 0.03340600000046834,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6165623323197997,
+        "native_counts": [
+          23804,
+          13970,
+          44149,
+          1942
+        ],
+        "controlled_counts": [
+          24156,
+          13618,
+          44149,
+          1942
+        ],
+        "native_control_disagree": 0.024143590829671203,
+        "confirmed_control_groups": 522,
+        "noncontrolling_groups_held": 31,
+        "invalid_groups": 38
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3842",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 174743,
+      "duplicate_rows": 501
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 68978,
+        "start_seconds": 62.44,
+        "end_seconds": 2821.52,
+        "shared_alignment_events": 743,
+        "alignment_offset_median": 3.1999999976051186e-05,
+        "alignment_residual_p95": 0.000651200000004337,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.8105627881353475,
+        "native_counts": [
+          25199,
+          21138,
+          21911,
+          730
+        ],
+        "controlled_counts": [
+          25295,
+          21042,
+          21911,
+          730
+        ],
+        "native_control_disagree": 0.010229406305975786,
+        "confirmed_control_groups": 650,
+        "noncontrolling_groups_held": 22,
+        "invalid_groups": 32
+      },
+      {
+        "period": 2,
+        "n": 76367,
+        "start_seconds": 2888.84,
+        "end_seconds": 5943.48,
+        "shared_alignment_events": 662,
+        "alignment_offset_median": 0.033395500000096945,
+        "alignment_residual_p95": 0.0004904000009219088,
+        "applied_shift": 0.033395500000096945,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6843139052208415,
+        "native_counts": [
+          23728,
+          17792,
+          33762,
+          1085
+        ],
+        "controlled_counts": [
+          23145,
+          18375,
+          33762,
+          1085
+        ],
+        "native_control_disagree": 0.02979287090558767,
+        "confirmed_control_groups": 546,
+        "noncontrolling_groups_held": 34,
+        "invalid_groups": 35
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3843",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 186143,
+      "duplicate_rows": 669
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 72015,
+        "start_seconds": 89.92,
+        "end_seconds": 2970.48,
+        "shared_alignment_events": 678,
+        "alignment_offset_median": 2.599999993435631e-05,
+        "alignment_residual_p95": 0.0005327999999394694,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6613899881969034,
+        "native_counts": [
+          28809,
+          11521,
+          31292,
+          393
+        ],
+        "controlled_counts": [
+          27317,
+          11627,
+          31292,
+          1779
+        ],
+        "native_control_disagree": 0.031635168447000823,
+        "confirmed_control_groups": 574,
+        "invalid_groups": 23,
+        "noncontrolling_groups_held": 32
+      },
+      {
+        "period": 2,
+        "n": 82700,
+        "start_seconds": 3012.32,
+        "end_seconds": 6320.28,
+        "shared_alignment_events": 709,
+        "alignment_offset_median": 1.3000000308238668e-05,
+        "alignment_residual_p95": 0.0004879999994955142,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6065538089480048,
+        "native_counts": [
+          20927,
+          19742,
+          39871,
+          2160
+        ],
+        "controlled_counts": [
+          20629,
+          19860,
+          39871,
+          2340
+        ],
+        "native_control_disagree": 0.021536713675319223,
+        "confirmed_control_groups": 588,
+        "invalid_groups": 45,
+        "noncontrolling_groups_held": 29
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3844",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 186028,
+      "duplicate_rows": 920
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 76495,
+        "start_seconds": 51.12,
+        "end_seconds": 3110.88,
+        "shared_alignment_events": 549,
+        "alignment_offset_median": 1.3999999964653398e-05,
+        "alignment_residual_p95": 0.001266799999893924,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.5090920975227139,
+        "native_counts": [
+          17974,
+          15678,
+          40991,
+          1852
+        ],
+        "controlled_counts": [
+          17472,
+          16140,
+          40991,
+          1892
+        ],
+        "native_control_disagree": 0.029275258836129952,
+        "confirmed_control_groups": 414,
+        "noncontrolling_groups_held": 27,
+        "invalid_groups": 42
+      },
+      {
+        "period": 2,
+        "n": 77915,
+        "start_seconds": 3210.6,
+        "end_seconds": 6327.16,
+        "shared_alignment_events": 605,
+        "alignment_offset_median": 6.200000007083872e-05,
+        "alignment_residual_p95": 0.03278259999951842,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.54759674003722,
+        "native_counts": [
+          20733,
+          11326,
+          42913,
+          2943
+        ],
+        "controlled_counts": [
+          20689,
+          11370,
+          42913,
+          2943
+        ],
+        "native_control_disagree": 0.021647587260987554,
+        "confirmed_control_groups": 455,
+        "invalid_groups": 58,
+        "noncontrolling_groups_held": 24
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3845",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 178621,
+      "duplicate_rows": 468
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 72014,
+        "start_seconds": 92.08,
+        "end_seconds": 2972.6,
+        "shared_alignment_events": 771,
+        "alignment_offset_median": 2.89999998130952e-05,
+        "alignment_residual_p95": 0.0005034999999793399,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6867275807481878,
+        "native_counts": [
+          27732,
+          15274,
+          27199,
+          1809
+        ],
+        "controlled_counts": [
+          28014,
+          14950,
+          27199,
+          1851
+        ],
+        "native_control_disagree": 0.013918629550321198,
+        "confirmed_control_groups": 646,
+        "invalid_groups": 45,
+        "noncontrolling_groups_held": 27
+      },
+      {
+        "period": 2,
+        "n": 76594,
+        "start_seconds": 3010.4,
+        "end_seconds": 6074.12,
+        "shared_alignment_events": 784,
+        "alignment_offset_median": 0.033409000000119704,
+        "alignment_residual_p95": 0.0005100000002357774,
+        "applied_shift": 0.033409000000119704,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.7279160247538972,
+        "native_counts": [
+          26884,
+          22240,
+          25706,
+          1764
+        ],
+        "controlled_counts": [
+          26982,
+          22142,
+          25706,
+          1764
+        ],
+        "native_control_disagree": 0.0156746193306734,
+        "confirmed_control_groups": 670,
+        "invalid_groups": 48,
+        "noncontrolling_groups_held": 25
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3846",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 178658,
+      "duplicate_rows": 628
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 75001,
+        "start_seconds": 176.24,
+        "end_seconds": 3176.24,
+        "shared_alignment_events": 664,
+        "alignment_offset_median": 1.4999999848441803e-05,
+        "alignment_residual_p95": 0.0005086999999662112,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6732976893641418,
+        "native_counts": [
+          10533,
+          29183,
+          34153,
+          1132
+        ],
+        "controlled_counts": [
+          9997,
+          29719,
+          34153,
+          1132
+        ],
+        "native_control_disagree": 0.02064659079464196,
+        "confirmed_control_groups": 563,
+        "invalid_groups": 24,
+        "noncontrolling_groups_held": 28
+      },
+      {
+        "period": 2,
+        "n": 73505,
+        "start_seconds": 3239.88,
+        "end_seconds": 6180.04,
+        "shared_alignment_events": 573,
+        "alignment_offset_median": 0.033393999999134394,
+        "alignment_residual_p95": 0.0005167999990590032,
+        "applied_shift": 0.033393999999134394,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6140262567172301,
+        "native_counts": [
+          16577,
+          17906,
+          38350,
+          672
+        ],
+        "controlled_counts": [
+          16693,
+          17790,
+          38350,
+          672
+        ],
+        "native_control_disagree": 0.019487863584954905,
+        "confirmed_control_groups": 478,
+        "invalid_groups": 35,
+        "noncontrolling_groups_held": 26
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3847",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 193219,
+      "duplicate_rows": 881
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 78124,
+        "start_seconds": 134.28,
+        "end_seconds": 3259.2,
+        "shared_alignment_events": 719,
+        "alignment_offset_median": 1.5999999959603883e-05,
+        "alignment_residual_p95": 0.008421700000121933,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6991705493830321,
+        "native_counts": [
+          17337,
+          28060,
+          30478,
+          2249
+        ],
+        "controlled_counts": [
+          17244,
+          28013,
+          30478,
+          2389
+        ],
+        "native_control_disagree": 0.016461541860927593,
+        "confirmed_control_groups": 578,
+        "invalid_groups": 32,
+        "noncontrolling_groups_held": 31
+      },
+      {
+        "period": 2,
+        "n": 82316,
+        "start_seconds": 3339.64,
+        "end_seconds": 6632.24,
+        "shared_alignment_events": 662,
+        "alignment_offset_median": 1.9499999780236976e-05,
+        "alignment_residual_p95": 0.0005705499999748968,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6560085524077943,
+        "native_counts": [
+          23888,
+          17568,
+          38919,
+          1941
+        ],
+        "controlled_counts": [
+          23754,
+          17591,
+          38919,
+          2052
+        ],
+        "native_control_disagree": 0.013109203047526908,
+        "confirmed_control_groups": 541,
+        "noncontrolling_groups_held": 27,
+        "invalid_groups": 34
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3848",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 177440,
+      "duplicate_rows": 1131
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 70493,
+        "start_seconds": 156.92,
+        "end_seconds": 2976.6,
+        "shared_alignment_events": 727,
+        "alignment_offset_median": 2.6000000161729986e-05,
+        "alignment_residual_p95": 0.0007034999998893444,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.7939086150397912,
+        "native_counts": [
+          14588,
+          28018,
+          24628,
+          3259
+        ],
+        "controlled_counts": [
+          14371,
+          28235,
+          24628,
+          3259
+        ],
+        "native_control_disagree": 0.014716237149697225,
+        "confirmed_control_groups": 609,
+        "noncontrolling_groups_held": 31,
+        "invalid_groups": 24
+      },
+      {
+        "period": 2,
+        "n": 76577,
+        "start_seconds": 3065.92,
+        "end_seconds": 6128.96,
+        "shared_alignment_events": 696,
+        "alignment_offset_median": 0.03340049999974326,
+        "alignment_residual_p95": 0.03265299999998206,
+        "applied_shift": 0.03340049999974326,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.7046632800971571,
+        "native_counts": [
+          13508,
+          28073,
+          31957,
+          3039
+        ],
+        "controlled_counts": [
+          13105,
+          28476,
+          31957,
+          3039
+        ],
+        "native_control_disagree": 0.02532406628027224,
+        "confirmed_control_groups": 564,
+        "noncontrolling_groups_held": 35,
+        "invalid_groups": 34
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3849",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 189266,
+      "duplicate_rows": 548
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 70859,
+        "start_seconds": 68.84,
+        "end_seconds": 2903.16,
+        "shared_alignment_events": 671,
+        "alignment_offset_median": 2.40000001667795e-05,
+        "alignment_residual_p95": 0.0005085000002509332,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6641075939541907,
+        "native_counts": [
+          17580,
+          21042,
+          31034,
+          1203
+        ],
+        "controlled_counts": [
+          17611,
+          21011,
+          31034,
+          1203
+        ],
+        "native_control_disagree": 0.029283827870125834,
+        "confirmed_control_groups": 535,
+        "noncontrolling_groups_held": 40,
+        "invalid_groups": 44
+      },
+      {
+        "period": 2,
+        "n": 86562,
+        "start_seconds": 2983.36,
+        "end_seconds": 6445.8,
+        "shared_alignment_events": 732,
+        "alignment_offset_median": 0.03336899999999332,
+        "alignment_residual_p95": 0.00048700000022563474,
+        "applied_shift": 0.03336899999999332,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.599396964025785,
+        "native_counts": [
+          13368,
+          27348,
+          44190,
+          1656
+        ],
+        "controlled_counts": [
+          12939,
+          27761,
+          44190,
+          1672
+        ],
+        "native_control_disagree": 0.02538083538083538,
+        "confirmed_control_groups": 573,
+        "noncontrolling_groups_held": 42,
+        "invalid_groups": 59
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3850",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 178934,
+      "duplicate_rows": 694
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 72164,
+        "start_seconds": 82.44,
+        "end_seconds": 2968.96,
+        "shared_alignment_events": 715,
+        "alignment_offset_median": 1.6999999957079126e-05,
+        "alignment_residual_p95": 0.0005032999999684761,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.7195693143395598,
+        "native_counts": [
+          16307,
+          29194,
+          24642,
+          2021
+        ],
+        "controlled_counts": [
+          15781,
+          29720,
+          24642,
+          2021
+        ],
+        "native_control_disagree": 0.02584558581130085,
+        "confirmed_control_groups": 589,
+        "noncontrolling_groups_held": 35,
+        "invalid_groups": 37
+      },
+      {
+        "period": 2,
+        "n": 76516,
+        "start_seconds": 3042.28,
+        "end_seconds": 6102.88,
+        "shared_alignment_events": 831,
+        "alignment_offset_median": 3.7000000702391844e-05,
+        "alignment_residual_p95": 0.0005150000006324262,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.7584165403314339,
+        "native_counts": [
+          11630,
+          39904,
+          24044,
+          938
+        ],
+        "controlled_counts": [
+          11381,
+          40153,
+          24044,
+          938
+        ],
+        "native_control_disagree": 0.01014863973299181,
+        "confirmed_control_groups": 739,
+        "invalid_groups": 25,
+        "noncontrolling_groups_held": 21
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3851",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 187629,
+      "duplicate_rows": 918
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 76820,
+        "start_seconds": 185.96,
+        "end_seconds": 3258.72,
+        "shared_alignment_events": 617,
+        "alignment_offset_median": 2.000000222324161e-06,
+        "alignment_residual_p95": 0.00920959999966722,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6415256443634471,
+        "native_counts": [
+          11157,
+          22602,
+          39793,
+          3268
+        ],
+        "controlled_counts": [
+          10988,
+          22771,
+          39793,
+          3268
+        ],
+        "native_control_disagree": 0.02994756953701235,
+        "confirmed_control_groups": 471,
+        "noncontrolling_groups_held": 33,
+        "invalid_groups": 54
+      },
+      {
+        "period": 2,
+        "n": 78927,
+        "start_seconds": 3323.96,
+        "end_seconds": 6481.0,
+        "shared_alignment_events": 593,
+        "alignment_offset_median": 0.033400000000256114,
+        "alignment_residual_p95": 0.032779199999458795,
+        "applied_shift": 0.033400000000256114,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.5818287784915175,
+        "native_counts": [
+          14132,
+          16159,
+          45748,
+          2888
+        ],
+        "controlled_counts": [
+          13804,
+          16444,
+          45748,
+          2931
+        ],
+        "native_control_disagree": 0.045920391430838405,
+        "confirmed_control_groups": 439,
+        "noncontrolling_groups_held": 44,
+        "invalid_groups": 45
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3852",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 176720,
+      "duplicate_rows": 606
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 73439,
+        "start_seconds": 186.12,
+        "end_seconds": 3123.64,
+        "shared_alignment_events": 786,
+        "alignment_offset_median": 1.2000000197076588e-05,
+        "alignment_residual_p95": 0.000493750000131854,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.7932297553071257,
+        "native_counts": [
+          23899,
+          26449,
+          22130,
+          961
+        ],
+        "controlled_counts": [
+          23879,
+          26469,
+          22130,
+          961
+        ],
+        "native_control_disagree": 0.011241757368713752,
+        "confirmed_control_groups": 679,
+        "invalid_groups": 43,
+        "noncontrolling_groups_held": 21
+      },
+      {
+        "period": 2,
+        "n": 73468,
+        "start_seconds": 3181.0,
+        "end_seconds": 6119.68,
+        "shared_alignment_events": 763,
+        "alignment_offset_median": 0.033429999999953,
+        "alignment_residual_p95": 0.0005840000002081067,
+        "applied_shift": 0.033429999999953,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.7789241574563075,
+        "native_counts": [
+          23834,
+          23629,
+          23123,
+          2882
+        ],
+        "controlled_counts": [
+          23617,
+          23846,
+          23123,
+          2882
+        ],
+        "native_control_disagree": 0.02606240650612056,
+        "confirmed_control_groups": 635,
+        "invalid_groups": 37,
+        "noncontrolling_groups_held": 35
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3853",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 178676,
+      "duplicate_rows": 658
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 75146,
+        "start_seconds": 43.4,
+        "end_seconds": 3049.2,
+        "shared_alignment_events": 636,
+        "alignment_offset_median": -1.44999999065476e-05,
+        "alignment_residual_p95": 0.0004899999999068427,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6507864690069997,
+        "native_counts": [
+          18806,
+          17623,
+          37618,
+          1099
+        ],
+        "controlled_counts": [
+          18936,
+          17493,
+          37618,
+          1099
+        ],
+        "native_control_disagree": 0.025638914051991545,
+        "confirmed_control_groups": 520,
+        "invalid_groups": 41,
+        "noncontrolling_groups_held": 31
+      },
+      {
+        "period": 2,
+        "n": 73349,
+        "start_seconds": 3128.0,
+        "end_seconds": 6061.92,
+        "shared_alignment_events": 646,
+        "alignment_offset_median": 0.03340400000001864,
+        "alignment_residual_p95": 0.0005347500002699235,
+        "applied_shift": 0.03340400000001864,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6894845192163492,
+        "native_counts": [
+          24719,
+          14688,
+          32002,
+          1940
+        ],
+        "controlled_counts": [
+          24646,
+          14761,
+          32002,
+          1940
+        ],
+        "native_control_disagree": 0.014895830689978937,
+        "confirmed_control_groups": 523,
+        "invalid_groups": 42,
+        "noncontrolling_groups_held": 17
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3854",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 177231,
+      "duplicate_rows": 589
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 69358,
+        "start_seconds": 93.76,
+        "end_seconds": 2868.04,
+        "shared_alignment_events": 815,
+        "alignment_offset_median": -1.2000000424450263e-05,
+        "alignment_residual_p95": 0.0004823000001351829,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.7948614435248998,
+        "native_counts": [
+          8319,
+          42660,
+          16906,
+          1473
+        ],
+        "controlled_counts": [
+          8009,
+          42970,
+          16906,
+          1473
+        ],
+        "native_control_disagree": 0.011612624806292788,
+        "confirmed_control_groups": 699,
+        "invalid_groups": 48,
+        "noncontrolling_groups_held": 17
+      },
+      {
+        "period": 2,
+        "n": 77988,
+        "start_seconds": 2901.24,
+        "end_seconds": 6020.72,
+        "shared_alignment_events": 769,
+        "alignment_offset_median": 0.03337499999997817,
+        "alignment_residual_p95": 0.0004935999999361228,
+        "applied_shift": 0.03337499999997817,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6586013232805047,
+        "native_counts": [
+          9236,
+          36207,
+          29916,
+          2629
+        ],
+        "controlled_counts": [
+          8653,
+          36790,
+          29916,
+          2629
+        ],
+        "native_control_disagree": 0.017186365336795545,
+        "confirmed_control_groups": 654,
+        "invalid_groups": 44,
+        "noncontrolling_groups_held": 28
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3855",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 182443,
+      "duplicate_rows": 758
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 69014,
+        "start_seconds": 102.44,
+        "end_seconds": 2862.96,
+        "shared_alignment_events": 764,
+        "alignment_offset_median": 2.6000000048043148e-05,
+        "alignment_residual_p95": 0.0005069999996294428,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.7451241777030747,
+        "native_counts": [
+          16005,
+          30507,
+          21475,
+          1027
+        ],
+        "controlled_counts": [
+          15123,
+          31368,
+          21475,
+          1048
+        ],
+        "native_control_disagree": 0.027295605601084082,
+        "confirmed_control_groups": 632,
+        "noncontrolling_groups_held": 31,
+        "invalid_groups": 37
+      },
+      {
+        "period": 2,
+        "n": 82540,
+        "start_seconds": 2951.16,
+        "end_seconds": 6252.72,
+        "shared_alignment_events": 775,
+        "alignment_offset_median": 2.500000027794158e-05,
+        "alignment_residual_p95": 0.0007301999995434015,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6452629028349891,
+        "native_counts": [
+          15751,
+          28766,
+          37241,
+          782
+        ],
+        "controlled_counts": [
+          15730,
+          28750,
+          37241,
+          819
+        ],
+        "native_control_disagree": 0.02704586330935252,
+        "confirmed_control_groups": 617,
+        "noncontrolling_groups_held": 42,
+        "invalid_groups": 34
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3856",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 194552,
+      "duplicate_rows": 730
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 79617,
+        "start_seconds": 176.52,
+        "end_seconds": 3361.16,
+        "shared_alignment_events": 630,
+        "alignment_offset_median": 3.299999994510472e-05,
+        "alignment_residual_p95": 0.0005700500000159504,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.5545549317356846,
+        "native_counts": [
+          15489,
+          18646,
+          43445,
+          2037
+        ],
+        "controlled_counts": [
+          15343,
+          18756,
+          43445,
+          2073
+        ],
+        "native_control_disagree": 0.024575500747822516,
+        "confirmed_control_groups": 505,
+        "invalid_groups": 39,
+        "noncontrolling_groups_held": 28
+      },
+      {
+        "period": 2,
+        "n": 82061,
+        "start_seconds": 3429.88,
+        "end_seconds": 6712.28,
+        "shared_alignment_events": 728,
+        "alignment_offset_median": 0.033443000000261236,
+        "alignment_residual_p95": 0.0007721500003754034,
+        "applied_shift": 0.033443000000261236,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6173334470698627,
+        "native_counts": [
+          23869,
+          16250,
+          40992,
+          950
+        ],
+        "controlled_counts": [
+          23949,
+          16170,
+          40992,
+          950
+        ],
+        "native_control_disagree": 0.03225404421845011,
+        "confirmed_control_groups": 547,
+        "invalid_groups": 60,
+        "noncontrolling_groups_held": 41
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3857",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 178778,
+      "duplicate_rows": 640
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 70590,
+        "start_seconds": 45.24,
+        "end_seconds": 2868.8,
+        "shared_alignment_events": 646,
+        "alignment_offset_median": 1.1999999969702912e-05,
+        "alignment_residual_p95": 0.0004987500001334411,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.7013174670633234,
+        "native_counts": [
+          19007,
+          23100,
+          26700,
+          1783
+        ],
+        "controlled_counts": [
+          18608,
+          23460,
+          26700,
+          1822
+        ],
+        "native_control_disagree": 0.03133184134088853,
+        "confirmed_control_groups": 532,
+        "invalid_groups": 48,
+        "noncontrolling_groups_held": 24
+      },
+      {
+        "period": 2,
+        "n": 78005,
+        "start_seconds": 2920.88,
+        "end_seconds": 6041.04,
+        "shared_alignment_events": 648,
+        "alignment_offset_median": 2.6000000161729986e-05,
+        "alignment_residual_p95": 0.0005160000005162146,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6311390295493878,
+        "native_counts": [
+          13915,
+          26203,
+          36306,
+          1581
+        ],
+        "controlled_counts": [
+          13498,
+          26482,
+          36306,
+          1719
+        ],
+        "native_control_disagree": 0.036778503340088566,
+        "confirmed_control_groups": 522,
+        "invalid_groups": 44,
+        "noncontrolling_groups_held": 33
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3858",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 186415,
+      "duplicate_rows": 750
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 71935,
+        "start_seconds": 40.52,
+        "end_seconds": 2917.88,
+        "shared_alignment_events": 597,
+        "alignment_offset_median": 9.000000090964022e-06,
+        "alignment_residual_p95": 0.0011568000001716387,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6839090845902551,
+        "native_counts": [
+          19110,
+          20396,
+          30547,
+          1882
+        ],
+        "controlled_counts": [
+          18929,
+          20542,
+          30547,
+          1917
+        ],
+        "native_control_disagree": 0.027159180157584048,
+        "confirmed_control_groups": 484,
+        "noncontrolling_groups_held": 24,
+        "invalid_groups": 43
+      },
+      {
+        "period": 2,
+        "n": 82939,
+        "start_seconds": 2991.56,
+        "end_seconds": 6309.08,
+        "shared_alignment_events": 663,
+        "alignment_offset_median": 0.03342799999973067,
+        "alignment_residual_p95": 0.0007072999996580618,
+        "applied_shift": 0.03342799999973067,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.6104124718166363,
+        "native_counts": [
+          21749,
+          17590,
+          41887,
+          1713
+        ],
+        "controlled_counts": [
+          21287,
+          18052,
+          41887,
+          1713
+        ],
+        "native_control_disagree": 0.03060576018709169,
+        "confirmed_control_groups": 547,
+        "noncontrolling_groups_held": 34,
+        "invalid_groups": 28
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  },
+  {
+    "match": "3859",
+    "version": "raw_control_v2",
+    "source_fps": 29.97,
+    "raw_counts": {
+      "raw_rows": 187750,
+      "duplicate_rows": 733
+    },
+    "periods": [
+      {
+        "period": 1,
+        "n": 73423,
+        "start_seconds": 101.4,
+        "end_seconds": 3038.28,
+        "shared_alignment_events": 645,
+        "alignment_offset_median": 3.999999989900971e-05,
+        "alignment_residual_p95": 0.0005230000001120061,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.650082399248192,
+        "native_counts": [
+          15041,
+          26037,
+          30824,
+          1521
+        ],
+        "controlled_counts": [
+          14685,
+          26393,
+          30824,
+          1521
+        ],
+        "native_control_disagree": 0.022055601538536442,
+        "confirmed_control_groups": 538,
+        "noncontrolling_groups_held": 24,
+        "invalid_groups": 26
+      },
+      {
+        "period": 2,
+        "n": 82578,
+        "start_seconds": 3070.84,
+        "end_seconds": 6373.92,
+        "shared_alignment_events": 630,
+        "alignment_offset_median": 5.050000027040369e-05,
+        "alignment_residual_p95": 0.0008956500000977006,
+        "applied_shift": 0.0,
+        "alignment_accepted": true,
+        "coverage": 1.0,
+        "usable_geometry": 1.0,
+        "ball_seen": 0.5818135580905326,
+        "native_counts": [
+          15935,
+          21692,
+          42666,
+          2285
+        ],
+        "controlled_counts": [
+          15877,
+          21696,
+          42666,
+          2339
+        ],
+        "native_control_disagree": 0.020333750299417135,
+        "confirmed_control_groups": 508,
+        "noncontrolling_groups_held": 27,
+        "invalid_groups": 25
+      }
+    ],
+    "event_periods": [
+      1,
+      2
+    ]
+  }
+]

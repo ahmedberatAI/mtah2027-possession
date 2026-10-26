@@ -1,0 +1,36 @@
+scoreboard  gt\BAR-ATH_possession_gt_public.csv  199319 frames  7500 graded  21 gt segments
+ground truth has 17 possessions of mean 14.2 s  <- compare the poss and dur columns
+ranked on spell_f1_mean; gaps below ~0.38 are within noise (widest bootstrap interval, 17 possessions, 1000 draws)
+spellF1 = mean possession-spell F1 over IoU 0.3/0.4/0.5/0.6/0.7; transF1/lat_f at +/-25 frames
+
+rank  submission                macroF1  spellF1   poss     dur  transF1  lat_f  shareE  frag
+----  ------------------------  -------  -------  -----  ------  -------  -----  ------  ----
+   1  bigru_s20261027            0.9434   0.7862     12    19.8   0.6286   +6.9   0.029  0.76
+   2  bigru_s20261025            0.9440   0.7724     12    19.7   0.6286   +3.1   0.031  0.76
+   3  bigru_ensemble_equal       0.9433   0.7724     12    19.8   0.6286   +6.2   0.028  0.76
+   4  bigru_s20261026            0.9412   0.7724     12    19.8   0.6286   +7.4   0.028  0.76
+   5  lgb_balanced_s20261025     0.9250   0.6667     10    23.6   0.4848   +9.1   0.028  0.67
+   6  lgb_balanced_s20261026     0.9244   0.6667     10    23.6   0.4848   +9.4   0.028  0.67
+   7  lgb_balanced_s20261027     0.9243   0.6667     10    23.6   0.4848   +9.6   0.029  0.67
+   8  v7                         0.9244   0.6519     10    23.5   0.5455   +7.9   0.029  0.67
+   9  baseline_smooth125         0.5812   0.4242     16    18.5   0.1667   -7.7   0.052  0.81
+  10  baseline_smooth50          0.6207   0.3256     26    10.8   0.0816   +4.0   0.048  1.43
+  11  baseline_smooth25          0.6200   0.2868     36     7.6   0.2034   +8.2   0.056  1.90
+  12  baseline_raw               0.5972   0.0378    131     2.0   0.1410   -3.1   0.046  6.52
+
+macroF1 would order the field differently -- these move, biggest first:
+  lgb_balanced_s20261027     board #5   -> macroF1 #8    DOWN 3
+  baseline_smooth125         board #9   -> macroF1 #12   DOWN 3
+  bigru_s20261026            board #2   -> macroF1 #4    DOWN 2
+  lgb_balanced_s20261026     board #5   -> macroF1 #7    DOWN 2
+  v7                         board #8   -> macroF1 #6    up 2
+  bigru_s20261027            board #1   -> macroF1 #2    DOWN 1
+  bigru_s20261025            board #2   -> macroF1 #1    up 1
+  bigru_ensemble_equal       board #2   -> macroF1 #3    DOWN 1
+  baseline_smooth50          board #10  -> macroF1 #9    up 1
+  baseline_smooth25          board #11  -> macroF1 #10   up 1
+  baseline_raw               board #12  -> macroF1 #11   up 1
+  one that rises under macroF1 is trading possession structure for per-frame accuracy
+
+Wrote cache/github_public_comparison/official\scoreboard.csv
+Wrote 12 per-submission reports to cache/github_public_comparison/official\reports

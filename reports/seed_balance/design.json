@@ -1,0 +1,118 @@
+{
+  "seeds": [
+    20261025,
+    20261026,
+    20261027
+  ],
+  "neural_selection": {
+    "tcn": {
+      "config": {
+        "name": "tcn_64",
+        "kind": "tcn",
+        "width": 64,
+        "drop": 0.15,
+        "lr": 0.001
+      },
+      "epoch": 11,
+      "balanced_spellF1": 0.6962430852087448,
+      "by_source": {
+        "dfl": {
+          "J03WPY": 0.6291666666666667,
+          "J03WR9": 0.6880258899676375
+        },
+        "pff": {
+          "10502": 0.6789565217391303,
+          "10508": 0.7880059970014993,
+          "3818": 0.7403636363636364,
+          "3819": 0.7916666666666666,
+          "3823": 0.7705103969754253,
+          "3827": 0.7576994434137291,
+          "3828": 0.7248882265275709,
+          "3830": 0.6917562724014337,
+          "3844": 0.656084656084656,
+          "3849": 0.7205673758865249,
+          "3850": 0.7667415730337079,
+          "3854": 0.7194379391100701
+        }
+      }
+    },
+    "bigru": {
+      "config": {
+        "name": "bigru_64",
+        "kind": "bigru",
+        "width": 64,
+        "drop": 0.15,
+        "lr": 0.001
+      },
+      "epoch": 11,
+      "balanced_spellF1": 0.7030624328276076,
+      "by_source": {
+        "dfl": {
+          "J03WPY": 0.6377581120943953,
+          "J03WR9": 0.6908507223113964
+        },
+        "pff": {
+          "10502": 0.6613518197573658,
+          "10508": 0.7856929955290612,
+          "3818": 0.7630550621669626,
+          "3819": 0.7780590717299578,
+          "3823": 0.7984934086629003,
+          "3827": 0.7807050092764378,
+          "3828": 0.7197604790419162,
+          "3830": 0.6964028776978417,
+          "3844": 0.6560846560846562,
+          "3849": 0.7580419580419581,
+          "3850": 0.7568539325842697,
+          "3854": 0.7473441108545035
+        }
+      }
+    }
+  },
+  "selection_sha256": "00c1471b823a1d9dadb07a5d39f489f27a4f56778951dd5d342c5c64fa75a5e7",
+  "neural_fixed": {
+    "epochs": 11,
+    "steps": 192,
+    "batch": 16,
+    "input_hz": 12.5,
+    "output_hz": 25,
+    "scaler_seed": 20261024
+  },
+  "seed_effects": {
+    "neural": "initialization, dropout, training-window draws; scaler fixed",
+    "lightgbm": "seed, data_random_seed, feature_fraction_seed, bagging_seed"
+  },
+  "lightgbm_parameters": {
+    "objective": "binary",
+    "learning_rate": 0.05,
+    "num_leaves": 63,
+    "min_data_in_leaf": 200,
+    "feature_fraction": 0.8,
+    "bagging_fraction": 0.7,
+    "bagging_freq": 1,
+    "lambda_l2": 1.0,
+    "verbose": -1,
+    "seed": 0,
+    "num_threads": 8,
+    "deterministic": true,
+    "force_row_wise": true
+  },
+  "lightgbm_rounds": 400,
+  "lightgbm_weighting": {
+    "lgb_unbalanced": "one per row",
+    "lgb_balanced": "N/(2*N_source) per row; exact 50/50 source total and mean weight one"
+  },
+  "controlled_contrast": "paired LGB weights only; same rows, feature order, parameters and seed",
+  "all_training_matches": {
+    "dfl": 7,
+    "pff": 64
+  },
+  "external_tuning": false,
+  "decoder": "fixed B2 pen_team12; fixed learned-D and oracle-D diagnostics",
+  "previous_single_seed_not_in_new_mean": true,
+  "source_code": {
+    "exp_seed_balance.py": "3f1eeacae41aa81d017b0d094d9f7f036c019daea3bda644eec33b5999f5843e",
+    "exp_seq_pff.py": "03885e3e9a7ecb65fbd26840d53f1f16749372e7b2a1a5d6d1a76a2144409cc7",
+    "seq_pff.py": "561611ad37cd6969530fbe1d9f1695645c8abf40ee39d549193682d6b62ba279",
+    "exp_pff.py": "3480d83942c5dd3c2109cd41f90f9a97a2e918a72789b0c7128fd335fbfd9f20"
+  }
+}

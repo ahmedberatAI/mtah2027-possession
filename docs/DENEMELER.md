@@ -1,6 +1,143 @@
 # Deneme günlüğü — ne denendi, ne işe yaradı, ne yaramadı
 
+> **24 Ekim 2026 kural düzeltmesi:** Güncel resmi kurallar, BAR-ATH üzerinde
+> eğitim/doğrulama dahil hiçbir amaçla elle etiketlemeye izin vermiyor. Aşağıdaki
+> eski elle doğrulama önerileri geçersizdir. Yeni kapı deneyleri yalnız dış
+> maçlarda çalışır; sonuçlar `reports/gates/` altında tutulur.
+
 Amaç: aynı hataları tekrarlamamak. Her yeni denemede buraya bir satır ekleyin (tarih, ne, sonuç, karar).
+
+## 25 Ekim 2026 — DFL kontrollü etiketli BiGRU
+
+DFL `trk` etiketleri temiz takipten yeniden türetildi: canlı karelerin %6.68'i
+değişti, canlı takım değişimi 2351→972. Aynı 5+52 / 2+12 ayrımında iki ayar,
+üçer seed; kontrollü iç GT ile eski 64 ayarı seçildi. Üç tam-veri refit;
+özellikler, PFF, scaler, kaynak dengesi ve B2 sabit.
+
+Metrica-ctrl **0.8071→0.8176**, bölme göstergesi **%4.91→%2.07**; fakat kısa
+possession kaçırma **%53.99→%63.38**. SC-pp **0.6336→0.5778** (20/20 kayıp),
+faz **0.6221→0.5977**, Metrica-events **0.6452→0.5771**. Birleştirme artıyor;
+**bu dönüşüm genel yükseltme olarak alınmadı**, mevcut ensemble korunuyor.
+9 fit, 24 skor hücresi ve etiket müdahalesi/scaler ayrımı audit edildi;
+4 yeni test geçti. [Rapor](../reports/controlled_dfl_bigru/SONUC.md).
+
+## 25 Ekim 2026 — hata analizi ve iç doğrulamada hibrit seçimi
+
+5 DFL + 52 PFF ile üç BiGRU ve üç dengeli LGB yeniden eğitildi; 2 DFL +
+12 PFF yalnız seçimde. Beş sabit ağırlıkta en iyi **%100 BiGRU / %0 LGB**:
+iç spellF1 0.6947, %75/%25 karışım 0.6828. Seçim iki kaynak ortalamasında da
+saf BiGRU'yu destekliyor; dış sette ağırlık değiştirilmedi. Seçilen sonuç
+mevcut ensemble ile aynı; **yeni hibrit kazancı yok**.
+
+Hata teşhisi (IoU=.5): Metrica-ctrl'de BiGRU'nun eşleşmeyen tahmin oranı
+%19.03 (v7 %17.01), bölme göstergesi %4.91 (v7 %3.42). SC-pp'de <4 sn
+kaçırma v7 %82.59 → BiGRU %75.70; eşleşmeyen tahmin %38.82 → %33.33.
+SC-pp'de yalnız LGB 149, yalnız BiGRU 456 GT possession kurtarıyor;
+tamamlayıcılık sabit harmanla kazanca dönüşmedi. Altı yeni test, altı iç model
+ayrım/scaler/ağırlık auditi ve 32 dış hücre kontrolü geçti.
+[Sonuç](../reports/hybrid/SONUC.md), [hata analizi](../reports/hybrid/HATA_ANALIZI.md).
+
+## 25 Ekim 2026 — ensemble dış veri testi
+
+Sabit 1/3 olasılık ortalaması, gerçek v7 model dosyası, aynı learned-D/B2:
+SkillCorner-pp **0.5829 → 0.6336** (Δ +0.0507, %95 [+0.0436,+0.0586]),
+faz **0.5816 → 0.6221**; her ikisinde **20/20 maç**. Metrica kontrollü
+**0.8147 → 0.8071**, olay **0.6155 → 0.6452**; yalnız üç maç ve fark
+aralıkları sıfırı kapsıyor. Birleştirme SC-pp'de ayrı seed ortalamasına +0.0028
+ekliyor, bu küçük ek katkı belirsiz. **SC kazancı var; genel v7 değişimi yok.**
+24 eski seed hücresi birebir yeniden üretildi; 3 yeni test geçti.
+[Rapor](../reports/external_bigru_ensemble/SONUC.md).
+
+## 25 Ekim 2026 — eşit ağırlıklı BiGRU ensemble
+
+Üç kayıtlı BiGRU seed'inin P(home) olasılıklarına 1/3 aritmetik ağırlık;
+aynı v7 ölü-top kanalı ve B2. Public spellF1 **0.7724**, v7'ye **+0.1206**,
+ayrı seed skor ortalaması 0.7770'a **−0.0046**. Public ağırlık araması yapılmadı.
+**199.319 satırlık submission hazır ve resmî doğrulamadan geçti:**
+`submissions/barath_bigru_ensemble/bigru_ensemble_equal.csv`.
+[Rapor](../reports/barath_bigru_ensemble/SONUC.md). Dosya yarışmaya yüklenmedi;
+bu skor yalnız açık beş dakikaya aittir.
+
+## 25 Ekim 2026 — BAR-ATH açık bölüm karşılaştırması
+
+[Sonuç](../reports/barath_public/SONUC.md), [seed skorları](../reports/barath_public/RESULTS.md).
+Taktik/yayın ham dosyaları katılımcı bağlantısından indirildi. Aynı v7 kural
+tabanlı ölü-top kanalı ve B2 ile yalnız takım modeli değiştirildi. Yedi tam-maç
+CSV'si public skorlamadan önce donduruldu; public ayarı/seed seçimi yapılmadı.
+
+| Model | Public spellF1 | v7'ye fark | Karar |
+|---|---:|---:|---|
+| Yeniden üretilmiş v7 | 0.6519 | — | tarihsel ~0.652 yeniden üretildi |
+| Dengeli LightGBM, 3 seed | 0.6667±0.0000 | +0.0148 | küçük public artış |
+| BiGRU, 3 seed | 0.7770±0.0080; aralık 0.7724–0.7862 | +0.1252 | üç seed de kazandı; tam maç üstünlüğü henüz bilinmiyor |
+
+17 GT possession içeren kısa açık bölüm; resmî bootstrap aralıkları geniş.
+Resmî CLI ile skorlar doğrulandı, 32 test geçti. Dosyalar yerelde saklandı;
+yarışmaya gönderim veya otomatik model değişimi yapılmadı.
+
+## 24 Ekim 2026 — üç seed ve kaynak dengesi kontrolü
+
+[Sonuç](../reports/seed_balance/SONUC.md), [tüm eşli farklar](../reports/seed_balance/RESULTS.md).
+Üç yeni seed (20261025/26/27), aynı seçilmiş ayarlar, toplam 12 model:
+TCN/BiGRU + aynı seed'lerde normal/dengeli PFF LightGBM. LGB çiftinde yalnız
+kaynak ağırlığı değişir; ortalama satır ağırlığı 1, kaynak toplamları 50:50.
+
+| Deneme | Sonuç (3-seed learned-D spellF1) | Karar |
+|---|---|---|
+| SC-pp kaynak dengelemesi | normal LGB 0.5911→dengeli 0.5930; Δ +0.0020 [%95 −0.0029,+0.0070] | tek başına büyük kazancı açıklamıyor |
+| SC-pp TCN / BiGRU | 0.6243±0.0058 / 0.6308±0.0019; dengeli LGB üzerine +0.0313 / +0.0378; aralıklar pozitif | BiGRU daha kararlı; her seed'de 20/20 maç kontrolü geçiyor |
+| Metrica kontrollü | dengeli LGB 0.8173; TCN 0.8046; BiGRU 0.8024 | önceki tek seed iyimserdi; genel model yükseltmesi yok |
+
+29 test ve 112 değerlendirme hücresi doğrulandı. Aşağıdaki tek-seed sıra modeli
+sonuçları tarihsel kayıttır; kararlılık yorumunda bu üç-seed sonucu esas alınır.
+Saf mimari etkisi pencere/özellik işleme farklarından tamamen ayrılmış değildir.
+
+## 24 Ekim 2026 — dengeli PFF/DFL TCN ve BiGRU
+
+[Sonuç](../reports/sequence_pff/SONUC.md), [eşli skorlar](../reports/sequence_pff/RESULTS.md),
+[protokol](../reports/sequence_pff/METODOLOJI.md). Seçim 5 DFL+52 PFF eğitim /
+2 DFL+12 PFF iç doğrulama ile yapıldı; kaynaklar minibatch ve kayıpta 50:50.
+İki aday/mimariden 64 kanal, lr .001, dropout .15, epoch 11 seçildi; son
+modeller tüm 7+64 maçta yeniden eğitildi. Dış sonuçlarla ayar değiştirilmedi.
+
+| Deneme | Sonuç (learned-D spellF1) | Karar |
+|---|---|---|
+| TCN | Metrica-ctrl 0.8168; SC-pp 0.6265; PFF LightGBM'ye SC-pp +0.0352 [%95 +0.0278,+0.0430], 20/20 maç | güçlü SC adayı; Metrica kontrollüde belirgin üstünlük yok |
+| BiGRU | Metrica-ctrl 0.8120; events 0.6435; SC-pp 0.6284; PFF LightGBM'ye SC-pp +0.0370 [%95 +0.0300,+0.0444], 20/20 maç | önceki büyük kayıp tekrarlanmadı; genel v7 değişimi yapılmadı |
+
+23 test geçti. Tek seed / iki adaylık arama; kaynak dengesi ve mimari birlikte
+değiştiğinden kazanç yalnız veri miktarına veya mimariye atfedilemez.
+
+## 24 Ekim 2026 — PFF 64 maç eğitimi
+
+[Sonuç](../reports/pff/SONUC.md), [tüm skorlar](../reports/pff/RESULTS.md),
+[yöntem](../reports/pff/METODOLOJI.md). 64 maç / 134 devre 25 Hz'e hizalandı;
+59,33 saat ortak canlı veri, 5.892.500 takım-perspektifli eğitim satırı.
+Olaylardan türetilen Smoothed top sızıntı riski nedeniyle dışlandı.
+
+| Deneme | Sonuç (learned-D spellF1) | Karar |
+|---|---|---|
+| DFL7+PFF64 kontrollü; aynı v7 özellikleri/400 ağaç/B2 | Metrica-ctrl 0.8147→0.8144; SC-pp 0.5829→0.5913, 14/20 maç, Δ %95 [+0.0023,+0.0144] | küçük SC kazancı; genel üstünlük yok, v7 korunuyor |
+| Kontrollü / aktör-takım etiketleri, aynı PFF kareleri | kontrollü etiket katkısı Metrica-ctrl +0.0101, events −0.0053; SC-pp +0.0025, phase +0.0044 | tanım bağımlılığı sürüyor |
+| Yalnız PFF kontrollü | Metrica-ctrl 0.8123; SC-pp 0.5891 | birleşik eğitimi geçmedi |
+
+17 test ve 32 dış değerlendirme hücresi tamamlandı. Özel BAR-ATH skoru veya
+sıra modeli ölçülmedi; PFF etiketleri doğrulanmış GT değil, muhafazakâr vekildir.
+
+## 24 Ekim 2026 — üç bahis kapı testleri
+
+Tam rapor: [SONUC.md](../reports/gates/SONUC.md); ayrıntılı tablolar ve komutlar:
+[SUMMARY.md](../reports/gates/SUMMARY.md).
+
+| Deneme | Sonuç | Karar |
+|---|---|---|
+| DFL 2/4/7 takım eğitimi; 7 dengeli alt küme, sabit v7/B2 ve dead modeli | Metrica-ctrl 0.8022→0.8095→0.8147; SC-pp 0.5792→0.5813→0.5829 | küçük olumlu sinyal; 64 maç / sıra modeli kazancı kanıtlanmış değil |
+| Pas çapalarını tüm mevcut temas vekillerine genişletme; event precision .70 / recall .70 / team accuracy .95 | Δ Metrica-ctrl −0.0254, SC-pp +0.0269, SC-phase +0.0214 | ana +0.03 kapısı geçilmedi |
+| Sonradan eklenen tür ayrımlı pencere (keşifsel; olay türü doğru varsayılır) | Δ Metrica-ctrl −0.0204; SC-pp +0.0430 (20/20); SC-phase +0.0307 (20/20) | umut verici fakat konvansiyona bağlı; bağımsız video sonucu değil |
+| B2 açık/kapalı, sabit pen 12 | Metrica-ctrl +0.0424; Metrica-events −0.0345; SC-pp +0.0097 | upstream GT sahiplik konvansiyonunu netleştirmek öncelikli |
+| Gradient / SoccerTrack erişim kontrolü | PFF formu gönderildi, 64 maç (~3.93 GB) indirildi; CH/RE/TC/IT doğrulandı. SoccerTrack CC BY 4.0 fakat HF auto-gated/401 | Gradient etiket adaptörü gerekiyor (örnek tracking 29.97 fps, seyrek sahiplik); SoccerTrack olay içerikleri henüz doğrulanmadı |
+
+## Önceki deneyler
 Skorlar: public = ilk 5 dk (17 possession, spellF1 bootstrap aralığı ~0.27–0.62 → tek başına karar verdirmez).
 "Vekiller" = `src/proxy.py` (Smart Tagging duran top / takım uyumu, top-dışarı kapsaması) + tam maç sayıları.
 

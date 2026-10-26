@@ -1,0 +1,18 @@
+D:\barca\mtah2027-possession\.venv\Lib\site-packages\torch\backends\__init__.py:46: UserWarning: Please use the new API settings to control TF32 behavior, such as torch.backends.cudnn.conv.fp32_precision = 'tf32' or torch.backends.cuda.matmul.fp32_precision = 'ieee'. Old settings, e.g, torch.backends.cuda.matmul.allow_tf32 = True, torch.backends.cudnn.allow_tf32 = True, allowTF32CuDNN() and allowTF32CuBLAS() will be deprecated after Pytorch 2.9. Please see https://pytorch.org/docs/main/notes/cuda.html#tensorfloat-32-tf32-on-ampere-and-later-devices (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\pytorch\aten\src\ATen\Context.cpp:85.)
+  self.setter(val)
+{'model': 'tcn', 'source': 'metrica@v3', 'conv': 'ctrl', 'dead': 'learned'} 0.816809532601989
+{'model': 'tcn', 'source': 'metrica@v3', 'conv': 'ctrl', 'dead': 'oracle'} 0.8717130515470043
+{'model': 'tcn', 'source': 'metrica@v3', 'conv': 'events', 'dead': 'learned'} 0.6252971023395131
+{'model': 'tcn', 'source': 'metrica@v3', 'conv': 'events', 'dead': 'oracle'} 0.6710596770236091
+{'model': 'bigru', 'source': 'metrica@v3', 'conv': 'ctrl', 'dead': 'learned'} 0.8120267506524922
+{'model': 'bigru', 'source': 'metrica@v3', 'conv': 'ctrl', 'dead': 'oracle'} 0.8686116972097134
+{'model': 'bigru', 'source': 'metrica@v3', 'conv': 'events', 'dead': 'learned'} 0.6435296083134552
+{'model': 'bigru', 'source': 'metrica@v3', 'conv': 'events', 'dead': 'oracle'} 0.6914887383215493
+{'model': 'tcn', 'source': 'sc@v3', 'conv': 'pp', 'dead': 'learned'} 0.6265413317441267
+{'model': 'tcn', 'source': 'sc@v3', 'conv': 'pp', 'dead': 'oracle'} 0.7804176470611522
+{'model': 'tcn', 'source': 'sc@v3', 'conv': 'phase', 'dead': 'learned'} 0.6208248701927478
+{'model': 'tcn', 'source': 'sc@v3', 'conv': 'phase', 'dead': 'oracle'} 0.7801945923782736
+{'model': 'bigru', 'source': 'sc@v3', 'conv': 'pp', 'dead': 'learned'} 0.6283588055132006
+{'model': 'bigru', 'source': 'sc@v3', 'conv': 'pp', 'dead': 'oracle'} 0.7865802923673927
+{'model': 'bigru', 'source': 'sc@v3', 'conv': 'phase', 'dead': 'learned'} 0.6200788715243182
+{'model': 'bigru', 'source': 'sc@v3', 'conv': 'phase', 'dead': 'oracle'} 0.7823856948010844

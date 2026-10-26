@@ -1,0 +1,34 @@
+[
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "both_match": 556.0,
+    "only_lgb_matches": 12.333333333333332,
+    "only_bigru_matches": 19.666666666666664,
+    "neither_matches": 105.0
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "events",
+    "both_match": 555.0,
+    "only_lgb_matches": 17.666666666666668,
+    "only_bigru_matches": 51.0,
+    "neither_matches": 521.3333333333334
+  },
+  {
+    "source": "sc@v3",
+    "conv": "pp",
+    "both_match": 2993.0,
+    "only_lgb_matches": 149.0,
+    "only_bigru_matches": 456.0,
+    "neither_matches": 1912.0
+  },
+  {
+    "source": "sc@v3",
+    "conv": "phase",
+    "both_match": 2868.0,
+    "only_lgb_matches": 148.0,
+    "only_bigru_matches": 389.0,
+    "neither_matches": 1687.0
+  }
+]

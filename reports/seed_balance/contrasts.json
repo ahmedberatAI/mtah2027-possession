@@ -1,0 +1,1538 @@
+[
+  {
+    "model": "lgb_balanced",
+    "baseline": "lgb_unbalanced",
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "delta": 0.00430324652906554,
+    "seed_deltas": [
+      0.007195623839439946,
+      0.004988986974791887,
+      0.0007251287729647856
+    ],
+    "crossed_seed_match_ci95": [
+      -0.00033150303608901294,
+      0.009555047687321565
+    ],
+    "positive_matches_seed_mean": 3,
+    "positive_matches_each_seed": [
+      3,
+      2,
+      1
+    ],
+    "matches": 3
+  },
+  {
+    "model": "tcn",
+    "baseline": "lgb_balanced",
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "delta": -0.012730236090890301,
+    "seed_deltas": [
+      -0.024537694187518982,
+      -0.007808995138840406,
+      -0.005844018946311517
+    ],
+    "crossed_seed_match_ci95": [
+      -0.02696902091409385,
+      0.0028407651340188497
+    ],
+    "positive_matches_seed_mean": 0,
+    "positive_matches_each_seed": [
+      0,
+      1,
+      2
+    ],
+    "matches": 3
+  },
+  {
+    "model": "bigru",
+    "baseline": "lgb_balanced",
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "delta": -0.014907100364468715,
+    "seed_deltas": [
+      -0.020669129803550068,
+      -0.008311567684272067,
+      -0.01574060360558401
+    ],
+    "crossed_seed_match_ci95": [
+      -0.02782900019202746,
+      -0.0021006558965959896
+    ],
+    "positive_matches_seed_mean": 0,
+    "positive_matches_each_seed": [
+      0,
+      0,
+      1
+    ],
+    "matches": 3
+  },
+  {
+    "model": "tcn",
+    "baseline": "lgb_unbalanced",
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "delta": -0.008426989561824761,
+    "seed_deltas": [
+      -0.017342070348079035,
+      -0.002820008164048519,
+      -0.005118890173346731
+    ],
+    "crossed_seed_match_ci95": [
+      -0.02548023137342152,
+      0.005970703279820373
+    ],
+    "positive_matches_seed_mean": 2,
+    "positive_matches_each_seed": [
+      0,
+      2,
+      2
+    ],
+    "matches": 3
+  },
+  {
+    "model": "bigru",
+    "baseline": "lgb_unbalanced",
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "delta": -0.010603853835403175,
+    "seed_deltas": [
+      -0.013473505964110122,
+      -0.0033225807094801794,
+      -0.015015474832619224
+    ],
+    "crossed_seed_match_ci95": [
+      -0.02722434795512226,
+      0.0038131065539607953
+    ],
+    "positive_matches_seed_mean": 1,
+    "positive_matches_each_seed": [
+      0,
+      2,
+      0
+    ],
+    "matches": 3
+  },
+  {
+    "model": "tcn",
+    "baseline": "v7",
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "delta": -0.01009241678410148,
+    "seed_deltas": [
+      -0.018859652710569257,
+      -0.005614815307255013,
+      -0.005802782334480172
+    ],
+    "crossed_seed_match_ci95": [
+      -0.020339345843443584,
+      0.0002831104555005694
+    ],
+    "positive_matches_seed_mean": 0,
+    "positive_matches_each_seed": [
+      0,
+      1,
+      1
+    ],
+    "matches": 3
+  },
+  {
+    "model": "bigru",
+    "baseline": "v7",
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "delta": -0.012269281057679894,
+    "seed_deltas": [
+      -0.014991088326600344,
+      -0.006117387852686673,
+      -0.015699366993752666
+    ],
+    "crossed_seed_match_ci95": [
+      -0.02216862716338423,
+      -0.0009999700837981889
+    ],
+    "positive_matches_seed_mean": 0,
+    "positive_matches_each_seed": [
+      0,
+      1,
+      0
+    ],
+    "matches": 3
+  },
+  {
+    "model": "bigru",
+    "baseline": "tcn",
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "delta": -0.0021768642735784135,
+    "seed_deltas": [
+      0.0038685643839689123,
+      -0.0005025725454316602,
+      -0.009896584659272492
+    ],
+    "crossed_seed_match_ci95": [
+      -0.009410644115277367,
+      0.00408309158244111
+    ],
+    "positive_matches_seed_mean": 1,
+    "positive_matches_each_seed": [
+      3,
+      1,
+      0
+    ],
+    "matches": 3
+  },
+  {
+    "model": "lgb_balanced",
+    "baseline": "lgb_unbalanced",
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "delta": 0.004277814040449641,
+    "seed_deltas": [
+      0.007929097578386446,
+      0.0056741523626244,
+      -0.0007698078196619237
+    ],
+    "crossed_seed_match_ci95": [
+      -0.0018207268769594442,
+      0.010864128224467437
+    ],
+    "positive_matches_seed_mean": 2,
+    "positive_matches_each_seed": [
+      3,
+      3,
+      1
+    ],
+    "matches": 3
+  },
+  {
+    "model": "tcn",
+    "baseline": "lgb_balanced",
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "delta": -0.013629639431166166,
+    "seed_deltas": [
+      -0.025872756938348118,
+      -0.010444257634162532,
+      -0.004571903720987851
+    ],
+    "crossed_seed_match_ci95": [
+      -0.026084385740538285,
+      0.0010583444644326726
+    ],
+    "positive_matches_seed_mean": 0,
+    "positive_matches_each_seed": [
+      0,
+      0,
+      2
+    ],
+    "matches": 3
+  },
+  {
+    "model": "bigru",
+    "baseline": "lgb_balanced",
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "delta": -0.01661354344993911,
+    "seed_deltas": [
+      -0.02066170933314874,
+      -0.011915842388467953,
+      -0.017263078628200645
+    ],
+    "crossed_seed_match_ci95": [
+      -0.030337917508155177,
+      -0.005347445660339956
+    ],
+    "positive_matches_seed_mean": 0,
+    "positive_matches_each_seed": [
+      0,
+      0,
+      0
+    ],
+    "matches": 3
+  },
+  {
+    "model": "tcn",
+    "baseline": "lgb_unbalanced",
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "delta": -0.009351825390716526,
+    "seed_deltas": [
+      -0.017943659359961672,
+      -0.004770105271538132,
+      -0.005341711540649774
+    ],
+    "crossed_seed_match_ci95": [
+      -0.024816556350566454,
+      0.004743923455572014
+    ],
+    "positive_matches_seed_mean": 1,
+    "positive_matches_each_seed": [
+      0,
+      1,
+      2
+    ],
+    "matches": 3
+  },
+  {
+    "model": "bigru",
+    "baseline": "lgb_unbalanced",
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "delta": -0.012335729409489472,
+    "seed_deltas": [
+      -0.012732611754762294,
+      -0.006241690025843553,
+      -0.018032886447862568
+    ],
+    "crossed_seed_match_ci95": [
+      -0.031057770764895538,
+      0.0032360833480565964
+    ],
+    "positive_matches_seed_mean": 0,
+    "positive_matches_each_seed": [
+      0,
+      1,
+      0
+    ],
+    "matches": 3
+  },
+  {
+    "model": "tcn",
+    "baseline": "v7",
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "delta": -0.010383801818739472,
+    "seed_deltas": [
+      -0.01996023599457819,
+      -0.006095659798153667,
+      -0.00509550966348656
+    ],
+    "crossed_seed_match_ci95": [
+      -0.022334675236702888,
+      0.0015475428701119892
+    ],
+    "positive_matches_seed_mean": 1,
+    "positive_matches_each_seed": [
+      0,
+      1,
+      1
+    ],
+    "matches": 3
+  },
+  {
+    "model": "bigru",
+    "baseline": "v7",
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "delta": -0.01336770583751242,
+    "seed_deltas": [
+      -0.014749188389378812,
+      -0.007567244552459089,
+      -0.017786684570699356
+    ],
+    "crossed_seed_match_ci95": [
+      -0.025511339290341845,
+      -0.001500007406048572
+    ],
+    "positive_matches_seed_mean": 0,
+    "positive_matches_each_seed": [
+      0,
+      1,
+      0
+    ],
+    "matches": 3
+  },
+  {
+    "model": "bigru",
+    "baseline": "tcn",
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "delta": -0.002983904018772946,
+    "seed_deltas": [
+      0.0052110476051993775,
+      -0.0014715847543054217,
+      -0.012691174907212796
+    ],
+    "crossed_seed_match_ci95": [
+      -0.01240012906306176,
+      0.006581297804474177
+    ],
+    "positive_matches_seed_mean": 0,
+    "positive_matches_each_seed": [
+      2,
+      2,
+      0
+    ],
+    "matches": 3
+  },
+  {
+    "model": "lgb_balanced",
+    "baseline": "lgb_unbalanced",
+    "source": "metrica@v3",
+    "conv": "events",
+    "dead": "learned",
+    "delta": 0.005131713527736658,
+    "seed_deltas": [
+      0.0035924992105486795,
+      0.005143052413902523,
+      0.00665958895875877
+    ],
+    "crossed_seed_match_ci95": [
+      -0.0007528119703845334,
+      0.010024053076248466
+    ],
+    "positive_matches_seed_mean": 2,
+    "positive_matches_each_seed": [
+      2,
+      2,
+      3
+    ],
+    "matches": 3
+  },
+  {
+    "model": "tcn",
+    "baseline": "lgb_balanced",
+    "source": "metrica@v3",
+    "conv": "events",
+    "dead": "learned",
+    "delta": 0.025521588876220063,
+    "seed_deltas": [
+      0.038298992902725905,
+      0.020687453261669025,
+      0.017578320464265256
+    ],
+    "crossed_seed_match_ci95": [
+      -0.0007973037840230216,
+      0.04752807794096581
+    ],
+    "positive_matches_seed_mean": 2,
+    "positive_matches_each_seed": [
+      3,
+      2,
+      2
+    ],
+    "matches": 3
+  },
+  {
+    "model": "bigru",
+    "baseline": "lgb_balanced",
+    "source": "metrica@v3",
+    "conv": "events",
+    "dead": "learned",
+    "delta": 0.0304463047945192,
+    "seed_deltas": [
+      0.029060972549693087,
+      0.02050211791667922,
+      0.0417758239171853
+    ],
+    "crossed_seed_match_ci95": [
+      0.004072324145210933,
+      0.05213823141742251
+    ],
+    "positive_matches_seed_mean": 3,
+    "positive_matches_each_seed": [
+      2,
+      2,
+      3
+    ],
+    "matches": 3
+  },
+  {
+    "model": "tcn",
+    "baseline": "lgb_unbalanced",
+    "source": "metrica@v3",
+    "conv": "events",
+    "dead": "learned",
+    "delta": 0.03065330240395672,
+    "seed_deltas": [
+      0.04189149211327459,
+      0.025830505675571547,
+      0.024237909423024024
+    ],
+    "crossed_seed_match_ci95": [
+      0.005326595693323018,
+      0.05336789375280774
+    ],
+    "positive_matches_seed_mean": 3,
+    "positive_matches_each_seed": [
+      3,
+      3,
+      3
+    ],
+    "matches": 3
+  },
+  {
+    "model": "bigru",
+    "baseline": "lgb_unbalanced",
+    "source": "metrica@v3",
+    "conv": "events",
+    "dead": "learned",
+    "delta": 0.03557801832225586,
+    "seed_deltas": [
+      0.03265347176024177,
+      0.02564517033058174,
+      0.04843541287594407
+    ],
+    "crossed_seed_match_ci95": [
+      0.010196223622556974,
+      0.05833036578292743
+    ],
+    "positive_matches_seed_mean": 3,
+    "positive_matches_each_seed": [
+      2,
+      3,
+      3
+    ],
+    "matches": 3
+  },
+  {
+    "model": "tcn",
+    "baseline": "v7",
+    "source": "metrica@v3",
+    "conv": "events",
+    "dead": "learned",
+    "delta": 0.025839737876038018,
+    "seed_deltas": [
+      0.03802512135386434,
+      0.021713710128563934,
+      0.01778038214568578
+    ],
+    "crossed_seed_match_ci95": [
+      -0.0055797476875958,
+      0.05249214887698431
+    ],
+    "positive_matches_seed_mean": 2,
+    "positive_matches_each_seed": [
+      3,
+      2,
+      2
+    ],
+    "matches": 3
+  },
+  {
+    "model": "bigru",
+    "baseline": "v7",
+    "source": "metrica@v3",
+    "conv": "events",
+    "dead": "learned",
+    "delta": 0.03076445379433716,
+    "seed_deltas": [
+      0.02878710100083152,
+      0.02152837478357413,
+      0.041977885598605824
+    ],
+    "crossed_seed_match_ci95": [
+      -0.0007101197583618454,
+      0.05414328645226815
+    ],
+    "positive_matches_seed_mean": 2,
+    "positive_matches_each_seed": [
+      2,
+      2,
+      3
+    ],
+    "matches": 3
+  },
+  {
+    "model": "bigru",
+    "baseline": "tcn",
+    "source": "metrica@v3",
+    "conv": "events",
+    "dead": "learned",
+    "delta": 0.0049247159182991395,
+    "seed_deltas": [
+      -0.00923802035303282,
+      -0.00018533534498980467,
+      0.024197503452920044
+    ],
+    "crossed_seed_match_ci95": [
+      -0.00914364721272872,
+      0.02193735235491993
+    ],
+    "positive_matches_seed_mean": 3,
+    "positive_matches_each_seed": [
+      0,
+      2,
+      3
+    ],
+    "matches": 3
+  },
+  {
+    "model": "lgb_balanced",
+    "baseline": "lgb_unbalanced",
+    "source": "metrica@v3",
+    "conv": "events",
+    "dead": "oracle",
+    "delta": 0.004829603717818277,
+    "seed_deltas": [
+      0.004061476026514262,
+      0.005328343481758442,
+      0.005098991645182127
+    ],
+    "crossed_seed_match_ci95": [
+      -0.001221668880846553,
+      0.010487161918809643
+    ],
+    "positive_matches_seed_mean": 2,
+    "positive_matches_each_seed": [
+      3,
+      2,
+      2
+    ],
+    "matches": 3
+  },
+  {
+    "model": "tcn",
+    "baseline": "lgb_balanced",
+    "source": "metrica@v3",
+    "conv": "events",
+    "dead": "oracle",
+    "delta": 0.025010546647768424,
+    "seed_deltas": [
+      0.036500139897462036,
+      0.020789504459196213,
+      0.01774199558664702
+    ],
+    "crossed_seed_match_ci95": [
+      -0.0035434352438959613,
+      0.04675143852258491
+    ],
+    "positive_matches_seed_mean": 2,
+    "positive_matches_each_seed": [
+      3,
+      2,
+      2
+    ],
+    "matches": 3
+  },
+  {
+    "model": "bigru",
+    "baseline": "lgb_balanced",
+    "source": "metrica@v3",
+    "conv": "events",
+    "dead": "oracle",
+    "delta": 0.03039470735354626,
+    "seed_deltas": [
+      0.027759616307779456,
+      0.020091059302842534,
+      0.0433334464500168
+    ],
+    "crossed_seed_match_ci95": [
+      0.0008260842702669432,
+      0.05428589315160163
+    ],
+    "positive_matches_seed_mean": 3,
+    "positive_matches_each_seed": [
+      2,
+      2,
+      3
+    ],
+    "matches": 3
+  },
+  {
+    "model": "tcn",
+    "baseline": "lgb_unbalanced",
+    "source": "metrica@v3",
+    "conv": "events",
+    "dead": "oracle",
+    "delta": 0.0298401503655867,
+    "seed_deltas": [
+      0.0405616159239763,
+      0.026117847940954658,
+      0.022840987231829146
+    ],
+    "crossed_seed_match_ci95": [
+      0.004075742458478415,
+      0.05347214907209869
+    ],
+    "positive_matches_seed_mean": 3,
+    "positive_matches_each_seed": [
+      3,
+      3,
+      3
+    ],
+    "matches": 3
+  },
+  {
+    "model": "bigru",
+    "baseline": "lgb_unbalanced",
+    "source": "metrica@v3",
+    "conv": "events",
+    "dead": "oracle",
+    "delta": 0.03522431107136454,
+    "seed_deltas": [
+      0.03182109233429372,
+      0.025419402784600975,
+      0.048432438095198926
+    ],
+    "crossed_seed_match_ci95": [
+      0.007951257913171306,
+      0.05893549581273062
+    ],
+    "positive_matches_seed_mean": 3,
+    "positive_matches_each_seed": [
+      2,
+      3,
+      3
+    ],
+    "matches": 3
+  },
+  {
+    "model": "tcn",
+    "baseline": "v7",
+    "source": "metrica@v3",
+    "conv": "events",
+    "dead": "oracle",
+    "delta": 0.026127169286145804,
+    "seed_deltas": [
+      0.03727724181454676,
+      0.023036504588229405,
+      0.018067761455661246
+    ],
+    "crossed_seed_match_ci95": [
+      -0.004675080979266426,
+      0.051502022434994216
+    ],
+    "positive_matches_seed_mean": 2,
+    "positive_matches_each_seed": [
+      2,
+      2,
+      2
+    ],
+    "matches": 3
+  },
+  {
+    "model": "bigru",
+    "baseline": "v7",
+    "source": "metrica@v3",
+    "conv": "events",
+    "dead": "oracle",
+    "delta": 0.031511329991923645,
+    "seed_deltas": [
+      0.028536718224864182,
+      0.022338059431875723,
+      0.04365921231903103
+    ],
+    "crossed_seed_match_ci95": [
+      -0.000305561465103521,
+      0.055401844009792124
+    ],
+    "positive_matches_seed_mean": 2,
+    "positive_matches_each_seed": [
+      2,
+      2,
+      3
+    ],
+    "matches": 3
+  },
+  {
+    "model": "bigru",
+    "baseline": "tcn",
+    "source": "metrica@v3",
+    "conv": "events",
+    "dead": "oracle",
+    "delta": 0.00538416070577784,
+    "seed_deltas": [
+      -0.00874052358968258,
+      -0.0006984451563536812,
+      0.02559145086336978
+    ],
+    "crossed_seed_match_ci95": [
+      -0.008551352183567026,
+      0.024287035917450295
+    ],
+    "positive_matches_seed_mean": 3,
+    "positive_matches_each_seed": [
+      0,
+      1,
+      3
+    ],
+    "matches": 3
+  },
+  {
+    "model": "lgb_balanced",
+    "baseline": "lgb_unbalanced",
+    "source": "sc@v3",
+    "conv": "pp",
+    "dead": "learned",
+    "delta": 0.0019637009820111426,
+    "seed_deltas": [
+      0.001060887873646732,
+      0.0020409829651683088,
+      0.002789232107218387
+    ],
+    "crossed_seed_match_ci95": [
+      -0.0029051120717153755,
+      0.007044258824189989
+    ],
+    "positive_matches_seed_mean": 13,
+    "positive_matches_each_seed": [
+      9,
+      11,
+      12
+    ],
+    "matches": 20
+  },
+  {
+    "model": "tcn",
+    "baseline": "lgb_balanced",
+    "source": "sc@v3",
+    "conv": "pp",
+    "dead": "learned",
+    "delta": 0.03126686818895901,
+    "seed_deltas": [
+      0.026746049400514078,
+      0.037739059444330855,
+      0.029315495722032115
+    ],
+    "crossed_seed_match_ci95": [
+      0.02213546422653471,
+      0.04007499118828379
+    ],
+    "positive_matches_seed_mean": 20,
+    "positive_matches_each_seed": [
+      19,
+      20,
+      20
+    ],
+    "matches": 20
+  },
+  {
+    "model": "bigru",
+    "baseline": "lgb_balanced",
+    "source": "sc@v3",
+    "conv": "pp",
+    "dead": "learned",
+    "delta": 0.03777296186346413,
+    "seed_deltas": [
+      0.035968330118066695,
+      0.03899009738649859,
+      0.03836045808582708
+    ],
+    "crossed_seed_match_ci95": [
+      0.031056406790661156,
+      0.04431702566102321
+    ],
+    "positive_matches_seed_mean": 20,
+    "positive_matches_each_seed": [
+      20,
+      20,
+      20
+    ],
+    "matches": 20
+  },
+  {
+    "model": "tcn",
+    "baseline": "lgb_unbalanced",
+    "source": "sc@v3",
+    "conv": "pp",
+    "dead": "learned",
+    "delta": 0.033230569170970156,
+    "seed_deltas": [
+      0.02780693727416081,
+      0.03978004240949916,
+      0.0321047278292505
+    ],
+    "crossed_seed_match_ci95": [
+      0.02369287858515088,
+      0.042237501332746286
+    ],
+    "positive_matches_seed_mean": 20,
+    "positive_matches_each_seed": [
+      18,
+      20,
+      20
+    ],
+    "matches": 20
+  },
+  {
+    "model": "bigru",
+    "baseline": "lgb_unbalanced",
+    "source": "sc@v3",
+    "conv": "pp",
+    "dead": "learned",
+    "delta": 0.03973666284547527,
+    "seed_deltas": [
+      0.03702921799171342,
+      0.0410310803516669,
+      0.04114969019304547
+    ],
+    "crossed_seed_match_ci95": [
+      0.03235579813294772,
+      0.046667189368064174
+    ],
+    "positive_matches_seed_mean": 20,
+    "positive_matches_each_seed": [
+      20,
+      20,
+      20
+    ],
+    "matches": 20
+  },
+  {
+    "model": "tcn",
+    "baseline": "v7",
+    "source": "sc@v3",
+    "conv": "pp",
+    "dead": "learned",
+    "delta": 0.041399679524236725,
+    "seed_deltas": [
+      0.03651759059651194,
+      0.047869792905626624,
+      0.03981165507057162
+    ],
+    "crossed_seed_match_ci95": [
+      0.031116005931526608,
+      0.05130479263385102
+    ],
+    "positive_matches_seed_mean": 20,
+    "positive_matches_each_seed": [
+      20,
+      20,
+      19
+    ],
+    "matches": 20
+  },
+  {
+    "model": "bigru",
+    "baseline": "v7",
+    "source": "sc@v3",
+    "conv": "pp",
+    "dead": "learned",
+    "delta": 0.04790577319874183,
+    "seed_deltas": [
+      0.045739871314064554,
+      0.04912083084779436,
+      0.04885661743436659
+    ],
+    "crossed_seed_match_ci95": [
+      0.04055560384994489,
+      0.05507983850125698
+    ],
+    "positive_matches_seed_mean": 20,
+    "positive_matches_each_seed": [
+      20,
+      20,
+      20
+    ],
+    "matches": 20
+  },
+  {
+    "model": "bigru",
+    "baseline": "tcn",
+    "source": "sc@v3",
+    "conv": "pp",
+    "dead": "learned",
+    "delta": 0.006506093674505107,
+    "seed_deltas": [
+      0.009222280717552617,
+      0.0012510379421677375,
+      0.009044962363794967
+    ],
+    "crossed_seed_match_ci95": [
+      0.000772044687671722,
+      0.011721964164767219
+    ],
+    "positive_matches_seed_mean": 17,
+    "positive_matches_each_seed": [
+      16,
+      11,
+      16
+    ],
+    "matches": 20
+  },
+  {
+    "model": "lgb_balanced",
+    "baseline": "lgb_unbalanced",
+    "source": "sc@v3",
+    "conv": "pp",
+    "dead": "oracle",
+    "delta": 0.0005168486863847484,
+    "seed_deltas": [
+      0.001736089797078827,
+      -0.0031739959199667046,
+      0.0029884521820421226
+    ],
+    "crossed_seed_match_ci95": [
+      -0.004954253018144556,
+      0.0060922811056967445
+    ],
+    "positive_matches_seed_mean": 10,
+    "positive_matches_each_seed": [
+      9,
+      7,
+      9
+    ],
+    "matches": 20
+  },
+  {
+    "model": "tcn",
+    "baseline": "lgb_balanced",
+    "source": "sc@v3",
+    "conv": "pp",
+    "dead": "oracle",
+    "delta": 0.028939782877644794,
+    "seed_deltas": [
+      0.023537802822480126,
+      0.03604274241086401,
+      0.02723880339959025
+    ],
+    "crossed_seed_match_ci95": [
+      0.01964131919682219,
+      0.03780625276869849
+    ],
+    "positive_matches_seed_mean": 20,
+    "positive_matches_each_seed": [
+      17,
+      20,
+      19
+    ],
+    "matches": 20
+  },
+  {
+    "model": "bigru",
+    "baseline": "lgb_balanced",
+    "source": "sc@v3",
+    "conv": "pp",
+    "dead": "oracle",
+    "delta": 0.036558152797244954,
+    "seed_deltas": [
+      0.03312177634395729,
+      0.03908610036473942,
+      0.03746658168303814
+    ],
+    "crossed_seed_match_ci95": [
+      0.02870301371627957,
+      0.044750254178134656
+    ],
+    "positive_matches_seed_mean": 20,
+    "positive_matches_each_seed": [
+      20,
+      20,
+      20
+    ],
+    "matches": 20
+  },
+  {
+    "model": "tcn",
+    "baseline": "lgb_unbalanced",
+    "source": "sc@v3",
+    "conv": "pp",
+    "dead": "oracle",
+    "delta": 0.02945663156402955,
+    "seed_deltas": [
+      0.025273892619558952,
+      0.03286874649089731,
+      0.030227255581632372
+    ],
+    "crossed_seed_match_ci95": [
+      0.021549696121378345,
+      0.0368402113352461
+    ],
+    "positive_matches_seed_mean": 20,
+    "positive_matches_each_seed": [
+      18,
+      20,
+      19
+    ],
+    "matches": 20
+  },
+  {
+    "model": "bigru",
+    "baseline": "lgb_unbalanced",
+    "source": "sc@v3",
+    "conv": "pp",
+    "dead": "oracle",
+    "delta": 0.037075001483629695,
+    "seed_deltas": [
+      0.03485786614103612,
+      0.03591210444477271,
+      0.040455033865080266
+    ],
+    "crossed_seed_match_ci95": [
+      0.029922942102868822,
+      0.045135509843417757
+    ],
+    "positive_matches_seed_mean": 20,
+    "positive_matches_each_seed": [
+      20,
+      19,
+      20
+    ],
+    "matches": 20
+  },
+  {
+    "model": "tcn",
+    "baseline": "v7",
+    "source": "sc@v3",
+    "conv": "pp",
+    "dead": "oracle",
+    "delta": 0.03549088234343783,
+    "seed_deltas": [
+      0.030582273059895665,
+      0.039120463202732346,
+      0.03676991076768549
+    ],
+    "crossed_seed_match_ci95": [
+      0.02647848316391379,
+      0.04378190356890749
+    ],
+    "positive_matches_seed_mean": 20,
+    "positive_matches_each_seed": [
+      19,
+      20,
+      20
+    ],
+    "matches": 20
+  },
+  {
+    "model": "bigru",
+    "baseline": "v7",
+    "source": "sc@v3",
+    "conv": "pp",
+    "dead": "oracle",
+    "delta": 0.04310925226303799,
+    "seed_deltas": [
+      0.040166246581372834,
+      0.04216382115660775,
+      0.04699768905113338
+    ],
+    "crossed_seed_match_ci95": [
+      0.03533731861569082,
+      0.05189052442743219
+    ],
+    "positive_matches_seed_mean": 20,
+    "positive_matches_each_seed": [
+      20,
+      20,
+      20
+    ],
+    "matches": 20
+  },
+  {
+    "model": "bigru",
+    "baseline": "tcn",
+    "source": "sc@v3",
+    "conv": "pp",
+    "dead": "oracle",
+    "delta": 0.0076183699196001545,
+    "seed_deltas": [
+      0.009583973521477168,
+      0.003043357953875403,
+      0.010227778283447892
+    ],
+    "crossed_seed_match_ci95": [
+      0.0016615169321211602,
+      0.013401056516708554
+    ],
+    "positive_matches_seed_mean": 17,
+    "positive_matches_each_seed": [
+      14,
+      11,
+      16
+    ],
+    "matches": 20
+  },
+  {
+    "model": "lgb_balanced",
+    "baseline": "lgb_unbalanced",
+    "source": "sc@v3",
+    "conv": "phase",
+    "dead": "learned",
+    "delta": 0.0022076364599484793,
+    "seed_deltas": [
+      0.0008156235663011769,
+      0.002459486945492173,
+      0.0033477988680520876
+    ],
+    "crossed_seed_match_ci95": [
+      -0.002625358059384932,
+      0.007070797285539998
+    ],
+    "positive_matches_seed_mean": 12,
+    "positive_matches_each_seed": [
+      10,
+      12,
+      13
+    ],
+    "matches": 20
+  },
+  {
+    "model": "tcn",
+    "baseline": "lgb_balanced",
+    "source": "sc@v3",
+    "conv": "phase",
+    "dead": "learned",
+    "delta": 0.01991801219152953,
+    "seed_deltas": [
+      0.011744232174552593,
+      0.025848830970823994,
+      0.022160973429212
+    ],
+    "crossed_seed_match_ci95": [
+      0.008885352343061429,
+      0.029685751040257186
+    ],
+    "positive_matches_seed_mean": 17,
+    "positive_matches_each_seed": [
+      15,
+      20,
+      16
+    ],
+    "matches": 20
+  },
+  {
+    "model": "bigru",
+    "baseline": "lgb_balanced",
+    "source": "sc@v3",
+    "conv": "phase",
+    "dead": "learned",
+    "delta": 0.02745870237934953,
+    "seed_deltas": [
+      0.02592092158718099,
+      0.028476962293068574,
+      0.027978223257799018
+    ],
+    "crossed_seed_match_ci95": [
+      0.01970794064649805,
+      0.03519199184485941
+    ],
+    "positive_matches_seed_mean": 19,
+    "positive_matches_each_seed": [
+      18,
+      19,
+      19
+    ],
+    "matches": 20
+  },
+  {
+    "model": "tcn",
+    "baseline": "lgb_unbalanced",
+    "source": "sc@v3",
+    "conv": "phase",
+    "dead": "learned",
+    "delta": 0.022125648651478005,
+    "seed_deltas": [
+      0.01255985574085377,
+      0.02830831791631617,
+      0.025508772297264087
+    ],
+    "crossed_seed_match_ci95": [
+      0.010464341783365473,
+      0.032794601279051455
+    ],
+    "positive_matches_seed_mean": 18,
+    "positive_matches_each_seed": [
+      14,
+      18,
+      17
+    ],
+    "matches": 20
+  },
+  {
+    "model": "bigru",
+    "baseline": "lgb_unbalanced",
+    "source": "sc@v3",
+    "conv": "phase",
+    "dead": "learned",
+    "delta": 0.029666338839298003,
+    "seed_deltas": [
+      0.026736545153482165,
+      0.03093644923856075,
+      0.0313260221258511
+    ],
+    "crossed_seed_match_ci95": [
+      0.021223775859658595,
+      0.03796001703104764
+    ],
+    "positive_matches_seed_mean": 19,
+    "positive_matches_each_seed": [
+      19,
+      18,
+      18
+    ],
+    "matches": 20
+  },
+  {
+    "model": "tcn",
+    "baseline": "v7",
+    "source": "sc@v3",
+    "conv": "phase",
+    "dead": "learned",
+    "delta": 0.030336827197379672,
+    "seed_deltas": [
+      0.02109557426972728,
+      0.03670562091289533,
+      0.03320928640951641
+    ],
+    "crossed_seed_match_ci95": [
+      0.01811088668929444,
+      0.04121470124794294
+    ],
+    "positive_matches_seed_mean": 19,
+    "positive_matches_each_seed": [
+      16,
+      20,
+      19
+    ],
+    "matches": 20
+  },
+  {
+    "model": "bigru",
+    "baseline": "v7",
+    "source": "sc@v3",
+    "conv": "phase",
+    "dead": "learned",
+    "delta": 0.03787751738519967,
+    "seed_deltas": [
+      0.03527226368235568,
+      0.039333752235139914,
+      0.039026536238103426
+    ],
+    "crossed_seed_match_ci95": [
+      0.02985248872786812,
+      0.045956251828575205
+    ],
+    "positive_matches_seed_mean": 20,
+    "positive_matches_each_seed": [
+      20,
+      20,
+      20
+    ],
+    "matches": 20
+  },
+  {
+    "model": "bigru",
+    "baseline": "tcn",
+    "source": "sc@v3",
+    "conv": "phase",
+    "dead": "learned",
+    "delta": 0.007540690187819998,
+    "seed_deltas": [
+      0.014176689412628396,
+      0.0026281313222445814,
+      0.005817249828587018
+    ],
+    "crossed_seed_match_ci95": [
+      0.001279014214031921,
+      0.014264501088827743
+    ],
+    "positive_matches_seed_mean": 17,
+    "positive_matches_each_seed": [
+      16,
+      10,
+      13
+    ],
+    "matches": 20
+  },
+  {
+    "model": "lgb_balanced",
+    "baseline": "lgb_unbalanced",
+    "source": "sc@v3",
+    "conv": "phase",
+    "dead": "oracle",
+    "delta": -0.0009782809929405223,
+    "seed_deltas": [
+      -0.0004913937040580463,
+      -0.003639502750692791,
+      0.0011960534759292707
+    ],
+    "crossed_seed_match_ci95": [
+      -0.005758125388092837,
+      0.0038132094230657297
+    ],
+    "positive_matches_seed_mean": 8,
+    "positive_matches_each_seed": [
+      9,
+      7,
+      7
+    ],
+    "matches": 20
+  },
+  {
+    "model": "tcn",
+    "baseline": "lgb_balanced",
+    "source": "sc@v3",
+    "conv": "phase",
+    "dead": "oracle",
+    "delta": 0.016401687440765568,
+    "seed_deltas": [
+      0.005396027762750865,
+      0.023780290666379034,
+      0.020028743893166806
+    ],
+    "crossed_seed_match_ci95": [
+      0.004164140515304046,
+      0.027120739883608587
+    ],
+    "positive_matches_seed_mean": 18,
+    "positive_matches_each_seed": [
+      13,
+      19,
+      14
+    ],
+    "matches": 20
+  },
+  {
+    "model": "bigru",
+    "baseline": "lgb_balanced",
+    "source": "sc@v3",
+    "conv": "phase",
+    "dead": "oracle",
+    "delta": 0.025639662050940863,
+    "seed_deltas": [
+      0.02238834260318006,
+      0.02751457565681782,
+      0.027016067892824718
+    ],
+    "crossed_seed_match_ci95": [
+      0.017021391663120118,
+      0.03472473568459575
+    ],
+    "positive_matches_seed_mean": 19,
+    "positive_matches_each_seed": [
+      17,
+      19,
+      17
+    ],
+    "matches": 20
+  },
+  {
+    "model": "tcn",
+    "baseline": "lgb_unbalanced",
+    "source": "sc@v3",
+    "conv": "phase",
+    "dead": "oracle",
+    "delta": 0.015423406447825047,
+    "seed_deltas": [
+      0.004904634058692819,
+      0.020140787915686242,
+      0.021224797369096077
+    ],
+    "crossed_seed_match_ci95": [
+      0.003679687554330016,
+      0.026203693021646313
+    ],
+    "positive_matches_seed_mean": 18,
+    "positive_matches_each_seed": [
+      12,
+      17,
+      15
+    ],
+    "matches": 20
+  },
+  {
+    "model": "bigru",
+    "baseline": "lgb_unbalanced",
+    "source": "sc@v3",
+    "conv": "phase",
+    "dead": "oracle",
+    "delta": 0.024661381058000344,
+    "seed_deltas": [
+      0.021896948899122016,
+      0.023875072906125026,
+      0.02821212136875399
+    ],
+    "crossed_seed_match_ci95": [
+      0.015653927434016255,
+      0.03426634515295809
+    ],
+    "positive_matches_seed_mean": 18,
+    "positive_matches_each_seed": [
+      17,
+      17,
+      17
+    ],
+    "matches": 20
+  },
+  {
+    "model": "tcn",
+    "baseline": "v7",
+    "source": "sc@v3",
+    "conv": "phase",
+    "dead": "oracle",
+    "delta": 0.022492363125874777,
+    "seed_deltas": [
+      0.011353197150411266,
+      0.027290626675536438,
+      0.02883326555167664
+    ],
+    "crossed_seed_match_ci95": [
+      0.009595499944296496,
+      0.0342772906644308
+    ],
+    "positive_matches_seed_mean": 16,
+    "positive_matches_each_seed": [
+      12,
+      18,
+      17
+    ],
+    "matches": 20
+  },
+  {
+    "model": "bigru",
+    "baseline": "v7",
+    "source": "sc@v3",
+    "conv": "phase",
+    "dead": "oracle",
+    "delta": 0.03173033773605008,
+    "seed_deltas": [
+      0.028345511990840462,
+      0.031024911665975225,
+      0.035820589551334554
+    ],
+    "crossed_seed_match_ci95": [
+      0.022516799834638144,
+      0.04174304170908944
+    ],
+    "positive_matches_seed_mean": 20,
+    "positive_matches_each_seed": [
+      19,
+      19,
+      19
+    ],
+    "matches": 20
+  },
+  {
+    "model": "bigru",
+    "baseline": "tcn",
+    "source": "sc@v3",
+    "conv": "phase",
+    "dead": "oracle",
+    "delta": 0.009237974610175299,
+    "seed_deltas": [
+      0.016992314840429196,
+      0.0037342849904387853,
+      0.006987323999657913
+    ],
+    "crossed_seed_match_ci95": [
+      0.002221255811708146,
+      0.017060042393738695
+    ],
+    "positive_matches_seed_mean": 18,
+    "positive_matches_each_seed": [
+      17,
+      13,
+      14
+    ],
+    "matches": 20
+  }
+]

@@ -1,0 +1,24 @@
+D:\barca\mtah2027-possession\.venv\Lib\site-packages\torch\backends\__init__.py:46: UserWarning: Please use the new API settings to control TF32 behavior, such as torch.backends.cudnn.conv.fp32_precision = 'tf32' or torch.backends.cuda.matmul.fp32_precision = 'ieee'. Old settings, e.g, torch.backends.cuda.matmul.allow_tf32 = True, torch.backends.cudnn.allow_tf32 = True, allowTF32CuDNN() and allowTF32CuBLAS() will be deprecated after Pytorch 2.9. Please see https://pytorch.org/docs/main/notes/cuda.html#tensorfloat-32-tf32-on-ampere-and-later-devices (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\pytorch\aten\src\ATen\Context.cpp:85.)
+  self.setter(val)
+tcn_final epoch 1 train 0.30707 validation None seconds 5
+tcn_final epoch 2 train 0.25251 validation None seconds 4
+tcn_final epoch 3 train 0.23942 validation None seconds 4
+tcn_final epoch 4 train 0.2401 validation None seconds 3
+tcn_final epoch 5 train 0.23853 validation None seconds 3
+tcn_final epoch 6 train 0.22699 validation None seconds 3
+tcn_final epoch 7 train 0.22851 validation None seconds 3
+tcn_final epoch 8 train 0.21162 validation None seconds 4
+tcn_final epoch 9 train 0.22055 validation None seconds 4
+tcn_final epoch 10 train 0.21295 validation None seconds 4
+tcn_final epoch 11 train 0.20381 validation None seconds 4
+bigru_final epoch 1 train 0.30319 validation None seconds 5
+bigru_final epoch 2 train 0.2488 validation None seconds 3
+bigru_final epoch 3 train 0.23518 validation None seconds 3
+bigru_final epoch 4 train 0.2327 validation None seconds 3
+bigru_final epoch 5 train 0.23037 validation None seconds 4
+bigru_final epoch 6 train 0.21741 validation None seconds 3
+bigru_final epoch 7 train 0.21749 validation None seconds 3
+bigru_final epoch 8 train 0.20172 validation None seconds 3
+bigru_final epoch 9 train 0.20979 validation None seconds 3
+bigru_final epoch 10 train 0.19735 validation None seconds 3
+bigru_final epoch 11 train 0.19196 validation None seconds 3

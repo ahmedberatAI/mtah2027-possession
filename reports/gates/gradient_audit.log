@@ -1,0 +1,215 @@
+event audit 10502 2240 rows
+event audit 10503 2492 rows
+event audit 10504 2261 rows
+event audit 10505 2096 rows
+event audit 10506 2881 rows
+event audit 10507 2432 rows
+event audit 10508 3044 rows
+event audit 10509 2085 rows
+event audit 10510 3160 rows
+event audit 10511 2832 rows
+event audit 10512 2103 rows
+event audit 10513 2007 rows
+event audit 10514 2271 rows
+event audit 10515 2174 rows
+event audit 10516 2199 rows
+event audit 10517 2814 rows
+event audit 3812 2010 rows
+event audit 3813 2218 rows
+event audit 3814 2034 rows
+event audit 3815 2273 rows
+event audit 3816 2099 rows
+event audit 3817 2220 rows
+event audit 3818 1975 rows
+event audit 3819 2520 rows
+event audit 3820 2282 rows
+event audit 3821 2296 rows
+event audit 3822 2697 rows
+event audit 3823 2202 rows
+event audit 3824 2234 rows
+event audit 3825 2161 rows
+event audit 3826 2240 rows
+event audit 3827 2231 rows
+event audit 3828 1981 rows
+event audit 3829 2159 rows
+event audit 3830 2118 rows
+event audit 3831 2173 rows
+event audit 3832 2068 rows
+event audit 3833 2030 rows
+event audit 3834 2304 rows
+event audit 3835 2060 rows
+event audit 3836 2270 rows
+event audit 3837 2199 rows
+event audit 3838 2247 rows
+event audit 3839 2191 rows
+event audit 3840 1991 rows
+event audit 3841 2100 rows
+event audit 3842 2305 rows
+event audit 3843 2187 rows
+event audit 3844 1789 rows
+event audit 3845 2576 rows
+event audit 3846 1977 rows
+event audit 3847 2200 rows
+event audit 3848 2202 rows
+event audit 3849 2270 rows
+event audit 3850 2554 rows
+event audit 3851 1856 rows
+event audit 3852 2539 rows
+event audit 3853 2051 rows
+event audit 3854 2665 rows
+event audit 3855 2417 rows
+event audit 3856 2113 rows
+event audit 3857 2118 rows
+event audit 3858 2003 rows
+event audit 3859 2045 rows
+{
+  "inventory": {
+    "events": {
+      "expected": 64,
+      "complete": 64,
+      "expected_bytes": 1149120881
+    },
+    "tracking": {
+      "expected": 64,
+      "complete": 64,
+      "expected_bytes": 2776070163
+    },
+    "metadata": {
+      "expected": 64,
+      "complete": 64,
+      "expected_bytes": 63141
+    },
+    "rosters": {
+      "expected": 64,
+      "complete": 64,
+      "expected_bytes": 483962
+    }
+  },
+  "event_totals": {
+    "rows": 144541,
+    "initial_non_event": 1082,
+    "event_non_event": 1081,
+    "video_missing": 4616,
+    "deflector_nonnull": 236,
+    "missing_home_team": 7749
+  },
+  "event_counts": {
+    "event_type": {
+      "PA": 66715,
+      "IT": 47097,
+      "CH": 11555,
+      "RE": 2544,
+      "CL": 2956,
+      "CR": 2412,
+      "SH": 1559,
+      "TC": 1290,
+      "BC": 855,
+      "FO": 28
+    },
+    "challenge_type": {
+      "D": 1972,
+      "FIFTY": 1422,
+      "B": 2525,
+      "A": 2834,
+      "H": 390,
+      "T": 1560,
+      "S": 507,
+      "L": 338,
+      "G": 4,
+      "K": 3
+    },
+    "challenge_outcome": {
+      "R": 3177,
+      "D": 3264,
+      "P": 2021,
+      "O": 542,
+      "S": 101,
+      "N": 129,
+      "F": 1511,
+      "L": 51,
+      "M": 165,
+      "K": 337,
+      "B": 49,
+      "C": 192,
+      "I": 16
+    },
+    "touch_type": {
+      "F": 720,
+      "H": 493,
+      "T": 169,
+      "G": 20,
+      "C": 4,
+      "S": 6,
+      "P": 9,
+      "D": 15,
+      "L": 5
+    },
+    "rebound_outcome": {
+      "P": 1698,
+      "T": 804,
+      "R": 22,
+      "D": 6,
+      "A": 1
+    },
+    "initial_touch_type": {
+      "S": 135130,
+      "M": 1204,
+      "B": 652,
+      "G": 239
+    },
+    "period": {
+      "1": 71381,
+      "2": 69554,
+      "3": 1844,
+      "4": 1761,
+      "0": 1
+    }
+  },
+  "tracking_sample": {
+    "match": "10511",
+    "counts": {
+      "rows": 196098,
+      "home_ball_null_rows": 143305,
+      "actor_differs_from_sequence_team": 0,
+      "ball_visible_rows": 75791
+    },
+    "unique_frames": 195468,
+    "duplicate_rows": 630,
+    "ownership_conflict_frames": 0,
+    "frame_step_histogram": {
+      "1": 195466,
+      "2002": 1
+    },
+    "milliseconds_per_frame": {
+      "33.367": 136832,
+      "33.366": 58634,
+      "33.3667": 1
+    },
+    "game_event_types": {
+      "FIRSTKICKOFF": 1,
+      "None": 143296,
+      "OTB": 52692,
+      "OUT": 99,
+      "OFF": 1,
+      "ON": 1,
+      "END": 1,
+      "SECONDKICKOFF": 1,
+      "SUB": 6
+    },
+    "possession_event_types": {
+      "PA": 1268,
+      "None": 194196,
+      "CH": 435,
+      "RE": 42,
+      "BC": 44,
+      "CL": 63,
+      "SH": 20,
+      "CR": 30
+    },
+    "periods": {
+      "1": 92017,
+      "2": 104081
+    }
+  },
+  "status": "schema_audit_only_not_training_labels"
+}

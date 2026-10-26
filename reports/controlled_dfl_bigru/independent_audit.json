@@ -1,0 +1,65 @@
+{
+  "artifacts": [
+    {
+      "stage": "internal",
+      "config": "bigru_64",
+      "seed": 20261025,
+      "sha256": "716b809fdbee11049eb9a0a222b0d292ca2045ee36b96b87dc608a232ba1a564"
+    },
+    {
+      "stage": "internal",
+      "config": "bigru_64",
+      "seed": 20261026,
+      "sha256": "2374afc5e16e8cf4fc67b370a34e281f082e03b8a9c04b8278a803dc38eaa202"
+    },
+    {
+      "stage": "internal",
+      "config": "bigru_64",
+      "seed": 20261027,
+      "sha256": "f60765d8d74d32ff01f680a5444798c2fd43a011ba2e57db89fa17c6fde9ab50"
+    },
+    {
+      "stage": "internal",
+      "config": "bigru_96",
+      "seed": 20261025,
+      "sha256": "8a04c96c442cd05382cae4ea9e5a38fa743e4fe35ad1ea94a3e636008a9a4562"
+    },
+    {
+      "stage": "internal",
+      "config": "bigru_96",
+      "seed": 20261026,
+      "sha256": "510992ed3c027d90e3d6d28ee66c87824d6ce310fd1d1d72b951aca891e13747"
+    },
+    {
+      "stage": "internal",
+      "config": "bigru_96",
+      "seed": 20261027,
+      "sha256": "5decdf817ebd9ceb360a006b870a151936702601abdbecb2348617b6ba2ba943"
+    },
+    {
+      "stage": "final",
+      "config": "bigru_64",
+      "seed": 20261025,
+      "sha256": "b8b88d0dec699171bf6ade75fe466b9b170a4fd2ed82511cd9dc336a0136c94a"
+    },
+    {
+      "stage": "final",
+      "config": "bigru_64",
+      "seed": 20261026,
+      "sha256": "93f12c3df1ae61d656059ddba9ba619a7d913ced6692bc30abfaa90b2641bbf7"
+    },
+    {
+      "stage": "final",
+      "config": "bigru_64",
+      "seed": 20261027,
+      "sha256": "07a71d5769b9d036531c7d35fdad68db58dd68d68955d574e0dbc902cf342e89"
+    }
+  ],
+  "feature_paths_and_pff_labels_unchanged": true,
+  "train_validation_disjoint": true,
+  "scalers_recomputed_from_training_only": true,
+  "fixed_config_native_control_identical_preprocessing": true,
+  "selection_recomputed": true,
+  "external_cells": 24,
+  "selection_sha256": "b3bc44cabf7ab7fff4e8b2b3a9395534609933473176ea3bdd09eb9f62252247"
+}

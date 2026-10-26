@@ -1,0 +1,8 @@
+metrica@v3 ctrl learned B2 delta 0.04244
+metrica@v3 events learned B2 delta -0.03448
+metrica@v3 ctrl oracle B2 delta 0.03682
+metrica@v3 events oracle B2 delta -0.04109
+sc@v3 pp learned B2 delta 0.0097
+sc@v3 phase learned B2 delta 0.02499
+sc@v3 pp oracle B2 delta 0.01209
+sc@v3 phase oracle B2 delta 0.03395

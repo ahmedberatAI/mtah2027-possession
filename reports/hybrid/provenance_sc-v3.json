@@ -1,0 +1,38 @@
+[
+  {
+    "kind": "bigru",
+    "seed": 20261025,
+    "model_sha256": "c4a8872c224dd3032cf293855e64dac5df0ab180c4d909920bd12eb568a3435d",
+    "probabilities_sha256": "d8de51cbdf0bd28be917058d84f8ffa16457cc50075314334a077f6a86f5d03a"
+  },
+  {
+    "kind": "bigru",
+    "seed": 20261026,
+    "model_sha256": "f6f2781c04557d3c63bbc58df53f2562cd6c4cc9593862a1df62af02175f08a7",
+    "probabilities_sha256": "4c9ba2c7630b75009757bb813a08fd212d7a074d0427f8e9a627810d5f9c440d"
+  },
+  {
+    "kind": "bigru",
+    "seed": 20261027,
+    "model_sha256": "35b7425242ae33b5f5f380be8a58d8c01ba97912b0563a89dd322015e9dffc31",
+    "probabilities_sha256": "3eb2590940995ed1874267c252fa5200dbd4bf077ebb8cbef146a842e8fd311e"
+  },
+  {
+    "kind": "lgb_balanced",
+    "seed": 20261025,
+    "model_sha256": "6008d35875219f50e631b35e949af78eda7f62bc128c89bf190a2100a1c92825",
+    "probabilities_sha256": "49e0990aac29097895360fbcc6314634c1cb7557e81525a04d43effe3e846fc0"
+  },
+  {
+    "kind": "lgb_balanced",
+    "seed": 20261026,
+    "model_sha256": "f8703c1c896eed20d511e81eff5958328f5b9bb5178f1343f325623541ab18c6",
+    "probabilities_sha256": "5ea1e7188e849e3ec66553e8ab1f12a8bcee4da3456c27384ebf767df66468be"
+  },
+  {
+    "kind": "lgb_balanced",
+    "seed": 20261027,
+    "model_sha256": "1e4aa53972e16a8929770f038bf2a3b3a9a9d743702fb2c15ca0159100f645ea",
+    "probabilities_sha256": "49ed3f74652037a3be5eeea93bf4a36371e70898d7b46b28513d9f0101962ef6"
+  }
+]

@@ -1,0 +1,49 @@
+{
+  "selection_sha256": "b3bc44cabf7ab7fff4e8b2b3a9395534609933473176ea3bdd09eb9f62252247",
+  "models": [
+    {
+      "source": "metrica@v3",
+      "config": "bigru_64",
+      "seed": 20261025,
+      "model_sha256": "b8b88d0dec699171bf6ade75fe466b9b170a4fd2ed82511cd9dc336a0136c94a",
+      "probabilities_sha256": "1ac0fdccaaa51f32e35bf5a206cceb31f70b842a7844fedfce9855e17c63a0e5"
+    },
+    {
+      "source": "metrica@v3",
+      "config": "bigru_64",
+      "seed": 20261026,
+      "model_sha256": "93f12c3df1ae61d656059ddba9ba619a7d913ced6692bc30abfaa90b2641bbf7",
+      "probabilities_sha256": "70bd91b88c7a3bc1b74389c84373667fd74d43d747814c2c8edeeb227d2ef207"
+    },
+    {
+      "source": "metrica@v3",
+      "config": "bigru_64",
+      "seed": 20261027,
+      "model_sha256": "07a71d5769b9d036531c7d35fdad68db58dd68d68955d574e0dbc902cf342e89",
+      "probabilities_sha256": "548681dfa5d31f79d899ad05c8e5a070af00f1171606f0fda337b45645ac74aa"
+    },
+    {
+      "source": "sc@v3",
+      "config": "bigru_64",
+      "seed": 20261025,
+      "model_sha256": "b8b88d0dec699171bf6ade75fe466b9b170a4fd2ed82511cd9dc336a0136c94a",
+      "probabilities_sha256": "01bf4b8ce416d65bcf41a379ef2a7d6db6b37684e894b664953713e934ad3560"
+    },
+    {
+      "source": "sc@v3",
+      "config": "bigru_64",
+      "seed": 20261026,
+      "model_sha256": "93f12c3df1ae61d656059ddba9ba619a7d913ced6692bc30abfaa90b2641bbf7",
+      "probabilities_sha256": "60b49324be114cf41b4ef37f593596294f405c11e096a9d9699fed05bc82d7aa"
+    },
+    {
+      "source": "sc@v3",
+      "config": "bigru_64",
+      "seed": 20261027,
+      "model_sha256": "07a71d5769b9d036531c7d35fdad68db58dd68d68955d574e0dbc902cf342e89",
+      "probabilities_sha256": "cebcfd1df7aac0f4a3f391c0f9cbbf1584abcf2075326a43bbf6917a0a76f2f1"
+    }
+  ],
+  "external_cells": 24,
+  "prior_ensemble_reproduced": true
+}

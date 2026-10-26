@@ -1,0 +1,37 @@
+{
+  "models_and_predictions": {
+    "tcn": {
+      "epoch": 11,
+      "model_hash_valid": true,
+      "scaler_valid": true
+    },
+    "bigru": {
+      "epoch": 11,
+      "model_hash_valid": true,
+      "scaler_valid": true
+    },
+    "tcn_metrica@v3": {
+      "halves": 18,
+      "frames": 1289769,
+      "valid": true
+    },
+    "bigru_metrica@v3": {
+      "halves": 18,
+      "frames": 1289769,
+      "valid": true
+    },
+    "tcn_sc@v3": {
+      "halves": 40,
+      "frames": 2955547,
+      "valid": true
+    },
+    "bigru_sc@v3": {
+      "halves": 40,
+      "frames": 2955547,
+      "valid": true
+    }
+  },
+  "unique_evaluation_cells": 32,
+  "tests_passed": 23,
+  "source_code_matches_frozen_selection": true
+}

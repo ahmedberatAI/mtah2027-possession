@@ -1,0 +1,30 @@
+{
+  "models": [
+    {
+      "path": "D:\\barca\\mtah2027-possession\\cache\\pff_experiment\\raw_control_v2\\dfl_pff_controlled.txt",
+      "sha256": "a43adb10f12a716ec200355bc95d75d30c6cc975c6297989b3d94642f39dcafc",
+      "trees": 400,
+      "features": 172
+    },
+    {
+      "path": "D:\\barca\\mtah2027-possession\\cache\\pff_experiment\\raw_control_v2\\dfl_pff_native.txt",
+      "sha256": "ca0f78b692a6ad2d449f4f00361b5dcf1d3f157ae311c8fab9ed343fd3bf768a",
+      "trees": 400,
+      "features": 172
+    },
+    {
+      "path": "D:\\barca\\mtah2027-possession\\cache\\pff_experiment\\raw_control_v2\\pff_controlled.txt",
+      "sha256": "013bb1480e509ed1931f81ce560be3af54c686f83b2c3b9d0db2abbd51578e23",
+      "trees": 400,
+      "features": 172
+    }
+  ],
+  "evaluation_cells": 32,
+  "label_files": 134,
+  "unit_tests": 17,
+  "unit_test_log": "reports/pff/tests.log",
+  "dead_masks_equal_across_conventions": {
+    "metrica@v3": true,
+    "sc@v3": true
+  }
+}

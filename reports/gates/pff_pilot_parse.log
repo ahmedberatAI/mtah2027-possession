@@ -1,0 +1,77 @@
+{
+  "match": "10511",
+  "version": "raw_control_v1",
+  "source_fps": 29.97,
+  "raw_counts": {
+    "raw_rows": 196098,
+    "duplicate_rows": 630
+  },
+  "periods": [
+    {
+      "period": 1,
+      "n": 76560,
+      "start_seconds": 90.72,
+      "end_seconds": 3153.08,
+      "shared_alignment_events": 677,
+      "alignment_offset_median": 7.000000010748408e-06,
+      "alignment_residual_p95": 0.0004902000002459772,
+      "applied_shift": 0.0,
+      "alignment_accepted": true,
+      "coverage": 1.0,
+      "usable_geometry": 1.0,
+      "ball_seen": 0.717358934169279,
+      "native_counts": [
+        23397,
+        18318,
+        31148,
+        3697
+      ],
+      "controlled_counts": [
+        23673,
+        18042,
+        31148,
+        3697
+      ],
+      "native_control_disagree": 0.026561189020735947,
+      "confirmed_control_groups": 556,
+      "noncontrolling_groups_held": 30,
+      "invalid_groups": 49
+    },
+    {
+      "period": 2,
+      "n": 86491,
+      "start_seconds": 3219.92,
+      "end_seconds": 6679.52,
+      "shared_alignment_events": 643,
+      "alignment_offset_median": 0.03340299999990748,
+      "alignment_residual_p95": 0.000529999999798747,
+      "applied_shift": 0.0,
+      "alignment_accepted": true,
+      "coverage": 1.0,
+      "usable_geometry": 1.0,
+      "ball_seen": 0.5936108959313686,
+      "native_counts": [
+        22586,
+        16368,
+        45532,
+        2005
+      ],
+      "controlled_counts": [
+        22979,
+        15975,
+        45532,
+        2005
+      ],
+      "native_control_disagree": 0.01753350105252349,
+      "confirmed_control_groups": 513,
+      "noncontrolling_groups_held": 20,
+      "invalid_groups": 50
+    }
+  ],
+  "event_periods": [
+    1,
+    2,
+    3,
+    4
+  ]
+}

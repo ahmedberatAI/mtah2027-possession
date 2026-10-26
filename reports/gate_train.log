@@ -1,0 +1,30 @@
+train 2 0 ['J03WPY', 'J03WR9']
+trained 2 0 9 s
+train 2 1 ['J03WR9', 'J03WOH']
+trained 2 1 9 s
+train 2 2 ['J03WOH', 'J03WQQ']
+trained 2 2 9 s
+train 2 3 ['J03WQQ', 'J03WMX']
+trained 2 3 9 s
+train 2 4 ['J03WMX', 'J03WOY']
+trained 2 4 9 s
+train 2 5 ['J03WOY', 'J03WN1']
+trained 2 5 8 s
+train 2 6 ['J03WN1', 'J03WPY']
+trained 2 6 8 s
+train 4 0 ['J03WPY', 'J03WR9', 'J03WOH', 'J03WQQ']
+trained 4 0 13 s
+train 4 1 ['J03WR9', 'J03WOH', 'J03WQQ', 'J03WMX']
+trained 4 1 13 s
+train 4 2 ['J03WOH', 'J03WQQ', 'J03WMX', 'J03WOY']
+trained 4 2 13 s
+train 4 3 ['J03WQQ', 'J03WMX', 'J03WOY', 'J03WN1']
+trained 4 3 13 s
+train 4 4 ['J03WMX', 'J03WOY', 'J03WN1', 'J03WPY']
+trained 4 4 12 s
+train 4 5 ['J03WOY', 'J03WN1', 'J03WPY', 'J03WR9']
+trained 4 5 13 s
+train 4 6 ['J03WN1', 'J03WPY', 'J03WR9', 'J03WOH']
+trained 4 6 13 s
+train 7 0 ['J03WPY', 'J03WR9', 'J03WOH', 'J03WQQ', 'J03WMX', 'J03WOY', 'J03WN1']
+trained 7 0 18 s

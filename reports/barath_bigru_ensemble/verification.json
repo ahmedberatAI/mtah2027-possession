@@ -1,0 +1,23 @@
+{
+  "csv_sha256": "f4a4b86501fab3e94e5ef9e288b064a431818c35908982678af39c0ee1cfd225",
+  "rows": 199319,
+  "frame_range": [
+    0,
+    199318
+  ],
+  "exact_equal_probability_mean": true,
+  "input_probability_hashes_valid": true,
+  "public_scored_after_csv_frozen": true,
+  "official_validation_passed": true,
+  "official_score_agrees": true,
+  "official_ci95": [
+    0.551034,
+    0.901808
+  ],
+  "full_match_label_counts": {
+    "H": 47997,
+    "A": 31539,
+    "D": 79321,
+    "X": 40462
+  }
+}

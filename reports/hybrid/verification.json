@@ -1,0 +1,8 @@
+{
+  "selected_alpha": 1.0,
+  "selection_sha256": "e32bffd9cd5a4b3e4966604bce579f57370c2b2c83783a9b3897f4defc050fc4",
+  "external_cells": 32,
+  "prior_v7_and_ensemble_match_scores_reproduced": true,
+  "weights_unchanged_on_external": true,
+  "validation_excluded_from_six_internal_fits": true
+}

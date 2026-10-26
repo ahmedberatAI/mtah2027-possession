@@ -1,0 +1,1 @@
+Ensemble macroF1=0.9433  spellF1=0.7724  n_pred=12  n_gt=17  dur=19.7633  alive_dead_f1=0.9796  team_acc=0.9752  spell_lo=None  spell_hi=None  f1_per_iou={0.3: 0.828, 0.4: 0.828, 0.5: 0.759, 0.6: 0.759, 0.7: 0.69}  delta_v7=0.1206  delta_seed_mean=-0.0046  delta_best_seed=-0.0138

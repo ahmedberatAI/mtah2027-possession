@@ -1,0 +1,76 @@
+{
+  "predictions": [
+    {
+      "name": "v7",
+      "kind": "v7",
+      "seed": null,
+      "path": "D:\\barca\\mtah2027-possession\\cache\\barath_public_v1\\v7_team.txt",
+      "sha256": "5df1685093786013830f107e546c94dbf7abad234061ee8f04359c0c63449e7c",
+      "prediction": "D:\\barca\\mtah2027-possession\\submissions\\barath_public_v1\\v7.csv",
+      "prediction_sha256": "0df6c5592980546ba5b4fcdbc77ccb12e0460ee25edf222e53d2c6d8e2dc08f3",
+      "probabilities": "D:\\barca\\mtah2027-possession\\cache\\barath_public_v1\\v7_probs.pkl"
+    },
+    {
+      "name": "bigru_s20261025",
+      "kind": "bigru",
+      "seed": 20261025,
+      "path": "D:\\barca\\mtah2027-possession\\cache\\seed_balance_v1\\bigru_s20261025.pt",
+      "sha256": "c4a8872c224dd3032cf293855e64dac5df0ab180c4d909920bd12eb568a3435d",
+      "prediction": "D:\\barca\\mtah2027-possession\\submissions\\barath_public_v1\\bigru_s20261025.csv",
+      "prediction_sha256": "1d44cae7737cfaae590e6bae92939789dd1a497c0700f4dabb98b9242f4c7c78",
+      "probabilities": "D:\\barca\\mtah2027-possession\\cache\\barath_public_v1\\bigru_s20261025_probs.pkl"
+    },
+    {
+      "name": "bigru_s20261026",
+      "kind": "bigru",
+      "seed": 20261026,
+      "path": "D:\\barca\\mtah2027-possession\\cache\\seed_balance_v1\\bigru_s20261026.pt",
+      "sha256": "f6f2781c04557d3c63bbc58df53f2562cd6c4cc9593862a1df62af02175f08a7",
+      "prediction": "D:\\barca\\mtah2027-possession\\submissions\\barath_public_v1\\bigru_s20261026.csv",
+      "prediction_sha256": "ecaded6f4c2c05224a9c44cd65f604f017c7e739198f29a963ebabb0865c858a",
+      "probabilities": "D:\\barca\\mtah2027-possession\\cache\\barath_public_v1\\bigru_s20261026_probs.pkl"
+    },
+    {
+      "name": "bigru_s20261027",
+      "kind": "bigru",
+      "seed": 20261027,
+      "path": "D:\\barca\\mtah2027-possession\\cache\\seed_balance_v1\\bigru_s20261027.pt",
+      "sha256": "35b7425242ae33b5f5f380be8a58d8c01ba97912b0563a89dd322015e9dffc31",
+      "prediction": "D:\\barca\\mtah2027-possession\\submissions\\barath_public_v1\\bigru_s20261027.csv",
+      "prediction_sha256": "8ffece243a085024e6389ea2eb6e2472e66889968be9521fa37c4b6c1dcf1689",
+      "probabilities": "D:\\barca\\mtah2027-possession\\cache\\barath_public_v1\\bigru_s20261027_probs.pkl"
+    },
+    {
+      "name": "lgb_balanced_s20261025",
+      "kind": "lgb_balanced",
+      "seed": 20261025,
+      "path": "D:\\barca\\mtah2027-possession\\cache\\seed_balance_v1\\lgb_balanced_s20261025.txt",
+      "sha256": "6008d35875219f50e631b35e949af78eda7f62bc128c89bf190a2100a1c92825",
+      "prediction": "D:\\barca\\mtah2027-possession\\submissions\\barath_public_v1\\lgb_balanced_s20261025.csv",
+      "prediction_sha256": "b555520f91fd623c5c3814d793527ee5abb9aae20a6e83f985ca4f1e1d8859e1",
+      "probabilities": "D:\\barca\\mtah2027-possession\\cache\\barath_public_v1\\lgb_balanced_s20261025_probs.pkl"
+    },
+    {
+      "name": "lgb_balanced_s20261026",
+      "kind": "lgb_balanced",
+      "seed": 20261026,
+      "path": "D:\\barca\\mtah2027-possession\\cache\\seed_balance_v1\\lgb_balanced_s20261026.txt",
+      "sha256": "f8703c1c896eed20d511e81eff5958328f5b9bb5178f1343f325623541ab18c6",
+      "prediction": "D:\\barca\\mtah2027-possession\\submissions\\barath_public_v1\\lgb_balanced_s20261026.csv",
+      "prediction_sha256": "47269e3028b238ac80e1b094be65b1f85519742737eb1c04e46518d11ecf56e6",
+      "probabilities": "D:\\barca\\mtah2027-possession\\cache\\barath_public_v1\\lgb_balanced_s20261026_probs.pkl"
+    },
+    {
+      "name": "lgb_balanced_s20261027",
+      "kind": "lgb_balanced",
+      "seed": 20261027,
+      "path": "D:\\barca\\mtah2027-possession\\cache\\seed_balance_v1\\lgb_balanced_s20261027.txt",
+      "sha256": "1e4aa53972e16a8929770f038bf2a3b3a9a9d743702fb2c15ca0159100f645ea",
+      "prediction": "D:\\barca\\mtah2027-possession\\submissions\\barath_public_v1\\lgb_balanced_s20261027.csv",
+      "prediction_sha256": "5ff58ec6ac8047243c74e0efaf43b118d6cfed69b63c89e8e596229a2e0c7abc",
+      "probabilities": "D:\\barca\\mtah2027-possession\\cache\\barath_public_v1\\lgb_balanced_s20261027_probs.pkl"
+    }
+  ],
+  "design_sha256": "b382a842700146aeb9b2e512ce5958d414de6c349238783af0f94a0410e13eb9",
+  "frozen_at": "2026-10-25T07:45:04.567338+00:00"
+}

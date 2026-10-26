@@ -1,0 +1,16 @@
+v7 metrica@v3 ctrl learned 0.81471
+v7 metrica@v3 ctrl oracle 0.8715
+v7 metrica@v3 events learned 0.61554
+v7 metrica@v3 events oracle 0.65952
+dfl_pff_controlled metrica@v3 ctrl learned 0.81444
+dfl_pff_controlled metrica@v3 ctrl oracle 0.87093
+dfl_pff_controlled metrica@v3 events learned 0.60996
+dfl_pff_controlled metrica@v3 events oracle 0.65481
+v7 sc@v3 pp learned 0.58291
+v7 sc@v3 pp oracle 0.741
+v7 sc@v3 phase learned 0.58158
+v7 sc@v3 phase oracle 0.74565
+dfl_pff_controlled sc@v3 pp learned 0.59131
+dfl_pff_controlled sc@v3 pp oracle 0.74713
+dfl_pff_controlled sc@v3 phase learned 0.58967
+dfl_pff_controlled sc@v3 phase oracle 0.75259

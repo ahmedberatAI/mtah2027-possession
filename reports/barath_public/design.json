@@ -1,0 +1,134 @@
+{
+  "date": "2026-10-25",
+  "models": [
+    {
+      "name": "bigru_s20261025",
+      "kind": "bigru",
+      "seed": 20261025,
+      "path": "D:\\barca\\mtah2027-possession\\cache\\seed_balance_v1\\bigru_s20261025.pt",
+      "sha256": "c4a8872c224dd3032cf293855e64dac5df0ab180c4d909920bd12eb568a3435d"
+    },
+    {
+      "name": "bigru_s20261026",
+      "kind": "bigru",
+      "seed": 20261026,
+      "path": "D:\\barca\\mtah2027-possession\\cache\\seed_balance_v1\\bigru_s20261026.pt",
+      "sha256": "f6f2781c04557d3c63bbc58df53f2562cd6c4cc9593862a1df62af02175f08a7"
+    },
+    {
+      "name": "bigru_s20261027",
+      "kind": "bigru",
+      "seed": 20261027,
+      "path": "D:\\barca\\mtah2027-possession\\cache\\seed_balance_v1\\bigru_s20261027.pt",
+      "sha256": "35b7425242ae33b5f5f380be8a58d8c01ba97912b0563a89dd322015e9dffc31"
+    },
+    {
+      "name": "lgb_balanced_s20261025",
+      "kind": "lgb_balanced",
+      "seed": 20261025,
+      "path": "D:\\barca\\mtah2027-possession\\cache\\seed_balance_v1\\lgb_balanced_s20261025.txt",
+      "sha256": "6008d35875219f50e631b35e949af78eda7f62bc128c89bf190a2100a1c92825"
+    },
+    {
+      "name": "lgb_balanced_s20261026",
+      "kind": "lgb_balanced",
+      "seed": 20261026,
+      "path": "D:\\barca\\mtah2027-possession\\cache\\seed_balance_v1\\lgb_balanced_s20261026.txt",
+      "sha256": "f8703c1c896eed20d511e81eff5958328f5b9bb5178f1343f325623541ab18c6"
+    },
+    {
+      "name": "lgb_balanced_s20261027",
+      "kind": "lgb_balanced",
+      "seed": 20261027,
+      "path": "D:\\barca\\mtah2027-possession\\cache\\seed_balance_v1\\lgb_balanced_s20261027.txt",
+      "sha256": "1e4aa53972e16a8929770f038bf2a3b3a9a9d743702fb2c15ca0159100f645ea"
+    }
+  ],
+  "baseline": "exact model_v7 team training recipe, 7 DFL natural match order",
+  "features": "base+feat_fix:own_half+feat_ctrl:control+feat_team2:c145",
+  "decoder_and_evidence": {
+    "v0": 1.55,
+    "kv": 2.2,
+    "v_clip": 2.5,
+    "v0_long": 1.55,
+    "kv_long": 1.2,
+    "out_margin": 0.5,
+    "w_out": 4.0,
+    "w_missing": 0.25,
+    "missing_after": 25,
+    "still_disp": 0.6,
+    "w_still": 0.8,
+    "ball_fast": 5.0,
+    "w_ballmove": 0.6,
+    "r_ctrl": 1.5,
+    "r_sigma": 1.0,
+    "ctrl_rel": 2.5,
+    "ctrl_boost": 1.0,
+    "contest_scale": 1.0,
+    "w_team": 2.0,
+    "pen_team": 12.0,
+    "pen_dead": 30.0,
+    "min_poss": 8,
+    "min_dead": 50,
+    "spd_shift": 37,
+    "w_binvalid": 1.5,
+    "w_blive": 0.4,
+    "dis_lo": 1.0,
+    "dis_hi": 2.5,
+    "w_dis_mid": 0.7,
+    "w_dis_hi": 0.35,
+    "k_team": 1.0,
+    "mix_rule": 0.0,
+    "b2_D0": 175,
+    "b2_c": 48.0
+  },
+  "source_assets": [
+    {
+      "name": "tactical\\BAR-ATH_tactical_atd.xml",
+      "bytes": 59057,
+      "sha256": "327e35e32e46a647389b88f883d4f9a2ab931e3e6148aef2fcf8f22b1e93c43a"
+    },
+    {
+      "name": "tactical\\BAR-ATH_tactical_atd.txt",
+      "bytes": 195714285,
+      "sha256": "f130e350d2bfdf734b7e32f072931fccc6d015c1e837d082064875fe0a700431"
+    },
+    {
+      "name": "tactical\\BAR-ATH_tactical_homography.csv",
+      "bytes": 23187043,
+      "sha256": "421c81abe16f0912dc45c2541f9bf19dd5660066397a3dcc043038a1b61c28c3"
+    },
+    {
+      "name": "tactical\\BAR-ATH_tactical_smart_tagging.xml",
+      "bytes": 261055,
+      "sha256": "0594d35e3df01b9c5002372d8615e2e8ef5379ac8f4e84c5ef7a53f4304c9019"
+    },
+    {
+      "name": "broadcast\\BAR-ATH_broadcast_atd.xml",
+      "bytes": 64956,
+      "sha256": "53d387bcdef718c2034ee2e05c3036c7edfa3cfcd5bbe8270a43695bd252dbe9"
+    },
+    {
+      "name": "broadcast\\BAR-ATH_broadcast_atd.txt",
+      "bytes": 141966465,
+      "sha256": "a71c1c9391e564032446be91ffbd7564205b47966060181532d80a338685e458"
+    },
+    {
+      "name": "broadcast\\BAR-ATH_broadcast_homography.csv",
+      "bytes": 15401635,
+      "sha256": "9ed07e7085bb0f200e171929948ae378cdba760d844bd18266c0b7caa4ba4afb"
+    }
+  ],
+  "prior_model_selection_sha256": "00c1471b823a1d9dadb07a5d39f489f27a4f56778951dd5d342c5c64fa75a5e7",
+  "public_tuning": false,
+  "ensemble": false,
+  "all_predictions_frozen_before_public_scoring": true,
+  "source_code": {
+    "exp_barath_public.py": "914c81010662fe619feada52f5cf9198e55ba47b075e9daafea7af014cafb0e9",
+    "model_v7.py": "1e5165b1d1b19a09a641afea9a72c1df3540950fd0877472977c7c2d5d1ef33c",
+    "model_v5.py": "d81e8c252024dd4aa96366f9daf21f4898ab55902490f2f2c54eefe0a3f377e3",
+    "model_v3.py": "5dc24db930cc8a3cb4f59ca50197532d14d38f8be04a9832126aaeb94689749b",
+    "seq_pff.py": "561611ad37cd6969530fbe1d9f1695645c8abf40ee39d549193682d6b62ba279"
+  },
+  "scorer_sha256": "32c878630c74fb52a90c301485d6dff806509d8e933b1177b6035ee8e8f42b80"
+}
