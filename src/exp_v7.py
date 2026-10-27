@@ -1,4 +1,4 @@
-"""Round-3 synthesis (docs/FIKIRLER.md): do the feature gains (own_half, C6, c145) and the B2 soft-minimum
+"""Round-3 synthesis (docs/RAPOR.md): do the feature gains (own_half, C6, c145) and the B2 soft-minimum
 decoder add up? Candidates x decoders on DFL-trk / Metrica-ctrl (sim V3), paired per match / game x seed
 against base_native_v3 + the standard decoder at its own best penalty. AGGREGATE output only.
 

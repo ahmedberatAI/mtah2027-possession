@@ -1,4 +1,4 @@
-"""Ball frames that BAR-ATH's tactical ATD filled in by prediction (idea 8, docs/FIKIRLER.md).
+"""Ball frames that BAR-ATH's tactical ATD filled in by prediction (idea 8, docs/RAPOR.md).
 
 Over-smooth runs of the tactical ball -- |2nd difference| < 2 mm for >= 8 frames while it moves (> 1 m/s) -- are
 3.1% of the seen graded frames; there the tactical and broadcast balls disagree by 1.66 m (median; 3.15 m for runs

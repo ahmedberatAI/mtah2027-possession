@@ -1,0 +1,47 @@
+# Files of the public repository (tools/export_public.py). Source modules: the import closure of
+# src/make_submission.py with model_v10 (incl. lazily imported option modules and the feature plugins named in
+# model_v7.VERSION), the open-data download script, and the team classifier trained on open data.
+src/atd.py
+src/ballclean.py
+src/bench.py
+src/bfree.py
+src/broadcast.py
+src/ctrl_model.py
+src/decode.py
+src/decode2.py
+src/dfl.py
+src/download_idsse.py
+src/evaluate.py
+src/exp_bfree.py
+src/exp_ctrl.py
+src/exp_ctrl2.py
+src/exp_oracle.py
+src/exp_v4.py
+src/exp_v7.py
+src/feat_ctrl.py
+src/feat_fix.py
+src/feat_team2.py
+src/features.py
+src/make_submission.py
+src/metrica_sample.py
+src/mlfeat.py
+src/model_v10.py
+src/model_v2.py
+src/model_v3.py
+src/model_v5.py
+src/model_v6.py
+src/model_v7.py
+src/model_v9.py
+src/podead.py
+src/podead_barath.py
+src/proxy.py
+src/sim.py
+src/skillcorner.py
+src/snap.py
+src/touch.py
+src/train_dfl.py
+src/whistle.py
+src/whistle_eval.py
+src/whistle_panns.py
+src/whistle_ref.py
+models/v10_team.txt

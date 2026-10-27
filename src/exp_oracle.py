@@ -1,4 +1,4 @@
-"""Round 6, step 0 (docs/FIKIRLER.md): where is spellF1 lost? AGGREGATE output only.
+"""Round 6, step 0 (docs/RAPOR.md): where is spellF1 lost? AGGREGATE output only.
 
 Oracle ladder (cumulative; each rung makes one more component perfect, starting from v7):
   v7            v7 team probabilities + learned dead-ball model, v7 decoder (B2 soft minimum, pen 12)

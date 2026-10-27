@@ -1,4 +1,4 @@
-Decoder track (docs/FIKIRLER.md B/G) - src/decode2.py (generalised decoder; std_spec == decode.viterbi_min_dur
+Decoder track (docs/RAPOR.md B/G) - src/decode2.py (generalised decoder; std_spec == decode.viterbi_min_dur
 on the test blocks), src/exp_decoders.py (driver). Aggregates only. Each variant at its own best pen_team
 (grid 2-96); deltas are vs the standard decoder at ITS best pen. Metrica = 3 games x 3 seeds, DFL = 7 matches LOMO.
 

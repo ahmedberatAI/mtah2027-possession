@@ -1,4 +1,4 @@
-"""Pressure-aware control cues per team (idea C6, docs/FIKIRLER.md), as a bench feature plugin.
+"""Pressure-aware control cues per team (idea C6, docs/RAPOR.md), as a bench feature plugin.
 
 Error analysis (src/err_spells.py): most missed ground-truth possessions are short spells right after a
 turnover in which BOTH teams are near the ball -- the nearest player is often the presser, not the player

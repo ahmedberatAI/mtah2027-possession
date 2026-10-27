@@ -1,4 +1,4 @@
-"""Pilot (round 7, research R-6; docs/FIKIRLER.md): the 2023 SoccerNet ball-action-spotting winner (R. Baikulov, MIT,
+"""Pilot (round 7, research R-6; docs/RAPOR.md): the 2023 SoccerNet ball-action-spotting winner (R. Baikulov, MIT,
 github.com/lRomul/ball-action-spotting; one fold model of its final experiment ball_finetune_long_004) on the BAR-ATH
 broadcast video, read from the user's own Drive mounted on this VM. Runs on the Colab VM only (colab/run_bas.sh).
 

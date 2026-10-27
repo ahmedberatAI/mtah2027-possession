@@ -1,4 +1,4 @@
-"""Attention-to-ball cues for the dead-ball model (idea D1, docs/FIKIRLER.md), as bench feature plugins.
+"""Attention-to-ball cues for the dead-ball model (idea D1, docs/RAPOR.md), as bench feature plugins.
 
 While play is alive, moving players run towards / with the ball; at a stoppage they turn away and walk
 back into position (open DFL, clean data: dead-ball AUC speed 0.929 -> speed + attention 0.944, four

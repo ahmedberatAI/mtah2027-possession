@@ -14,7 +14,7 @@ DEFAULT = dict(alive_missing=0.12, dead_missing=0.70, miss_median_s=10.7, alive_
                p_noise=0.15, p_present_median_s=35.0, p_missing_median_s=2.0, p_sigma=1.2,
                p_target_missing=0.07)
 # ball_model "v2" (ball_dropout_v2): pass as degrade(..., params=V2). Targets from BAR-ATH aggregates
-# (src/ball_gaps.py, reports/sim_ball_dropout.md; merged ball = what the team model sees): ~6.5%
+# (src/ball_gaps.py, docs/RAPOR.md Ek C; merged ball = what the team model sees): ~6.5%
 # missing in play, ~70% while dead; the ball is already gone on the last alive frame before ~24% of
 # stoppages (median ~2.7 s earlier) and still gone on the first alive frame after ~22% of restarts
 # (median ~2 s more). V2_TACTICAL: tactical-ball rates (alive/dead = the v1 targets 12% / 70%).

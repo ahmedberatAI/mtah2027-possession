@@ -1,4 +1,4 @@
-"""How good is the Smart Tagging as possession evidence? (ideas F1 / F2 in docs/FIKIRLER.md)
+"""How good is the Smart Tagging as possession evidence? (ideas F1 / F2 in docs/RAPOR.md)
 AGGREGATE output only: counts, agreement rates and offset quantiles; no tag rows are printed.
 
   1. phase tags (team in possession / defending team) vs the public GT and vs v5, per code family

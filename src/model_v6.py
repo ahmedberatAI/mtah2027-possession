@@ -2,7 +2,7 @@
 
 Whistles = the `wh_topn` strongest local maxima (+-1 s suppression, graded frames) of the
 referee-whistle matched filter (template from the two kick-off whistles; see whistle_ref.py and
-reports/whistle_eval.md). A whistle only acts where it can say "play stopped earlier than v5
+docs/RAPOR.md Ek D). A whistle only acts where it can say "play stopped earlier than v5
 thinks": v5 (the same scores without whistles) has the ball alive at the whistle and its own
 alive -> D switch follows within `wh_lead` frames. Such a whistle gives a bonus `wh_bonus` to
 ENTERING the dead-ball state at frames w + wh_e0 .. w + wh_e1 (+-0.32 s, the detector's timing

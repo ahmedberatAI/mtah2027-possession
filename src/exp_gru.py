@@ -1,4 +1,4 @@
-"""Idea N25 (docs/FIKIRLER.md): BiGRU team model (src/seq_gru.py) vs v7's LightGBM team model, and their
+"""Idea N25 (docs/RAPOR.md): BiGRU team model (src/seq_gru.py) vs v7's LightGBM team model, and their
 logit-average ensemble. Meant for a GPU VM (colab/run_gru.sh); everything is rebuilt there from open data so
 both models see identical inputs. Dead-ball evidence = TRUE D on every set (the GRU only changes the team side),
 decoder = v7's B2 soft minimum. DFL: leave-one-match-out for both models; Metrica-ctrl and SkillCorner-phase:

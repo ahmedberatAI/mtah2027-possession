@@ -1,4 +1,4 @@
-"""Idea N20 (docs/FIKIRLER.md): temporal stacking. A second LightGBM sees the first-stage (v7 team model)
+"""Idea N20 (docs/RAPOR.md): temporal stacking. A second LightGBM sees the first-stage (v7 team model)
 probabilities around each frame -- logit p_home at offsets up to +-5 s, window means / mins / maxes, the
 dead-ball probability -- and predicts possession again, i.e. a learned, context-dependent smoother in front
 of the B2 decoder. Level 1 = out-of-fold DFL probabilities (bench oof of v7's tag); level 2 is trained

@@ -1,4 +1,4 @@
-"""Out-of-domain check on the 20 SkillCorner open matches (idea A3, docs/FIKIRLER.md): team models trained on
+"""Out-of-domain check on the 20 SkillCorner open matches (idea A3, docs/RAPOR.md): team models trained on
 degraded DFL (bench tags) applied to SkillCorner degraded with sim V3, labels from SkillCorner's phases of
 play (a control-based possession convention close to the public GT statistics). Standard decoder vs the B2
 soft minimum, per match, paired against base_native_v3 + standard decoder at its own best penalty.

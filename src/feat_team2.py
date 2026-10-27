@@ -1,4 +1,4 @@
-"""Extra team-perspective features for the H/A model (docs/FIKIRLER.md group C), bench plugins:
+"""Extra team-perspective features for the H/A model (docs/RAPOR.md group C), bench plugins:
 bench.run("base+feat_team2:c1", ...). Every function takes ONE half -- P (n, slots, 2) normalised 0-1,
 NaN = missing; B (n, 2) normalised, NaN = missing; team (slots,) 0/1; gk (slots,) bool; pitch (L, W) m --
 and returns (F_extra, T_home, T_away). All features are team-perspective (T dicts: the same feature seen

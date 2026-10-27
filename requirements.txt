@@ -1,0 +1,8 @@
+# Python 3.12 (tested with 3.12.13). Pinned versions of the packages the submission pipeline imports
+# (src/make_submission.py -> model_v10); the pipeline needs no GPU.
+numpy==2.5.4
+pandas==3.0.6
+scipy==1.18.1
+numba==0.68.0
+llvmlite==0.50.0
+lightgbm==4.7.0

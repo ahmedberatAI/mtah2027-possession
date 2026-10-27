@@ -1,4 +1,4 @@
-"""Idea A3b (docs/FIKIRLER.md): train the team model on degraded DFL + degraded SkillCorner instead of DFL
+"""Idea A3b (docs/RAPOR.md): train the team model on degraded DFL + degraded SkillCorner instead of DFL
 alone. SkillCorner is evaluated out of fold (4 folds over its 20 matches, all DFL always in training),
 Metrica-ctrl and BAR-ATH with the model trained on DFL + all of SkillCorner. Same features as v7 (sim V3),
 dead-ball evidence = the all-DFL base V3 model for every variant. AGGREGATE output only.

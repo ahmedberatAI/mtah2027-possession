@@ -1,4 +1,4 @@
-"""Idea N21 (docs/FIKIRLER.md): SkillCorner as a labelled testbed for BAR-ATH's alive/dead evidence.
+"""Idea N21 (docs/RAPOR.md): SkillCorner as a labelled testbed for BAR-ATH's alive/dead evidence.
 
 BAR-ATH's dead-ball side is v3's hand-made rules + the aligned broadcast (homography invalid in 76% of GT-D
 frames vs ~3.5% of alive frames); so far it could only be checked on the 4 stoppages of the public window.

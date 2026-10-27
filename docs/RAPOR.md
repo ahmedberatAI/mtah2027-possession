@@ -1,0 +1,2139 @@
+# MTAH 2027 — çalışma raporu: yapılanlar, sonuçlar, kararlar
+
+Projenin **tek** fikir / deneme / sonuç belgesi. 25 Ekim 2026'da `docs/DENEMELER.md`, `docs/FIKIRLER.md`,
+`reports/ANALIZ_RAPORU.md`, `reports/metrica_calibration.md`, `reports/sim_ball_dropout.md` ve `reports/whistle_eval.md`
+burada birleştirildi. İçerik aynen korundu; yalnız başlık düzeyleri, iç referanslar ve tablo boşlukları uyarlandı.
+`reports/` altında yalnız betiklerin ham toplu çıktıları (txt / json / png) kaldı.
+
+**Yeni deneme nasıl eklenir:**
+1. §3'teki "Tek tek denemeler" tablosunun **sonuna** bir satır: ne (betik), sonuç (toplu sayılar), karar (✅ / ❌ / ≈ / bilgi).
+2. Anlatım gerekiyorsa §4'ün sonundaki son turun altına; yeni bir tursa tarihli yeni bir "Tur N" başlığıyla.
+3. Model, gönderim ya da skorlar değiştiyse §1'deki özet güncellenir.
+
+Veri politikası: yalnız toplu istatistik. Ham satır, kare bazlı çıktı, video karesi yok; belge hiçbir yerde yayınlanmaz.
+
+İçindekiler: 1. Özet · 2. Kalıcı kurallar ve tuzaklar · 3. Deneme günlüğü · 4. Fikir havuzu ve tur kayıtları ·
+Ek A İlk analiz ve baseline'lar · Ek B Metrica kalibrasyonu · Ek C Simülatörde top kaybı · Ek D Hakem düdüğü
+
+## 1. Özet — şu anki durum (25 Ekim 2026)
+
+**Görev.** BAR-ATH maçının 199,319 karesinin her birine H / A / D etiketi (X: cevap yok). Sıralama, tam maçın gizli
+etiketleri üzerinde spellF1 ile yapılıyor (possession spell'leri, IoU 0.3–0.7); eşitlikte macroF1. Son teslim 17 Kasım
+2026: CSV + dosyayı birebir yeniden üreten herkese açık repo (verisiz) + kısa teknik doküman. Teslimden önce geri bildirim
+yok; elimizdeki göstergeler public 5 dakika (17 spell) ve dış veri setleri.
+
+**Şu anki model: v10** (`src/model_v10.py`). **Gönderim (25 Ekim kararı): düdüksüz `submissions/candidate_v10.csv`**
+(MD5 ca20c5b6…); üretmek için `src/make_submission.py` (varsayılanlar artık model_v10 ve bu dosya). Düdüklü sürüm
+(`candidate_v10w.csv`, `--params '{"wh_bonus": 30}'`) artık önerilmiyor: tek dayanağı public pencereydi.
+1. **Ölü top mu, canlı mı:** v3 kuralları. Oyuncu temposu (±1 ve ±3 sn; hakeme tepki gecikmesi için 1.5 sn ileriye
+   bakılıyor); top çizgi dışında mı, 1 sn'den uzun görünmüyor mu, duruyor mu, hızlı mı; hizalanmış yayın görüntüsünden
+   tekrar / yakın çekim ve canlılık ipuçları. Yayının topu taktik topun boşluklarını dolduruyor.
+2. **Takım (H/A):** LightGBM, kare başına "top ev sahibinde" olasılığı. Eğitim: açık DFL (7 maç, kendi possession bayrağı)
+   + 3 Metrica örnek maçı (kontrollü possession; her maç 2 DFL maçı ağırlığında). İkisi de `sim.V3` ile BAR-ATH'ın otomatik
+   takibine benzetiliyor. Özellikler: topa yakınlık, baskı altında kontrol (C6), kendi yarı saha, duran top dizilimi /
+   takım şekli / hareketi (c145), topsuz takım etkileşimleri (`src/bfree.py`). Oyuncu kimliği yok, hepsi takım düzeyinde.
+   Olasılıklar ±1 sn (±25 kare) logit ortalamasıyla yumuşatılıyor.
+3. **Decoder:** her devre için ayrı Viterbi. Takım değişimi cezası 12, ölü top cezası 30; en az 8 kare possession, 50 kare
+   ölü top; 7 sn'den kısa bir possession'ı bitirmeye süre kısaldıkça artan ek maliyet (B2: 175 kare, 48).
+4. **Düdük (yalnız v10w):** taktik videonun sesinde, iki santra düdüğünden yapılan şablonla hakem düdüğü aranıyor. Model
+   ölü topa bir düdükten sonraki 3 sn içinde geçiyorsa geçiş düdük anına çekiliyor.
+
+Kapalı seçenekler: v11 (dokunuş özellikleri), v12 (dokunuşa göre geçiş kolaylığı), `po_lam` (yalnız oyunculara dayalı
+ölü top), `clean_ball` (ATD'nin tahminle doldurduğu top karelerini atmak).
+
+**Skorlar — dış setler** (spellF1, öğrenilmiş D / gerçek D; her maç eğitimden dışarıda; v10 = 3 LightGBM tohumunun
+ortalaması; `cache/bench/vers_table.log`, sürümlerin tamamı §4'te "Sürümlerin mutlak skorları"):
+
+| Set | v7 | v10 | Fark |
+|---|---|---|---|
+| DFL-trk (7 maç) | 0.760 / 0.782 | 0.769 / 0.798 | +0.010 / +0.016 |
+| Metrica-ctrl (3 maç) | 0.815 / 0.872 | 0.823 / 0.882 | +0.009 / +0.011 |
+| SkillCorner faz (20 maç) | 0.582 / 0.746 | 0.597 / 0.759 | +0.016 / +0.014 |
+| SkillCorner oyuncu possession | 0.583 / 0.741 | 0.592 / 0.748 | +0.009 / +0.007 |
+
+Öğrenilmiş D: ölü topu model kendisi buluyor (dış setlerde yayın yok, öğrenilmiş ölü top modeli kullanılıyor). Gerçek D:
+ölü top doğru veriliyor, yalnız takım kararı ölçülüyor. BAR-ATH'a en yakın set Metrica: aynı sağlayıcı, aynı possession mantığı.
+
+**Skorlar — public 5 dakika** (resmi skorlayıcı; köşeli parantezde 1000 bootstrap ile %90 aralık). Yalnız hattın doğru
+çalıştığını gösterir, sürüm seçmez:
+
+| Model | spellF1 | macroF1 |
+|---|---|---|
+| Resmi baseline (smooth50; tam maçta 0.243) | 0.326 [0.21–0.45] | 0.621 |
+| v5 | 0.566 [0.36–0.76] | 0.901 |
+| v7 | 0.652 [0.43–0.81] | 0.924 |
+| **v10** | **0.667 [0.44–0.83]** | **0.932** |
+| v10w | 0.667 [0.44–0.83] | 0.939 |
+
+v10 public'te canlı/ölü F1 0.98, canlı karelerde takım doğruluğu 0.95; 17 gerçek spell'e karşı 10 spell üretiyor (kaçanlar
+kısa top kayıpları). Tam maçta 203 possession, 118 ölü top bölümü, %49 ölü pay (etiketsiz; literatürle uyumlu).
+
+**Model zinciri** (ayrıntı §3'teki "Modeller" tablosunda):
+- v1–v4 (20 Ekim): kurallar + en kısa süreli Viterbi. v3'ün canlı/ölü kuralları bugün de kullanılıyor.
+- v5: DFL'de öğrenilmiş takım olasılıkları. v6: hakem düdüğü.
+- v7 (22 Ekim): `sim.V3` ile eğitim, C6 + own_half + c145 özellikleri, B2 decoder, ceza 12.
+- v8: Metrica maçları eğitime. v9: topsuz özellikler + ±1 sn yumuşatma.
+- **v10 (23 Ekim): Metrica ağırlığı 2 — varsayılan.** v11 / v12: dokunuş seçenekleri, v10'a eşit (≈).
+
+**Neler işe yaradı** (dış setlerde; ayrıntılar §3–§4):
+- Simülatör hatasının bulunması: `sim.V2`'nin her kareye bağımsız gürültüsü hızları ikiye katlıyordu (adversarial
+  validation, AUC 1.000). Pürüzsüz gürültülü `sim.V3` ile düzeldi; öncesindeki bütün öğrenilmiş modeller bozuk hızlarla
+  eğitilmişti.
+- Baskı altında kontrol özellikleri (C6): ilk tutarlı kazanç (DFL-trk +0.0085, Metrica +0.006).
+- Duran top dizilimi / takım şekli / hareketi (c145): +0.007…+0.013.
+- B2 yumuşak en kısa possession süresi: Metrica +0.009, DFL-trk +0.013. Birleşimi v7: DFL-trk ve Metrica +0.016,
+  SkillCorner +0.017.
+- **Eğitim verisi (en büyük adım):** Metrica maçlarını eğitime katmak (v8), topsuz özellikler + ±1 sn yumuşatma (v9),
+  Metrica ağırlığı 2 (v10). v10, v7'yi sekiz bağlamın hepsinde geçiyor (bootstrap P 0.95–1.00; tohum, ceza ve stres
+  testlerine dayanıklı).
+- Ölü topta yayın görüntüsü ipuçları (v3; public canlı/ölü F1 0.97).
+
+**Neler işe yaramadı** (hepsi ≤ +0.003 ya da eksi):
+- Decoder hileleri: B1 / B4 / B5 / B6 / G1 / G2, el değişimi modeli, kısa possession doğrulama, yeniden başlama muafiyeti,
+  gecikme düzeltmesi, konsensüs, varış yerine göre rampa, mücadele anına özel decoder.
+- Daha güçlü öğreniciler: BiGRU (−0.04…−0.10), zamansal yığınlama, büyük LightGBM, extra-trees, monoton kısıt, topluluklar.
+- Yeni özellikler: rol farkındalığı (DFL −0.013…−0.015), oyuncu düzeyinde kontrolcü (yalnız SkillCorner'da artı), mücadele
+  sonucu özellikleri, dokunuş özellikleri (v11, ≈).
+- Eğitim / etiket varyantları: SkillCorner'ı eğitime katmak (Metrica her seferinde −0.006…−0.009), DFL trk etiketi, yumuşak
+  hedefler, top kaybı ve mücadele karelerine ×3 ağırlık, test maçında kendi kendine eğitim.
+- Top ve video: kusursuz top izi bile < +0.02; hazır WASB ve YOLO11s ince ayarı yetmedi; video pas pilotu v7 düzeyinde;
+  ATD top temizliği dış setlerde desteklenmedi; kusursuz konum ≈ +0.005.
+- Ölü top alternatifleri (öğrenilmiş harman, yalnız oyunculara dayalı model) ve Smart Tagging'i takım kanıtı yapmak.
+- Yeni gözlemler (tur 11): yayın kamerasının kadrajı (BAR-ATH'ta v10-emin karelerde AUC 0.95, ama SkillCorner'da gerçek
+  etiketle birleştirme her ayarda −0.014…−0.13, sahte değişim vetosu olarak da −0.0005…−0.038), spiker adları (dakikada
+  5.5, %87'si ev sahibi, zayıf) ve top yüksekliği (DFL'nin gerçek yüksekliğiyle bile −0.005…−0.010).
+
+**Dersler:**
+- Simülasyon içi CV simülasyon hatasını göremez; her yeni bozulma BAR-ATH'a karşı adversarial validation ile kontrol edilir.
+- Public pencere sürüm seçemez (v10'un aralığı 0.44–0.83). Kararlar dış setlerde en kötü durum pişmanlığıyla verilir; fark
+  0.005'ten küçükse mevcut ya da basit olan kalır.
+- Her aday en az 3 tohumda ölçülür: v10'un kendisi tohumlar arasında DFL'de ±0.004 oynuyor.
+- Kare doğruluğu artıp spellF1 düşüyorsa çıktı genellikle zıplıyordur; reddetmeden önce yumuşatmayla denenir.
+- Kalan kayıp 4 sn'den kısa oyun içi top kaybı spell'lerinde (özellikle ikili mücadeleler) ve bunların aynası olan yanlış
+  değişimlerde. Mücadele anlarında takip verisi v10'un kullandığından çok az fazla bilgi taşıyor; kusursuz konum bile
+  ≈ +0.005. Bu havuzu ancak yeni bir gözlem açabilir: topa kimin dokunduğu (video).
+- Yeni bir ipucunun modelin emin olduğu karelerdeki uyumu, değerinin ölçüsü değildir (kamera kadrajı: AUC 0.95, ama
+  birleştirme kaybettirdi). Değer, modelin belirsiz olduğu anlarda ve gerçek etiketle ölçülür; BAR-ATH'a özgü bir gözlem
+  ancak aynı türden gözlemi taşıyan bir dış sette doğrulanabiliyorsa benimsenir.
+
+**BAR-ATH'ın kullanımı (24 Ekim denetimi):**
+- Takım modeli, eğitim verisi, özellikler, yumuşatma ve decoder dış setlerde seçildi.
+- Ölü top kuralları (v2/v3, 20 Ekim) public pencereye bakılarak kuruldu: ölü top bölümlerinde oyuncu hızı, hakeme tepki
+  gecikmesi, yayın görüntüsünün geçersizliği; hız kaydırması public canlı/ölü F1 ile tarandı. İki öğrenilmiş alternatif
+  public'te kaybettiği için reddedildi.
+- Düdük: şablon BAR-ATH videosunun sesinden; eklenme kararı ve "yalnız model geç kaldıysa" kuralı public'e bakılarak verildi.
+- Simülatör: BAR-ATH'ın etiketsiz tam maç istatistiklerine göre ayarlandı (canlı/ölü ayrımı için GT değil, v5 tahminleri).
+- **Kurallar güncellendi** (resmî repo f8f2629, 23 Ekim; 26 Ekim'de çekildi): public 5 dakika "eğitim verisi değil, ayar
+  seti değil" (yalnız hat kontrolü); BAR-ATH'ta elle etiket hiçbir amaçla yok; maç hakkında insan üretimi veri (olay
+  verisi, düzeltilmiş takip) yok; başka maçların verisi serbest. Bu yüzden public'e bakılarak kurulan ölü top sabitleri
+  dış veride yeniden türetilmeli.
+- Kurallar (eski yerel kopya, son commit 15 Ekim): yasak olanlar elle üretilmiş etiketlerle gönderim, gizli tam maç etiketleri
+  ve yeniden üretilemeyen dosya. Yayınlanan 5 dakika ve test videosu girdi olarak serbest. EVALUATION.md public pencerenin
+  sürüm seçmek için kullanılmamasını öğütlüyor; ölü top kuralları ve düdük bu öğüde aykırı, teknik dokümanda açıkça yazılmalı.
+
+**Açık konular:**
+- ~~Varsayılanı düdüksüz `candidate_v10.csv` yapmak~~ → 25 Ekim'de yapıldı (kullanıcı kararı; `make_submission.py`
+  varsayılanı model_v10, MD5 ca20c5b6… doğrulandı).
+- Teslimin sağlamlaştırılması (25 Ekim, kullanıcı: seçenek 3): yeniden üretim temiz kopyada doğrulandı (§3); takım
+  modeli `models/v10_team.txt` olarak repoda (yalnız açık veriden eğitilmiş; varsayılan çalıştırma yalnız verilen veriyle
+  ~1 dk); `requirements.txt` sürümleri sabitli; teknik doküman taslağı `docs/TECHNICAL_DOCUMENT.md` (İngilizce; takım
+  adı / üyeler / repo adresi boş); herkese açık repo içeriği `tools/export_public.py` ile ayrı klasöre çıkarılıyor
+  (`docs/RAPOR.md` ve `reports/` dahil değil). Repo henüz açılmadı, commit / push yapılmadı (kullanıcı kararı bekleniyor).
+- Video ile dokunuş tespiti (topa kim dokundu): yerelde hazır model yok. Adaylar (tur 11 araştırması): SoccerNet 2025
+  Team-BAS baseline'ı (47 MB; takımlı pas / top sürme), kendi takibimizle etiketlenen "topa sahip oyuncu" görüntü
+  sınıflandırıcısı, yayın karesinde top + forma rengi. Hepsinde aynı engel: yayın videosu taşıyan etiketli bir dış set
+  olmadan doğrulanamıyor (SoccerNet verisi NDA ister). Elle etiketleme reddedildi.
+- Eğitim verisi: SoccerTrack v2 (10 tam saha maç, Hugging Face onayı gerekiyor; topu olaylardan yeniden kurulmuş, top
+  özellikleri etiketi sızdırır → yalnız topsuz özelliklerle).
+- Teslim için herkese açık repo gerekiyor (şu an özel; veri, cache ve submissions gitignore'lu). Repo açılmadan önce bu
+  belge BAR-ATH sayıları açısından gözden geçirilmeli. Teknik dokümanda kaynaklar: Metrica Sports sample data,
+  IDSSE / open DFL (CC BY 4.0), SkillCorner open data (MIT).
+- Tur 9–10 çalışması henüz commit edilmedi.
+
+## 2. Kalıcı kurallar ve tuzaklar
+
+- **Veri hiçbir bulut LLM'e gösterilmez** (T&C). Scriptler sadece toplu istatistik basar; video karesi, ham satır,
+  ses, ham veri grafiği yok. Analiz raporları Artifact olarak yayınlanmaz.
+- **Public pencerede parametre ayarlamayın.** Resmi örnek: smooth125 public'te kazanıyor, tam maçta kaybediyor.
+  Bizde de v1'de ceza seçimi public'e göre yapılınca iyimser çıktı (0.525*).
+- **Hız kanalı m/s** (XML "kph" diyor). **Top hız kanalı çöp** (corr −0.10) → konumdan türet.
+- **ATD frame_id − 1 = video karesi.** Kendi parse'ımızla resmi baseline'lar birebir üretildi (hizalama doğru).
+- **Broadcast hizası:** 1. yarı `tactical = broadcast + 4014`, 2. yarı `+ 26920` (top eşleşmesiyle; takım
+  merkezleriyle denendi → başarısız, çünkü broadcast sadece görünen oyuncuları içeriyor).
+- **Simülasyonu simülasyon içi CV ile doğrulamayın.** DFL-CV / Metrica eğitim ile testi aynı bozulmadan
+  geçirir; bozulma gerçekçi değilse (V2'deki her-kare gürültü gibi) bunu göremez. Her yeni bozulmayı
+  `src/exp_advval.py` (BAR-ATH'a karşı adversarial validation) ve kinematik istatistiklerle kontrol edin.
+- **Skor birleştirmede ±e/2 hatası:** `S[H]=a/2+e/2, S[A]=a/2−e/2` en iyi canlı duruma |e|/2 bedava bonus verir,
+  D payını bozar. Doğrusu `S[H]=a/2+log p_H`, `S[A]=a/2+log p_A` (log p ≤ 0).
+- **Takım kanıtı sıfır-toplamlı olmalı:** v1'de takım kanıtı canlı durumları da ödüllendirince duran topta
+  topun yanında duran oyuncu "canlı H" ürettirdi.
+- Google Drive "Kota aşıldı": klasörü **zip olarak indirmek** çalıştı; tek dosya / "kopya oluştur" videoda çalışmadı.
+  Yerleşik tarayıcı paneli kapatılınca indirme iptal oluyor.
+- **Her aday en az 3 LightGBM tohumunda / model örneğinde ölçülür** (tur 9): tek örnekteki maç bootstrap'ı ve stres
+  testleri kazancı abartabiliyor; v10'un kendisi tohumlar arasında DFL'de ±0.004 oynuyor.
+- **Kare doğruluğunu artırıp spellF1'i düşüren fikirler** çoğu zaman yalnız daha zıplayan çıktı verir; reddetmeden önce
+  ±25 kare logit yumuşatmayla denenir (tur 9).
+- **Karar kuralı:** dış setlerde (DFL-trk, Metrica-ctrl, SkillCorner; öğrenilmiş ve gerçek D) en kötü durum pişmanlığı;
+  fark 0.005'ten küçükse mevcut / basit olan kalır. Ayrıntı §4'te "Karar protokolü: parametre seçimi (22 Ekim)".
+- **BAR-ATH'a bakarak karar verilmez** (public pencere dahil); BAR-ATH yalnız akıl sağlığı kontrolü ve etiketsiz tanı
+  içindir. Geçmişte BAR-ATH'a bakılarak verilen kararlar §1'deki 24 Ekim denetiminde listelendi.
+
+## 3. Deneme günlüğü
+
+Amaç: aynı hataları tekrarlamamak. Her yeni denemede buraya bir satır ekleyin (tarih, ne, sonuç, karar).
+Skorlar: public = ilk 5 dk (17 possession, spellF1 bootstrap aralığı ~0.27–0.62 → tek başına karar verdirmez).
+"Vekiller" = `src/proxy.py` (Smart Tagging duran top / takım uyumu, top-dışarı kapsaması) + tam maç sayıları.
+
+### Modeller (kronolojik)
+
+| # | Ne | Public macroF1 / spellF1 | Tam maç | Karar |
+|---|---|---|---|---|
+| resmi | en yakın oyuncu + çoğunluk oyu | 0.621 / 0.326 | 594 poss | taban |
+| v1 | kural kanıtı + min-süreli Viterbi | 0.709 / 0.525* | 214 | ceza public'e göre seçildi → güvenilmez |
+| v2 | canlı/ölü (a) ve takım (e) ayrı; sıfır-toplamlı takım | 0.816 / 0.448 | 234, %48 D | ✅ yapı doğru |
+| v3 | v2 + broadcast geçerliliği/canlılığı + broadcast topu ile boşluk doldurma + kamera uyuşmazlığı ağırlığı + hız penceresi 1.5 sn ileri | 0.878 / 0.459 | 221, 113 D seg | ✅ canlı/ölü F1 0.972 |
+| v4 | olay tabanlı takım takibi (kontrol epizodları, teyit kuralları) | 0.84 / 0.39–0.47 | 206–266 | ❌ v3'ü geçmedi, bırakıldı |
+| DFL-saf | DFL'de eğitilen LightGBM ölü-top + takım, BAR-ATH'a doğrudan | 0.74–0.75 / 0.37–0.42 | %54 D | ❌ ölü-top alan farkı (F1 0.880) |
+| **v5** | v3 canlı/ölü + DFL LightGBM takım olasılıkları, pen_team 8 | **0.901 / 0.566** | 261, 119 D seg, %50 D | ✅ **mevcut baseline** |
+| v6 | v5 + düdük şablonu (D başlangıcını öne çekme) | 0.908 / 0.566 | aynı | ✅ küçük, düşük riskli; henüz varsayılan değil |
+| **v7** (aday) | v3 canlı/ölü + **sim V3** ile eğitilen takım modeli (own_half düzeltmesi + baskı altında kontrol C6 + dizilim/şekil/hareket c145) + **B2 yumuşak min. dekoder**, pen 12 | **0.924 / 0.652** [0.43–0.81] | 227 poss (~4.3/dk), 118 D seg | ✅ simülasyonda eşli +0.016 (DFL-trk 7/7, Metrica-ctrl 9/9); `submissions/candidate_v7.csv`; varsayılan yapılması kullanıcı onayında |
+| v8 | v7 + 3 Metrica örnek maçı takım modelinin eğitiminde (kontrollü etiket) | 0.930 / 0.667 | 208 poss, 118 D seg | ✅ dış setlerde v7'den iyi (A2) |
+| v9 | v8 + topsuz takım etkileşim özellikleri + ±1 sn logit yumuşatma | 0.932 / 0.667 | 206 poss, 118 D seg | ✅ v7'ye göre her dış sette artı |
+| **v10** | v9 + Metrica ağırlığı 2 | **0.932 / 0.667** (düdüklü v10w 0.939 / 0.667) | 203 poss, 118 D seg, %49 D | ✅ **önerilen varsayılan** (23 Eki) |
+| v11 | v10 + top dokunuşu olay özellikleri | 0.933 / 0.681 | 202 poss, 118 D seg | ≈ seçenek (3 tohumda v10'a eşit) |
+| v12 | v10 + dokunuşa göre geçiş kolaylığı (yalnız decoder) | 0.931 / 0.667 | 205 poss, 118 D seg | ≈ seçenek (5 model örneğinde ≤ +0.002) |
+
+Public sütunu yalnız bilgi içindir (17 spell, aralık ~0.4); v7'den itibaren sürümler dış setlerle seçildi.
+
+### Dış veri
+
+- IDSSE/Open DFL (7 maç, CC BY): ölü-top istatistikleri çok benzer; possession bayrağı GT'den ~2× sık dönüyor.
+- Metrica örnek (3 maç, kaynak belirtilmeli), SkillCorner open data (20 maç, MIT; tur 4'ten beri doğrulama seti,
+  `src/skillcorner.py`; kaynak belirtilmeli).
+- WASB futbol ağırlıkları (MIT) — top tespiti için.
+
+### Açık sorular (eski, 20–22 Ekim)
+
+- ~~pen_team 8 mi 20 mi?~~ → **dış doğrulamayla karara bağlandı (22 Eki, v7 + B2):** GT'ye benzeyen dört dış set
+  (DFL-trk, Metrica-ctrl, SkillCorner öğrenilmiş D, SkillCorner gerçek D) üzerinde en kötü durum pişmanlığı
+  (en iyiye uzaklık) pen 4: 0.0127, **8: 0.0068**, **12: 0.0016**, 20: 0.0017 → **pen 12** (v7 varsayılanı). Tam maç
+  possession hızı pen 12'de 4.26/canlı dk (hedef ~3.8–4.2; simülasyonda en iyi tahmin/GT oranı 0.9–1.0). Public
+  pencere pen 4–32 arasında birebir aynı skoru veriyor → karar verdiremez. Kaynakların eskiden farklı değer
+  göstermesi konvansiyon farkıydı (DFL native sık döner → düşük ceza; kontrollü konvansiyonlar → yüksek) ve standart
+  dekoderin dik eğrisiydi; B2 eğriyi düzleştirdi.
+- Top tespiti: hazır WASB yetmiyor; ATD sözde-etiketleriyle ince ayar (doğal çözünürlükte karolar) Colab'da yapılacak. *Sonra (21–24 Ekim): YOLO11s ince ayarı val mAP50 ~0.08'de takıldı; kusursuz top izi bile < +0.02, kusursuz konum ≈ +0.005 kazandırıyor → video top tespiti ertelendi.*
+
+### Tek tek denemeler (yeni satırlar tablonun sonuna)
+
+| Deneme | Sonuç | Karar |
+|---|---|---|
+| "Son yakın takım" kuralları (R 0.75–3 m, k 1–25 kare) | takım doğruluğu ~%85–87'de tavan | tek başına yetmez |
+| Oracle (public): canlı/ölü mükemmel / takım mükemmel | 0.461→0.473 / 0.461→0.889 | darboğaz takım kararı |
+| Hız penceresini ileri kaydırma (0–50 kare) | alive/dead F1 0.962→0.974 (50); 37 seçildi (fiziksel gerekçe) | ✅ |
+| Kamera uyuşmazlığı (>2.5 m) ile takım kanıtını zayıflatma | macroF1 +0.012 | ✅ v3'te |
+| Basit bant-tonalite düdük detektörü (`whistle.py`) | tüm maçta lift ~1 (tribün ıslıkları) | ❌ |
+| PANNs CNN14 AudioSet "Whistle" (3 varyant) | lift 1.0–1.9, santraları kaçırıyor | ❌ |
+| Santra düdüğü şablonu ile arama (`whistle_ref.py`) | D başl. ±1 sn lift 3.2 (p=4e-4); santraları 5./9. sırada buluyor | ✅ v6 |
+| Düdük bonusunu her düdüğe vermek | D segmenti 119→160, spellF1 düşüyor | ❌ sadece "v5 geç kaldıysa" |
+| Sınır yakalama (snapping) DFL'de | ±0.003 | ❌ gereksiz |
+| DFL bozulma simülasyonu v1 (canlı %12, ölü %70 kayıp) | çalışıyor; ölü boşluklar canlıya taşıyordu | ✅ `sim.V2` (opt-in): boşluklar yeniden başlamada kesiliyor (canlı %6.6, ölü ~%70); varsayılan değişmedi; pen_team önerisi (20) değişmedi |
+| Metrica örnek maçları kalibrasyonu | "kontrollü possession" konvansiyonu GT'ye uyuyor; pen_team 20 öneriliyor (8 public'te daha iyi) | ⏳ elle etiketle karar verilecek |
+| Kamera merkezi top vekili | medyan 23.6 m hata | ❌ |
+| Takım merkezleriyle broadcast hizalama | tutarsız | ❌ → top ile çözüldü |
+| WASB (futbol, hazır) tam kare 1920×1080→512×288, sıfır-atış (600 kare) | 40 px içinde **%0**, medyan hata 548 px; top 2–3 px'e iniyor | ❌ tam kareyi küçültme |
+| WASB hazır, topu içeren **doğal çözünürlükte** 512×288 kırpıntı (oracle konum) | medyan 33 px, 10 px içinde %28; çok yanlış pozitif (kafa/tozluk) | ❌ ince ayar şart |
+| WASB vs ATD zaman/uzay ofseti | en iyi 0/+1 kare (hizalı); WASB merkezi ATD'nin ~5–7 px **yukarısında** (ATD = topun zemin noktası) | sözde-etiket y'sini ~6 px yukarı kaydır |
+| CPU hızı (24 çekirdek) | WASB çıkarımı ~0.16 sn/üçlü → tüm maç ~3 sa (örtüşmesiz üçlü, tek ölçek); ince ayar CPU'da pratik değil | GPU (Colab) |
+| sim.V2 ile yeniden eğitilen takım modeli + v5 (pen_team 8/12/20) | public spellF1 0.542/0.552/**0.578**, macroF1 ~0.89–0.90; tam maç 277/258/236 poss; v5 ile kare uyumu %98 | aday: **v2 model + pen 20** (Metrica'nın önerisiyle tutarlı, public'i de cezalandırmıyor); karar elle etiketle |
+| sim.V2 ile ölü-top LightGBM | DFL CV'de iyi (0.980), BAR-ATH public'te hâlâ zayıf (0.766) | ❌ kurallar kalıyor |
+| YOLO11s ince ayar (ATD sözde-etiketleri, 640 doğal karolar, 16k+5.6k kırpıntı) | 18 epoch'ta val mAP50 ~0.08'de takıldı | ❌ durduruldu (ağırlık `cache/ball_yolo/train/weights/last.pt`) |
+| **Top izinin değeri (GPU'suz, DFL CV, eşli)**: oyun içi top eksikliği %6.5 → %3.3 → %0 | takım doğruluğu 0.8914 → 0.8933 → 0.8942; spellF1 (pen20) 0.558 → 0.563 → 0.568; ayarlı 0.587 → 0.597 → 0.606 | ❌ mükemmel top bile <+0.02 → **video top tespiti ertelendi**; darboğaz top izi değil |
+| ATD kısa boşluk doldurma şüphesi | 27–128 karelik boşluk sadece 1; ~%3 görünür kare olağandışı pürüzsüz, orada iki kamera farkı 1.22 m (normal 0.74 m) | ATD kısa boşlukları tahminle dolduruyor; sözde-etiket kullanılırsa pürüzsüz koşular + boşluk kenarları çıkarılmalı |
+| Resmi skorlayıcı, public 5 dk, 1000 bootstrap (21 Eki) | v6 0.908/0.566 [0.36–0.76]; v5 0.901/0.566 [0.36–0.76]; v5 pen20 0.885/0.448 [0.21–0.65]; v3 0.878/0.459; resmi 0.621/0.326 [0.21–0.45] | v5/v6 resmi baseline'dan net iyi; v5 / v5-pen20 / v6 farkları güven aralığı içinde |
+| Dikkat sinyalleri (oyuncu hareketi topa dönük mü) DFL'de ölü top ayrımı | AUC: hız 0.929 → hız+dikkat 0.944 (doğrusal), 4 pencere + LightGBM 0.974 (hız tek başına 0.950) | ✅ umut verici; v5'e eklenmesi bekliyor |
+| **Ortak CPU düzeneği** `src/bench.py` (21 Eki): DFL-CV (7 maç), DFL **trk** (takipten kontrollü possession: 240 spell/maç, 4.56/canlı dk), Metrica-ctrl (3 maç × 3 tohum), BAR-ATH public + tam maç | V2 tabanı: DFL-trk 0.756 (pen 48), Metrica-ctrl 0.808 (pen 32), DFL-native 0.592 (pen 4) | ✅ fikirler bununla ölçülüyor (§4) |
+| Takım modelini trk (kontrollü) etiketle eğitmek (A1) | kare doğruluğu ↑ (0.903→0.915), spellF1 ≈/↓ (0.756→0.749; Metrica 0.808→0.802) | ❌ tek başına; dekoder cezası aynı işi yapıyor |
+| Smart Tagging faz takımı / set piece (F1, F2) | public'te etiket %76 vs v5 %85; çelişkide etiket %25 haklı; set piece başlangıcı restarttan ~5 sn önce | ❌ değersiz / zayıf |
+| **Adversarial validation (E1)**: bozulmuş DFL vs BAR-ATH | AUC 1.000 — **simülasyon hatası**: her-kare bağımsız gürültü hızları 2× şişiriyordu (medyan 3.7 vs 1.95 m/s); ayrıca `own_half_frac` NaN hatası | ✅ `sim.V3` (pürüzsüz gürültü), `feat_fix.own_half`; **tüm öğrenilmiş modeller bozuk hızlarla eğitilmişti** |
+| sim.V3 ile ölü-top LightGBM | BAR-ATH public ham canlı F1 0.915 (V2: 0.766) | ✅ artık kullanılabilir ikinci sinyal (kurallar 0.974) |
+| sim.V3 ile takım modeli + v5 | public pen 8: 0.579 / 0.905 / takım 0.934 (V2 0.529 / 0.898 / 0.925); trk modeli 0.579 / 0.908 / 0.938, 4.22 poss/dk | ✅ aday; DFL/Metrica simülasyon içi olduğu için V2–V3 farkını göremiyor |
+| Kurallar + öğrenilmiş ölü-top harmanı (N1, V3) | DFL/Metrica'da kurallar zayıf (broadcast yok; canlı/ölü 0.88 vs 0.98); BAR-ATH public: canlı/ölü F1 0.974→0.965, macroF1 0.901→0.873 (w=0.25); ölü payı eşitlenince de düşüş | ❌ v3 kuralları kalıyor |
+| native + trk topluluğu (N3) | DFL-trk +0.005, Metrica-ctrl +0.003, events −0.02 | ≈ |
+| Top kaybı çevresine ×3 örnek ağırlığı (N9) | DFL-native +0.018 (7/7), Metrica-events +0.009; DFL-trk −0.003, Metrica-ctrl +0.0025; public macroF1 0.912 | ≈ GT konvansiyonuna yaramıyor |
+| `own_half` NaN düzeltmesi (N4) | DFL-trk +0.004, Metrica-ctrl +0.006, public aynı | ✅ ilkeli, tutuluyor |
+| **Baskı altında kontrol özellikleri (C6, `src/feat_ctrl.py`)** | eşli: DFL-trk +0.0085 (6/7), DFL-native +0.012 (6/7), Metrica-ctrl +0.006 (7/9), events 0; public pen 8 0.594 / 0.900 | ✅ ilk tutarlı kazanç; birleşime alınacak |
+| Public hata analizi (`src/err_spells.py`) | top kaybı spell'lerinin 3/12'si doğru (simülasyonda %66–80); kaçanlar kısa ve iki takım da topa yakın | darboğaz: baskı altındaki kısa possession'lar |
+| Dekoder fikirleri B1/B4/B5/B6/G1/G2 (alt ajan) | hepsi ≤ +0.002 | ❌ |
+| **B2 yumuşak min. possession süresi** | V3: Metrica-ctrl +0.009 (9/9), DFL-trk +0.013; native/events'te −0.03…−0.05 | ✅ v7'de (kontrollü konvansiyon tercihi) |
+| Özellik grupları c1–c5 (alt ajan) | c145 en iyi (+0.007…+0.013, pen 32–48); c2, c3 ≈ 0 | ✅ c145 v7'de |
+| Birleşim + B2 (sentez) | DFL-trk +0.016 (7/7), Metrica-ctrl +0.016 (9/9) | ✅ v7 |
+| **SkillCorner 20 maç, alan dışı doğrulama** (DFL'de eğitilen modeller, `src/exp_sc.py`) | mutlak ~0.57–0.58 (BAR-ATH public düzeyi); v7 (birleşim+B2) +0.0167 (15/20), c145+B2 +0.0178 (17/20), own_half+C6+B2 +0.0159 (17/20) | ✅ v7 bağımsız veride de doğrulandı |
+| SC gerçek D ile (oracle) takım karşılaştırması | v7 0.582 → 0.746 (fark ölü-top modelinin SC'ye taşınamaması); v7 +0.0137 (17/20), c145+B2 +0.0125, own_half+C6 ±0.001 | ✅ v7 en iyi; C6'nın SC katkısı takım tarafında değil |
+| SC'yi eğitime katmak (A3b) | SC alan içi +0.025 (18/20), Metrica −0.005, BAR-ATH public aynı | ≈ v7 DFL ile kalıyor |
+| B2 parametre taraması (64 ayar) | düz plato; (175, 64, 8) +0.002 düzeyi, BAR-ATH'ta fark yok | ✅ varsayılan (175, 48, 12) kalıyor |
+| Dokunuş dedektörü sabit eşikle | DFL 38, SC 24, BAR-ATH 14 dokunuş/canlı dk → alan farkı | ⚠️ eşik dokunuş oranına uyarlanmalı (C7'de yapıldı) |
+| Zamansal yığınlama (N20) | DFL-trk −0.005, Metrica −0.006, SC-oracle −0.010 | ❌ |
+| Geçişleri kaydırmak (SC, Metrica) | her kaydırma kaybettiriyor; SC'de yeniden başlamayı 0.5 sn kaydırmak −0.012…−0.023 | ❌ zamanlama hizalı |
+| BAR-ATH ölü-top yaklaşımı SC'de (N21) | kurallar + 0.5 × öğrenilmiş: SC +0.038 (20/20); BAR-ATH'ta public macroF1 düşüyor | ≈ SC'de taktik kamera yok; BAR-ATH'ta benimsenmedi |
+| v7 + hakem düdüğü (N24, `wh_bonus` 30) | public macroF1 0.9244 → 0.9314, canlı/ölü F1 0.9788 → 0.9819, spellF1 aynı; karelerin %0.1'i değişiyor | ✅ küçük, düşük riskli; `candidate_v7w.csv` (yalnız BAR-ATH'ta ölçülebilir) |
+| Takım modeli hiperparametreleri (N23: yavaş öğrenme, büyük ağaç, düzenlileştirme, her kare) | hepsi v7 varsayılanının ±0.005'i içinde, tutarlı kazanan yok | ≈ varsayılan kalıyor |
+| **Oracle merdiveni + hata bütçesi** (`src/exp_oracle.py`) | kusursuz ölü top +0.022/+0.057/+0.164, restart takımı +0.006…+0.014, zamanlama +0.005…+0.007, kaçan <4 sn possession'lar +0.040…+0.111, sahteler +0.050…+0.086 (DFL-trk/Metrica/SC) | ✅ fikir sırası buna göre |
+| Gecikme düzeltmesi (fikir 1) | bulunan değişimlerde medyan +1…+3 kare; resmi medyan 0 | ❌ potansiyel yok |
+| El değişimi modeli + zamana bağlı ceza (fikir 2) | AUC 0.88–0.95 ama spellF1 +0.001…+0.003 (iyimser seçimle) | ≈ |
+| Kısa possession doğrulama (fikir 3) | ekleme adaylarının %4–9'u gerçek, eklemek kaybettiriyor; silme ±0.003 | ≈/❌ |
+| Restart spell'lerini B2'den muaf tutmak (fikir 4 yan dalı) | −0.001…−0.010 | ❌ |
+| Görünürlüğe göre sıcaklık (7) / konsensüs (10) | ±0.003 / etkisiz | ≈ / ❌ |
+| BiGRU takım modeli, Colab T4 (11) | gerçek D ile −0.04…−0.10 | ❌ |
+| sim.V4 ön yumuşatma (N26) | SC +0.004, Metrica −0.004, BAR-ATH yapışkanlık aynı | ≈ |
+| **ATD uydurma top karelerini temizlemek (8)** | iki kamera farkı 1.66 m vs 0.75 m; public 0.652 → 0.696, takım 0.948 → 0.968; SC'de dış doğrulama yok | ✅ seçenek (`clean_ball`), varsayılan değil |
+| Oyuncu düzeyinde kontrolcü, SkillCorner player possession denetimli (R-1, tur 7; `src/ctrl_model.py`) | SC 5-fold AUC 0.988, ilk-1 0.946; ham karışım her sette −0.002…−0.11 | ❌ |
+| Kontrolcü: sınırlı karışım / takım modeline özellik (`src/exp_ctrl2.py`) | SC +0.003…+0.006 (13–18/20) ama DFL-trk +0.000 / −0.008 (1/7), Metrica −0.001…−0.003; BAR-ATH'ta karışım possession hızını 4.26 → 4.50 çıkarıyor | ❌ alan dışına taşınmıyor |
+| Kısa possession kapsama teşhisi | <4 sn spell'lerin %87–94'ünde v7 doğru takımı en az bir karede gösteriyor; kontrolcü yalnız %19–37'sinde emin, canlı dakikada 0.6–1.2 yanlış emin koşu; SC kısa spell'lerinde oyuncu kontrol süresi medyan 0 sn | ders: sorun görmek değil ayırt etmek |
+| Topu k karede bir görmek (`src/exp_ballrate.py`, kullanıcı sorusu: kare kare mi aralıklı mı) | 0.2–0.4 sn ±0.004 (tek sette artı, maçların yarısı); 0.6 sn −0.001…−0.013; 1 sn −0.007…−0.025; 2 sn −0.012…−0.043; 10 sn −0.025…−0.109 (öğrenilmiş D en çok) | ❌ kare kare en iyisi; aralık yalnız hesap tasarrufu |
+| Rol farkındalığı, numarasız (`src/roles.py`, `src/exp_role.py`; kullanıcı fikri) | rol çıkarımı metadata'ya karşı DFL %84.5 (hat %87.5), SC %75; v7'ye 16 rol özelliği: kare takım doğruluğu her sette +0.001…+0.005, spellF1 SC +0.008…+0.011 (13–17/20) ama DFL-trk −0.013…−0.015 (1/7), Metrica −0.004…−0.006 | ❌ |
+| Rol modeli için pen_team yeniden seçimi (`src/exp_role_pen.py`) | en kötü durum pişmanlığı: v7 pen 12 0.0115 (en iyi), rol modeli en iyi pen 16 / 32: 0.0126–0.0131 (DFL-trk'te en iyi cezada bile −0.012) | ❌ v7 kalıyor |
+| **Video pilotu: pas / top sürme olayları** (2023 SoccerNet BAS birincisi, tek fold, Colab T4; `colab/bas_pilot.py`, `src/bas_eval.py`) | public (bilgi): pas takımı tepe anında 0.77, 0.24 sn önce 0.94–0.95 (v7 0.94; ayrışma 5–7, olay 3–4 / v7 2–3); top sürme 0.88 (v7 0.93); tam maçta v7 ile uyum 0.83 | ≈ v7 düzeyinde, üstünlük kanıtı yok; dış doğrulama yok → entegre edilmedi |
+| Olay çapası kâhini (`src/exp_anchor.py`; gerçek paslar → sınırlı kanıt) | β=4: kusursuz +0.016…+0.037, pilota benzer +0.007…+0.020, kötü ≈0…+0.013 (iyimser: etiketler aynı olaylardan) | ✅ tavan küçük ama pozitif |
+| Pilot çapaları BAR-ATH'ta (`src/anchor_barath.py`) | possession hızı 4.26 → 4.61 / 4.90 dk⁻¹; public (bilgi) β=2 aynı, β=4 −0.039; temiz topla −0.015 / −0.056; çapalar v7 ile %17 çelişiyor | ❌ varsayılan değil |
+| **Temiz topun dış testi** (`sim.V5` uydurma top %3, `src/exp_fab.py`) | uydurmanın maliyeti ≤ −0.003; temizlemek DFL −0.003 / −0.001, Metrica −0.009 / 0.000, SC ±0.001; uydurmayla eğitmek de kazandırmıyor | ❌ dış veride desteklenmiyor → önerilen varsayılan v7 / v7w (v7cw değil) |
+| Topsuz etkileşim özellikleri (tur 9, `src/bfree.py`) | kare doğruluğu +0.001…+0.004; spellF1 SC +0.009…+0.014, Metrica −0.005…−0.007, DFL −0.003 / +0.001 | ❌ |
+| Düzenleme kâhini (`src/exp_edit.py`) | ham-olasılık adayları kısa spell'lerin %7–10'unu kapsıyor; kâhin ekleme +0.017…+0.029, kâhin silme +0.040…+0.061 | ders: havuz silmede |
+| Silme fayda puanlayıcısı (`src/exp_edit2.py`) | LODO öğrenilmiş D: +0.006 / +0.001 / +0.005; gerçek D adaylarıyla Metrica −0.004, SC −0.005…−0.007 | ❌ ölü top kaynağına bağımlı |
+| **A2: Metrica (ctrl) eğitime** (`src/exp_a2.py`, `src/model_v8.py`) | dışarıda bırakılan maçlarda DFL-trk +0.010 / +0.014, Metrica +0.004 / +0.005, SC faz +0.009 / +0.008, SC pp +0.003 / 0.000; pişmanlık 0.0067 (pen 12) vs v7 0.0112; BAR-ATH public (bilgi) 0.652 → 0.667, macroF1 0.930 | ✅ **v8** (`candidate_v8.csv`, `candidate_v8w.csv`) |
+| **v9: A2 + topsuz özellikler + ±1 sn logit yumuşatma** (`src/exp_combo.py`, `src/model_v9.py`) | v7'ye göre DFL +0.008 / +0.012, Metrica +0.007 / +0.009, SC +0.017 / +0.016, pp +0.011 / +0.009; bootstrap %5 alt sınır her yerde > 0; tohumlara dayanıklı | ✅ |
+| **v10: v9 + Metrica ağırlığı 2** (`src/model_v10.py`) | iki tohum ortalaması DFL +0.011 / +0.018, Metrica +0.008 / +0.011, SC +0.015 / +0.013, pp +0.009 / +0.006; ağırlık 3 her yerde daha kötü | ✅ **önerilen varsayılan** (`candidate_v10.csv`, `candidate_v10w.csv`) |
+| SC'yi eğitime katmak (pp ya da kontrollü etiket) / ikinci bozulma kopyası / ±2 sn özellikleri / ölçekleme / bf_feats2 | Metrica her zaman −0.006…−0.009 / ≈ / DFL −0.008 / ≈ / ≈ | ❌ |
+| DFL trk etiketiyle eğitim (A1 yeniden) / sınır ağırlığı | trk: kare +0.01…+0.016, spellF1 −0.005…−0.022 (ceza seçimiyle de); sınır: karışık | ❌ |
+| Logit yumuşatma teşhisi (`src/exp_smooth.py`) | topsuz özellikler + ±25 kare: her sette + (DFL +0.003 / +0.005, Metrica +0.004 / +0.006, SC +0.011…+0.012); v7 kendisi ±0.001 | ders: kare kazancı zıplamayla kayboluyordu |
+| **Yalnız oyunculara dayalı ölü top** (`src/podead.py`; sınırlı füzyon) | dışarıda (öğrenilmiş D temeli) her sette + (DFL +0.001…+0.003, Metrica +0.004…+0.005, SC +0.004…+0.014; pişmanlık 0.008 vs 0.022); BAR-ATH public canlı/ölü F1 0.979 → 0.968–0.974, spellF1 −0.000…−0.052 | ❌ varsayılan değil (seçenek `po_lam`) |
+| v10 dayanıklılığı (bootstrap, tohum, ceza / B2 yeniden seçimi, stres V5 / V4, sıfırdan yeniden eğitim) | v10 − v7 bootstrap P(>v7) 0.95–1.00; ceza 12 / B2 (175, 48) korunuyor; V5'te DFL +0.017 / +0.021, Metrica +0.011 / +0.012; V4'te +0.010 / +0.009, +0.012 / +0.012; MD5 aynı | ✅ |
+| Büyük LightGBM / bağlama göre yumuşatma / DFL mikro birleştirme / ayna TTA / kontrolcü özellikleri v10 düzeninde (`src/exp_ctrlv10.py`) | pişmanlık berabere / sabit ±25 en iyi / ±0.002 / birebir aynı / Metrica −0.004 / −0.001, SC +0.002…+0.004 | ❌ |
+| Öğrenilmiş zamansal yığınlayıcı v10 üstünde (`src/exp_stack10.py`; çok ölçekli logit özetleri, ölü top girdisi yok) | v10'a göre DFL −0.007 / −0.008 (w0), −0.003 / −0.004 (w12); Metrica −0.001…−0.003; SC ±0.002; kazancın %93'ü ham…±12 pencerelerden | ❌ (N20 gibi: kare hedefi çıktıyı keskinleştiriyor) |
+| Yumuşatma çekirdeği: Gauss / üçgen / medyan / ±4–8 kare kaydırma (`src/exp_kernel.py`) | pişmanlık kutu ±25 0.0022 = üçgen ±35; diğerleri 0.0024–0.0099; kutu + ham / ±6 karışımı 0.0014–0.0044 (v10 0.0013) | ❌ v10'un kutusu korunur |
+| BAR-ATH alan kayması tanısı (`src/exp_domain.py`) | topsuz sütunlar kaymıyor (mutlak kayma ≤ 0.10); en büyük kayma oyuncu sayısı (+0.67 IQR) ama v10'da payı %0.02; alan AUC BAR-ATH 0.917, SC 0.931 | bilgi: eyleme dönük uyumsuzluk yok |
+| Yumuşak takım hedefleri (±12 kare H payı, çapraz entropi; `src/exp_v10var.py`) | v10'a göre DFL −0.003…−0.008, Metrica 0.000…−0.004, SC ±0.001 | ❌ |
+| Metrica eğitim etiketleri kontrol eşiği 2 sn / 0.5 sn (V10_KEEP) | 2 sn: DFL −0.006, Metrica −0.005…−0.006, SC −0.003…−0.008; 0.5 sn: DFL −0.004 / −0.005, Metrica −0.001, SC −0.000…−0.004 | ❌ 1 sn en iyi |
+| v10'u ön yumuşatılmış DFL@V4 ile eğitmek (`src/exp_v4train.py`) | V3 testinde DFL −0.010, Metrica −0.003…−0.005, SC −0.001…−0.003; V4 testinde de Metrica −0.002…−0.003 | ❌ |
+| v10 hata dökümü (`src/exp_errbins.py`) | Metrica gerçek D: 0–2 sn geri çağrım 0.38, 2–4 sn 0.63; kaçırılan 291'in 168'i duruşa bitişik (en çok "duruşla biten" 86) | bilgi |
+| Varış yerine göre B2 rampası (duruşa çıkışta f × ramp; `src/exp_b2d.py`) | f < 1 öğrenilmiş D ile her yerde −0.003…−0.013; pişmanlık f 1 en iyi | ❌ |
+| extra_trees (v10 düzeninde) | DFL −0.002 / −0.000, Metrica −0.001, SC ≈ | ≈ |
+| Gecenin modellerinden topluluk (`src/exp_ens.py`) | en iyi v10 + kontrolcülü v10: pişmanlık 0.0021 vs 0.0028, Metrica −0.002 / −0.000 | ≈ v10 tek model |
+| Monoton kısıt (kendi kontrol payı +1) | DFL −0.004 / −0.003, Metrica −0.004 | ❌ |
+| **Top dokunuşu olay özellikleri** (`src/touch.py`, `src/exp_touch.py`, `src/model_v11.py`) | v10'a göre DFL −0.001 / −0.000, Metrica +0.002 / +0.002, SC +0.002 / +0.004, pp +0.001; bootstrap P(>v10) 0.47–0.91 (anlamlı değil); V5 testi Metrica +0.001, DFL −0.004; V4 testi Metrica +0.006, SC pp −0.003; tohum 1: Metrica +0.002 / −0.001, SC +0.001…+0.005; tohum 2: DFL +0.005 / +0.002, Metrica ±0.000, SC −0.001…−0.002; üç tohum ortalaması DFL +0.002 / −0.000, Metrica +0.001 / +0.000, SC +0.000…+0.002; BAR-ATH karelerin %0.75'i değişiyor, public (bilgi) 0.682 vs 0.667 | ≈ → seçenek **v11** (`candidate_v11.csv`, `candidate_v11w.csv`); varsayılan v10 |
+| Dokunuş özellikleri v2 (16 sütun) | DFL +0.003 / +0.001, Metrica −0.001 / +0.002, SC pp −0.004 / −0.003 | ❌ |
+| DFL dokunuşlarını V4 toptan almak (TOUCH_DFL=v4) | DFL −0.003 / −0.002, Metrica +0.000 / +0.002, SC +0.000 / +0.003 | ❌ |
+| v10 / v11 toplulukları (ENS_SET=touch) | pişmanlık v11 0.0016 = v11 iki tohum; v10 + v11 0.0041 | ❌ tek v11 |
+| Takip dokunuşları dekoder çapası (`src/exp_tanchor.py`) | v10 + β 0.5: DFL +0.003, Metrica +0.002, SC ±0.000; v11 + çapa kötü (çift sayım) | ≈ (v11 ile aynı büyüklük) |
+| Dokunuşla zamana bağlı geçiş maliyeti (`src/exp_tswitch.py`) | v10 + λ 8: DFL +0.003 / +0.003, Metrica +0.003 / +0.003, SC ±0.001; pişmanlık 0.0036 vs 0.0059 | ≈ hafif + → `src/exp_tcombo.py` |
+| v12 = v10 + dokunuşla geçiş kolaylığı λ 8 ±6 (`src/exp_tcombo.py`, `src/exp_boot3.py`, `src/model_v12.py`) | tohum-0 v10'da V3 / V5 / V4'ün 24 bağlamında ≥ −0.001, DFL / Metrica +0.003 (bootstrap destekli); **beş model örneği ortalamasında** Metrica +0.002 / +0.0015 (4/5 artı), DFL +0.001 / +0.000, SC ≈ 0; BAR-ATH karelerin %0.16'sı | ≈ seçenek (`candidate_v12w.csv`); varsayılan v10w |
+| v12 inceltmeleri: doğrulanmış kazanmalar / asimetrik pencere (`src/exp_tswitch2.py`) | v12'ye göre −0.002…+0.001 | ≈ v12 kalır |
+| Test maçında kendi kendine eğitim (`src/exp_selftrain.py`; güven 0.9, ağırlık 1 maç) | kare +0.000…+0.001; spellF1 DFL −0.001 / −0.002, Metrica −0.003 / −0.002, SC −0.002…−0.000 | ❌ |
+| Ölü kareleri atlayan yumuşatma (`src/exp_dsmooth.py`; canlı ağırlıklı / D'de bölünmüş) | v10'a göre her bağlamda ±0.001; pişmanlık v10 0.0006 | ≈ |
+| v10 için geniş B2 ızgarası (D0 75–250, c 0–96) | pişmanlık en iyi (250, 24) 0.0098, mevcut (175, 48) 0.0119; Metrica'da mevcut ayar en iyi | ≈ mevcut korunur |
+| BAR-ATH yapışkanlık tanısı (`src/exp_sticky.py`) | ham / ±25 işaret değişimi dk başına BAR-ATH 6.6 / 2.7, Metrica 6.1 / 2.8, DFL 9.1 / 4.0, SC 8.8 / 3.8; v10 her sette gerçek hızın 0.93–0.94'ü | bilgi: BAR-ATH Metrica gibi davranıyor; tahmini gerçek hız ≈ 4.1 / dk |
+| v10 hata dökümü 2 (`src/exp_err10.py`, tur 10) | tek başına kâhin (gerçek D) DFL / Metrica / SC: kaçırılan <4 sn spell'leri ekleme +0.079 / +0.061 / +0.134, sahte spell'leri silme +0.073 / +0.030 / +0.065, zamanlama ≤ +0.006; BAR-ATH public kısa ekleme +0.275, sahte silme 0; kaçırmaların %53–56'sı yanlış takım, %39–42'si birleşme; top kaybıyla başlayan spell geri çağrımı 0.63–0.82 (public 4/12), yeniden başlamayla 0.82–0.91 (public 4/4); kare hatalarının %40–52'si gerçek değişimin ±1 sn'sinde; Metrica'da ikili mücadeleden doğan top kayıpları 0.70–0.75 | bilgi: hedef oyun içi kısa top kayıpları ve yanlış değişimler |
+| Mücadele kâhini (`src/exp_contest.py oracle`; iki takım da topa ≤ 3 m, canlı karelerin %28–34'ü) | mücadele karelerinde takım logiti doğruya tam çekilince +0.071…+0.108, yarı yol +0.046…+0.077, dörtte bir +0.027…+0.046 | bilgi: havuz büyük |
+| Mücadele anına özel kod çözücü (`src/exp_contest.py decode`; geçiş kolaylığı / yakınlık cezası / zayıf süre rampası / dar yumuşatma; 20 varyant × 3 tohum) | 8 bağlam ortalaması ≤ +0.0014; Metrica 0…−0.002; zayıf rampa Metrica −0.002…−0.010 | ❌ |
+| Mücadele karelerine ×3 eğitim ağırlığı (`src/exp_contest.py train`, tohum 0) | DFL −0.004 / −0.0035, Metrica −0.0016 / −0.0005, SC −0.002…+0.0015 | ❌ |
+| Mücadele sonucu özellikleri ana modelde (`src/duel.py`, `src/exp_duel.py`, tohum 0) | DFL −0.006 / −0.008, Metrica −0.0002, SC +0.002…+0.003 | ❌ |
+| Mücadele uzmanı (yalnız mücadele kareleriyle eğitim, mücadelede v10'un yerine; `DUEL_SPEC=1`, 3 tohum) | DFL +0.002 / +0.001, Metrica +0.0005 / −0.0009 (gerçek D 0/3), SC +0.001…+0.004; mücadeledeki kısa spell kare doğruluğu +0.007…+0.018 | ≈ (eşik altı, Metrica nötr) |
+| Kusursuz konum testi (`src/exp_clean.py`, varyant `v3p0`: V3 maskeleri, konum gürültüsü / paralaks yok; eğitim + test, tohum 0) | gerçek D spellF1 DFL +0.0045, Metrica +0.0063, SC −0.002 / −0.004; mücadeledeki kısa spell kare doğruluğu 0.63–0.65 → 0.69–0.70 | bilgi: konum hassasiyetinin tavanı ≈ +0.005; video ancak dokunuş bilgisiyle anlamlı |
+| Yayın sesinde konuşma payı (`src/exp_audio.py`, PANNs, tur 11) | yayında değerlendirilen sürenin %87'sinde konuşma, taktik videoda %1; ASR dili İngilizce | bilgi: spiker var → ad tespiti (B1) mümkün |
+| **Yayın kamerasının kadrajı, "önde boşluk"** (`src/exp_framing.py`, fikir E6, etiketsiz) | v10'un emin karelerinde ev / deplasman AUC 0.952 (top hızı sabit 0.97–0.99, top konumu sabit 0.94–0.97); medyan +9.4 / −7.3 m; canlı karelerin %88'inde var; kadraj v10'un değişiminden ~1.7 sn önce dönüyor | ✅ güçlü yeni gözlem; birleştirme testi aşağıda |
+| Kamera görüntüsü modeli (`src/camera.py fit`; v10'un emin karelerinden, yarı yarı çapraz) | AUC 0.982 (δ 0), 0.979 (δ 25), 0.966 (δ 50) | bilgi |
+| Kamera ipucu SkillCorner'da gerçek etiketle (`src/camera_sc.py truth`; köşe izdüşümleri) | üst köşeler %91 karede kırpılmış → görüntünün orta çizgisi topun derinliğinde; AUC tüm canlı 0.756, v10-emin karelerde ~0.8 (BAR-ATH aynı tanımla 0.909); kamera gerçek değişimden ~1.8 sn önce dönüyor; kısa gerçek spell'lerin %61'inde o takıma dönüyor (yanlış alarm tabanı %27) | bilgi: ipucu SkillCorner'da daha zayıf |
+| **Kamera ipucunu v10'a eklemek, SkillCorner'da gerçek etiketle** (`src/camera_sc.py eval`; BAR-ATH tarifi etiketsiz: kamera modeli v10'un emin karelerinden; 9 ayar × 3 tohum × öğrenilmiş / gerçek D × faz / pp) | her ayarda kayıp: w 0.5 −0.014…−0.019, w 1 −0.026…−0.070, w 1.5 −0.09…−0.13; tohumların çoğunda 0/20 kazanma; maç maç kazanç ipucunun gücüyle ilişkisiz (korelasyon −0.10; AUC 0.90–0.92 olan maçlar da −0.06…−0.10); spell sayısı 4264 → 4569 (gerçek 5092) ama kare doğruluğu 0.919 → 0.911 | ❌ kadraj değişimlerde topun gidiş yönüne göre dönüyor ve ~2 sn öncü: uzun spell'lerde v10'un zaten bildiğini söylüyor, belirsiz anlarda yanlış yerde spell üretiyor |
+| Spiker adları (`colab/asr_whisper.py` + `src/commentary.py`; faster-whisper large-v3, İngilizce yayın) | 17,775 kelime; canlı oyunda 5.5 ad / dk, %87'si ev sahibi (v10'da ev sahibi payı 0.61); adın takımı v10 ile %73 (ev) / %78 (deplasman, yalnız 37 ad) uyuşuyor; v10 değişimlerinde yeni takımın adı [−1, +3] sn içinde %19 (rastgele pencerede herhangi bir ad %31) | ❌ seyrek, ev sahibine yanlı, zamanlaması bulanık; kaldıraç değil |
+| Kamera vetosu: kadrajın karşı çıktığı kısa v10 spell'lerini silmek (`src/camera_sc.py veto`; < 4 / < 8 sn, τ 0.5–2, 3 tohum, SkillCorner gerçek etiket) | her ayarda kayıp: < 4 sn −0.0005…−0.0075, < 8 sn −0.009…−0.038 | ❌ |
+| Top yüksekliği kâhini (`src/exp_height.py`; DFL'nin gerçek top yüksekliği, SC'nin kestirimi, Metrica yok; v10 tarifi + 7 yükseklik sütunu, tohum 0) | DFL −0.006 / −0.010 (2/7), Metrica −0.006 / −0.005, SC faz −0.001 / +0.001, pp +0.004 / +0.005; sütunların kazanç payı 0.002 | ❌ kusursuz yükseklik bile kaldıraç değil → iki kameradan yükseklik kestirmeye gerek yok |
+| **Yeniden üretim testleri** (25 Ekim, seçenek 3; temiz kopya, boş `cache/`, veri bağlantıyla) | (1) bütün kod, açık veriden simülasyon + eğitim dahil: 7 dk, MD5 ca20c5b6… aynı; (2) takım modeli `models/v10_team.txt` olarak kaydedildi (2.85 MB, yalnız açık veriden): yüklenen modelle olasılık farkı 0; (3) herkese açık dosya seti (`tools/export_public.py`, 48 dosya), açık veri olmadan, yalnız verilen veriyle: ~70 sn, MD5 aynı; (4) aynı sette `MTAH_RETRAIN=1` ile sıfırdan eğitim: 7 dk, model dosyası bayt bayt aynı (MD5 83830ab3…), gönderim MD5 aynı | ✅ gönderim yeniden üretilebilir |
+| R12-1 gözetimli kamera ikinci aşaması (`src/camera_sc.py stage2`; SkillCorner, maç dışarıda, faz etiketiyle eğitim, 3 tohum) | kameralı: faz +0.0004…+0.0050 (öğrenilmiş D), +0.0034…+0.0089 (gerçek D; 13–14/20); pp −0.006…−0.015. Kamerasız eşi her yerde −0.004…−0.020 (yeniden keskinleşme + etiket türüne kayma) → kameranın kendi katkısı kamerasız eşe göre faz +0.009…+0.018, pp +0.004…+0.006 | ≈ / ❌ v10'a göre karışık; marjinal katkı ayrıca test ediliyor |
+| R12-2 Metrica'yı ham olay etiketiyle eğitmek (`COMBO_MCONV=events`, tohum 0) | v10'a göre DFL-trk −0.006 / −0.007, Metrica −0.006 / −0.004, SC faz +0.001 / +0.001, SC pp +0.008 / +0.009 | ❌ BAR-ATH'a en yakın iki sette kayıp |
+| DFL olay senkronu (`src/dfl_events.py`) ve yeni bağlam DFL-evctrl | olayların %66–86'sı oyuncu–top yakınlığıyla kareye oturuyor (bazı maçlarda olay zamanı ~1–2 sn kayık); evctrl: DFL bayrağının spell'i yeni takım içinde kontrol olayı (pas, şut, kaleci tutuşu, duran top ya da ≥ 1 sn sonra herhangi bir olay) gösteriyorsa kalıyor → maç başına ~230 spell (public GT hızı ~4.2 / dk), trk ile %96 aynı. v10 (3 tohum) DFL-evctrl 0.781–0.783 / 0.807–0.809, v7 0.760 / 0.783 | ✅ yeni, olay tabanlı (GT'ye benzer) değerlendirme bağlamı; `exp_a2.SETS`'e eklendi |
+| R12-3b DFL'yi olay tabanlı kontrollü etiketle (evctrl) eğitmek (`COMBO_DFLCONV=evctrl`, tohum 0) | v7'ye göre (±25): DFL-trk −0.006 / −0.003, Metrica −0.006 / −0.002, SC faz ≈ 0, SC pp −0.020 / −0.022, DFL-evctrl +0.009 / +0.008 (v10: +0.023 / +0.026) | ❌ her yerde v10'dan kötü; ders yine: model sık dönen etiketle eğitilir, kontrollü kuralı decoder taşır |
+| Önbellekteki ~35 adayı DFL-evctrl'de yeniden puanlamak (`src/exp_evctrl.py`) | v10 3 tohum ortalaması 0.7820 / 0.8082; öne çıkan: dokunuş v2 +0.008 / +0.006 (tur 9'da SC pp yüzünden reddedilmişti), DFL tau0.4 +0.002 / +0.001; DFL trk ile eğitim −0.022 | bilgi: dokunuş v2 yeni tohumlarla doğrulanıyor (seçim yanlılığına karşı) |
+| **Ekip arkadaşının BiGRU topluluğu** (Alperen Aydın, GitHub commit a3b3070, 26 Ekim; v7 özellikleri üzerinde BiGRU, DFL + 64 PFF World Cup maçı, 3 tohum, eşit ağırlık; onun raporlarındaki sayılar bizim bench'imizde, v7 referansı birebir tutuyor) | bizim v10'a göre (öğrenilmiş / gerçek D): SC pp +0.041 / +0.040, SC faz +0.025 / +0.022 (20/20 maç), Metrica-ctrl −0.017 / −0.018; DFL karşılaştırılamıyor (bütün DFL eğitimde); BAR-ATH public 0.772 vs 0.667 (karar için kullanılamaz: yeni kurallar). En kötü durum pişmanlığı bu altı bağlamda BiGRU 0.018, v10 0.041 | ≈ güçlü aday; karar dış veriyle, ideal olarak v10 + BiGRU birleşimi test edilerek (modelleri ve PFF verisi yalnız onun makinesinde) |
+
+## 4. Fikir havuzu ve tur kayıtları (21–24 Ekim)
+
+GPU bir süre dolu → bütün fikirler CPU'da denenir. Döngü: **fikir üret → CPU'da dene → ölç → kaydet →
+sonuçlara göre yeni fikir üret**. Denenen her şeyin sonucu §3'teki deneme günlüğüne de satır olarak geçer.
+
+### Ortak ölçüt (`src/bench.py`)
+
+Her fikir aynı düzenekle ölçülür; yalnızca toplu sayılar basılır.
+
+| Set | İçerik | Neden |
+|---|---|---|
+| **DFL-CV** | 7 açık DFL maçı, `sim.V2` bozulması, maç-dışarıda-bırak | büyük, ama etiket konvansiyonu farklı |
+| **DFL-trk** | aynı maçlar, **kontrollü possession** etiketi (`bench.trk_ctrl`: rakip spell'inden sonra gelen spell ancak takım içi pas ya da ≥1 sn top tutma varsa sayılır) | GT konvansiyonuna yakın: 240 spell/maç, canlı dk başına 4.56 (Metrica ctrl 4.01, public GT 4.23) |
+| **Metrica-ctrl** | 3 Metrica örnek maçı × 3 bozulma tohumu, olaylardan "kontrollü" etiket | GT'ye en benzeyen konvansiyon; model DFL'de eğitilir (sızıntı yok) |
+| **SkillCorner** (tur 4) | 20 A-League maçı (yayın takibi, 10→25 fps), `sim.V3` bozulması, etiket = "phases of play" (top oyundayken topa sahip takım; faz dışı = D) | alan dışı + GT'ye benzeyen konvansiyon: medyan spell 7.4 sn, <2 sn %13 (public GT 7.56 sn, %12); 4.83 spell/canlı dk |
+| **BAR-ATH** | public 5 dk (17 possession; sadece akıl sağlığı kontrolü) + tam maç tanıları (possession hızı, Smart Tagging uyumu) | karar verdirmez |
+
+Konvansiyon istatistikleri (spell/maç · canlı dk başına · medyan sn):
+DFL native 437 · 8.30 · 3.7 | DFL tau2 288 · 5.47 · 6.8 | DFL tau3 237 · 4.50 · 8.7 | **DFL trk 240 · 4.56 · 8.5** |
+Metrica events 382 · 6.62 · 4.4 | Metrica tau2 269 · 4.66 · 8.5 | **Metrica ctrl 231 · 4.01 · 10.3**.
+
+### Fikirler
+
+Değer = beklenen spellF1 kazancı × güven; maliyet = CPU zamanı + kod. Durum: ⏳ sırada, 🔬 deneniyor, ✅ işe yaradı, ❌ yaramadı.
+
+#### A. Hedef / etiket uyumu
+
+| # | Fikir | Hipotez | Maliyet | Durum |
+|---|---|---|---|---|
+| A1 | Takım modelini DFL **trk** (kontrollü) etiketleriyle eğitmek | Model, kontrolsüz dokunuşta possession'ı çevirmemeyi doğrudan öğrenir; dekoder cezası daha az iş yapar | düşük | ≈ kare doğruluğu ↑, spellF1 aynı (tur 1) |
+| A2 | Metrica örnek maçlarını (ctrl) eğitime eklemek | 7 → 10 maç, GT konvansiyonunda gerçek olay etiketleri | orta | ⏳ |
+| A3 | SkillCorner open data (diskte **20 maç**; possession "phases of play"tan) | daha fazla maç + kontrol tabanlı possession; ama yayın takibi (10 fps, kısmi görüş) | yüksek | ✅ yeni bağımsız doğrulama seti (`src/skillcorner.py`, `src/exp_sc.py`); eğitime katmak (A3b) deneniyor |
+
+#### B. Dekoder / yapı (metrik farkında)
+
+| # | Fikir | Hipotez | Maliyet | Durum |
+|---|---|---|---|---|
+| B1 | Yeniden başlama farkında dekoder: D durumunu "H'den sonra D" / "A'dan sonra D" diye ikiye bölmek, D→takım geçişine bağlama göre (top yan çizgiden / kale çizgisinden çıktı, faul) maliyet | duran toptan sonra topu kimin alacağı, duruştan önceki takımla ve çıkış yeriyle güçlü ilişkili | orta | ❌ ≤ +0.0014 (aynı takım yeniden başlatma: kale çizgisi 0.14–0.22, yan çizgi 0.59–0.60, içeride 0.52–0.56; kare kanıtı yanında önsel etkisiz) |
+| B2 | Süre farkında dekoder (HSMM benzeri; negatif binom süre) | min-süre + geometrik kuyruk kaba; gerçek spell süre dağılımı lognormal | orta | ✅ **yumuşak minimum** (`src/decode2.py`): 7 sn'den kısa possession'dan çıkış 48·(1−d/175); V3'te Metrica-ctrl +0.009 (9/9), DFL-trk +0.013 (5/7); cezayı önemsizleştiriyor; native/events konvansiyonunda −0.03…−0.05 (konvansiyon tercihi) |
+| B3 | MBR çözümleme: posterior örneklerine karşı beklenen spellF1'i en yükseltecek aday | metriği doğrudan optimize eder; parçalanma düzeyini maça göre seçer | orta-yüksek | ❌ çalıştırılmadı: maç başına kâhin ceza seçiminin tavanı bile +0.004 / +0.005 |
+| B4 | Geçiş tipine özel cezalar (H→D, D→H, H↔A ayrı) | şu an simetrik | düşük | ❌ ≤ +0.0014 |
+| B5 | Bağlama bağlı takım cezası: top görünmüyorken / havadayken daha yüksek | kanıt zayıfken sahte geçişleri önler | düşük | ❌ V2'de DFL-trk +0.006, V3'te tutmadı (+0.001/+0.002) |
+| B6 | Sistematik gecikme düzeltmesi (geçiş tipine göre medyan gecikme kadar kaydırma) | pencereli özellikler geçişi geç yakalıyor olabilir | çok düşük | ❌ simülasyonda medyan gecikme 0–2 kare; ≤ +0.001 |
+
+#### C. Takım modeli özellikleri
+
+| # | Fikir | Hipotez | Maliyet | Durum |
+|---|---|---|---|---|
+| C1 | Takım perspektifinden **duran top dizilimi**: kendi oyuncusu taç çizgisi dışında / korner bayrağında / kendi kalecisi 5.50'de ve rakipler ceza sahası dışında / santrada | top görünmezken bile yeniden başlatan takımı dizilim söyler (taç atan oyuncu çizginin dışındadır) | düşük-orta | ≈ DFL-native +0.010, trk +0.005, ctrl 0 (`feat_team2:c1`) |
+| C2 | Top sahibi sürekliliği: en yakın oyuncu kimliğinin koşu uzunluğu, takım içi el değiştirme (pas) sayısı | "kontrol" = takım içinde dolaşan top | orta | ❌ +0.000–0.002 |
+| C3 | Uzun bağlam pencereleri (±10 / ±20 sn) | kontrollü possession uzun süreli bir durum | düşük | ❌ ±0.001 |
+| C4 | Takım şekli: genişlik/derinlik, dışbükey örtü alanı, hatlar arası mesafe | hücum eden takım açılır, savunan takım daralır | orta | ✅ trk +0.010, ctrl +0.005 |
+| C5 | Takım bazında hareket yönü: hücum eden takım ileri / topdan uzağa (pas almak için), savunan takım topa ve kendi kalesine doğru koşar | dikkat bulgusunun takım versiyonu | düşük-orta | ✅ trk +0.009, ctrl +0.008 |
+| **C6** | **Baskı altında kontrol** (`src/feat_ctrl.py`): takım başına top–oyuncu birlikte hareket (3 m içinde min \|v_top − v_oyuncu\|), yaklaşma hızı (baskı), topa dönük koşu, kesintisiz topa yakınlık süresi | hata analizi: kaçan possession'lar iki takımın da topa yakın olduğu kısa top kaybı spell'leri; kontrol eden topla birlikte hareket eder, baskı yapan topa koşar | düşük | ✅ eşli: DFL-trk +0.0085 (6/7), DFL-native +0.012 (6/7), Metrica-ctrl +0.006 (7/9) |
+
+#### D. Canlı / ölü
+
+| # | Fikir | Hipotez | Maliyet | Durum |
+|---|---|---|---|---|
+| D1 | Dikkat sinyalleri (oyuncu hareketi topa kilitli mi), bozulmuş DFL'de son görülen topla, v3 kurallarıyla harman | AUC 0.929 → 0.974 (temiz DFL); canlı/ölü darboğaz değil ama D bölmeleri spell'i ikiye ayırıyor | orta | ⏳ (`src/feat_dead.py` hazır) |
+| N1 | Kurallar + öğrenilmiş ölü-top harmanı | V3 ile öğrenilmiş model taşınıyor | düşük | ❌ public'te canlı/ölü F1 0.974→0.965, macroF1 0.901→0.873; ölü payını eşitleyince de düşüyor |
+| D2 | Yeniden başlama anını dizilimden (duran oyuncular + ani ivme) yakalamak | D→canlı sınırı keskinleşir | düşük-orta | ⏳ |
+
+#### E. Sağlamlık / alan uyumu
+
+| # | Fikir | Hipotez | Maliyet | Durum |
+|---|---|---|---|---|
+| E1 | Adversarial validation: bozulmuş DFL vs BAR-ATH özellikleri | hangi özellik alan farkı taşıyor → çıkar / simülasyonu düzelt | düşük | ✅ **iki hata bulundu** (tur 1) |
+| E2 | Çok tohumlu / çok simülasyonlu eğitim ve topluluk (V1+V2+V2T) | varyans düşer, alan farkına dayanıklılık artar | düşük-orta | ⏳ |
+| E3 | Top görünürlüğüne göre olasılık kalibrasyonu (sıcaklık) | top yokken model fazla emin olabilir | düşük | ⏳ |
+| N3 | native + trk takım modeli topluluğu (logit ortalaması) | iki konvansiyonun güçlü yanları | çok düşük | ≈ DFL-trk +0.005, Metrica-ctrl +0.003; events'te kayıp |
+| N9 | Takım modelinde top kaybı (H↔A) çevresindeki karelere ×3 ağırlık | hatalar kısa top kaybı spell'lerinde | çok düşük | ≈ native/events konvansiyonlarında + (DFL-native +0.018 7/7), kontrollüde değil (DFL-trk −0.003); public macroF1 en yüksek (0.912) |
+| N4 | `own_half` düzeltmesi (V3) | alan farkı hatası | çok düşük | ✅ ilkeli; simülasyonda DFL-trk +0.004, Metrica-ctrl +0.006 |
+
+#### F. Smart Tagging (SSS: "Use it — that is why it is there")
+
+| # | Fikir | Hipotez | Maliyet | Durum |
+|---|---|---|---|---|
+| F1 | Faz etiketlerinin takımını zayıf takım kanıtı olarak eklemek | v5 ile tam maçta %86.6 uyum; hatalar bağımsızsa birleşim kazandırır | düşük | ❌ (tur 1) |
+| F2 | Set piece etiketleri = yeniden başlama: başlangıcı D→canlı sınırı, takımı yeniden başlatan takım | 18% duran topta takım/yeniden başlama kaçıyor (setpiece_ok 0.815) | düşük | ❌ zayıf (tur 1) |
+
+#### G. Metriğe özel son işlem
+
+| # | Fikir | Hipotez | Maliyet | Durum |
+|---|---|---|---|---|
+| G1 | A-B-A kalıbında kısa B spell'ini A'ya katmak | kontrollü konvansiyonda kısa ara spell nadiren gerçek | çok düşük | ❌ ≤ +0.0006 (B2 aynı işi ilkeli yapıyor) |
+| G2 | İki aynı takım spell'i arasındaki kısa / zayıf D'yi silmek | sahte D bir spell'i ikiye bölüp iki eşleşmeyi bozar | çok düşük | ❌ ≤ 0 |
+
+### Tur kayıtları
+(her tur sonunda: ne denendi, sonuç, karar, yeni doğan fikirler)
+
+#### Tur 1 — 21 Ekim
+- **Düzenek** (`src/bench.py`) + DFL için takipten "kontrollü possession" etiketi (`trk`).
+- **A1** (sim V2): trk ile eğitim → kare takım doğruluğu DFL-trk 0.903→0.915, Metrica-ctrl 0.940→0.950; ama
+  spellF1 DFL-trk 0.756→0.749, Metrica-ctrl 0.808→0.802; BAR-ATH public 0.448 (8/17 spell, aşırı birleştirme).
+  Doğal model + yüksek ceza aynı yumuşatmayı zaten yapıyor. V3'te ikisi eşit (0.744/0.741, 0.7985/0.7984).
+- **F1/F2 Smart Tagging** (`src/exp_tags.py`): public'te faz etiketinin takımı GT ile %76 (v5 aynı karelerde
+  %85); çeliştiklerinde etiket yalnız %25 haklı → takım kanıtı olarak değersiz. Set piece etiketi yeniden
+  başlamadan medyan 5.3 sn önce başlıyor, 59'unun 27'sinde takım var → zayıf.
+- **E1 adversarial validation** (`src/exp_advval.py`) → **iki hata**:
+  1. `sim.degrade` her kareye bağımsız konum gürültüsü (oyuncu 0.15 m, top 0.35 m) ekliyordu; türev alınınca
+     hız gürültüsü ~2.6 / ~6 m/s. Bozulmuş DFL'de medyan oyuncu hızı 3.7 m/s (temiz DFL 1.9–2.1, BAR-ATH canlı
+     oyunda 1.95), top–oyuncu bağıl hızı 10.2 (temiz 1.5, BAR-ATH 3.5); ayırıcı AUC 1.000, kazancın %92'si hız.
+     → `sim.V3`: aynı rastgele çekilişler zamanda alçak geçiren filtreden geçiyor (oyuncu 1 sn, top 0.5 sn);
+     maskeler V2 ile birebir aynı, konum hatası aynı (0.17 m), hızlar gerçekçi.
+  2. `mlfeat.own_half_frac_c12`: NaN konumlu (sahada olmayan) slotlar "kendi yarısında değil" sayılıyor;
+     BAR-ATH 46 slot, DFL ~30 → farklı seyreltme (tek değişkenli AUC 0.017). → `src/feat_fix.py:own_half`.
+  Kalan fark maçlar arası doğal fark düzeyinde (DFL'de bir maç vs diğer altı: AUC 0.93–0.96).
+- **V3 ile** (BAR-ATH public, v5 kodlayıcı, pen 8): native model 0.579 / macroF1 0.905 / takım 0.934 (V2 modeli
+  0.529 / 0.898 / 0.925); trk modeli 0.579 / 0.908 / 0.938 ve tam maçta 4.22 possession/canlı dk (public GT 4.23).
+  **Öğrenilmiş ölü-top modeli artık taşınıyor**: public ham canlı F1 0.915 (önceki denemeler 0.77–0.88; kurallar 0.974).
+- Yeni fikirler: **N1** kurallar + öğrenilmiş ölü-top harmanı (V3 sayesinde DFL/Metrica'da ayarlanabilir),
+  **N2** adversarial validation ile simülasyon kalibrasyon döngüsü (sıradaki farklar: oyuncu sayısı, topun
+  kaybolduğu yer `last_edge`/`next_edge`), **N3** native + trk takım modeli topluluğu, **N4** üretim
+  özelliklerinde `own_half` düzeltmesi + V3 ile yeniden eğitim.
+
+#### Tur 2 — 21 Ekim
+- **Hata analizi** (`src/err_spells.py`, public 17 GT spell, IoU 0.5): yeniden başlama ile başlayan 4/4 doğru;
+  **top kaybıyla başlayan 12'nin yalnız 3'ü** doğru (5 yanlış takım, 3 birleşmiş, 1 ölü). Yanlış takım verilen
+  spell'ler kısa (ort. 4.1 sn), top %98 görünür ama GT takımı topa daha yakın olduğu kare yalnız %29 (doğru
+  spell'lerde %82): **iki takımın da topa yakın olduğu baskı anları**. Simülasyonda aynı hata türü daha seyrek
+  (Metrica-ctrl'de top kaybı spell'lerinin %80'i doğru; yanlış takımlarda GT takımı %54 yakın).
+- GT zamanlaması: "en yakın takım" ile uyum GT ~30–40 kare öne alınınca en yüksek; Metrica-ctrl / DFL-trk
+  etiketlerinde −20 → GT bizim etiketlerden ~0.4–0.8 sn geç possession değiştiriyor (küçük etki; B6).
+- ATD: takım başına >11 iz karelerin %5–8'inde (hakem / yanlış atama?) ama public'te bu karelerde takım
+  modeli %100 doğru; ağır oyuncu kayıpları ölü topta (canlıda p5 = 20 oyuncu). Taktik kamera sabit değil
+  (görünür genişlik 52–76 m, oyunu izliyor).
+- Denenenler: N1 ❌, N3 ≈, N9 ≈ (native'e iyi, kontrollüye değil), N4 ✅ (ilkeli), **C6 ✅**.
+- Yeni fikirler: **N11** C6'nın güçlü sinyali "kesintisiz yakınlık süresi" (tek başına AUC 0.92) için uzun /
+  üstel azalan sürümler; **N12** temiz DFL'den oyuncu düzeyinde "topu kontrol eden" dedektörü (en yakın + birlikte
+  hareket) öğrenip takım düzeyine toplamak; **N13** C6 + C1 + own_half birleşimi ve dekoder iyileştirmeleriyle
+  v7 adayı.
+
+#### Tur 3 — 21 Ekim
+- **Özellik hattı (alt ajan, `src/feat_team2.py`)**, V3, native etiket, eşli: en iyi set **c145** (dizilim + şekil +
+  hareket) — pen 32: DFL-trk +0.0071 (5/7), Metrica-ctrl +0.0069 (8/9); pen 48: +0.0132 (6/7) / +0.0083 (6/9);
+  kazanç yalnız yüksek cezalarda (32–48). BAR-ATH public takım doğruluğu 0.934 → 0.953.
+  Yan bulgular: taç atan oyuncunun çizgi dışı mesafesi yeniden başlatan takımı AUC 0.97 ile söylüyor ama kare
+  özelliği olarak katkı yok → B1'de D→takım geçiş kanıtı olarak denenmeli; takım genişliği/derinliği tek başına
+  AUC 0.80 (oyunda), 0.95 (yeniden başlamada); c4 yavaş (yarı başına ~25 sn, yüzdelikler) → üretimden önce
+  vektörleştirilmeli; en iyi ceza ızgara kenarında (48) → ızgaraya 64, 96 eklendi.
+- **own_half + C6** (V3, native): DFL-native 0.6028 (+0.014), DFL-trk 0.7505 (+0.0065), Metrica-ctrl 0.8073
+  (+0.009), Metrica-events 0.6523 (+0.004).
+- **Ceza seçimi**: simülasyonda en iyi ceza, tahmin/GT spell oranı 0.90–0.95 olan yerde. BAR-ATH için GT oranı
+  ~4.2/canlı dk alınırsa hedef 3.8–4.0/dk; own_half + C6 modelinde bu pen 40–48 (pen 32: 4.40, pen 48: 3.81).
+  Mevcut v5 (pen 8) 4.94/dk → aşırı parçalı (simülasyonda oran 1.15–1.2 ≈ −0.02…−0.04 spellF1).
+- **Dekoder hattı (alt ajan, `src/decode2.py`, `src/exp_decoders.py`)**: B1, B4, B5, B6, G1, G2 gürültü düzeyinde;
+  **B2 yumuşak minimum** benimsendi (yukarıdaki tablo).
+- **Sentez** (`src/exp_v7.py`, V3 taban + standart dekoder en iyi cezasına göre eşli): taban+B2 +0.015 / +0.009;
+  own_half+C6+B2 +0.011 / +0.018 (9/9); c145+B2 +0.019 (7/7) / +0.0165; **birleşim+B2 +0.016 (7/7) / +0.016 (9/9)**
+  (DFL-trk / Metrica-ctrl). B2 ile özellik kazançları kısmen örtüşüyor; birleşim en sağlamı.
+- trk etiketle birleşim yine geride (DFL-trk 0.749 vs 0.757, Metrica-ctrl 0.800 vs 0.809) → native kalıyor.
+- **v7 adayı** (`src/model_v7.py`, `submissions/candidate_v7.csv`, MD5 48dbf986…): v3 kuralları + broadcast
+  canlı/ölü, sim V3 + own_half + C6 + c145 takım modeli (native), B2 dekoder, pen_team 12. Temiz önbellekten
+  yeniden üretim birebir (1 dk 41 sn). Public: spellF1 **0.652 [0.43–0.81]**, macroF1 **0.924**, canlı/ölü F1
+  0.979, takım 0.948 (v5: 0.566 [0.36–0.76] / 0.901 / 0.974 / 0.929). Tam maç: 227 possession (~4.3/canlı dk),
+  <2 sn 1; v5 ile kare uyumu %96.3. Public hata dökümü: top kaybı spell'leri 4/12 doğru (v5 3/12), eşleşmeyen
+  tahmin 1 (v5 4). Güven aralıkları örtüşüyor → asıl dayanak simülasyondaki eşli kazanç.
+- Kalan / yeni fikirler: **A2** Metrica maçlarını son eğitime katmak; **A3** SkillCorner; **N2** simülasyon
+  kalibrasyonu (topun kaybolduğu yer, takım başına >11 iz); **N11** yakınlık süresi varyantları; c4'ü vektörleştirmek;
+  kale çizgisi / taç atan oyuncu ipucunu takım modeline yeniden başlama özelliği olarak vermek.
+  **En değerli sonraki adım:** elle etiketlenmiş birkaç 5 dakikalık pencere (`tools/labeler.html`) — public
+  17 possession'la v5/v7 farkı istatistiksel olarak ayrılamıyor.
+
+#### Tur 4 — 21 Ekim
+- Kullanıcı notu: **veri indirme yok** (kendi internetine bağlı); yalnız diskteki veriler kullanılıyor.
+- **SkillCorner (A3)**: diskteki 20 maç `src/skillcorner.py` ile DFL düzenine çevrildi (25 fps ara değerleme, fazlardan
+  H/A/D). Bozulmuş kinematik DFL/BAR-ATH ile uyumlu (canlı oyunda oyuncu hızı medyan 2.05 m/s; top 5.8 m/s, BAR-ATH 6.1).
+  DFL'de eğitilen modeller SC'de (alan dışı, `src/exp_sc.py`): mutlak spellF1 ~0.57–0.58 — simülasyon içi
+  DFL/Metrica'dan (0.75–0.81) çok düşük, **BAR-ATH public'e (0.57–0.65) çok yakın** → SC, BAR-ATH zorluğunu daha iyi
+  yansıtan vekil. Eşli kazançlar (V3 taban std en iyi 0.5665'e göre): taban+B2 +0.0066 (14/20); own_half+C6+B2
+  +0.0159 (17/20); c145+B2 +0.0178 (17/20); **birleşim+B2 (v7) +0.0167 (15/20)**; std ile birleşim +0.0075 (15/20).
+  → v7'nin kazançları bağımsız bir veri setinde de tutuyor. DFL ölü-top modeli SC'de kare doğruluğu 0.903 (DFL'de 0.98).
+- **SC'de hata kaynağı**: gerçek D etiketleriyle (oracle) v7 0.582 → **0.746**. SC'deki düşük skorun çoğu DFL ölü-top
+  modelinin SC'ye taşınamamasından (birleşen spell'ler, 2132'ye karşı 884 sahte spell). BAR-ATH'ta D için kurallar +
+  broadcast kullanıldığından takım fikirleri SC'de oracle D ile de ölçülüyor. Oracle D ile (V3 taban std 0.7326'ya göre):
+  taban+B2 +0.0044 (9/20); own_half+C6 ±0.001 (C6 SC'de takım tarafında etkisiz); c145+B2 +0.0125 (15/20);
+  **birleşim+B2 (v7) +0.0137 (17/20)**; trk ≈ 0. Kalan ana hata yine top kaybı spell'lerinde yanlış takım (%20).
+- **A3b** SC'yi eğitime katmak (DFL + SC, 4 katlı): SC katlar dışı +0.025 (18/20, alan içi), Metrica-ctrl −0.005 (4/9),
+  BAR-ATH public aynı (0.652; macroF1 0.929), tam maç 227 → 202 possession → ≈ kararsız; v7 DFL ile kalıyor.
+- **SC'de yeniden sınama**: A1 trk eğitimi (B2 ile +0.003 vs native +0.0066) ❌, N9 (+0.0057) ❌, birleşim trk (+0.014 vs
+  +0.0167) ❌ — simülasyondaki kararlar SC'de de geçerli.
+- **B2 parametre taraması** (`src/exp_b2tune.py`, 64 ayar × SC/Metrica/DFL): varsayılan (D0 175, c 48, pen 12) düz bir
+  platoda; en iyi ortalama sıra (175, 64, 8) yalnız +0.002/+0.0004/+0.004 ve BAR-ATH'ta fark yok → varsayılan kalıyor.
+- **C7 dokunuş olayları** (`src/feat_touch.py`): top hız sıçraması + yakında oyuncu = dokunuş; takım başına son dokunan,
+  ardışık dokunuş, takım içi pas, dokunuştan beri geçen süre. Sabit eşik alan bağımlı (3 m/s'de DFL 38, SC 24, BAR-ATH
+  14 dokunuş/canlı dk; BAR-ATH topu çok pürüzsüz) → eşik her yarıda dakikada 10 dokunuşa uyarlanıyor (artık 17.5–19/canlı
+  dk her yerde; dokunan takım = possession %85–87). Değerlendiriliyor.
+- **C7 sonucu**: v7'ye eklenince GT benzeri setlerin hepsinde hafif kayıp (B2 ile DFL-trk 0.7600→0.7550, Metrica-ctrl
+  0.8147→0.8128, SC oracle 0.7463→0.7425, SC 0.5832→0.5799); yalnız Metrica-events +0.019 → dokunuşlar hızlı el
+  değişimlerini yakalıyor, GT'nin kontrollü tanımı bunları saymıyor. ❌ v7'ye alınmadı.
+- **Sıcaklık (temp_t) B2 ile**: tutarlı yön yok (SC yüksek, DFL düşük ister; Metrica ve SC-oracle 1.0) → 1.0 kalıyor.
+- **N19 topluluk** (birleşim + c145 + own_half/C6 modellerinin logit ortalaması): Metrica +0.0034 (7/9), DFL-trk +0.0054
+  (5/7), SC +0.0013 (12/20) ama SC-oracle −0.0025 (8/20) → ≈ karışık; v7 tek model kalıyor.
+- (Tur 4 burada kullanıcı isteğiyle durduruldu, 21 Ekim; kullanıcı "devam et" deyince tur 5 başladı.)
+
+#### Tur 5 — 21 Ekim
+- **N20 zamansal yığınlama** (`src/exp_stack.py`; ikinci LightGBM, v7 olasılıklarının ±5 sn kaymaları ve pencere
+  istatistikleri): DFL-trk −0.005 (2/7), Metrica-ctrl −0.006 (2/9), SC +0.0005, SC-oracle −0.010 → ❌ (kazancın %81'i
+  zaten z0'dan; B2 ile çakışan bir yumuşatıcı).
+- **Geçiş kaydırma** (takım değişimi / yeniden başlama ±0.5–1 sn): SC ve Metrica'da her kaydırma kaybettiriyor (SC'de
+  yeniden başlamayı 0.5 sn kaydırmak −0.012…−0.023) → zamanlama bu konvansiyonlarla hizalı; ölü-top sınır hassasiyeti çok
+  önemli. ❌
+- **N21 SkillCorner'da BAR-ATH ölü-top yaklaşımı** (`src/exp_scdead.py`): SC'nin "görüntü sahayı gösteriyor" bayrağı
+  BAR-ATH broadcast geçerliliği gibi davranıyor (canlı %94, ölü %25 geçerli; BAR-ATH ~%96.5 / %24). SC'de: öğrenilmiş DFL
+  ölü-top 0.582, v3 kuralları + görüntü işaretleri 0.573, **kurallar + 0.5 × öğrenilmiş 0.619 (+0.038, 20/20)**,
+  gerçek D 0.746. Ama BAR-ATH'ta (v7 ile) harman public macroF1'i 0.924 → 0.84–0.90 düşürüyor, vekiller çelişkili
+  (ballout_cov ↑, setpiece_ok ↓). SC'de taktik kamera yok (tekrar sırasında oyuncu verisi de yok) → kurallar orada
+  zayıf; BAR-ATH'ta sürekli taktik takip var. ≈ BAR-ATH'ta benimsenmedi.
+- **N22 başlangıç türüne göre yumuşak minimum**: GT süre dağılımları yeniden başlama / top kaybı spell'leri için aynı
+  (SC medyan 7.4 / 7.3 sn) → denenmeden ❌.
+- **N23 takım modeli hiperparametreleri** (B2 ile, V3 taban std'ye göre; DFL-trk / Metrica-ctrl / SC-oracle / SC):
+  v7 varsayılan +0.016 / +0.016 / +0.014 / +0.017; yavaş öğrenme (lr 0.025, 800 tur) +0.015 / +0.019 / +0.012 / +0.018;
+  büyük ağaç (127 yaprak) +0.016 / +0.020 / +0.013 / +0.017; güçlü düzenlileştirme +0.015 / +0.015 / +0.008 / +0.019;
+  her kare (stride 1) +0.021 / +0.017 / +0.008 / +0.015 → hepsi ±0.005 içinde, her biri başka sette önde → ≈ varsayılan kalıyor.
+- **N24 v7 + hakem düdüğü** (v6'nın mantığı: düdükten sonra geç başlayan D'ye girişi düdüğe çekmek; `model_v7`
+  `wh_bonus` seçeneği, varsayılan kapalı): public macroF1 0.9244 → **0.9314**, canlı/ölü F1 0.9788 → 0.9819, spellF1
+  aynı; tam maçta karelerin %0.1'i değişiyor; vekiller aynı. Yalnız BAR-ATH'ta ölçülebiliyor (sesi olan tek veri).
+  `submissions/candidate_v7w.csv` (MD5 00e1fab6…). Düdük skoru videodan yeniden üretilebilir (ffmpeg, kurulu pakette).
+- **Tur 5 sonucu**: denenen 6 fikirden yalnız N24 (düdük) küçük bir artı (public macroF1 +0.007); diğerleri ≈/❌.
+  CPU'da model tarafında getiri azaldı: son iki turda hiçbir fikir v7'yi tutarlı biçimde geçmedi. Kalan en değerli
+  adımlar CPU deneyi değil: (1) elle etiketlenmiş birkaç 5 dakikalık pencere (v5 / v7 / v7w kararı), (2) teslim
+  hattının (v7 veya v7w) varsayılan yapılması ve teknik dokümana işlenmesi.
+
+#### Karar protokolü: parametre seçimi (22 Ekim)
+Parametreler (ör. pen_team) public pencereye göre değil, **GT'ye benzeyen dış setlerde en kötü durum pişmanlığını
+en aza indiren** değerle seçilir: DFL-trk (7 maç), Metrica-ctrl (3 maç × 3 tohum), SkillCorner (20 maç; öğrenilmiş ve
+gerçek D). Ek akıl sağlığı kontrolü: BAR-ATH tam maç possession hızı ~3.8–4.2/canlı dk. Public yalnız bilgi amaçlı.
+v7 için pen_team: 4 → max pişmanlık 0.0127, 8 → 0.0068, **12 → 0.0016**, 20 → 0.0017 (public 4–32 arası aynı).
+
+#### Tur 6 — 22 Ekim (kullanıcının planı: oracle merdiveni → kayıp havuzlarına göre fikir sırası)
+**0. adım — nereden kaybediyoruz** (`src/exp_oracle.py`; v7 + B2 pen 12; birikimli oracle merdiveni):
+
+| basamak | DFL-trk | Metrica-ctrl | SkillCorner |
+|---|---|---|---|
+| v7 | 0.760 | 0.815 | 0.582 |
+| + kusursuz ölü top | +0.022 | +0.057 | +0.164 |
+| + kusursuz restart takımı (2 sn) | +0.010 | +0.006 | +0.014 |
+| + kusursuz zamanlama (±1 sn) | +0.007 | +0.005 | +0.006 |
+| + kaçan <4 sn possession'lar | **+0.065** | **+0.040** | **+0.111** |
+| + sahte possession'lar silinince | **+0.086** | **+0.050** | **+0.068** |
+
+- Hata bütçesi (v7, DFL-trk; 5 IoU eşiği toplamı): kaçırılan %22 (çoğu <4 sn), kısmi örtüşme %61 (gerçek tarafı %29,
+  tahmin tarafı %32, her süre grubunda), sahte %17 (çoğu 2–8 sn). Metrica ve SC benzer.
+- Gecikme: bulunan el değişimlerinde top görünürken medyan +1 (DFL) / +3 (Metrica, SC) kare; resmi ölçüm medyan 0.
+  Top kayıpken +10…+12 kare ama vaka az. Gerçek el değişimlerinin yalnız ~%53'ü ±1 sn içinde bulunuyor.
+- **Sonuç**: fikir 1 (gecikme) ≈ 0 potansiyel; restart takımı (4) küçük (+0.006…+0.014); en büyük havuzlar kısa possession'ları
+  yakalamak ve sahteleri ayıklamak → önce fikir 2 (değişim modeli + zamana bağlı ceza), sonra 3 (possession düzeyinde
+  doğrulama). Ölü top: BAR-ATH'ta kurallar + broadcast zaten güçlü (public canlı/ölü F1 0.979).
+- Planın önceki turlarda denenmiş maddeleri: 5 (konvansiyon uyumu = A1, ❌), 6 (possession hafızası ≈ C2/C7, ❌ GT
+  benzeri konvansiyonlarda), 7'nin sıcaklık kısmı (≈), 11 (BiGRU) Colab'da çalışıyor.
+
+**Fikir 2 — el değişimi modeli + zamana bağlı ceza** (`src/exp_change.py`): LightGBM "±6 kare içinde el değişimi var mı?"
+(DFL trk, maç dışarıda; girdiler v7 özellikleri + takım olasılığının yönsüz değişim işaretleri). Ayırt edicilik yüksek:
+AUC DFL 0.912, Metrica 0.953, SC 0.881 (pozitif %2). Dekoderde takım geçişi maliyeti pen − λ·(logit p − b) (≥ 0),
+36 ayarlık ızgara, her sette en iyisi (iyimser): DFL-trk +0.0028 (4/7), Metrica +0.0010 (5/9), Metrica gerçek D +0.0017,
+SC +0.0016 (10/20), SC gerçek D +0.0013 (11/20) → **≈ gürültü**. Değişim bilgisi takım olasılıklarında zaten var.
+
+**Fikir 3 — kısa possession doğrulama** (`src/exp_shortpos.py`): ekleme adayları (düşük cezalı çözümün omurga içindeki
+karşı takım parçaları) yalnız %4–9 gerçek; sınıflandırıcı AUC 0.77–0.88 ama eklemek her sette kaybettiriyor (−0.0002…−0.006).
+Silme (8 sn'den kısa omurga spell'leri, %44–81 gerçek, AUC 0.70–0.74): öğrenilmiş D ile +0.001…+0.003, gerçek D ile
+−0.001…−0.002 → ≈/❌. Teşhis: kaçan kısa possession'ların çoğu aday bile olmuyor (takım modeli hiç dönmüyor) → havuz
+dekoderle değil, daha iyi kare kanıtıyla açılır.
+**Fikir 4 — restart takımı**: ölü toptan sonraki ilk 2 sn'de ham takım olasılığı zaten %95–98 doğru (çözülmüş: gerçek D ile
+%93–96.5). Restart spell'lerini B2'den muaf tutmak her sette kaybettiriyor (−0.001…−0.010) → B2'nin bastırdığı kısa restart
+spell'leri çoğunlukla gürültü. Ayrı restart modelinin tavanı küçük; ertelendi.
+**Fikir 7 (kalibrasyon yarısı)**: top yokken model hafif fazla temkinli (DFL conf−acc −0.029); görünürlüğe göre sıcaklık
+karışık (−0.002…+0.003) → ≈. **Fikir 10 (konsensüs)**: B2 ile 4–20 cezalı çözümler neredeyse aynı → oylama = pen 12, etkisiz.
+**Fikir 11 (BiGRU, Colab T4, `src/seq_gru.py`, `src/exp_gru.py`)**: gerçek D + B2 ile DFL-trk 0.676 vs LightGBM 0.776
+(−0.10), Metrica −0.09, SC −0.04; kare takım doğruluğu yakın (SC 0.896 vs 0.897; topluluk 0.902) ama sınırlar kötü → ❌
+(planın +0.03 koşulu sağlanmadı). Colab maliyeti ~1.5 birim.
+**Kendi çıktısına gecikme göstergesi** (1 sn kaydırmada spellF1): GT benzeri etiketler 0.76–0.85, v7 simülasyonda 0.88–0.89,
+**BAR-ATH'ta 0.93** (public pencerede GT 0.78, v7 0.98) → BAR-ATH'ta tahminler simülasyondakinden daha "yapışkan".
+Sebep adayı: DFL kare düzeyinde BAR-ATH'tan ~5× pürüzlü (canlı oyunda |2. fark| oyuncu 0.0105 vs 0.0020 m, top 0.06 vs 0.011 m;
+SC 0.0019 / 0.0103 ve Metrica 0.0027 / 0.0035 BAR-ATH kadar pürüzsüz) → **N26: sim.V4** = V3 + ön yumuşatma (oyuncu 1.5,
+top 4 kare; oyuncularda BAR-ATH'la birebir) — değerlendiriliyor.
+
+**N26 — sim.V4 (ön yumuşatma)** (`src/exp_v4.py`): DFL-trk (kendi bozulmasında) −0.006 (1/7); Metrica −0.004 (3–4/9);
+SC +0.004 (13/20) / +0.001 gerçek D; BAR-ATH yapışkanlık göstergesi değişmedi (0.926 → 0.930) → ≈, benimsenmedi.
+Yapışkanlığın sebebi pürüzsüzlük farkı değil.
+**Fikir 8 — ATD'nin uydurduğu top kareleri** (`src/ballclean.py`, `src/exp_fabball.py`, `src/exp_scfab.py`): taktik
+topta hareket ederken ivmesi < 2 mm olan ≥ 8 karelik koşular görünür karelerin %3.1'i; burada iki kamera arası fark
+medyan 1.66 m (≥ 25 karelik koşularda 3.15 m), diğer karelerde 0.75 m → kestirim. Bu kareler broadcast topuyla
+(geçerli + canlıysa) değiştirilip yoksa kayıp sayılınca (karelerin %0.2'si değişiyor): etiketsiz göstergeler aynı
+(229 possession, yapışkanlık 0.927), takım modeli bu karelerde daha emin (|logit| 3.11 → 3.57); public (bilgi)
+spellF1 0.652 → **0.696** [0.44–0.84], macroF1 0.924 → 0.937, takım 0.948 → 0.968 (IoU 0.7'de F1 0.52 → 0.67).
+SC dış kontrolü: dedektör SC'nin kendi kestirim bayraklarına karşı kesinlik 0.92 ama duyarlılık 0.01 (SC'nin
+kestirimleri "düz" değil); SC'nin kestirilen top karelerini kayıp saymak kazandırmıyor (gerçek D −0.003) → dış
+doğrulama yok, ama BAR-ATH'ta iki kamera farkı bağımsız kanıt. **Seçenek olarak eklendi** (`model_v7` `clean_ball`,
+varsayılan kapalı): `candidate_v7c.csv` (temizlik), `candidate_v7cw.csv` (temizlik + düdük; public 0.696 / macroF1 0.944).
+
+**Tur 6 özeti**: 0. adım kayıp havuzlarını netleştirdi (kısa possession'lar ve sahteler en büyük; ölü top SC'de büyük,
+BAR-ATH'ta kurallar güçlü). Planın fikirlerinden 1, 2, 3, 4, 7, 10, 11 ≈/❌; N26 ≈; 8 BAR-ATH'a özgü küçük artı (seçenek).
+Kısa possession havuzunu açmanın yolu dekoder değil, daha iyi kare kanıtı (takım modeli o anlarda hiç dönmüyor).
+
+#### Tur 7 — 22 Ekim (geniş araştırma → oyuncu düzeyinde kontrolcü modeli)
+
+**Araştırma** (5 Codex alt ajanı, yalnız web; ajanlara yalnız genel problem tanımı verildi, veri / dosya paylaşılmadı):
+R1 benzer yarışmaların kazanan çözümleri (SoccerNet BAS, NFL contact detection, DFL shootout), R2 tracking'den
+possession / kontrol çıkarımı, R3 zamansal segmentasyon (MS-TCN, ASFormer, ASRF, DiffAct…), R4 alan uyumu /
+simülasyon / etiket gürültüsü, R5 video (top tespiti, pass/drive spotting, takım ataması). Birden çok raporun
+birleştiği öneriler (öncelik sırasıyla):
+
+| # | Öneri | Kaynak | Bizdeki karşılığı |
+|---|---|---|---|
+| R-1 | **Oyuncu düzeyinde kontrolcü modeli**, baskı yapan rakip zor negatif; SkillCorner "player possession" denetimi | R2#1, R1#2, R5#8, R4#1 | bu tur (`src/ctrl_model.py`) |
+| R-2 | Takım modeli dönmese de **kısa possession adayı üreten bağımsız kanıt** + ekleme yapabilen aralık modeli (var olan spell'leri doğrulamak değil) | R3#1, R1#6, R5#3 | tur 6 fikir 3'ün dersi: aday bile yoktu → R-1'in kanıtıyla |
+| R-3 | Öğrenilmiş ölü top başlığı (oyuncu hareketi, restart geometrisi; kamera geçersizliği ≠ D) | R1#4, R2#3, R3#3, R4#6 | N1 ❌ (kurallarla harman); oyuncu-tabanlı ayrı model denenmedi |
+| R-4 | Konvansiyon denetimi + küçük bağımsız denetim seti (zor kesitler ayrı, temsilî kesitler ayrı) | R2#2, R4#1–2, R3#5 | SC pp etiketleri ✅; elle etiket (tools/labeler.html) kullanıcı kararı |
+| R-5 | Yapısal gözlem simülatörü (ardışık kopma patlamaları, duruma bağlı top kaybı) + gözlem yaşı / kalite bayrakları | R4#3–4, R2#7, R3#9, R1#9 | V3 (yumuşak gürültü); patlama / yaş bayrağı yok |
+| R-6 | Video: 2023 SoccerNet BAS birincisi pass/drive (MIT) → takıma atanmış kontrol çapaları; top: WASB / FootAndBall | R5#1–3, R1#1 | videolar Drive'da; Colab erişimi kullanıcı kararı |
+| R-7 | PathCRF (KDD 2026; DFL'de eğitilmiş, kod + checkpoint, MPL-2.0) sınırlı yeniden üretim | R2#4 | DFL checkpoint'i bizim DFL-CV'ye sızar → yalnız SC / Metrica'da |
+| R-8 | Spell dengeli eğitim (kısa spell'in her karesi daha ağır, tavanlı) + OOF zor örnek pencereleri | R1#5, R3#4 | N9 (top kaybı ağırlığı) ≈; spell dengeli denenmedi |
+| R-9 | OOF olasılıklar + seçili kanıt üzerinde küçük **residual** TCN (sıfırdan başlayan düzeltme) | R3#2, R1#10 | BiGRU ❌ (tek başına sınıflandırıcıydı); yalnız yeni kanıt işe yararsa |
+| R-10 | Dekoderde kontrol / transit / kontrolsüz durumları | R2#6 | B2 aynı işin bir kısmını yapıyor |
+
+Geriye bırakılanlar: UVAST, tam DiffAct, MBR (B3 tavanı küçük), DANN / entropi, global gecikme düzeltmesi (B6 ❌).
+R3'ün metrik notu: 2 sn'lik spell'in IoU 0.7'yi geçmesi için sınır hatası ≤ 0.35 sn (≈ 9 kare); 17 spell'lik public
+pencerede tek eşleşme F1'i 5.9 puan oynatır → parametre seçimi public'te yapılmaz (karar protokolü).
+
+**R-1 — oyuncu düzeyinde kontrolcü** (`src/ctrl_model.py`, `src/exp_ctrl.py`, `src/exp_ctrl2.py`, `src/ctrl_barath.py`):
+adaylar her takımın topa en yakın 3 oyuncusu (5 karede bir satır); özellikler AYNI oyuncuyu zamanda izler (mesafe,
+top–oyuncu göreli hızı, yaklaşma, topa yakın kalma süresi, son / sonraki 1 sn'de en yakın olma payı, 3 m içindeki
+rakipler) + top ipuçları. Denetim: SkillCorner "player possession" (kontrollü; blok / kontrolsüz dokunuş değil);
+baskı yapan rakip dahil diğer herkes negatif. Takım kanıtı q = 1 − Π(1 − p). SC'de 5-fold (maç): **AUC 0.988, kontrolcü
+varken ilk-1 0.946** — ama spellF1'e taşınmıyor:
+
+| v7'ye karşı (eşli) | SC pp öğr. D | SC pp gerçek D | SC faz öğr. D | SC faz gerçek D | DFL-trk | Metrica öğr. D | Metrica gerçek D |
+|---|---|---|---|---|---|---|---|
+| ham karışım α·log(q_H/q_A) (α 0.25) | −0.003…−0.005 | −0.002 | −0.003…+0.002 | ±0.001 | −0.004…−0.007 | −0.012…−0.015 | −0.010…−0.013 |
+| sınırlı karışım α·log((q_H+0.2)/(q_A+0.2)), α 0.5 | +0.006 (17/20) | +0.004 (13/20) | +0.006 (18/20) | +0.003 (16/20) | +0.000 (4/7) | −0.002 (5/9) | −0.001 (4/9) |
+| 14 kontrolcü özelliği takım modelinde (DFL'de yeniden eğitim) | +0.006 (13/20) | −0.000 (9/20) | +0.006 (14/20) | −0.000 (9/20) | **−0.008 (1/7)** | −0.003 (5/9) | −0.001 (5/9) |
+
+Kare takım doğruluğu: SC +0.002 (özellik), DFL −0.001, Metrica −0.001; karışım her yerde ≤ 0. Kontrolcünün
+görmediği alanlarda (DFL, Metrica) kazanç yok → SC'deki artı alan içi avantaj; BAR-ATH de kontrolcü için alan dışı.
+BAR-ATH (bilgi): özellik modeli public 0.652 → 0.667 (temiz topla 0.696 → 0.696, macroF1 0.937 → 0.940); karışım
+possession hızını 4.26 → 4.50/canlı dk (temiz topla 4.59) çıkarıyor, public aynı / temiz topla 0.696 → 0.682.
+→ ❌ benimsenmedi (dosyalar `cache/bench/ctrl/barath_probs_*.pkl`).
+
+**Kapsama teşhisi** (neden?): <4 sn gerçek spell'lerin yalnız %6–13'ünde v7'nin ham takım olasılığı doğru takımı hiç
+göstermiyor (DFL-trk %9, Metrica %6, SC %13) → kısa possession'ların çoğunu model *görüyor*, sorun gürültüden
+ayırmak. Kontrolcü kısa spell'lerin yalnız %19–37'sinde doğru takım için emin (q > 0.5, ≥ 3–10 kare; v7'nin hiç
+göstermediklerinin %0–5'inde), uzun spell'lerin içinde canlı dakikada 0.6–1.2 yanlış emin koşu üretiyor. SC'de kısa
+takım spell'lerinin yarısından fazlası tek dokunuş: içlerindeki oyuncu kontrol süresi medyan 0 sn (bütün player
+possession'ların %25'i < 0.3 sn, %41'i < 1 sn). Yani kısa possession'ı taşıyan şey "kontrol eden oyuncu" değil, tek
+dokunuşlu pas / müdahale; tracking'den oyuncu kontrolü bunu ayırt etmiyor.
+
+**Tur 7 özeti**: araştırmanın 1 numaralı tracking önerisi (R-1) SC içinde çalışıyor ama alan dışına taşınmıyor; kısa
+possession havuzu için tracking kanıtı doygun görünüyor. Sıradaki güçlü kaldıraçlar yeni gözlem kaynağı: video
+(R-6: taktik videodan top tespiti — temiz top seçeneğinin public'te +0.044 vermesi top kalitesinin BAR-ATH'ta önemli
+olduğunu gösteriyor; yayın videosundan pass/drive çapaları) ve BAR-ATH'ta küçük bir elle etiketli doğrulama seti
+(RULES.md: "Small amounts of hand-labelled data used to train or validate a model are fine"; gönderilen etiketler
+modelden gelmeli). İkisi de kullanıcı kararı (videonun Colab'a ulaşması / etiketleme zamanı).
+
+**Top gözlem sıklığı** (kullanıcı sorusu; `src/exp_ballrate.py`, `sim._ball_every`): model takibi zaten kare kare
+okuyor. Top yalnız her k karede görülse (aradaki kareler doğrusal) ne kaybederdik — her varyantta modeller yeniden
+eğitildi: 0.2 / 0.4 sn ±0.004 (gürültü), 0.6 sn'den itibaren her sette kayıp ve aralıkla büyüyor (1 sn −0.007…−0.025,
+2 sn −0.012…−0.043, 10 sn −0.025…−0.109; en çok öğrenilmiş ölü top). Aralıklı bakmanın artısı yok; video dedektörü
+çalıştırılırsa 0.2 sn adım hesap tasarrufu için kabul edilebilir.
+
+**Rol farkındalığı (numarasız)** (kullanıcı fikri; `src/roles.py`, `src/exp_role.py`, `src/exp_role_pen.py`):
+oyuncunun ±2.5 dk'lık ortalama derinliği (rakip kaleye doğru) ve takım içi derinlik sırası, genişliği → kaleci /
+stoper / bek / orta saha / forvet (4 en derin savunma, 2 en geniş savunmacı bek, 2 en ileri forvet). Metadata'ya karşı
+(bozulmuş girdide, oyuncu-devre çoğunluğu): DFL %84.5 (hat %87.5), SC %75 (kanat forvetleri orta saha sayılıyor —
+4-3-3'te 3 forvet). Topa en yakın oyuncuların rolü, "kendi ceza sahasında baskı altında savunmacı", "rakip yarı
+sahada forvet" vb. 16 takım-perspektifli özellik v7'ye eklendi: kare takım doğruluğu her sette artıyor
+(+0.001…+0.005) ama spellF1 SC'de +0.008…+0.011 (13–17/20), DFL-trk'te −0.013…−0.015 (1/7), Metrica'da −0.004…−0.006;
+ceza yeniden seçilince de en kötü durum pişmanlığında v7 pen 12 (0.0115) rol modelini (0.0126–0.0131) geçiyor →
+❌. Yorum: native (dokunuşta dönen) DFL etiketleriyle eğitilen model rol bilgisini dokunuş değişimlerini öğrenmek
+için kullanıyor; kontrollü konvansiyonda bunlar sahte spell. Forma numarası: ATD her izi kadrodaki bir oyuncuya
+(numara + ad) bağlıyor, yani kimlik zaten var; pozisyon bilgisi yok (kaleciler dışında "Unknown"). Dış veriden
+"rol × bölge × baskı → top kaybı" önseli (StatsBomb indirme gerektirir) ve maç içi kendi-tahmin istatistikleri
+denenmedi: rol özelliklerinin kendisi spellF1'e taşınmadığı için beklenen değer düşük.
+
+**R-6 video pilotu — pas / top sürme olayları** (`colab/bas_pilot.py`, `colab/run_bas.sh`, `src/bas_eval.py`):
+2023 SoccerNet ball-action-spotting birincisinin (R. Baikulov, MIT) tek fold modeli (fold 5), yayın videosunda
+Colab T4'te (2 vCPU, ~100 dk; video kullanıcının Drive'ından VM içinde okundu, yerel bağlantı kullanılmadı); çift
+kareler (modelin 12.5 fps adımı), yatay çevirme TTA. Pas tepeleri ≥0.2: 1284 (video dk başına 11.7), top sürme 1208.
+Takım ataması = olay anında topa en yakın oyuncu (≤3 m, taktik ATD + birleşik top, yayın→taktik gecikmesi).
+Public pencere (bilgi; 4 dk canlı): pas, tepe anında atanınca olay-takım doğruluğu 0.75–0.77 (v7 aynı karelerde
+0.91–0.93; ayrışmalarda olay 2–3 / v7 12–13 haklı) — tepe topun ayaktan çıkmasından sonra. 6 kare (0.24 sn) önce
+atanınca 0.94–0.95 (v7 0.94), ayrışma 5–7 (olay 3–4 / v7 2–3); tam maçta v7 ile uyum 0.665 → 0.829 (ofset public'e
+bakarak 9 değer içinden seçildi; fiziksel olarak da pası atan vuruştan önce topa en yakın). Top sürme 0.88–0.90
+(v7 0.93; ayrışmalarda v7 haklı). Yayın görüntüsü geçersiz karelerle sınırlamak fark yaratmıyor (olayların %99'u
+geçerli görüntüde). Sonuç: pas olayları v7 düzeyinde isabetli ama onu geçtiğine kanıt yok ve dış doğrulama
+imkânsız (DFL / Metrica / SkillCorner'ın videosu yok) → şimdilik entegre edilmedi; olası tek kullanım sınırlı,
+v7'nin kararsız olduğu anlarda zayıf kanıt (`cache/video/` altında skorlar duruyor). Maliyet ~3 Colab birimi.
+
+#### Tur 8 — 22 Ekim (20 ajanlık araştırma filosu)
+
+20 Codex ajanı (yalnız web + temizlenmiş `brief/`: README, FIKIRLER, DENEMELER, analiz raporları; veri yok), her
+biri ayrı alan: takipten kontrollü possession, takipten olay tespiti, olay–takip senkronu, oyunculardan top izi, GNN /
+set modelleri vs GBM, öz-denetimli ön eğitim, diğer sporlar, ölü top / duran top, yayın yapısı, ses, video top tespiti,
+takıma atanmış aksiyon tespiti, oyun durumu yeniden kurulumu, forma numarası, yerel VLM'ler, gürültülü etiket,
+segment-IoU son işlemi, takip hata modeli, etiketsiz model seçimi, topsuz taktik bağlam. Ortak sonuçlar:
+
+- Hiçbir yayımlanmış yöntem kontrollü spell F1'de v7'yi geçtiğini göstermiyor; her ekleme **sınırlı**, "hiç etki
+  yok" ayarı içeren ve B2'yi sabit tutan bir düzeltme olmalı, en kötü durum pişmanlığından geçmeli.
+- **Önce tavan / kâhin, sonra inşa**: olay çapası kâhini (gerçek olaylarla kusursuz / bozulmuş çapalar → sınırlı
+  füzyonun kazancı ve gereken kesinlik), kısa spell kapsama kâhini, ölü top sınır karnesi.
+- **Top kaynağı / kalitesi**: simülatöre ATD tarzı uydurma (aşırı düzgün) top izleri + "son gerçek gözlemden beri
+  geçen süre" gibi kalite özellikleri → temiz top seçeneğinin ilk dış testi ve sahte 2–8 sn spell havuzu.
+- Video olayları (PASS / DRIVE) takıma atanmış seyrek çapa olarak, tekrar (replay) süzgeciyle; ekip-farkında hazır
+  model yalnız 2025 Team T-DEED (GPL, sol/sağ → ev/deplasman eşlemesi gerekir).
+- Yalnız oyunculara dayalı ölü top modeli (top / yayın girdisi yok) + yalnız sinyal zayıfken devreye giren füzyon:
+  denenmedi (R-3).
+- Model seçimi: eşli maç bootstrap'ı, Q95 pişmanlık, bir vekil seti dışarıda bırakarak seçicinin testi.
+- **Düzeltme (A18)**: DATA.md'ye göre ATD'de oyuncu kimliği yok — 46 "slot" iz yuvası, `ShirtNumber` = slot sırası;
+  izler kaybolup yeniden bulunurken kimlik değiştirir. v7'nin özellikleri kolektif (takım düzeyi; oyuncu bazında
+  yalnız ±1 karelik hız) → etkilenmiyor; BAR-ATH'ta kare başına >1 m sıçrama %0.009, iz yeniden başlama 11.2/dk
+  (simülasyon DFL 17.8, SC 26.2/dk — daha da parçalı). Oyuncu sürekliliğine dayanan kontrolcü ve rol özellikleri
+  BAR-ATH'ta ayrıca bozulurdu (benimsenmemişti).
+
+**Olay çapası kâhini** (`src/exp_anchor.py`; araştırma a02 / a07 / a12 / a17): GERÇEK pas olayları (Metrica PASS;
+SkillCorner pasla biten player possession) çapa sayılıp v7'ye sınırlı kanıt olarak eklendi (pasın 0.5 sn öncesi +
+0.12 sn sonrası, ±β, B2 pen 12). Etiketler aynı olaylardan türediği için iyimser üst sınır (SC faz etiketleri en
+az döngüsel). β=4'te: kusursuz çapalar Metrica +0.016 / +0.020 (9/9), SC pp +0.034 / +0.037, SC faz +0.028 (20/20);
+pilota benzer (geri çağırma 0.6, takım 0.94, ±3 kare, 1 sahte / canlı dk) Metrica +0.007 / +0.012, SC +0.013…+0.020;
+kötü (0.5, 0.85, ±5, 2 / dk) Metrica ≈0, SC +0.008…+0.013. → tavan küçük ama pozitif ve tutarlı.
+**BAR-ATH'ta pilotun çapaları** (`src/anchor_barath.py`; 820 atanmış pas, ≥0.35, 6 kare önce atama): possession hızı
+4.26 → 4.61 (β=2) / 4.90 (β=4) / canlı dk; public (bilgi) β=2 aynı (0.652; macroF1 +0.0015), β=4 0.613; temiz topla
+0.696 → 0.682 / 0.640. Kâhinden farkı: pilotun pasları tam maçta v7 ile %17 çelişiyor ve çelişkilerde olay / v7
+yaklaşık eşit haklı → her yanlış ekleme iki spell bozduğundan net ≈0 / eksi (a17'nin ΔM > (F/2)·ΔP koşulu). ❌
+varsayılan değil; dosyalar `cache/video/barath_probs_anchor_*.pkl`. Yeniden bakmak için koşul: çelişkilerde olayın
+isabetini yükselten daha iyi dedektör (7 fold topluluğu, "pası takım arkadaşı aldı" teyidi, tekrar süzgeci).
+
+**Temiz top seçeneğinin dış testi** (`src/exp_fab.py`, `sim.V5` / `V5C`; araştırma a01 / a04 / a18 / a19): V5 = V3 +
+görünen canlı oyunun %3'ü (medyan 0.8 sn'lik bölümler) iki uç arasında düz çizgiyle "uydurulmuş" (BAR-ATH: görülen
+karelerin %3.1'i; V5'te %3.3, sapma medyanı 1.3 m); V5C = aynısı + `ballclean.fabricated` ile silinmiş (dedektör
+V5'te geri çağırma 0.97, kesinlik 0.83; V3'te hiç kare işaretlemiyor). Eşli (A = V3 modelleri V5 girdisinde, yani
+v7'nin BAR-ATH durumu; öğrenilmiş / gerçek D):
+- uydurmanın maliyeti (V3 girdisine göre): DFL −0.003 / −0.002, Metrica −0.001 / −0.001, SC −0.000 / −0.001 → küçük;
+- temizlemek (B): DFL −0.003 / −0.001, Metrica −0.009 / 0.000, SC −0.000 / +0.001 → kazandırmıyor;
+- V5 ile eğitmek (C) ya da V5C ile eğitip çalıştırmak (D): −0.008…+0.001 → kazandırmıyor.
+BAR-ATH'ta uydurma kareler değişimlerin yakınında yalnız hafif yoğun (±1 sn 1.04×, ±2 sn 1.22×, temaslı anlarda
+1.15×) → düzgün yerleşim makul. **Sonuç: temiz top dış veride desteklenmiyor**; public'teki +0.044 (17 spell) büyük
+olasılıkla gürültü. Önerilen varsayılan v7cw'den **v7 (ya da v7w)**'ye çekildi; v7c / v7cw seçenek olarak kalır.
+
+#### Tur 9 — 22/23 Ekim gecesi (kullanıcı: "08.00'e kadar modeli geliştirmeye devam et")
+
+**Topsuz kısa vadeli etkileşim özellikleri** (`src/bfree.py`, `src/exp_bfree.py`; araştırma a20): takımın açılma /
+daralma hızı, son savunma hattının hızı, hücum yönündeki merkez hareketinin tersine dönmesi, en yakın rakibe kapanma
+ve boş alana açılma (hepsi takım düzeyi, kimliksiz). Kare takım doğruluğu her sette +0.001…+0.004; spellF1 SC +0.009
+…+0.014 (17/20) ama Metrica −0.005…−0.007 (2/9), DFL −0.003 / +0.001 → ❌. Rol özellikleriyle aynı örüntü: takım
+hareketi türü özellikler SC'yi iyileştirip Metrica'yı (BAR-ATH'ın ATD'siyle aynı sağlayıcı) kötüleştiriyor.
+
+**Düzenleme kâhini** (`src/exp_edit.py`; a17 adım 1): v7'nin ham olasılığından çıkan "karşı takım" koşuları (ham,
+±6, ±12 kare yumuşatma, ≥5 kare) canlı dk başına 4.6–7.1 aday, yalnız %3.5–4.9'u gerçek; <4 sn gerçek spell'lerin
+IoU≥0.5 ile kapsanması %7–10. Kâhin ekleme +0.017…+0.029, **kâhin silme +0.040…+0.061** (sahte spell'leri silmek),
+ikisi +0.057…+0.080 → asıl erişilebilir havuz silme.
+**Silme için düzenleme-fayda puanlayıcısı** (`src/exp_edit2.py`; a17 adım 2): aday = <15 sn, en az bir H/A komşulu
+çözülmüş spell; hedef = o spell silinince (komşusuna katılınca) maçın resmi açgözlü-IoU spell F1'inin kesin değişimi;
+özellikler: süre, kendi takım kanıtı (logit istatistikleri, toplam kanıt), komşular, ölü top olasılığı, top
+görünürlüğü, son duruştan beri geçen süre; LightGBM regresyon; tahmini kazancı > 0 olanlar silinir (komşular atlanır).
+Veri seti dışarıda (LODO): öğrenilmiş D adaylarıyla DFL +0.006 (5/7), Metrica +0.001 (4/9), SC +0.005 (14/20); ölü
+top özellikleri çıkarılınca Metrica ≈ −0.001…+0.001; **gerçek D adaylarıyla DFL +0.002…+0.004, Metrica −0.004 (1–2/9),
+SC −0.005…−0.007** → kazanç öğrenilmiş ölü top modelinin ürettiği yapay kısa spell'leri temizlemekten geliyor; BAR-ATH'ın
+kural tabanlı ölü topu (public canlı/ölü F1 0.979) gerçek D'ye daha yakın → ❌ benimsenmedi.
+
+**Yalnız oyunculara dayalı ölü top modeli** (`src/podead.py`, `src/exp_podead.py`, `src/podead_barath.py`; a08 / R-3):
+85 kolektif özellik (hız / ivme dağılımları, duran oyuncu payı, takım merkezlerinin hızı ve yayılımı, çizgi / köşe /
+kale alanı / orta yuvarlak yakınlığı, rakip yarı sahadaki oyuncu sayısı; ±0.4–4 sn özetleri ve geçmiş / gelecek
+değişimi); top, top kaybı ve yayın bayrakları YOK. DFL'de eğitim (V3, maç dışarıda): kare AUC DFL 0.987, Metrica
+0.963, SC 0.957 (öğrenilmiş ölü top modeli 0.998 / 0.995 / 0.963). Füzyon l_yeni = l_temel + g·λ·clip(l_po − l_temel,
+±c), temel = öğrenilmiş ölü top: her yerde λ 0.5 c 4 → DFL +0.001, Metrica +0.005 (6/9), SC +0.013 / +0.014 (20/20);
+"kararsız" kapı (0.1<p<0.9) λ 0.5 c 2 → DFL +0.003 (5/7), Metrica +0.004 (7/9), SC +0.004 (15/20); en kötü durum
+pişmanlığı 0.0080–0.0082 (v7 0.0220). **BAR-ATH'ta** (temel = kural + yayın skoru; ölçek log-odds benzeri: public
+canlı medyan −3.1, ölü +2.9): players-only model public'te güçlü (canlıda medyan P 0.01, ölüde 1.00) ama tam maçta
+v7'nin canlı/ölü kararıyla yalnız %89 uyuşuyor; füzyon her ayarda public canlı/ölü F1'i 0.979 → 0.968–0.974,
+spellF1'i 0.652 → 0.600–0.652 düşürüyor, ölü payını artırıyor (yeniden başlamalarda oyuncular hâlâ yavaş → sınırlar
+gecikiyor; dış testlerin temeli olan öğrenilmiş model sınırlarda bulanık olduğu için orada yardım ediyordu). →
+dışarıda ✅, BAR-ATH'ta ❌ → varsayılana eklenmedi; `model_v7` seçeneği `po_lam` / `po_c` / `po_gate` (varsayılan
+kapalı; v7 çıktısı birebir aynı, MD5 48dbf986…).
+
+**A2 — Metrica maçlarını takım modelinin eğitimine katmak** (`src/exp_a2.py`; tur 1'den beri açıktı): DFL (native) +
+3 Metrica maçı (kontrollü "ctrl" etiket; BAR-ATH'ın ATD'siyle aynı sağlayıcı; 3 bozulma tohumu = 1 maç ağırlığı),
+v7 özellikleri, V3. Her set dışarıda bırakılarak (DFL maç, Metrica oyun; SC hiç görülmemiş), öğrenilmiş / gerçek D:
+DFL-trk **+0.010 / +0.014** (5/7), Metrica-ctrl **+0.004 / +0.005** (7/9, 6/9), SC faz **+0.009 / +0.008**, SC pp
++0.003 / 0.000; kare takım doğruluğu her sette +0.006…+0.011. Metrica ağırlığı 3: daha zayıf (SC pp −0.004).
+Ceza yeniden seçimi (`src/exp_pensweep.py a2 wm1`): en kötü durum pişmanlığı ilk altı sıranın hepsi A2 — pen 6 0.0056,
+pen 8 0.0058, pen 12 0.0067; v7 pen 12 0.0112 → eşitlik kuralıyla (fark < 0.005 → daha basit) pen 12 korunur.
+→ ✅ **v8** (`src/model_v8.py`): v7 + DFL+Metrica ile eğitilmiş takım modeli, gerisi aynı. BAR-ATH: possession hızı
+4.26 → 3.90 / canlı dk (pen 8: 3.97), yapışkanlık 0.926 → 0.946; public (bilgi) spellF1 0.652 → 0.667, macroF1 0.924
+→ 0.930, canlı/ölü 0.979 → 0.981; karelerin %1.8'i değişiyor. Adaylar: `candidate_v8.csv` (MD5 aebc7265…),
+`candidate_v8w.csv` (+ düdük; MD5 c07d39f2…; public macroF1 0.937); `make_submission.py --model model_v8` aynı dosyayı
+yeniden üretiyor.
+**Yan bulgular**: DFL kontrollü (trk) etiketiyle eğitim (A1 yeniden): kare +0.010…+0.016 ama spellF1 −0.005…−0.022,
+ceza yeniden seçilince de v7 önde ❌; sınır yakınındaki karelere düşük ağırlık (±6 kare × 0.3): karışık ❌.
+**Yumuşatma teşhisi** (`src/exp_smooth.py`): kare doğruluğunu artırıp spellF1'i düşüren modellerin olasılıkları ±25
+karede (logit ortalaması) yumuşatılınca topsuz etkileşim modeli her sette artıya dönüyor (DFL +0.003 / +0.005,
+Metrica +0.004 / +0.006, SC +0.012 / +0.011; v7'nin kendisi yumuşatmayla ±0.001) → bu özelliklerin kazancı gerçekti,
+olasılıklar fazla zıplıyordu; rol modeli yumuşatmayla da DFL'de eksi.
+
+**A2 + topsuz etkileşim özellikleri + logit yumuşatma** (`src/exp_combo.py`): DFL + Metrica eğitimi, v7 + topsuz
+özellikler, olasılıklar ±w kare logit ortalaması. v7'ye göre (öğrenilmiş / gerçek D), dışarıda bırakılan maçlar:
+
+| | DFL-trk | Metrica-ctrl | SC faz | SC pp | en kötü pişmanlık (8 bağlam) |
+|---|---|---|---|---|---|
+| A2 (v8) | +0.010 / +0.014 | +0.004 / +0.005 | +0.009 / +0.008 | +0.003 / 0.000 | 0.0118 |
+| A2 + topsuz, w0 | +0.002 / +0.006 | +0.009 / +0.013 | +0.018 / +0.018 | +0.013 / +0.012 | 0.0080 |
+| A2 + topsuz, w12 | +0.006 / +0.009 | +0.008 / +0.011 | +0.018 / +0.017 | +0.013 / +0.011 | 0.0043 |
+| **A2 + topsuz, w25** | **+0.008 / +0.012** (6/7) | **+0.007 / +0.009** (7–8/9) | **+0.017 / +0.016** | **+0.011 / +0.009** | **0.0038** |
+→ ✅ **v9** (`src/model_v9.py`): v8 + topsuz özellikler + ±25 kare logit yumuşatma. BAR-ATH: possession 3.85 / canlı dk,
+yapışkanlık 0.947; public (bilgi) spellF1 0.667, macroF1 0.932 (v9w + düdük: 0.938), canlı/ölü 0.981; karelerin %2.2'si
+değişiyor (v7'ye göre). Adaylar `candidate_v9.csv` (MD5 b95b9119…), `candidate_v9w.csv` (MD5 247f8eb3…).
+**A2 + A3** (`src/exp_a23.py`; SC pp etiketleriyle eğitime, maç ağırlığı 0.3): A2'ye göre DFL +0.005, SC (alan içi)
++0.011 / +0.013 ama Metrica −0.006 (1–2/9) → ❌ (SC verisi modeli kendi konvansiyonuna çekiyor).
+**Uyarı (BAR-ATH yapışkanlığı)**: public pencerede bütün sürümler 17 gerçek spell'e karşı 10 spell tahmin ediyor;
+v8 / v9 tam maçta possession hızını 4.26 → 3.85–3.90 / dk düşürüyor. Ceza seçimi dış setlerde yapılıyor (public değil).
+
+**v9'un dayanıklılığı**: ceza yeniden seçimi (`src/exp_pensweep.py combo a2bf_w25`) — en kötü durum pişmanlığı pen 8 ve
+pen 12 0.0035 (berabere), v7 pen 12 0.0181 → pen 12 korunur; B2 (D0, c) ızgarası (`src/exp_b2v9.py`) — mevcut (175, 48)
+0.0088, en iyi (125, 72) 0.0081 → değişiklik yok. **Eşli maç bootstrap'ı** (`src/exp_boot.py`, 5000 yeniden örnek):
+v9 − v7 öğrenilmiş / gerçek D: DFL +0.008 / +0.012 (%5 alt sınır +0.000 / +0.004; P(>v7) 0.95 / 0.995), Metrica +0.007 /
++0.009 (+0.002 / +0.002; 0.99), SC faz +0.017 / +0.016 (+0.012 / +0.011; 1.00), SC pp +0.011 / +0.009 (+0.007 / +0.006;
+1.00) → sekiz bağlamın hepsinde alt sınır > 0 (Metrica'nın 9 "maçı" 3 oyunun 3 tohumu: belirsizlik olduğundan dar
+görünür). v8 (A2 tek başına): DFL / Metrica / SC pp'de alt sınır < 0. **Önerilen varsayılan: v9 (ya da v9w).**
+**Tohum dayanıklılığı ve topluluğu** (`src/exp_combo.py` LGB_SEED=1 / 2, `src/exp_seedens.py`): v9 kazancı tohumdan
+bağımsız — w25'te tohum 1: DFL +0.008 / +0.013, Metrica +0.005 / +0.008, SC +0.015 / +0.015, pp +0.008 / +0.007;
+tohum 2: +0.009 / +0.011, +0.008 / +0.008, +0.019 / +0.017, +0.013 / +0.010. Üç tohumun logit ortalaması (w25):
+pişmanlık 0.0022 vs v9 0.0021 → berabere, tek tohum korunur.
+**Topsuz özelliklerin ±2 sn ortalamaları** (`src/exp_bfree2.py`): v9'a göre DFL −0.007…−0.009 (1–3/7), Metrica ±0.002,
+SC ±0.005 → ❌. **Possession hızı yanlılığı**: dış setlerde tahmin / gerçek spell oranı v7 DFL 1.00, Metrica 0.98, SC
+0.92; v9 0.96 / 0.93 / 0.86 → v9 daha az ama daha isabetli spell üretip kazanıyor; BAR-ATH'taki 3.85 / dk bu oranla
+gerçek ≈ 4.1 / dk demek (public 4.25) → alarm değil.
+**SkillCorner etiketlerini kontrollü konvansiyona çevirmek** (`bench.labels("sc", "ctrl")` = pp etiketleri +
+`trk_ctrl` kuralı): 3.94 spell / canlı dk, medyan 10.2 sn, <2 sn %8 (pp 5.23 / 6.7 sn / %15; Metrica-ctrl 4.01 /
+10.3 sn); pp ile kare uyumu %98.1 → eğitime bu etiketlerle katmak deneniyor (`src/exp_a23b.py`).
+**İkinci bozulma kopyasıyla eğitim** (E2, `src/exp_aug.py`, bench varyantı `v3s2` = V3 başka tohumlarla): v9'a göre DFL
+−0.001 / 0.000, Metrica +0.003 / +0.003, SC ±0.001 → ≈, eğitim maliyeti iki kat → benimsenmedi.
+**SkillCorner'ı kontrollü etiketlerle eğitime katmak** (`src/exp_a23b.py`, ağırlık 0.3 / maç): v9'a göre DFL +0.002 /
++0.006, SC faz +0.001 / +0.003 ama **Metrica −0.008 / −0.009 (1–2/9)**, SC pp −0.012 / −0.010 → ❌. SC verisi etiket
+konvansiyonu ne olursa olsun Metrica'yı bozuyor → sorun konvansiyon değil, SC'nin yayın takibine özgü alan farkı.
+v9'un eğitim verisi DFL + Metrica'da kalıyor.
+**v9 düzeninde ince ayarlar** (`src/exp_combo.py` COMBO_WM / COMBO_NORM, `src/exp_bfree3.py`), v7'ye göre w25:
+
+| | DFL-trk | Metrica-ctrl | SC faz | SC pp |
+|---|---|---|---|---|
+| v9 (Metrica ağırlığı 1) | +0.008 / +0.012 | +0.007 / +0.009 | +0.017 / +0.016 | +0.011 / +0.009 |
+| **Metrica ağırlığı 2** | **+0.013 / +0.019** | **+0.009 / +0.010** | +0.016 / +0.014 | +0.009 / +0.007 |
+| topsuz sütunlar devre içinde ölçeklenmiş | +0.008 / +0.013 | +0.008 / +0.009 | +0.017 / +0.014 | +0.009 / +0.005 |
+| + hareket uyumu / en yoğun bölge (bf_feats2) | +0.008 / +0.013 | +0.010 / +0.010 | +0.018 / +0.017 | +0.010 / +0.010 |
+Ağırlık 2: bu havuzda en kötü durum pişmanlığı 0.0019 (v9 0.0072) — DFL kazancı tohum gürültüsünün (±0.001)
+üstünde; tohum 1 ile doğrulanıyor. Ölçekleme ve bf_feats2: v9'dan farkı gürültü düzeyinde → eklenmedi.
+**Metrica ağırlığı eğrisi** (w25, v7'ye göre): ağırlık 1 (v9) iki tohum ortalaması DFL +0.008 / +0.012, Metrica +0.006 /
++0.008, SC +0.016 / +0.015, pp +0.010 / +0.008; **ağırlık 2** iki tohum ortalaması DFL +0.011 / +0.018, Metrica +0.008 /
++0.011, SC +0.015 / +0.013, pp +0.009 / +0.006 (pişmanlık 0.0026 vs 0.0062); ağırlık 3 (tohum 0) her sette ağırlık 2'den
+kötü (DFL +0.012 / +0.017, Metrica +0.007 / +0.008, SC +0.015 / +0.011, pp +0.008 / +0.005) → tepe ağırlık 2.
+→ ✅ **v10** (`src/model_v10.py`) = v9, Metrica ağırlığı 2. BAR-ATH: possession 3.79 / canlı dk, yapışkanlık 0.951;
+public (bilgi) spellF1 0.667, macroF1 0.933 (v10w 0.939), canlı/ölü 0.982; v7'ye göre karelerin %2.4'ü değişiyor.
+Adaylar `candidate_v10.csv` (MD5 ca20c5b6…), `candidate_v10w.csv` (MD5 e7d00f0c…). **Önerilen varsayılan: v10 / v10w.**
+**v10 dayanıklılığı**: bootstrap (`src/exp_boot.py`) v10 − v7: DFL +0.013 / +0.019 (%5 −0.000 / +0.004; P 0.95 / 0.98),
+Metrica +0.009 / +0.010 (+0.005 / +0.004; 1.00), SC faz +0.016 / +0.014 (1.00), SC pp +0.009 / +0.007 (≥ 0.99). Ceza
+(`exp_pensweep.py combo v10_w25`): pen 8 0.0017, pen 6 0.0028, pen 12 0.0035 (v7 0.0176) → fark < 0.005, pen 12
+korunur (skorlar ±0.002). DFL tau2 etiketleri (2 sn'den kısa spell'ler birleşik) + Metrica ctrl: Metrica +0.001 /
++0.003, SC +0.011 / +0.009, pp +0.002 / +0.001 → native'den kötü ❌.
+**Stres testi** (`src/exp_stress.py`): iki model de V3'te eğitilip eğitimde görülmemiş V5 test girdisinde (uydurma
+top izleri) çalıştırıldı; v10 − v7: DFL +0.017 / +0.021 (5/7), Metrica +0.011 / +0.012 (7/9), SC faz +0.016 / +0.014
+(17–18/20), SC pp +0.008 / +0.006 → üstünlük korunuyor (DFL / Metrica'da normal testten bile büyük). v10'un
+sıfırdan yeniden eğitimi aynı dosyayı veriyor (MD5 ca20c5b6…).
+**Daha büyük LightGBM** (127 yaprak, 600 tur, min 400 örnek; v10 düzeni): v10'a göre SC +0.002…+0.008 ama DFL −0.005…
+−0.008 → en kötü durum pişmanlığı berabere (0.0077 / 0.0076) → v10 korunur.
+**Bağlama göre yumuşatma** (`src/exp_ctxsmooth.py`; top görünürken / yokken farklı pencere): sabit ±25 (v10) en düşük
+pişmanlık (0.0012; en yakın 0.0013) → değişiklik yok. **DFL mikro spell birleştirme** (native, <0.4 sn birleşik):
+v10'a göre ±0.002 → ❌.
+
+**Tur 9 özeti (gece)**: kazanç özelliklerden değil **eğitim verisinden** geldi. (1) Metrica'nın 3 maçını kontrollü
+etiketlerle eğitime katmak (A2) her sette kazandırdı; (2) topsuz kısa vadeli etkileşim özellikleri tek başına yalnız
+SC'yi iyileştiriyordu, Metrica'lı eğitim + ±1 sn logit yumuşatmayla her sette büyük kazanca dönüştü; (3) Metrica
+ağırlığı 2 DFL / Metrica'yı daha da iyileştirdi → **v10**: v7'ye göre DFL +0.013 / +0.019, Metrica +0.009 / +0.010,
+SC faz +0.016 / +0.014, SC pp +0.009 / +0.007; bootstrap, tohum, ceza / B2 yeniden seçimi ve görülmemiş test bozulması
+(V5) altında dayanıklı; deterministik. Denenip benimsenmeyenler: yalnız oyunculara dayalı ölü top (dışarıda +,
+BAR-ATH public canlı/ölü F1'de −), silme puanlayıcısı (ölü top kaynağına bağımlı), SC'yi eğitime katmak (her
+konvansiyonda Metrica −), DFL trk / tau2 / tau0.4 etiketleri, ikinci bozulma kopyası, ±2 sn özellikleri, ölçekleme,
+bf_feats2, büyük model, tohum topluluğu, bağlama göre yumuşatma. Önerilen gönderim: `candidate_v10w.csv` (düdüklü) ya
+da `candidate_v10.csv`.
+**İkinci stres testi, V4** (ön yumuşatılmış takip, BAR-ATH kadar pürüzsüz; `src/exp_stress.py v4`): v10 − v7 DFL
++0.010 / +0.009 (5/7), Metrica +0.012 / +0.012 (8/9), SC faz +0.017 / +0.015 (18–19/20), SC pp +0.011 / +0.008 →
+üstünlük pürüzsüzlük farkında da korunuyor.
+**Test zamanı ayna ortalaması** (`src/exp_tta.py`; y → 1 − y): v10 ile birebir aynı (+0.0000, hiçbir maç değişmiyor) →
+özellikler zaten sağ-sol simetrik; gizli yön yanlılığı yok.
+**Kontrolcü özellikleri v10 düzeninde** (`src/exp_ctrlv10.py`; tur 7'nin SkillCorner'da eğitilmiş oyuncu düzeyi
+kontrolcüsünden 14 takım özelliği + v10 eğitimi ve yumuşatması): v10'a göre DFL −0.000 / +0.000, Metrica −0.004 /
+−0.001 (2–3/9), SC faz +0.002 / +0.004, SC pp +0.003 / +0.004 → yine "SC artı / Metrica eksi" örüntüsü ❌.
+**v10 üstünde öğrenilmiş zamansal yığınlayıcı** (`src/exp_stack10.py`; tur 5'in N20'si v7'de kaybetmişti, v10'un
+olasılıkları ise yumuşatmadan kazanıyor): küçük LightGBM, v10'un dışarıda bırakılmış logitinin ±6…±200 kare ortalamaları,
+geçmiş / gelecek ortalamaları ve farkları, yerel yayılım (ölü top girdisi yok); DFL maç / Metrica oyun dışarıda.
+v10'a göre DFL −0.007 / −0.008 (çıktı yumuşatmasız), ±12 ile −0.003 / −0.004; Metrica −0.001…−0.003; SC ±0.002 ❌.
+Kazancın %93'ü ham…±12 kare pencerelerinden: kare log-kaybı hedefi çıktıyı yeniden keskinleştiriyor, spellF1 için
+pencere doğrudan spellF1'le seçilmeli (±25).
+**Yumuşatma çekirdeğinin biçimi ve merkezi** (`src/exp_kernel.py`; önbellekteki ham v10 olasılıkları, yalnız kod
+çözme): en kötü durum pişmanlığı kutu ±25 (v10) 0.0022 = üçgen ±35 0.0022, Gauss σ15 0.0024, kutu −4 kare kaydırma
+0.0029, medyan 12 + kutu 0.0033; Gauss σ10 / σ20, üçgen ±50, medyan ±25 0.0067–0.0099; ileri / geri 4–8 kare
+kaydırma 0.0029–0.0075 (tur 5'teki gibi zamanlama zaten hizalı) → v10'un kutusu korunur. Kutuya ham logitten ya da
+±6 ortalamasından pay karıştırmak (kısa spell kanıtı geri gelsin diye; KERNEL_SET=mix, pay 0.1–0.35): pişmanlık v10
+0.0013, ham × 0.10 0.0014, diğerleri 0.0031–0.0044 → ≈.
+**BAR-ATH alan kayması tanısı** (`src/exp_domain.py`; v10'un 208 girdi sütunu, 1 sn'de bir kare): topsuz sütunların
+hepsi BAR-ATH'ta eğitimle aynı dağılımda (standart medyan kayması mutlak değerce ≤ 0.10, IQR oranı 0.78–1.00) → bu gece eklenen
+özellikler hedefte sağlıklı. En büyük kayma görünen oyuncu sayısında (+0.67 IQR, IQR ×0.50: ATD'de çoğu karede
+neredeyse herkes görünüyor, simülasyon eksikleri oyunculara yayıyor); alan sınıflandırıcısı eğitim ↔ BAR-ATH AUC
+0.917 (eğitim ↔ SkillCorner 0.931). Ama ayırt eden sütunların v10'daki kazanç payı küçük (oyuncu sayısı %0.02, sıra
+186 / 208; diğerleri ≤ %0.2); v10'un kazancının yarısı iki sütunda (son 3 sn kontrol %31, takım genişliği farkı %22),
+ikisi de kaymıyor → eyleme dönük bir uyumsuzluk yok.
+**v10 ceza 8 vs 12 BAR-ATH'ta** (bilgi): public birebir aynı (spellF1 0.667, 10 / 17 spell), tam maç 207 vs 203
+possession; <2 sn spell hiç yok (B2 rampası) → ceza BAR-ATH'ta etkisiz, değişiklik yok.
+**Yumuşak takım hedefleriyle eğitim** (`src/exp_v10var.py` V10_SOFT=12; hedef = ±12 karedeki canlı karelerin H payı,
+çapraz entropi; model yumuşatılmış hedefi doğrudan öğrensin diye): v10'a göre (çıktı yumuşatması 0 / 12 / 25) DFL
+−0.007 / −0.004 / −0.003 (öğrenilmiş D), −0.008 / −0.006 / −0.004 (gerçek D), 2–3/7; Metrica 0.000 / −0.001 / −0.003;
+SC ±0.001 → ❌ (en iyi hâli bile v10'un altında; sert etiket + ±25 çıktı yumuşatması daha iyi).
+**Metrica eğitim etiketlerinde daha katı kontrol eşiği** (V10_KEEP=2: yeni takımın spell'i ancak ≥ 2 sn top tutma /
+tamamlanan pas / şutla possession sayılır; değerlendirme hep 1 sn): v10'a göre DFL −0.006 / −0.006 (2/7), Metrica
+−0.006 / −0.005 (1–3/9), SC faz −0.003 / −0.004, SC pp −0.006 / −0.008 → ❌ her yerde. Daha gevşek eşik (V10_KEEP=0.5):
+DFL −0.004 / −0.005, Metrica −0.001 / −0.001, SC faz −0.000 / −0.003, SC pp −0.001 / −0.004 → ❌. 1 sn eşiği iki yönden de
+en iyisi: Metrica'nın "ctrl" dönüşümü yerinde.
+**BAR-ATH "yapışkanlık" tanısı** (`src/exp_sticky.py`; v10'un ham takım logiti, canlı kareler):
+
+| | ort. mutlak logit | kararsız pay | işaret değişimi / dk (ham, ±25) | v10 spell / dk (gerçek) |
+|---|---|---|---|---|
+| DFL-trk | 3.93 | 0.099 | 9.13, 4.02 | 4.27 (4.56) |
+| Metrica-ctrl | 4.55 | 0.065 | 6.11, 2.83 | 3.73 (4.01) |
+| SC faz | 3.74 | 0.110 | 8.79, 3.78 | 4.52 (4.83) |
+| **BAR-ATH** | 4.12 | 0.078 | 6.61, 2.69 | 3.79 (?) |
+→ BAR-ATH'taki kanıt dinamiği aynı sağlayıcının Metrica'sına çok benziyor (DFL / SC simülasyonuna değil); v10 her
+sette gerçek hızın 0.93–0.94'ünü üretiyor → BAR-ATH'ın gerçek hızı ≈ 3.79 / 0.93 ≈ 4.1 / dk (public tahmini 4.25).
+"BAR-ATH'ta daha yapışkan" gözlemi bir alan kusuru değil, ATD / Metrica verisinin özelliği; Metrica en doğru vekil.
+**v10'u ön yumuşatılmış DFL'yle eğitmek** (`src/exp_v4train.py`; DFL@V4 + Metrica@V3; topsuz özellikler hıza dayandığı
+için N26'nın v7'deki "≈" sonucu burada değişebilirdi): V3 testinde v10'a göre DFL −0.010 / −0.010 (0–1/7), Metrica
+−0.005 / −0.003, SC −0.001…−0.003; V4 testinde bile (V3-eğitimli v10 da V4 girdisinde) DFL −0.003 / +0.001, Metrica
+−0.003 / −0.002, SC ≈ → ❌. DFL'nin pürüzlülüğü bir sorun değil; V3 eğitimi pürüzsüz hedefe de daha iyi genelleşiyor.
+**v10 için geniş B2 ızgarası** (`src/exp_b2v9.py` B2_PROBS=probs_v10_w25.pkl B2_GRID=wide; D0 75–250, c 0–96): en kötü
+durum pişmanlığı (250, 24) 0.0098, (125, 48) 0.0102, (175, 24) 0.0105, mevcut (175, 48) 0.0119 → fark < 0.005, mevcut
+korunur. BAR-ATH'ın vekili Metrica'da mevcut ayar öğrenilmiş D ile en iyi (0.8237), gerçek D ile en iyiye 0.0007 uzak;
+rampasız (c = 0) her yerde kötü (DFL −0.040, Metrica −0.010), yalnız SC pp (kısa spell'i bol konvansiyon) onu seviyor.
+**Spell süresi profilleri** (toplam sayılar): public BAR-ATH GT 17 spell, canlı dk başına 4.23, medyan 7.6 sn, <2 sn
+%12, <4 sn %35; Metrica-ctrl 4.01 / 10.3 sn / %6 / %21; DFL-trk 4.56 / 8.5 / %7 / %22; SC faz 4.83 / 7.4 / %13 / %29;
+SC pp 5.23 / 6.7 / %15 / %33 (Metrica olay etiketi 6.62 / 4.4 / %28 / %47). Public pencere Metrica-ctrl'den biraz daha
+çok kısa spell gösteriyor ama 17 spell'le ayırt edilemez (Metrica-ctrl dağılımında ≥ 6 / 17 kısa spell olasılığı ≈
+%10). Daha zayıf rampa (c 24) BAR-ATH'ta: tam maç 212 vs 203 possession, public (bilgi) 0.643 vs 0.667, canlı/ölü
+0.976 vs 0.982 → destek yok, mevcut ayar kalıyor.
+**Ölü kareleri atlayan yumuşatma** (`src/exp_dsmooth.py`; takım modeli yalnız canlı karelerde eğitildiği hâlde ±25
+pencere duruşa bitişik spell başlarını / sonlarını ölü karelerin logitleriyle karıştırıyor): canlı olasılığıyla
+ağırlıklı ortalama ve çözülmüş D'de bölünmüş ortalama, v10'a göre her bağlamda ±0.001 içinde (pişmanlık v10 0.0006,
+diğerleri 0.0011–0.0012) → ≈, v10 korunur (ölü karelerdeki logitler zararsız; muhtemelen "kim başlatacak" bilgisi taşıyor).
+**Test maçında kendi kendine eğitim** (`src/exp_selftrain.py`; BAR-ATH'ta yapılacağı gibi her hedef maç tek tek: v10
+etiketler, çözülmüş H / A ile uyumlu ve yumuşatılmış olasılığı 0.9'u aşan kareler (DFL %41, Metrica %50, SC %41)
+sözde etiket olur, v10 bunlarla (ağırlık = bir maç) yeniden eğitilip aynı maçı yeniden tahmin eder): kare doğruluğu
++0.000…+0.001 ama spellF1 v10'a göre DFL −0.001 / −0.002, Metrica −0.003 / −0.002 (2–3/9), SC faz −0.002 / −0.000,
+SC pp −0.002 / −0.001 → ❌ (model kendi emin olduğu bölgeleri pekiştiriyor, sınırlarda yardım etmiyor).
+**v10 hata dökümü** (`src/exp_errbins.py`; IoU 0.5, resmî açgözlü eşleme), Metrica-ctrl gerçek D: gerçek spell'lerin
+geri çağrımı 0–2 sn 0.38 (126 spell), 2–4 sn 0.63 (300), 4–8 sn 0.89, 8–16 sn 0.93, >16 sn 0.98; v10'un kısa
+spell'lerinin isabeti yüksek (0–2 sn 0.83, 2–4 sn 0.80) ama sayısı az (60 / 203). Kaçırılan 291 gerçek spell'in 168'i
+duruşa bitişik (duruştan sonra başlayan 55, **duruşla biten 86**, iki duruş arası 27), 123'ü oyun içinde; öğrenilmiş D
+ile duruşa bitişik kayıp 272'ye çıkıyor. DFL-trk gerçek D: 219 duruşa bitişik (sonra 91, önce 102, arası 26), 151 oyun içi.
+Public BAR-ATH penceresinde (sayılar; `candidate_v10.csv`, IoU 0.5): 17 gerçek spell'den 0–2 sn 2 (0 eşleşti), 2–4 sn
+4 (1), 4–8 sn 3 (3), >8 sn 8 (5); kaçırılan 8'in 6'sı oyun içi, 2'si duruşla biten → BAR-ATH'ta baskın hata oyun içi
+kısa top kayıpları (tur 1'in bulgusu); kaçırılan her kısa spell komşu uzun spell'leri de IoU 0.5'in altına itiyor.
+**Varış yerine göre B2 rampası** (`src/exp_b2d.py`; duruşa çıkan possession rampanın f katını öder, f = 1 v10):
+f 0.5 / 0.25 / 0: öğrenilmiş D ile her yerde kayıp (DFL −0.004…−0.013, Metrica −0.003…−0.006, SC −0.004…−0.011),
+gerçek D ile Metrica −0.000…−0.002, SC +0.001…+0.003; pişmanlık f 1 0.0031 < 0.5 0.0047 < 0.25 0.0073 < 0 0.0126 → ❌.
+Tur 6'daki "duruştan sonra" muafiyeti gibi: rampanın bastırdığı duruşa bitişik kısa spell'ler serbest kalınca çoğu yanlış.
+**extra_trees** (`src/exp_v10var.py` V10_LGB='{"extra_trees": true}'): v10'a göre DFL −0.002 / −0.000, Metrica −0.001 /
+−0.001, SC −0.001…+0.000 → ≈, v10 korunur.
+**Gecenin v10 düzeni modellerinden topluluk** (`src/exp_ens.py`; logit ortalaması, sonra ±25 ve v7 dekoderi): en iyi
+v10 + kontrolcülü v10, pişmanlık 0.0021 vs v10 0.0028 (DFL +0.002 / +0.002, SC +0.002…+0.003 ama Metrica −0.002 /
+−0.000); extra-trees / yumuşak hedef / kendi kendine eğitim üyeleri 0.0034–0.0053 → fark eşitlik eşiğinin (0.005)
+çok altında ve BAR-ATH'ın vekili Metrica'da eksi → v10 tek model kalıyor.
+**Monoton kısıt** (V10_MONO=1; kendi kontrol payı ve pencere ortalamaları +1): v10'a göre DFL −0.004 / −0.003, Metrica
+−0.004 / −0.004 (2/9), SC −0.001 / −0.001 → ❌.
+**Top dokunuşu olay özellikleri** (`src/touch.py`, `src/exp_touch.py`; resmî tanımın "ikiden fazla ardışık pas" ipucu ve
+v10'un baskın kaybı olan oyun içi kısa top kayıpları için): dokunuş = topun hız vektörünün ±8 karede ≥ 2 m/s değiştiği
+yerel tepe + 2 m içinde oyuncu → o oyuncunun takımı (kimliksiz). Takım görünümü başına 10 sütun: son / sonraki
+dokunuş kimde, her takımın son / sonraki dokunuşuna uzaklık, son / sonraki 3 sn'de dokunuş dengesi, süren aynı takım
+dokunuş zinciri. Canlı dk başına algılanan dokunuş: Metrica@V3 27, SC 33, BAR-ATH 24 (ATD topu filtreli; ±3 karelik
+dedektörde BAR-ATH 16 vs Metrica 27 olduğu için ±8 seçildi), DFL@V3 41 (pürüzlü top). BAR-ATH / Metrica oranı eşiklere
+duyarsız (ΔV 1.25–2 m/s, yakınlık 2–4 m: 0.80–0.91; uydurma toplu Metrica@V5 = Metrica@V3) → kalan fark eşik değil.
+v10 düzeninde (±25):
+
+| | DFL-trk | Metrica-ctrl | SC faz | SC pp |
+|---|---|---|---|---|
+| v11 − v10 (öğrenilmiş / gerçek D) | −0.001 / −0.000 | **+0.002 / +0.002** | +0.002 / **+0.004** | +0.001 / +0.001 |
+| bootstrap P(> v10) | 0.47 / 0.51 | 0.66 / 0.71 | 0.73 / 0.91 | 0.57 / 0.66 |
+Kare doğruluğu her sette +0.001…+0.002; dokunuş sütunları modelin kazancının %11.5'i; pişmanlık 0.0035 → 0.0008 (fark
+< 0.005); yumuşatma penceresi yine ±25 (Metrica ±12'yi seviyor ama DFL −0.007…−0.009). BAR-ATH: karelerin %0.75'i
+değişiyor (H↔A %0.46, canlı↔D %0.30), 202 vs 203 possession; public (bilgi) spellF1 0.682 vs 0.667, macroF1 0.933 vs
+0.933, takım doğruluğu 0.954 vs 0.953.
+Stres testi (`src/exp_touch_stress.py`; V3'te eğitim, görülmemiş test bozulması), v11 − v10: **V5** (uydurma top
+izleri) DFL −0.004 / −0.003, Metrica +0.001 / +0.001, SC faz +0.003 / +0.004, SC pp +0.003 / +0.003 → uydurma topla
+DFL'deki küçük kayıp büyüyor, SC kazancı sürüyor. **V4** (ön yumuşatılmış takip, BAR-ATH kadar pürüzsüz) DFL −0.001 /
++0.002, **Metrica +0.006 / +0.006** (5–6/9), SC faz −0.001 / +0.001, SC pp −0.003 / −0.002. Metrica (BAR-ATH'ın vekili)
+üç test bozulmasında da artı (+0.002, +0.001, +0.006); SC pp ve DFL karışık.
+**Dokunuş özellikleri v2** (`touch.touch_feats2`, TOUCH_V=2; + son dokunuşun şiddeti, son "top kazanma"dan beri geçen
+süre, son 6 sn'nin en uzun zinciri; 16 sütun, kazanç payı %12.7): v10'a göre DFL +0.003 / +0.001, Metrica −0.001 /
++0.002, SC faz +0.001 / +0.000, SC pp −0.004 / −0.003 → v1'den farklı bir profil; sürümler arası ±0.003 salınım tohum
+gürültüsü düzeyinde → v2 ❌, v1 için tohum kontrolü (LGB_SEED=1, tohum-1 v10'a karşı).
+**v1 tohum kontrolü** (LGB_SEED=1): v10'a göre DFL +0.002 / −0.003, Metrica +0.002 / −0.001, SC faz +0.001 / +0.005, SC pp
++0.001 / +0.004; kare doğruluğu yine her sette +0.001. İki tohum ortalaması (öğrenilmiş / gerçek D): DFL +0.001 / −0.002,
+Metrica +0.002 / +0.000, SC faz +0.001 / +0.004, SC pp +0.001 / +0.002 → küçük, çoğunlukla artı ama eşitlik eşiğinin
+(0.005) altında, bootstrap anlamlı değil → **karar protokolüne göre v10 varsayılan kalır; v11 (`src/model_v11.py`)
+seçenek olarak** `candidate_v11.csv` (MD5 6dc6437a…) / `candidate_v11w.csv` (+ düdük, MD5 87e46d5e…; public bilgi
+macroF1 0.939, spellF1 0.682) — ikisi de resmî doğrulayıcıdan geçiyor, sıfırdan yeniden eğitim aynı dosyayı veriyor
+(dokunuş sinyali gerçek: kare doğruluğu iki tohumda da her yerde artıyor; BAR-ATH'ta algılama hızı Metrica'nın ~%87'si).
+Üçüncü tohum (LGB_SEED=2, tohum-2 v10'a karşı): DFL +0.005 / +0.002, Metrica −0.000 / +0.000, SC faz −0.001 / −0.001,
+SC pp −0.002 / −0.002 → üç tohum ortalaması DFL +0.002 / −0.000, Metrica +0.001 / +0.000, SC faz +0.001 / +0.002, SC pp
+−0.000 / +0.001: v11 ≈ v10 (kare doğruluğu yine her tohumda +0.000…+0.001). Not: v10'un kendisi tohumlar arasında DFL'de
+0.7654–0.7729 oynuyor (gönderimdeki tohum 0 en iyisi) → ±0.003'lük farklar bu düzeyde gürültü.
+İki tohum birleşik eşli bootstrap (`src/exp_boot2.py`; maç başına iki tohumun farkı ortalanıp maçlar yeniden
+örneklendi): P(v11 > v10) DFL 0.57 / 0.42, Metrica 0.71 / 0.53, SC faz 0.72 / **0.97** (%5 alt sınır +0.0004), SC pp
+0.61 / 0.85 → yalnız SC faz gerçek D'de anlamlı; geri kalanı belirsiz. Üç tohumla (`exp_boot2.py`, tohum 2 eklendi):
+P(v11 > v10) DFL 0.73 / 0.49, Metrica 0.65 / 0.54, SC faz 0.62 / 0.87, SC pp 0.46 / 0.71 → hiçbir yerde anlamlı değil.
+v11 ceza seçimi (`src/exp_pensweep.py touch v11_w25`): pişmanlık pen 6 0.0042, 4 0.0045, 2 0.0046, **12 0.0046**, 8
+0.0062 (v7 pen 12 0.0190) → pen 12 korunur (Metrica düşük cezayı seviyor: pen 2'de +0.003 / +0.004, DFL pen 8–12'yi).
+v10 / v11 karışımları (`src/exp_ens.py` ENS_SET=touch): pişmanlık v11 0.0016 = v11 iki tohum ortalaması 0.0016 <
+dört model 0.0021 < v10 0.0035 < v10 + v11 0.0041 → topluluk bir şey katmıyor; tek v11 yeterli.
+DFL'nin dokunuş sütunlarını ön yumuşatılmış (V4) toptan almak (TOUCH_DFL=v4; DFL'nin pürüzlü topu dk'da 41 dokunuş
+üretiyor, V4'te 28 ≈ Metrica): v10'a göre DFL −0.003 / −0.002, Metrica +0.000 / +0.002, SC +0.000 / +0.003, pp −0.001 /
++0.001 → v1'den iyi değil ❌.
+**Takip dokunuşları dekoder çapası olarak** (`src/exp_tanchor.py`; tur 8'in çapa füzyonu, gerçek pas yerine dokunuş:
+z = logit(p_s) + β · clip(Σ işaret · 1[t_a − 12 ≤ t ≤ t_a + 3], ±1)): v10 + β 0.5: DFL +0.003 / +0.003, Metrica +0.002 /
++0.002, SC ±0.000…−0.001 (pişmanlık 0.0039; v11 0.0041, v10 0.0058 bu havuzda); β 1–2 daha kötü; v11 + çapa kötü (aynı
+bilgi iki kez). Dokunuş bilgisi iki yoldan (özellik / çapa) aynı büyüklükte (+0.001…+0.003) kazanç veriyor → sinyal
+gerçek ama küçük; eşitlik eşiği altında, ayrı bir aday çıkarılmadı.
+**Dokunuşla zamana bağlı geçiş maliyeti** (`src/exp_tswitch.py`; dokunuş dizisi takım değiştirdiğinde (top kapma /
+kazanılan ikili mücadele) ±6 karede o takıma geçiş λ daha ucuz, kanıt eklenmiyor): v10 + λ 8: DFL +0.003 / +0.003
+(6/7, 4/7), Metrica +0.003 / +0.003 (5–6/9), SC faz +0.001 / −0.000, SC pp +0.001 / −0.000 → pişmanlık 0.0036 (v10
+0.0059 bu havuzda); λ 4 / 12 daha zayıf; v11 + λ 4 0.0034 ama SC −0.002…−0.000.
+**Duyarlılık, birleşim, stres** (`src/exp_tcombo.py`, v10 üstünde, yalnız kod çözme), v10'a göre:
+
+| | DFL-trk | Metrica-ctrl | SC faz | SC pp | pişmanlık (V3) |
+|---|---|---|---|---|---|
+| λ 8, ±6 (V3) | +0.003 / +0.003 | +0.003 / +0.003 | +0.001 / −0.000 | +0.001 / −0.000 | **0.0015** |
+| λ 8, ±3 / ±12; λ 6 / 10 (V3) | +0.001…+0.003 | +0.001…+0.004 | −0.002…+0.001 | −0.001…+0.002 | 0.0026–0.0030 |
+| λ 8 ±6 + çapa β 0.5 (V3) | +0.004 / +0.004 | +0.002 / +0.003 | +0.000 / +0.001 | +0.001 / +0.001 | 0.0021 |
+| λ 8, ±6 — **V5** testi | +0.003 / +0.003 | +0.003 / +0.002 | +0.001 / −0.001 | +0.002 / −0.000 | |
+| λ 8, ±6 — **V4** testi | −0.001 / −0.001 | +0.004 / +0.003 | +0.001 / −0.001 | +0.002 / +0.001 | |
+(v10 pişmanlığı bu havuzda 0.0042.) Bütün komşu ayarlar DFL ve Metrica'da artı → şans eseri bir ayar değil; λ 8 ±6,
+3 test bozulması × 8 bağlamın 24'ünde de ≥ −0.001, Metrica'da 6 koşulun hepsinde +0.002…+0.004. Model eğitimi yok →
+tohum gürültüsü yok. Çapalar (β 0.5) V4'te Metrica −0.002 → çapa eklenmedi. BAR-ATH'ta (`model_v7` seçeneği
+`ts_lam` / `ts_w` / `ts_beta`, varsayılan kapalı; v7 / v10 / v10w MD5'leri değişmedi): λ 8 ±6 ile karelerin %0.16'sı
+değişiyor (hepsi H↔A), 205 vs 203 possession; public (bilgi) spellF1 aynı 0.667, takım doğruluğu 0.951 vs 0.953.
+**Eşli maç bootstrap'ı** (`src/exp_boot3.py`; λ 8 ±6 vs v10, yalnız kod çözme → tohum gürültüsü yok), P(> v10)
+öğrenilmiş / gerçek D: V3 DFL **1.000 / 0.995** (%5 alt sınır +0.0015 / +0.0009), Metrica 0.911 / 0.913, SC faz 0.78 /
+0.44, SC pp 0.87 / 0.34; V5 DFL **0.999 / 0.982**, Metrica **0.999** / 0.911, SC 0.84 / 0.20, pp 0.96 / 0.42; V4 DFL
+0.37 / 0.29, Metrica **0.998 / 0.965**, SC 0.96 / 0.13, pp 1.00 / 0.92. En büyük kayıp −0.0006 (SC gerçek D).
+**Ama model örnekleri arası kontrol bunu küçültüyor**: bootstrap yalnız maç örneklemesini, V5 / V4 testleri de aynı
+(tohum 0) v10 örneğini ölçüyordu. Aynı geçiş kolaylığı beş örnekte (v10 tohum 0 / 1, v9 tohum 0 / 1 / 2; yalnız kod
+çözme): DFL +0.003 / −0.001 / −0.000 / +0.002 / +0.000 (ort. +0.001 / +0.000 gerçek D), **Metrica +0.003 / −0.001 /
++0.004 / +0.004 / +0.002 (ort. +0.0024; gerçek D +0.0015; 5 örneğin 4'ünde artı)**, SC faz ort. −0.0003 / −0.0004, SC
+pp +0.0002 / +0.0002 → tohum-0 v10 en şanslı örnekti; gerçek etki Metrica'da ≈ +0.002, başka yerde ≈ 0 → eşitlik
+eşiğinin altında → **varsayılan v10w kalıyor; v12 (`src/model_v12.py`) seçenek**: `candidate_v12.csv` (MD5 ddc2b0bf…),
+`candidate_v12w.csv` (+ düdük, MD5 5fe24daa…; public bilgi macroF1 0.937, spellF1 0.667); ikisi de resmî doğrulayıcıdan
+geçiyor ve yeniden üretilebilir; BAR-ATH 205 possession ≈ 3.83 / canlı dk. Ders: kod çözücü düzeyindeki bir
+değişikliği de birden çok model örneğinde ölçmek gerek (yeniden eğitim olmaması tohum gürültüsünü yok etmiyor:
+etki modelin olasılık örüntüsüne bağlı). Beş örnekte λ 4 her yerde daha zayıf (Metrica +0.001 / +0.001); kolaylığı
+yalnız kararsız karelere (|z| < 2) vermek λ 8 ile birebir aynı (kolaylık zaten yalnız orada etkili).
+**v12 inceltmeleri** (`src/exp_tswitch2.py`): yalnız "doğrulanmış" kazanmalar (yeni takım 3 sn içinde yine dokunuyor;
+λ 8 / 12) ve asimetrik pencereler ([−3, +9], [−9, +3]): v12'ye göre −0.002…+0.001; pişmanlık [−3, +9] 0.0008 vs v12
+0.0011 (fark gürültü düzeyinde) → v12 olduğu gibi kalır.
+
+**Tur 9 gece devamı özeti (23 Ekim 03:10–08:00)**: v10'dan sonra ~30 fikir / tanı; hiçbiri v10'u model örnekleri
+arasında eşitlik eşiğinin üstünde geçmedi. En umut verici yeni sinyal **takipten algılanan top dokunuşları**
+(`src/touch.py`; topun hızının ani değişimi + 2 m içinde oyuncu → o oyuncunun takımı; kare doğruluğunu her tohumda
+artırıyor). Üç kullanımı denendi: (1) takım modeline özellik (v11; üç tohum ortalaması DFL +0.002 / −0.000, Metrica +0.001
+/ +0.000, SC +0.001…+0.002; bootstrap anlamlı değil → ≈, seçenek), (2) dekoder çapası (≈), (3) **dokunuş dizisi takım
+değiştirdiğinde o takıma geçişi ucuzlatmak** → v12 (v10 + λ 8 ±6, yeniden eğitim yok): tohum-0 v10'da DFL / Metrica
++0.003 / +0.003 ve bootstrap destekli görünüyordu, ama beş model örneğinin ortalamasında Metrica +0.002 / +0.0015, DFL
++0.001 / +0.000, SC ≈ 0 → eşitlik eşiğinin altında → **varsayılan v10w kalıyor**; v12w ve v11w küçük kazançlı seçenekler.
+Benimsenmeyenler: kontrolcü özellikleri (v10 düzeninde), öğrenilmiş zamansal yığınlayıcı, yumuşatma çekirdeği / kaydırma
+/ karışım, yumuşak hedefler, Metrica kontrol eşiği 0.5 / 2 sn (1 sn en iyi), ön yumuşatılmış DFL ile eğitim, test
+maçında kendi kendine eğitim, extra-trees, monoton kısıt, varış yerine göre B2 rampası, ölü kareleri atlayan
+yumuşatma, model toplulukları, dokunuş v2 / DFL-V4 dokunuşları, dokunuş çapaları (≈). Tanılar: BAR-ATH'ın kanıt
+dinamiği Metrica'ya benziyor (v10 her yerde gerçek spell hızının 0.93–0.94'ü → BAR-ATH ≈ 4.1 / dk); v10'un önemli
+sütunlarında alan kayması yok; kalan kayıp kısa (<4 sn) spell'lerde (Metrica gerçek D: 0–2 sn geri çağrım 0.38, 2–4 sn
+0.63; duruşa bitişik olanlar ve oyun içi kısa top kayıpları); B2 / ceza mevcut ayarda optimumda. Yöntem dersi: tek
+model örneğindeki maç bootstrap'ı ve stres testleri (aynı örnek) kazancı abartabiliyor; v10'un kendisi tohumlar arasında
+DFL'de ±0.004 oynuyor → bundan sonra her aday en az 3 tohum / örnekte ölçülmeli. v10'un üç tohumunun logit ortalaması
+her bağlamda tek tohumların ortalamasına eşit (DFL 0.7696 vs 0.7690, Metrica 0.8235 vs 0.8233, SC 0.5968 vs 0.5973) →
+topluluk beklenen skoru artırmıyor; gönderimdeki tohum 0 korunur (yeniden üretilebilir, doğrulanmış). Önerilen gönderim:
+**`candidate_v10w.csv`** (MD5 e7d00f0c…; düdüksüz `candidate_v10.csv` ca20c5b6…); seçenekler `candidate_v12w.csv`
+(5fe24daa…; Metrica'da beklenen ≈ +0.002) ve `candidate_v11w.csv` (87e46d5e…).
+
+**Sürümlerin mutlak skorları** (`cache/bench/vers_table.log`; dışarıda bırakılan maçlar, V3 girdisi, spellF1
+öğrenilmiş / gerçek D; ort3 = LightGBM tohumları 0 / 1 / 2 ortalaması; v12 ort3 = v10'un üç tohumu + dokunuşla geçiş
+kolaylığı, yalnız kod çözme):
+
+| | v7 | v8 | v9 | v10 (gönderim, tohum 0) | v10 ort3 | v11 ort3 | v12 ort3 |
+|---|---|---|---|---|---|---|---|
+| DFL-trk | 0.7595 / 0.7816 | 0.7692 / 0.7952 | 0.7673 / 0.7932 | 0.7729 / 0.8005 | 0.7690 / 0.7979 | 0.7712 / 0.7975 | 0.7699 / 0.7987 |
+| Metrica-ctrl | 0.8147 / 0.8715 | 0.8182 / 0.8763 | 0.8217 / 0.8803 | 0.8237 / 0.8817 | 0.8233 / 0.8823 | 0.8245 / 0.8825 | 0.8248 / 0.8835 |
+| SC faz | 0.5816 / 0.7457 | 0.5904 / 0.7537 | 0.5983 / 0.7612 | 0.5976 / 0.7594 | 0.5973 / 0.7593 | 0.5979 / 0.7617 | 0.5975 / 0.7591 |
+| SC pp | 0.5829 / 0.7410 | 0.5854 / 0.7410 | 0.5939 / 0.7497 | 0.5923 / 0.7479 | 0.5917 / 0.7476 | 0.5916 / 0.7487 | 0.5928 / 0.7479 |
+
+v7 → v10 (gönderim) sekiz bağlamın hepsinde artı, ortalama +0.012 (+0.007…+0.019); tarifin beklenen kazancı (v10 ort3)
+DFL'de +0.010 / +0.016, diğer bağlamlarda aynı (±0.001). v12'nin v10'un üç tohumundaki etkisi beş örnek ölçümünü
+doğruluyor: Metrica +0.0015 / +0.0012, DFL +0.0009 / +0.0008, SC pp +0.0011 / +0.0003, SC faz ±0.0002.
+
+#### Tur 10 — yeni eğitimden önce hata dökümü
+
+**v10 nerede kaybediyor?** (`src/exp_err10.py`, `cache/bench/err10.log`; dışarıda bırakılan maçlar, V3; BAR-ATH public
+`candidate_v10w.csv`; yalnız toplam sayılar). Tek başına kâhin kazançları, gerçek D tabanında DFL / Metrica / SC:
+kaçırılan <4 sn spell'leri eklemek **+0.079 / +0.061 / +0.134**, eşleşmeyen tahmin spell'lerini silmek +0.073 / +0.030 /
++0.065, değişim zamanlamasını ±1 sn düzeltmek +0.005 / +0.004 / +0.006; öğrenilmiş → gerçek D +0.028 / +0.058 / +0.162;
+yeniden başlamada ilk 2 sn doğru takım +0.007 / +0.006 / +0.014. BAR-ATH public: kısa spell eklemek **+0.275**, silmek 0,
+zamanlama 0 (17 gerçek spell'e 10 tahmin; eşleşmeyen tahmin yalnız 1). Kaçırma biçimi (gerçek D): yanlış takım %53–56,
+birleşmiş %39–42 (kısa rakip spell'i kaçınca iki yanındaki spell tek spell oluyor), bölünmüş %3–5, kaymış ~0. Geri
+çağrım başlangıca göre: yeniden başlama 0.83 / 0.91 / 0.82, oyun içi top kaybı 0.74 / 0.82 / 0.63 (public 4/4 vs 4/12);
+süreye göre 0–2 sn 0.18 / 0.38 / 0.26, 2–4 sn 0.53 / 0.63 / 0.43, >8 sn ≥ 0.88. Kare hataları (gerçek D): gerçek bir takım
+değişiminin ±1 sn'si karelerin %7.5–9.5'i ama hataların %40–52'si (hata oranı %30–38); >3 sn sakin oyun karelerin
+%61–65'i, hata oranı %1–3; çekişmeli top (iki takım da 3 m içinde) %8–10, kimse 3 m içinde değil %4–11, tek takım
+yakın %3–5; girdide top yokken %8–14 (öğrenilmiş D ile %33–50: ölü top modeli şaşıyor; BAR-ATH'ta ölü top kurallar +
+yayından). Metrica olay türüne göre (gerçek D): ikili mücadeleden doğan top kayıpları en zor (hava topu kaybı 0.70,
+yerden mücadele kazanma 0.73, hava topu kazanma 0.75; araya girme 0.84, top kazanma 0.82, kaleci kurtarışı 0.86);
+duran toplarda korner 0.85 (korner spell'lerinin %46'sı <4 sn), taç 0.93, serbest vuruş 0.94. Sahte spell'ler (gerçek
+D) çoğunlukla 2–8 sn: rakip spell'i içinde yanlış değişim ve onun böldüğü aynı takım parçaları (yaklaşık birer birer);
+BAR-ATH public'te sahte yok, v10 orada az spell üretiyor. → Kayıp havuzu oyun içi kısa top kayıplarında (özellikle ikili
+mücadeleler) ve onların ayna görüntüsü yanlış değişimlerde; zamanlama, yeniden başlama ve (BAR-ATH'ta) ölü top küçük
+kalemler.
+
+**Mücadele anlarına özel önlem** (kullanıcı fikri; `src/exp_contest.py`, `src/duel.py`, `src/exp_duel.py`). Mücadele =
+iki takımdan da bir oyuncu topa ≤ 3 m (±0.5 sn; canlı karelerin %28–34'ü). Tanı (gerçek D, v10 tohum 0): gerçek top
+değişimlerinin %45–67'si mücadelede (v10'un sahte değişimlerinde %36–51), ama kaçırılan değişimler bulunanlar kadar sık
+mücadelede → mücadele sinyali kaçırılanı ayırmıyor; "topu alan takımın oyuncusu ≤ 2 m" Metrica'da gerçek değişimlerin
+%92–97'sinde, sahtelerin %77'sinde (DFL %80–84 / %60, SC'de ayrım yok). Üst sınır (mücadele karelerinde takım logiti
+doğruya α kadar çekilince, 8 bağlam): α 1 → +0.071…+0.108, α 0.5 → +0.046…+0.077, α 0.25 → +0.027…+0.046 → havuz büyük.
+Denenenler, v10'a göre: (1) kod çözücüde mücadelede geçiş kolaylığı / topu alan takım yakında değilse ceza / mücadelede
+doğan spell'e zayıf süre rampası / mücadelede dar yumuşatma — 20 varyant × 3 tohum: 8 bağlam ortalaması ≤ +0.0014,
+Metrica 0…−0.002 (zayıf rampa −0.002…−0.010); (2) mücadele karelerine eğitimde ×3 ağırlık (tohum 0): DFL −0.004 /
+−0.0035, Metrica −0.0016 / −0.0005, SC −0.002…+0.0015; (3) mücadele sonucu özellikleri (25 sütun: 0.5–3 sn ileride
+topa en yakın takım, 5 m içindeki oyuncu farkı, topun ilerleyişi, mücadele epizodundan sonra kim yakın) ana modelde
+(tohum 0): DFL −0.006 / −0.008, Metrica −0.0002, SC +0.002…+0.003; (4) aynı girdilerle yalnız mücadele karelerinde
+eğitilen uzman, mücadele karelerinde v10'un yerine — üç tohum ortalaması DFL +0.002 / +0.001, Metrica +0.0005 /
+−0.0009 (gerçek D 0/3), SC faz +0.002 / +0.004, SC pp +0.001 / +0.0025 (8 bağlam ortalaması +0.0015). Kare doğruluğu
+(±25 yumuşatılmış, tohum 0): mücadele karelerinde v10 0.898 / 0.928 / 0.898 (DFL / Metrica / SC), yeni modeller ≤
++0.004; mücadeledeki kısa spell karelerinde v10 0.626 / 0.652 / 0.616, en iyisi (uzman) +0.007 / +0.008 / +0.018 → takip
+verisi mücadele anında v10'un kullandığından çok az fazla bilgi taşıyor (oyuncular topa 1–3 m iken "topa kim dokundu"
+konum gürültüsünün altında). → ❌ hiçbiri eşitlik eşiğini (0.005) geçmiyor, Metrica'da kazanç yok; v10 kalır. Bu havuzu
+açmak için yeni gözlem gerekir (mücadele anlarında video ile dokunan oyuncunun takımı).
+**Video daha hassas konum verse yeter mi?** (`src/exp_clean.py`; bench varyantı `v3p0` = V3'ün maskeleri, aynı rastgele
+akış, ama konum gürültüsü ve havadaki top paralaksı yok; v10 tarifiyle bu girdilerde eğitim ve test, tohum 0, gerçek D):
+spellF1 DFL 0.8005 → 0.8050, Metrica 0.8817 → 0.8880, SC faz 0.7594 → 0.7575, SC pp 0.7479 → 0.7439; kare doğruluğu
+mücadele karelerinde 0.898 → 0.907 / 0.928 → 0.933 / 0.898 → 0.894, mücadeledeki kısa spell karelerinde 0.626 → 0.691
+/ 0.652 → 0.695 / 0.616 → 0.633. → Kusursuz konumla bile mücadeledeki kısa spell karelerinin ~%30'u yanlış; konum
+hassasiyetinin tavanı ≈ +0.005 spellF1. Video ancak "topa kim dokundu" bilgisi verirse işe yarar (dokunuş tespiti +
+dokunan oyuncunun takımı); bunun için yerelde hazır model yok (önceki pas tespit pilotu Colab'daydı ve takımı en yakın
+takip oyuncusundan alıyordu — mücadelede tanım gereği belirsiz) ve dış doğrulama yok (yalnız 17 spell'lik public).
+
+#### Tur 11 — 25 Ekim: problemi yeniden tanımlama, açılar, araştırma (kullanıcının planı)
+
+Kullanıcının planı: (1) problemi net tanımla, (2) farklı açılardan bak, (3) her açı için araştır, fikir türet, çözüm
+bul, (4) başarılı çözümler kalıcı olsun, (5) ufak artışlar değil net kaldıraçlar; fikirler futbolu çok iyi bilen bir
+izleyici gözüyle, futbolun doğasındaki "trick"ler kullanılarak. Yeni fikir ararken ilk bakılan yer bu belge: §3 tablosu
+ve §1'deki "işe yaramayanlar". Yeni bir gerekçe olmadan başarısız denemelere dönülmez.
+
+**1. Problem.**
+- *Girdi:* otomatik (düzeltilmemiş) takip — oyuncu konumları ve takımı, kimlik yok, kopan / yer değiştiren izler; top
+  değerlendirilen karelerin %41'inde yok, kısa boşluklar tahminle doldurulmuş. Otomatik Smart Tagging, homografi, taktik
+  video (sesli), kendi takibi ve homografisi olan yayın videosu (kesme, tekrar, yakın çekim).
+- *Çıktı:* 158,857 değerlendirilen karenin her biri için H / A / D.
+- *Etiketin anlamı:* GT, Metrica'nın **düzeltilmiş** takibinin kendi alanları. Top ölü işaretliyse D, değilse takibin "topa
+  sahip" dediği takım; olay verisi ya da videoyu izleyen bir insan değil, yumuşatma yok. Değişim için rakibin
+  **kontrollü** sahipliği gerekir; basit dokunuş, pası kesmeyen sapma, kontrolsüz kazanılan hava topu değişim değildir;
+  çekişmeli ya da serbest topta son sahip korunur.
+- *Ölçüt:* spellF1 (maksimal H/A koşuları, IoU 0.3–0.7'de bire bir eşleşme), eşitlikte macroF1. Kaçırılan kısa bir rakip
+  spell'i iki yanındaki spell'i birleştirir; bir hata birden çok eşleşmeyi bozabilir.
+- *Göstergeler:* dış setler (DFL-trk, Metrica-ctrl, SkillCorner; farklı etiket konvansiyonları), public 5 dk (17 spell;
+  sürüm seçmez), etiketsiz tam maç tanıları.
+- *Darboğaz (tur 10):* 4 sn'den kısa oyun içi top kaybı spell'leri (özellikle ikili mücadele ve hava topu) ve bunların
+  aynası olan yanlış değişimler. Kaçırılan kısa spell'leri eklemek kâhin olarak +0.06…+0.13 (dış); public'te 17 spell'e
+  10 tahmin. Zamanlama, yeniden başlama ve BAR-ATH'ta ölü top küçük kalemler.
+- *Bilgi teşhisi:* mücadele anında takip verisi v10'un kullandığından çok az fazla bilgi taşıyor; eksik bilgi "topa hangi
+  takımın oyuncusu dokundu / kontrol etti". Not: BAR-ATH'ın GT'si düzeltilmiş konumlardan mekanik olarak türetiliyor,
+  dış etiketler ise olaylardan (gerçek dokunuştan). Kusursuz konum testinin ≈ +0.005 tavanı dış konvansiyonlar içindir;
+  BAR-ATH'ın "sahip takım" alanı konumların ve sağlayıcının kuralının bir fonksiyonu olduğu için doğrudan taşınmayabilir.
+
+**2. Açılar.**
+- **A. Yeni gözlem — video:** topa dokunan oyuncunun takımı; takım farkındalıklı top aksiyonu tespiti, forma rengi.
+- **B. Yeni gözlem — ses:** spikerin söylediği oyuncu adları (kadro → takım), olay sözcükleri ("roba", "pierde",
+  "falta"), tribünün tepkisi.
+- **C. Etiketin üreticisi:** sağlayıcının "sahip takım" alanını nasıl ürettiği; onu taklit eden eğitim etiketleri.
+- **D. Eğitim verisi:** daha çok tam saha optik takip + olay verisi (şimdiye kadarki en büyük kaldıraç veriydi).
+- **E. Futbolun grameri (izleyici bilgisi):** karşı pres ve top kaybından sonraki ilk saniyeler, ikinci top, hava topu ve
+  uzun top, kalecinin topu tutması, yayın yönetmeninin kadrajı (kameranın hücum yönünde boşluk bırakması), iki kameradan
+  topun yüksekliği.
+- **F. Ölçütün yapısı:** decoder hileleri denendi (≤ +0.003); yeni kanıt olmadan açılmıyor, yeni kanıtla yeniden ele alınır.
+
+**3. Araştırma ve ilk testler.** Dört web araştırması (yalnız genel problem tarifiyle, veri yok): videodan takım
+farkındalıklı top aksiyonu modelleri, sağlayıcıların "sahip takım" alanı ve takipten possession algoritmaları, yayın
+sesi (ASR ve ad tespiti), açık takip veri setleri. Yerel ucuz testler: yayın sesinde konuşma payı (`src/exp_audio.py`).
+Not: possession araştırması ajanı ~12.5 MB PDF'i kullanıcının bağlantısından indirdi (brief'te indirme yasağı yazılı
+değildi); bundan sonra her ajan brief'ine "indirme yok" eklenir.
+
+- *Video (A):* takımı da tahmin eden tek hazır model SoccerNet 2025 Team-BAS baseline'ı (T-DEED + takım başı, 47 MB;
+  kod GPL, ağırlıklar NDA'lı veriyle eğitilmiş). Bütün kıyaslarda müdahale / blok tespiti çok zayıf (F1 0–0.35); pas ve
+  top sürme iyi (0.65–0.84). Alternatif: kendi takibimizle etiketlenen "topa sahip oyuncu" görüntü sınıflandırıcısı
+  (Peral et al. 2025 tarifi), yayın karesinde top + forma rengi. Hepsi pahalı ve dış doğrulamasız.
+- *Etiketin üreticisi (C):* Metrica'nın düzeltilmiş "sahip takım" alanının kuralı yayımlanmamış. Kanıtlar alanın
+  Metrica'nın kendi olay işaretlemesinden türediğini düşündürüyor: sahiplik yeni takımın ilk anlamlı dokunuşunda
+  değişiyor (o dokunuşa geri tarihli), serbest top önceki sahipte kalıyor, kısa top kazanmaları kalıyor. Takip tabanlı
+  kurallar (Link & Hoernig 2017, Vidal-Codina 2022, Bischofberger 2024) ve etiket üretim önerileri araştırma notunda.
+- *Ses (B):* önerilen hat WhisperX / faster-whisper + kadro adı eşleme + fiil kuralları ("roba X" → X'in takımı,
+  "pierde X" → öbür takım). Beklenti: maç başına 200–350 ad, filtreden sonra %80–90 doğru takım, ~2 sn bulanık, kısa
+  spell'lerin %20–35'ine dokunur. Yayınlanmış gecikme ölçümü yok; kendi maçımızda kalibre edilmeli.
+- *Veri (D):* en iyi yeni aday SoccerTrack v2 (10 üniversite maçı, sabit panoramik kamera, tam saha, takımlı olaylar,
+  CC BY 4.0; Hugging Face onayı gerekiyor, Colab çekebilir). PFF World Cup 2022 (64 maç) yayın tabanlı, SkillCorner gibi
+  zarar verebilir. ELASTIC, 7 DFL maçımızın 3'ü için düzeltilmiş olay zamanları yayımlamış.
+
+**4. İlk yerel bulgular.**
+- *Yayın sesi (`src/exp_audio.py`, PANNs):* değerlendirilen sürenin %87'sinde konuşma (taktik videoda %1) → yayında
+  sürekli spiker var. ASR (Colab T4, faster-whisper large-v3): dil İngilizce (uluslararası yayın).
+- *Yayın kamerasının kadrajı (`src/exp_framing.py`, fikir E6, etiketsiz):* yayın homografisiyle görüntü merkezinin
+  sahadaki yeri ile top arasındaki fark, ev sahibinin hücum yönünde ölçülünce ("önde boşluk"), v10'un emin karelerinde
+  ev / deplasmanı AUC **0.952** ile ayırıyor (ev sahibi sahipken medyan +9.4 m, deplasman −7.3 m); top hızı sabit
+  tutulunca 0.97–0.99, top konumu sabit tutulunca 0.94–0.97, iki yarıda da aynı. v10'un canlı karelerinin %88'inde var.
+  Kadraj, v10'un değişimlerinden ~1.7 sn önce yeni takıma dönüyor; takipte de yeni takımın oyuncusu aynı anda topa en
+  yakın hale geliyor. Kamera görüntüsü özellikleriyle çapraz eğitilen küçük model (`src/camera.py`, v10'un emin
+  karelerinden, yarı yarı) AUC 0.98.
+- *Dış doğrulama (`src/camera_sc.py`):* SkillCorner'ın 20 maçında her kare için yayın görüntüsünün köşeleri sahaya
+  izdüşürülmüş → aynı ipucu gerçek etiketlerle ölçülebiliyor. Gerçek takımla AUC tüm canlı karelerde 0.72, emin
+  karelerde 0.77 (maç maç 0.54–0.93); medyan ±3–4 m. Kamera, gerçek değişimden ~2 sn önce yeni takıma dönüyor (BAR-ATH'taki
+  zamanlamayla tutarlı: v10 geç değil, kamera öncü). 4 sn'den kısa gerçek spell'lerin %59'unda kadraj bir an o takıma
+  dönüyor. İpucu SkillCorner'da BAR-ATH'takinden belirgin zayıf (köşe verisinin kalitesi ve yayın prodüksiyonu farkı
+  olası). Düzeltme: SkillCorner üst köşeleri %91 karede uzak çizginin 5 m ötesine kırpıyor; kameranın yatay hedefi bu
+  yüzden görüntünün orta sütununun sahadaki çizgisinin topun derinliğindeki noktası olarak alındı (BAR-ATH'ta aynı
+  tanımla AUC 0.909, SkillCorner'da v10-emin karelerde ~0.8, maç maç 0.73–0.92). Kısa gerçek spell'lerin %61'inde kadraj
+  o takıma dönüyor; uzun spell içinde rastgele pencerede öbür takıma dönme (yanlış alarm) %27.
+
+**5. Birleştirme testi: kamera ❌, spiker ❌.**
+- *Kamera, SkillCorner gerçek etiketiyle (`src/camera_sc.py eval`):* BAR-ATH'taki etiketsiz tarifin aynısı (kamera modeli
+  maç içinde yarı yarı, v10'un emin karelerinden; kalibre log-olabilirlik oranı v10'un logitine w ağırlıkla, δ kayma,
+  ±cap). 9 ayar × 3 tohum × öğrenilmiş / gerçek D × faz / pp — **her ayarda kayıp**: w 0.5 −0.014…−0.019, w 1 −0.026…−0.070,
+  w 1.5 −0.09…−0.13; çoğu tohumda 20 maçın 0'ı kazanıyor. Maç maç kazanç ipucunun gücüyle ilişkisiz (korelasyon −0.10);
+  AUC'si 0.90–0.92 olan, yani BAR-ATH düzeyindeki maçlar da −0.06…−0.10. Kaybın biçimi: spell sayısı 4264 → 4569 (gerçek
+  5092), ama kare doğruluğu 0.919 → 0.911 — kadraj değişim anlarında topun gidiş yönüne göre dönüyor ve gerçek değişimin
+  ~2 sn önünden gidiyor, yani tam da belirsiz anlarda yanlış yerde spell üretiyor; uzun spell'lerde ise v10'un zaten
+  bildiğini söylüyor. BAR-ATH'ta benimsenmedi.
+- *Spiker adları:* Colab T4'te faster-whisper large-v3 (yalnız 25 MB sıkıştırılmış ses yüklendi; ağırlıklar VM'de; transkript
+  yalnız yerelde, yalnız toplam sayılar basıldı). 17,775 kelime; canlı oyunda 5.5 oyuncu adı / dk, %87'si ev sahibi
+  (v10'da ev sahibi payı 0.61). Adın takımı v10'un o anki takımıyla %73 (ev sahibi; taban %61) ve %78 (deplasman; taban %39,
+  ama maç boyunca yalnız 37 ad) uyuşuyor; v10 değişimlerinde yeni takımın adı [−1, +3] sn içinde %19 (rastgele 4 sn'lik
+  pencerede herhangi bir ad %31). Seyrek, ev sahibine yanlı, zamanlaması bulanık → kaldıraç değil; birleştirme denenmedi.
+- *Kamera vetosu ve top yüksekliği:* kadrajın karşı çıktığı kısa v10 spell'lerini silmek her ayarda kaybettiriyor
+  (−0.0005…−0.038); DFL'nin gerçek top yüksekliğini eklemek bile DFL / Metrica'da kaybettiriyor (−0.005…−0.010), modelin
+  yüksekliğe verdiği pay %0.2 → hava topu bilgisi de kaldıraç değil.
+- **Ders:** yeni bir ipucunun modelin emin olduğu karelerdeki uyumu (AUC 0.95) değerinin ölçüsü değildir; değer, modelin
+  belirsiz olduğu anlarda ve gerçek etiketle ölçülür. BAR-ATH'a özgü bir gözlem ancak aynı türden gözlemi taşıyan bir dış
+  sette (burada SkillCorner'ın kamera köşeleri) doğrulanabiliyorsa benimsenir.
+
+#### Tur 12 — 25 Ekim: yeni fikirler (kullanıcı: "teknik dokümandan çok modeli geliştirmeye devam; yeni fikir üret, dene")
+
+Yenilik kontrolü §3 tablosu ve §1'deki listeyle yapıldı; aşağıdakilerin hiçbiri daha önce denenmedi.
+- **R12-1 Gözetimli kamera birleştirmesi.** Tur 11'de etiketsiz ekleme kaybettirdi, çünkü kadraj değişim anlarında
+  yanıltıcı. Burada kameranın ne zaman güvenilir olduğunu SkillCorner'ın gerçek etiketiyle öğrenen küçük bir ikinci aşama
+  (girdi: v10 logiti ±1 / ±2 sn + kamera özellikleri ve kaymaları; maç dışarıda bırakılarak), aynı modelin kamerasız eşi
+  kontrol olarak (yalnız yeniden keskinleştirmenin etkisi).
+- **R12-2 Metrica'yı ham olay etiketleriyle eğitmek** (`COMBO_MCONV=events`): her kontrol olayında takım değişen etiket
+  (DFL'nin kendi bayrağı gibi). Model dokunuş anlarını daha net görebilir; kontrollü sahiplik kuralını decoder taşır
+  (A1'in, yani DFL'yi kontrollü etiketle eğitmenin tersi).
+- **R12-3 DFL olay dosyaları** (diskte vardı, hiç kullanılmamıştı): 7 maçta pas sonucu ve alıcısı, ikili mücadelede
+  kazanan ve "sahiplik değişti" bayrağı (maç başına ~229 mücadele, 64'ünde değişim), sahiplik evre numaraları. Olay
+  zamanları elle kodlandığı için takipten ~1.5 sn kayık; her olay, oyuncusunun topa en yakın olduğu kareye
+  senkronize edilerek kullanılabilir (kare-hassas kontrollü etiket ya da mücadele sonucu denetimi).
+- **R12-4 Öğrenilmiş dokunuş-takım dedektörü:** Metrica'nın kare-hassas olaylarından (ve senkronize DFL olaylarından)
+  "t anında k takımı topa dokundu" sınıflandırıcısı; v11'in kural tabanlı dokunuşlarının yerine.
+- **R12-5 Serbest top durumlu sahiplik HMM'i:** H-kontrol / H-serbest / A-kontrol / A-serbest / D. Bu yapı GT
+  tanımını taşıyor: serbest ve çekişmeli topta sahip değişmez, ancak rakip kontrol edince değişir.
+
+**Ara sonuçlar (kullanıcı ara verdi):**
+- R12-2 ❌, R12-3b ❌; R12-3'ten yeni değerlendirme bağlamı DFL-evctrl kaldı (§3).
+- **R12-1 umut verici.** Kameranın *marjinal* katkısı, yani SkillCorner'da gerçek etiketle öğrenilen ikinci aşama
+  (kameralı eksi kamerasız eş), v10'un logitine α 1 ile eklendi (`src/camera_sc.py delta`). pp etiketiyle eğitilince
+  SkillCorner'ın dört bağlamında da artı veriyor (3 tohum): faz +0.014 / +0.015 (maçların 16–18'i), pp +0.006 / +0.006
+  (12–16). Faz etiketiyle eğitilince faz +, pp −. Etkinin büyük kısmı kameradan geliyor: kamerasız ikinci aşama tek
+  başına her yerde kaybettiriyor.
+
+**Devam noktası:**
+1. `src/camera_sc.py robust`: zoom ve pan olmadan; kadraj farkı maç içinde ölçekli.
+2. BAR-ATH'a uygulama: `src/camera.py resid`, SkillCorner'la aynı tanımlı özellikler (`sc_style_features`), etiketsiz
+   tanılar.
+3. Dokunuş v2'yi yeni tohumlarla doğrulamak: `TOUCH_V=2 LGB_SEED=1/2 src/exp_touch.py`; tohum 0'da DFL-evctrl
+   +0.007 / +0.005, SC pp −0.004.
+4. R12-4 / R12-5.
+
+## Ek A — İlk analiz, araştırma ve baseline'lar (20 Ekim)
+
+*Tarihsel rapor; özgün başlığı: More than a Hack 2027 — Faz 1 (Top Sahipliği) · Analiz, Araştırma ve Baseline Raporu. Güncel durum için §1.*
+
+*Hazırlanma: 20 Ekim 2026 · Veri: FC Barcelona – Athletic Club (LaLiga 2024-25, 2. hafta)*
+
+> **Veri politikası notu.** Yarışma şartları, verinin veya herhangi bir parçasının bulut tabanlı bir
+> LLM'e yüklenmesini yasaklıyor. Bu nedenle tüm analizler lokal scriptlerle yapıldı; bu rapordaki her
+> sayı **toplu istatistik** (dağılım, oran, skor). Ham satır, video karesi veya kare-bazlı türev yok.
+> Bu dosyayı herkese açık bir yere koymayın; frame-level türev veri paylaşımı da yasak.
+
+---
+
+### 1. Yarışmanın özü
+
+| | |
+|---|---|
+| Görev | 199,319 karenin her biri için `H` (Barça topa sahip, oyun canlı) / `A` (Athletic) / `D` (ölü top) / `X` (cevap yok) |
+| Değerlendirilen kareler | 1. yarı 11,185–90,651 · 2. yarı 110,808–190,197 (158,857 kare ≈ 106 dk). 110,808–113,741 arası (2. yarı santrasından önce) **tamamı D** |
+| Sıralama metriği | **spellF1**: possession = kesintisiz H veya A koşusu (D böler). Tahmin/gerçek possession'lar aynı takım şartıyla, temporal IoU ile birebir açgözlü eşleşir; F1, IoU 0.3/0.4/0.5/0.6/0.7'de hesaplanıp ortalanır |
+| Eşitlik bozucu | macroF1 (H/A/D kare bazlı) |
+| `X` | spellF1'de "önceki etiketi tekrarla" demek (ileri doldurulur); macroF1'de hata. Değerlendirilen karelerde kullanmanın faydası yok |
+| Hassasiyet | 1 kare gecikme bedava; 8 kare → 0.893; **1 sn gecikme → 0.654**. Tam maçta <0.04 fark gürültü |
+| Yayınlanan taban | `baseline_smooth50` spellF1 **0.2433** (tam maç) |
+| Public GT | Sadece ilk 5 dk (17 possession). Public'te bootstrap aralığı **0.27–0.62** — model seçimi için kullanılamaz |
+| Kurallar | Her yöntem serbest (dış veri, hazır modeller dahil). Etiketler algoritmadan çıkmalı; az miktarda elle etiket **eğitim/doğrulama için serbest**. Repo dosyayı birebir yeniden üretmeli. Teslim: 17 Kasım 2026 |
+
+GT, Metrica'nın **düzeltilmiş** takip verisinden mekanik olarak türetilmiş: top ölüyse D, değilse
+düzeltilmiş verinin "topa sahip takım" alanı. Bize verilen ise **otomatik, düzeltilmemiş** takip.
+
+### 2. Veri durumu
+
+| Dosya | Durum |
+|---|---|
+| tactical ATD (txt+xml), homografi, Smart Tagging | ✅ indirildi, doğrulandı (199,319 satır, frame ID 1..199,319 kesintisiz) |
+| tactical video (5.2 GB) | ✅ indirildi; 1920×1080, 25 fps, 2:12:52.76 = 199,319 kare, **AAC stereo ses var** |
+| broadcast ATD, homografi | ✅ (164,488 satır) |
+| broadcast video (13 GB) | ⏳ Drive indirme kotası doluydu; tekrar denenecek |
+| Open DFL / IDSSE (7 Bundesliga maçı, CC BY 4.0) | dış eğitim/doğrulama verisi |
+
+Kendi parse'ımla resmi 4 baseline'ı **sıfır fark**la yeniden ürettim → hizalama doğru.
+
+### 3. Veri analizi — temel bulgular
+
+#### 3.1 Takip verisi
+- Top, değerlendirilen karelerin **%59.3**'ünde görünür. Boşluklar **uzun**: 150 boşluk, medyan **10.7 sn**,
+  kayıp karelerin %44'ü 30 sn'den uzun boşluklarda; 1 sn'den kısa boşluk neredeyse yok.
+- Görünür periyotlar medyan 13.8 sn.
+- Public pencerede top görünürlüğü: **H %99.9 · A %85 · D %66** → kayıp top büyük ölçüde ölü top ve bazı canlı fazlar.
+- Kayıp topun ~%29'u top çizgiye ≤2 m yakınken başlıyor (oyun dışı), ~%30'u ceza sahasında bitiyor (aut vuruşu vb.).
+- Oyuncu: kare başına ort. 20.5 takip (p5=14); 1,219 tracklet, medyan 35 sn; her takımda **1 kaleci slotu** (`position_type=Goalkeeper`, %93 doluluk).
+- **Hız kanalı m/s** (XML "kph" diyor ama konumdan türetilen hızla oran 1.006, korelasyon 0.90).
+- **Top hız kanalı anlamsız**: sadece 20,971 karede var ve konum-türevli hızla korelasyonu −0.10 → kullanılmamalı.
+- Top saha dışında: değerlendirilen top-görünür karelerin %4.2'si; GT-D'de %10.7, canlıda ~%0.
+
+#### 3.2 Public GT'ye karşı
+- "En yakın oyuncunun takımı = GT takımı": görünür canlı karelerde %77.8; mesafe ≤1 m iken %90.6.
+- "Son yakın takım" (R metre, k ardışık kare) kuralları R/k'dan bağımsız **~%85–87 takım doğruluğunda tavan** yapıyor.
+- Takım hatalarının **tamamı GT geçişlerinin 8 sn yakınında** (%36'sı ±1 sn içinde) → sorun zamanlama ve kısa possession'lar.
+- **Oracle analizi**: canlı/ölü mükemmel olsa spellF1 0.461→0.473; **takım mükemmel olsa 0.889**. Darboğaz H↔A kararı.
+- Ölü topta oyuncu hızı belirgin düşük (D ort. 1.1–2.0 m/s vs canlı 2.1–3.4); oyuncular hakeme **~1.5–2 sn gecikmeyle** tepki veriyor.
+
+#### 3.3 Smart Tagging (638 etiket)
+- Faz etiketleri **çiftler halinde**: PROGRESSION ↔ DEFENDING IN MIDDLE THIRD, BUILD UP ↔ DEFENDING IN ATTACKING THIRD, CREATING CHANCES ↔ DEFENDING IN DEFENSIVE THIRD, ATTACKING ↔ DEFENSIVE TRANSITION (DEFENDING etiketinin takımı = savunan takım).
+- Public GT ile takım uyumu: BUILD UP %91, LONG BALL %90, PROGRESSION %73, ATTACKING TRANSITION %67.
+- 59 duran top: 26 taç (hepsi Team=N/A), 12 korner, 10 aut, 5 serbest vuruş, 6 santra. Tipik maçta ~100–110 duraklama olduğundan etiketler eksik.
+- Duran top penceresi, gerçek yeniden başlamadan 3–12 sn önce açılıyor; birçok etiket sabit süreli (30–35 sn).
+
+#### 3.4 Homografi / kamera
+- Tactical homografi %100 geçerli; görüntü merkezi topa uzak (medyan 23.6 m) → kamera merkezi zayıf top vekili.
+
+#### 3.5 Broadcast — **hizalama çözüldü**
+- Yayın gerçek zamanlı kaydedilmiş, devre arasında kesilmiş: **1. yarı `tactical = broadcast + 4014`, 2. yarı `+ 26920`** (2'şer dakikalık bloklarda ±1–2 kare sabit; eşleşen top konumlarında medyan fark 0.5–1 m; oyuncu konumlarında medyan 0.30 m).
+- **Ölü top sinyali**: public GT-D karelerinin **%76'sında broadcast homografisi geçersiz** (tekrar/yakın çekim), canlıda sadece ~%3.5 (olabilirlik oranı ≈ 22).
+- Broadcast topu, tactical'da kayıp olan canlı-oyun karelerinin %40–60'ını dolduruyor (tüm maçta top kapsaması %59.3 → %63.1).
+- İki kameranın top konumu >2.5 m ayrışınca (top havada → zemine izdüşüm paralaksı) en-yakın-takım doğruluğu %89.5'ten ~%71'e düşüyor → güvenilirlik sinyali.
+
+#### 3.6 Ses
+- Her iki santrada GT başlangıcından ~1.1 sn önce güçlü düdük tepesi var. Ancak basit bant-tonalite detektörü tüm maçta tribün ıslıkları yüzünden ayırt edici değil → önceden eğitilmiş ses olayı modeli (AudioSet "Whistle") gerekli.
+
+### 4. Araştırma özeti (benzer problemler / en güçlü yaklaşımlar)
+
+- **2026 edisyonu** açık uçlu GenAI hackathonuydu → doğrudan kullanılabilir çözüm yok; 2027 reposunda henüz issue yok.
+- **Yapısal çözümleme** (HSMM / min-süreli Viterbi, sınır yakalama) segment metriklerinde en büyük kaldıraç (MS-TCN/ASRF literatürü, F1@k ≈ spellF1).
+- **Ölü top**: Lang et al. 2022 — sadece oyuncu verisiyle, ±0.4…80 sn zaman kaydırmalı bağlam: %92 kare doğruluğu, ≥2 sn duraklamalarda F1 0.80; formasyon tetikleyicileri (taç: çizgi dışında oyuncu, korner: köşede oyuncu, aut: kale alanında oyuncu, santra: herkes kendi yarısında).
+- **Sahiplik**: Vidal-Codina 2022 (possession zone 0.5–1 m, duel zone 1 m, top yön/hız değişimi ile kontrol), Link & Hoernig 2017; topsuz takım sahipliği: PathCRF (%92.4), ballradar (%85.9), TranSPORTmer.
+- **Dış etiketli veri**: Open DFL/IDSSE — 7 maç, 25 Hz, kare bazında `BallPossession` + `BallStatus` (CC BY). Metrica örnek maçları (3 maç, olaylarla H/A/D türetilebilir).
+- **Video**: top tespiti için WASB (MIT, futbol ağırlıkları), YOLO + SAHI; ATD topunu homografiyle piksele izdüşürüp **sözde-etiket** olarak kullanmak (113k kare).
+- Beklentiler: maç başına ~108 duraklama (ort. 18.7 sn), LaLiga efektif oyun ~53 dk → tam maçta D payı ~%45–50; ~200–350 possession.
+
+### 5. Baseline'lar ve sonuçlar
+
+Public pencere = 17 possession (gürültülü, sadece doğruluk kontrolü). Tam maç tanıları etiketsizdir.
+Vekil metrikler: `tagA` Smart Tagging faz-takım uyumu (az possession'ı ödüllendirir, dikkat), `spOK` takımlı duran
+topların doğru takım ile yeniden başlaması, `rst` herhangi bir yeniden başlama, `bout` top-dışarı olaylarının D kapsaması.
+
+| Model | macroF1 | spellF1 (public) | Possession (tam maç) | D payı | spOK | rst |
+|---|---|---|---|---|---|---|
+| baseline_smooth50 (resmi) | 0.621 | 0.326 | 594 | 0.32 | 0.48 | 0.80 |
+| v1 kurallar + Viterbi | 0.709 | 0.525* | 214 | 0.41 | 0.52 | 0.81 |
+| v2 ayrık canlı/ölü + takım kanıtı | 0.816 | 0.448 | 234 | 0.48 | 0.59 | 0.90 |
+| v3 = v2 + broadcast (+ top doldurma, kamera uyuşmazlığı, 1.5 sn tepki gecikmesi) | 0.878 | 0.459 | 221 (113 D segmenti) | 0.47 | 0.70 | 0.92 |
+| **v5 = v3 canlı/ölü + DFL'de öğrenilmiş takım olasılıkları (önerilen baseline)** | **0.901** | **0.566** | 261 (119 D segmenti) | 0.50 | **0.82** | **0.93** |
+
+v5 public pencerede: alive/dead F1 0.974, canlı karelerde takım doğruluğu 0.929 (v3: 0.972 / 0.901).
+Resmi skorlayıcı (public, 1000 bootstrap): v5 macroF1 0.9010 / spellF1 0.5655 / geçiş-F1 (±1 sn) 0.389, ortalama
+gecikme +1.1 kare, Barça topa sahip olma payı hatası 0.003. Public pencerede spellF1 farkları <0.41 gürültü sayılır;
+macroF1 ve tüm vekil metriklerdeki tutarlı iyileşme daha güvenilir sinyaldir.
+
+v3 public pencerede: alive/dead F1 **0.972**, takım doğruluğu 0.901 (ikisi de canlı karelerde). Tam maçta 113 ölü
+top segmenti ve %46.8 D payı, literatür (~108 duraklama, ~%45–50) ve DFL maçları (maç başına ~113 segment, %45–48)
+ile uyumlu.
+
+\* v1'in ceza ayarı public pencerede seçildi — iyimser.
+
+### 6. Yol haritası (öncelik sırasıyla)
+
+1. **Video top tespiti** — `colab/ball_detector_colab.py`: ATD topunu homografiyle piksele izdüşürüp ~113k
+   sözde-etiket, YOLO11s ince ayar (640 karo), ATD'de topun kayıp olduğu karelerde tespit → sahaya geri izdüşüm.
+   Hedef: top kapsaması %59 → %80+; takım kararı en çok bundan kazanır (oracle: takım mükemmel olsa public
+   spellF1 0.46 → 0.89). Yerel GPU şu an başka bir işle dolu → Colab.
+2. **Elle etiketlenmiş doğrulama seti (20–30 dk)** — kurallara uygun. `tools/labeler.html` (tarayıcıda lokal video,
+   klavye kısayolları, CSV) + `tools/transitions_to_gt.py` → resmi skorlayıcıda `--gt <yol>`. 17 possession'lık
+   public pencere yerine ~100+ possession ile model seçimi.
+3. **Düdük tespiti** — önceden eğitilmiş ses olayı modeli (PANNs/YAMNet "Whistle"); basit bant detektörü tribün
+   ıslıklarından dolayı yetersiz kaldı.
+4. **Ölü-top modelini BAR-ATH'a uyarlamak** — DFL simülasyonunu (topun saha dışındaki konumu, top kaybolma
+   örüntüsü) iyileştirmek veya v3 kurallarıyla öğrenilen modeli birleştirmek; Smart Tagging duran top
+   pencerelerini ek kanıt olarak eklemek.
+5. **Metrica örnek maçları** (3 maç, olaylardan H/A/D türetilebilir) — Metrica konvansiyonuna daha yakın ek
+   eğitim/doğrulama; takım-geçiş cezasını onlarla ayarlamak.
+6. Broadcast videosu (13 GB) — Drive kotası açılınca; tekrar/yakın çekim tespiti zaten homografi geçerliliğiyle
+   yapılıyor, opsiyonel.
+
+### 7. DFL deneyleri (dış veri ile öğrenme)
+
+**Kurulum.** Open DFL/IDSSE (7 maç, CC BY 4.0, DOI 10.6084/m9.figshare.28196177) → BAR-ATH ATD'ye
+benzetecek bozulma (`src/sim.py`): top canlıda ~%12–15, ölüde ~%70 kayıp (uzun boşluklar, havadaki topta daha
+olası), havadaki top için yan kamera paralaksı, oyuncu izlerinde ~%6 parçalanma + gürültü. Aynı öznitelikler
+(`src/mlfeat.py`: çok ölçekli/kaydırmalı oyuncu temposu, formasyon tetikleyicileri, top öznitelikleri, takım
+perspektifli kontrol/şekil) → LightGBM ölü-top modeli + takım-perspektifli H/A modeli (yer değiştirme
+augmentasyonu) → maç-dışarıda-bırak CV → min-süreli Viterbi.
+
+**DFL yapısı.** Maç başına ~113 ölü top segmenti, %45–48 D — BAR-ATH v3 tahminiyle neredeyse aynı (113, %46.8).
+Ancak DFL'nin sahiplik bayrağı daha sık dönüyor: maç başına ~456 possession, medyan 3.6 sn (public GT medyan
+7.6 sn, ort. 14.2 sn) → **konvansiyon farkı**; takım-geçiş cezası DFL'den doğrudan aktarılmamalı.
+
+**CV (bozulmuş DFL, 7 kat, 3,061 possession).**
+
+| | değer |
+|---|---|
+| kare doğruluğu | 0.89–0.92 |
+| canlı/ölü doğruluğu | 0.96–0.97 (Lang 2022: 0.92) |
+| takım doğruluğu (canlı) | 0.85–0.91 |
+| spellF1 (DFL konvansiyonu) | 0.549 (en iyi: pen_team=4, pen_dead=32) |
+| sınır yakalama (snapping) | etkisi ±0.003 → kullanılmadı |
+
+**BAR-ATH'a aktarım.** DFL modeli takım kararında belirgin daha iyi (public canlı karelerde takım doğruluğu
+0.937–0.940 vs v3 0.901), fakat ölü-top tespitinde alan farkı yüzünden zayıf (alive/dead F1 0.880 vs 0.972).
+→ **v5 hibrit**: canlı/ölü için v3 (kural + broadcast), H/A için DFL olasılıkları; doğru olasılıksal birleştirme
+`S[H]=a/2+log p_H` (ilk denemedeki `±e/2` formu canlı durumlara bedava bonus verip D payını bozuyordu).
+
+## Ek B — Metrica örnek maçlarıyla `pen_team` kalibrasyonu (20 Ekim)
+
+*Tarihsel rapor; özgün başlığı: Metrica örnek maçlarıyla takım-geçiş cezası (`pen_team`) kalibrasyonu. Güncel durum için §1.*
+
+*20 Ekim 2026 · kod: `src/metrica_sample.py`, `src/metrica_calibration.py` (yeni; mevcut dosyalara dokunulmadı) ·
+ham çıktılar: `reports/metrica_sweep.txt|.json`, `reports/metrica_barath_v5_pen_team.txt`,
+grafikler `reports/metrica_pen_team_{v5,dflcv}_{model,oracle}.png`*
+
+> **Veri politikası.** Metrica örnek verisi ve açık DFL verisi kısıtsız; bunların ham olaylarına bakıldı.
+> BAR-ATH tarafında yalnızca toplu istatistik üretildi (possession sayısı / süre özetleri, public-pencere
+> skorları ve sayıları). `model_v5.py` değiştirilmedi.
+
+### Özet
+
+- **Öneri: `model_v5` için `pen_team = 20` (k_team = 1; makul aralık 16–24).** Şu anki 8, DFL'nin
+  sık dönen etiketine göre seçilmiş bir önsel tahmindi. Metrica kalibrasyonu, gerçek GT'ye en çok benzeyen
+  konvansiyonda bunun ~0.04 spellF1 (resmi gürültü bandı kadar) eksik kaldığını gösteriyor.
+- **Etiketler doğrulandı.** Olaylardan türetilen D sınırları, Metrica'nın kendi temiz takip verisindeki
+  "top yok" koşularıyla neredeyse kare kare örtüşüyor (medyan sapma +1 / 0 kare). Yani Metrica takibinin
+  ölü-top bayrağı olay akışından geliyor. Possession bayrağının da aynı kaynaktan gelmesi muhtemel.
+- **Konvansiyon belirleyici.** Ham olay etiketi (son kontrol olayının takımı) maç başına 382 spell üretiyor
+  (6.6/canlı dk, medyan 4.4 sn). Bu, DFL (8.3/dk, 3.7 sn) ile public pencere (4.2/dk, 7.6 sn) arasında
+  kalıyor; public pencere bu konvansiyonda 5 dakikalık pencerelerin alt %3'ünde. Resmi tanımı ("kontrolsüz
+  dokunuş / kontrol gelmeyen hava topu possession değiştirmez") olaylara uygulayan **olay-kontrollü**
+  konvansiyon 231 spell/maç, 4.0/dk, ort. 15.0 sn veriyor. Public pencere bu konvansiyonda tipik
+  (hız 49. yüzdelik).
+- **Tarama (v5 dekoder, öğrenilmiş ölü-top kanıtı, 3 maç × 3 bozulma tohumu):**
+  - ham olay etiketinde en iyi `pen_team` 5 (3–8 arası 0.005 içinde),
+  - olay-kontrollüde 32 (20–32 düz),
+  - DFL'nin kendi etiketinde 2.
+
+  Kontrollü konvansiyonda 20, 8'i 9/9 eşli koşuda +0.037 geçiyor. Ham olay konvansiyonu doğru çıkarsa 20'nin
+  maliyeti −0.014. 20, beş konvansiyon üzerinde en kötü durum pişmanlığını en aza indiren değer.
+- **BAR-ATH kontrolü (toplu):**
+  - v5 `pen_team=20` ile tam maçta 218 possession (4.13/canlı dk, medyan 9.7 sn) üretiyor. Bu, olay-kontrollü
+    konvansiyonun (4.0/dk) ve public pencerenin (4.2/dk) hızıyla uyumlu. 8 ise 261 (4.9/dk) üretiyor.
+  - Uyarı: 17 possession'lık public pencerede spellF1 8'de 0.566, 16+'da 0.444–0.448. Bu fark, pencerede
+    tahmini spell'in 12'den 8–10'a inmesi ve ortalama ~2–3 eşleşmenin kaybı demek. Resmi doküman bu pencerede ayar yapmayı
+    açıkça yanlış seçime götüren bir yol olarak gösteriyor. Yine de elle etiketlenmiş doğrulama seti
+    (yol haritası #2) bu kararı netleştirecek ilk yer.
+
+### 1. Veri ve lisans
+
+| | |
+|---|---|
+| Kaynak | github.com/metrica-sports/sample-data, commit `e706dd5` (2021-04-15) → `external_data/metrica/` (gitignore'lu) |
+| İçerik | Game 1–2: CSV takip (ev/dep. ayrı) + CSV olaylar; Game 3: FIFA EPTS takip + metadata XML + JSON olaylar (CARRY olayı yalnız burada). 25 fps, 105 × 68 m, **düzeltilmiş (temiz)** takip, olaylar takiple kare-senkron |
+| Lisans | Repoda LICENSE dosyası yok. README "Legal stuff": *verinin sorumlu kullanılması* ve *kamuya açık kullanımda kaynağın belirtilmesi* isteniyor. → Veri repoya konmuyor/dağıtılmıyor; teknik dokümanda "Metrica Sports sample data (github.com/metrica-sports/sample-data)" kaynak olarak anılmalı |
+| İndirme | `.venv/Scripts/python.exe -I src/metrica_sample.py download` (sabit commit, ~185 MB) |
+
+`metrica_sample.parse(g)` → `dfl.parse()` ile aynı düzen: `h{1,2}_players (n, slot, 3)` [x, y normalize, hız m/s],
+`h{1,2}_ball (n, 4)` [x, y, hız, z = NaN], `_team`, `_gk` (Game 3'te metadata, Game 1–2'de takımın en derin
+oyuncusu), `_labels` (0 H / 1 A / 2 D), `_n0`. Önbellek: `cache/metrica/`.
+
+### 2. Olaylardan H/A/D etiketi
+
+- **D**: ölü-top tetikleyicisinden bir sonraki yeniden başlamaya kadar.
+  - Tetikleyiciler: BALL OUT (bitiş karesi = top çizgiyi geçtiği an), SHOT …-OUT / …-GOAL (bitiş), FAULT RECEIVED
+    ve CHALLENGE …-FAULT-… (başlangıç), BALL LOST / PASS + OFFSIDE / FORCED / HAND BALL / END HALF (bitiş).
+  - Yeniden başlama: SET PIECE (RETAKEN hariç) ve **GOAL KICK alt tipli her olay**. Bu veride aut atışları
+    SET PIECE değil, PASS / BALL LOST / BALL OUT olarak kodlanıyor.
+  - Tetikleyicisiz bir yeniden başlamada D, önceki aksiyonun bitişinden başlatılıyor (6 yarıda 54 kez).
+  - Devre başlangıcı öncesi ve END HALF sonrası D.
+- **H/A**: son kontrol olayının (SET PIECE, PASS, CARRY, RECOVERY, SHOT, BALL LOST başlangıç kareleri)
+  takımı. CHALLENGE, BALL OUT ve FAULT RECEIVED possession değiştirmiyor; sahipsiz top son sahibinde kalıyor.
+
+**Doğrulama: D, Metrica'nın kendi takibindeki ölü-top işaretiyle örtüşüyor.**
+- Temiz örnek takipte top, olay-türevli canlı karelerin %98.6–99.8'inde, ölü karelerin ise yalnız %0.5–16'sında
+  var. Metrica takibi top ölüyken topu boş bırakıyor.
+- 304 iç D segmentinde:
+  - D içindeki "top yok" payının medyanı 0.997 (p10 0.943),
+  - D başlangıcı ile "top yok" koşusunun başlangıcı arasındaki medyan fark **+1 kare** (%88'i ±5 kare içinde),
+  - D bitişinde **0 kare** (%92'si ±5 kare içinde).
+- D → canlı geçişlerinin 288/309'u (%93) bir SET PIECE ya da aut atışı karesinde. Bunların 39'unda olay
+  dosyası aut atışıyla aynı kareye bir RECOVERY yazıyor.
+
+**Possession konvansiyonları** (GT'nin "possession sahibi" bayrağı örnek veride yok; bu yüzden aralık
+taranıyor):
+
+| ad | tanım |
+|---|---|
+| `events` | yukarıdaki ham kural: her RECOVERY / tek dokunuş possession değiştirir |
+| `tau1/2/3` | bir önceki takımın spell'ini izleyen (araya D girmeyen) ve 1/2/3 sn'den kısa spell önceki takıma verilir |
+| `ctrl` (olay-kontrollü) | **resmi tanımın olaylara uygulanışı**: rakibin spell'ini izleyen spell, ancak içinde tamamlanmış PASS ya da SHOT varsa veya takım topu ≥1 sn tuttuysa (≥1 sn sonra başlayan BALL LOST/CARRY ya da ≥1 sn süren CARRY) possession değişimi sayılır. Aksi halde (tek dokunuşluk RECOVERY, hemen kaybedilen kafa/blok, kontrol gelmeyen hava topu) önceki takıma verilir. Ölü toptan sonraki spell her zaman korunur. Süre eşiği 0.5 / 1 / 2 sn için sonuç 233 / 231 / 224 spell/maç; eşik belirleyici değil. Zamana dayalı tanım bilinçli: CARRY yalnız Game 3'te var ve "kısa bir CARRY" kontrol sayılınca Game 3 tek başına 381 spell veriyordu |
+
+### 3. Possession-spell istatistikleri
+
+| set | konvansiyon | spell/maç | canlı dk başına | medyan sn | ort. sn | < 2 sn | < 1 sn | D seg./maç | D payı |
+|---|---|---|---|---|---|---|---|---|---|
+| Metrica game 1 | events | 381 | 7.17 | 3.92 | 8.37 | 0.252 | 0.126 | 105 | 0.450 |
+| Metrica game 2 | events | 359 | 6.54 | 4.56 | 9.17 | 0.304 | 0.128 | 106 | 0.417 |
+| Metrica game 3 | events | 405 | 6.23 | 4.64 | 9.63 | 0.272 | 0.116 | 104 | 0.322 |
+| **Metrica, 3 maç** | events | 382 | 6.62 | 4.40 | 9.06 | 0.275 | 0.123 | 105 | 0.396 |
+| **Metrica, 3 maç** | tau1 | 320 | 5.56 | 6.20 | 10.80 | 0.153 | 0.006 | 105 | 0.396 |
+| **Metrica, 3 maç** | tau2 | 269 | 4.66 | 8.50 | 12.88 | 0.041 | 0.007 | 105 | 0.396 |
+| **Metrica, 3 maç** | tau3 | 231 | 4.01 | 10.72 | 14.98 | 0.043 | 0.009 | 105 | 0.396 |
+| **Metrica, 3 maç** | **ctrl** | 231 | 4.01 | 10.28 | 14.98 | 0.061 | 0.013 | 105 | 0.396 |
+| açık DFL, 7 maç | BallPossession | 437 | 8.30 | 3.68 | 7.23 | 0.300 | 0.125 | 102 | 0.448 |
+| BAR-ATH public pencere (5 dk) | GT | 17 | 4.23 | 7.56 | 14.19 | 2/17 | 1/17 | 4 | 0.196 |
+
+(`ctrl` maç bazında: 225 / 215 / 253 spell, 4.24 / 3.92 / 3.89 canlı dk başına.)
+
+**Public pencere hangi konvansiyona benziyor?** Metrica etiketlerinden kaydırmalı 5 dakikalık pencereler alındı
+(30 sn adım, konvansiyon başına 516 pencere). Public penceredeki değerin bu dağılımdaki yüzdeliği:
+
+| konvansiyon | spell hızı | medyan süre | < 2 sn payı | hız ≤ public **ve** <2 sn payı ≤ public olan pencere payı |
+|---|---|---|---|---|
+| events | 8 | 84 | 8 | 0.027 |
+| tau1 | 17 | 65 | 42 | 0.122 |
+| tau2 | 30 | 41 | 87 | 0.287 |
+| tau3 | 48 | 19 | 85 | 0.444 |
+| **ctrl** | **49** | 20 | 75 | **0.422** |
+
+Ham olay konvansiyonunda public pencere uç bir pencere; `ctrl`'de ise tipik. Çekinceler:
+- 17 possession az.
+- Barça'nın oyun stili de spell'leri uzatabilir.
+- Metrica devrelerinin ilk 5 dakikası ham etiketle 14–32 spell veriyor; 16 ve 20 spell'lik açılışlar var.
+
+Bu yüzden bu bulgu konvansiyonu kanıtlamıyor, `ctrl`'e ağırlık veriyor.
+
+### 4. `pen_team` taraması
+
+**Kurulum.**
+- Zincir: temiz Metrica takibi → `sim.degrade` (3 tohum) → `mlfeat` → DFL'de eğitilmiş modeller
+  (`cache/dfl/models_all.pkl`, `train_dfl.predict_proba`) → `train_dfl.emissions` (temp 1/1, yani k_team = 1)
+  → `train_dfl.decode_block` → maç başına `train_dfl.spell_score`. Sonuçlar 3 maçın ortalaması, her maç
+  3 tohumun ortalaması.
+- Dekoder ayarları:
+  - **v5**: v5'in kalıtımla aldığı pen_dead = 30, min_poss = 8, min_dead = 50.
+  - **dflcv**: DFL CV'nin seçtiği 32 / 5 / 25.
+- Ölü-top kanıtı:
+  - **model**: DFL ölü-top modeli,
+  - **oracle**: gerçek D (yalnız takım kararını izole etmek için).
+- Aynı tarama DFL'nin out-of-fold olasılıklarında da koşuldu.
+- Bozulmuş Metrica'da kare kalitesi:
+  - canlı/ölü doğruluğu 0.949, canlı karelerde takım doğruluğu 0.919,
+  - top kayıp oranı canlıda 0.22, ölüde 0.98. DFL eğitim verisinde bu oranlar 0.26 / 0.67; ölü-top ipucu
+    Metrica'da daha kolay, oracle koşusu bunu sınırlıyor.
+
+![pen_team taraması](../reports/metrica_pen_team_v5_model.png)
+
+**spellF1, v5 dekoder, öğrenilmiş ölü-top kanıtı** (kalın = sütunun en iyisi):
+
+| pen_team | events | tau1 | tau2 | tau3 | ctrl | DFL | tahmin / gerçek spell (events) |
+|---|---|---|---|---|---|---|---|
+| 2 | 0.5982 | 0.6501 | 0.6741 | 0.6573 | 0.6659 | **0.5502** | 301 / 382 |
+| 3 | 0.6027 | 0.6566 | 0.6825 | 0.6688 | 0.6781 | 0.5495 | 293 / 382 |
+| 4 | 0.6041 | 0.6606 | 0.6888 | 0.6786 | 0.6875 | 0.5492 | 285 / 382 |
+| 5 | **0.6056** | 0.6640 | 0.6949 | 0.6872 | 0.6982 | 0.5477 | 279 / 382 |
+| 6 | 0.6052 | **0.6663** | 0.6990 | 0.6953 | 0.7060 | 0.5462 | 273 / 382 |
+| 8 *(şimdiki)* | 0.6016 | 0.6644 | 0.7034 | 0.7066 | 0.7184 | 0.5460 | 264 / 382 |
+| 10 | 0.5988 | 0.6645 | 0.7067 | 0.7143 | 0.7311 | 0.5409 | 256 / 382 |
+| 12 | 0.5963 | 0.6626 | 0.7091 | 0.7190 | 0.7350 | 0.5365 | 252 / 382 |
+| 16 | 0.5921 | 0.6589 | 0.7147 | 0.7288 | 0.7448 | 0.5292 | 245 / 382 |
+| **20 *(öneri)*** | 0.5877 | 0.6554 | 0.7170 | 0.7370 | 0.7558 | 0.5207 | 237 / 382 |
+| 24 | 0.5823 | 0.6507 | **0.7179** | 0.7412 | 0.7582 | 0.5140 | 233 / 382 |
+| 32 | 0.5736 | 0.6431 | 0.7144 | **0.7497** | **0.7603** | 0.5005 | 225 / 382 |
+| 48 | 0.5436 | 0.6120 | 0.6886 | 0.7430 | 0.7530 | 0.4795 | 208 / 382 |
+| 64 | 0.5265 | 0.5941 | 0.6731 | 0.7356 | 0.7432 | 0.4571 | 198 / 382 |
+
+**Sağlamlık: en iyi değer [en iyiden ≤ 0.005 uzaktaki aralık].**
+
+| ayar | events | tau1 | tau2 | tau3 | ctrl | DFL |
+|---|---|---|---|---|---|---|
+| v5, model | 5 [3–8] | 6 [5–12] | 24 [16–32] | 32 [32] | 32 [20–32] | 2 [2–8] |
+| v5, oracle | 5 [3–8] | 6 [5–12] | 24 [16–32] | 48 [32–48] | 48 [24–48] | 2 [2–4] |
+| dflcv, model | 5 [3–8] | 6 [5–12] | 24 [16–32] | 32 [32] | 32 [20–32] | 2 [2–8] |
+| dflcv, oracle | 5 [3–8] | 6 [5–12] | 24 [16–32] | 48 [32–48] | 48 [24–48] | 2 [2–5] |
+
+- Maç bazında en iyiler (v5, model): events 4 / 10 / 5, ctrl 32 / 24 / 24, tau2 20 / 24 / 16.
+- Dekoder ayarı ve ölü-top kanıtının kalitesi optimumu değiştirmiyor. Optimumu belirleyen, possession
+  konvansiyonu.
+
+**Eşli farklar, pen_team 8'e göre** (aynı tohum × maç, 9 koşu; ortalama, sd, kazanılan koşu):
+
+| | 6 | 12 | 16 | 20 | 24 | 32 |
+|---|---|---|---|---|---|---|
+| events | +0.0036 (0.005, 8/9) | −0.0053 (2/9) | −0.0095 (0/9) | −0.0140 (0.009, 1/9) | −0.0193 (0/9) | −0.0280 (0/9) |
+| ctrl | −0.0125 (0/9) | +0.0166 (9/9) | +0.0263 (9/9) | **+0.0373 (0.010, 9/9)** | +0.0398 (9/9) | +0.0419 (9/9) |
+| tau2 | −0.0044 (3/9) | +0.0058 (8/9) | +0.0113 (9/9) | +0.0136 (7/9) | +0.0146 (6/9) | +0.0110 (6/9) |
+
+**Pişmanlık analizi** (v5, model; pişmanlık = konvansiyonun en iyi spellF1'i − o pen_team'in spellF1'i):
+
+| pen_team | 5 | 8 | 12 | 16 | **20** | 24 | 32 |
+|---|---|---|---|---|---|---|---|
+| events | 0.000 | 0.004 | 0.009 | 0.013 | 0.018 | 0.023 | 0.032 |
+| tau1 | 0.002 | 0.002 | 0.004 | 0.007 | 0.011 | 0.016 | 0.023 |
+| tau2 | 0.023 | 0.015 | 0.009 | 0.003 | 0.001 | 0.000 | 0.004 |
+| tau3 | 0.063 | 0.043 | 0.031 | 0.021 | 0.013 | 0.009 | 0.000 |
+| ctrl | 0.062 | 0.042 | 0.025 | 0.016 | 0.005 | 0.002 | 0.000 |
+| **en kötü durum** | 0.063 | 0.043 | 0.031 | 0.021 | **0.018** | 0.023 | 0.032 |
+| beklenen, eşit önsel | 0.030 | 0.021 | 0.016 | 0.012 | **0.009** | 0.010 | 0.012 |
+| beklenen, ctrl-ağırlıklı (.5 ctrl) | 0.041 | 0.028 | 0.019 | 0.013 | 0.008 | **0.007** | 0.008 |
+| beklenen, public-pencere ağırlıklı | 0.047 | 0.032 | 0.021 | 0.014 | 0.007 | 0.006 | **0.004** |
+
+Oracle ölü-top kanıtında tablo aynı yönde; en kötü durum yine 20'de en küçük. Sadece ham olay konvansiyonuna
+inanılırsa doğru değer 5–6. Diğer her ağırlıklandırmada 20–32.
+
+### 5. BAR-ATH aktarım kontrolü (yalnız toplu istatistik)
+
+**Takım modelinin güveni.** `model_v5`'in canlı karelerinde medyan |logit p_home| 2.93 ve p > 0.9 payı 0.61.
+Bozulmuş Metrica'da bu değerler 3.52 ve 0.70. BAR-ATH'ta model biraz daha az emin; aynı ceza BAR-ATH'ta
+biraz daha fazla yumuşatma demek.
+
+**v5, tam maç ve public pencere, `pen_team`'e göre:**
+
+| pen_team | possession | canlı dk başına | medyan sn | ort. sn | < 2 sn | public spellF1 | public macroF1 | public tahmin/gerçek |
+|---|---|---|---|---|---|---|---|---|
+| 4 | 305 | 5.77 | 6.48 | 10.40 | 0.157 | 0.5548 | 0.9023 | 14/17 |
+| 6 | 282 | 5.33 | 7.06 | 11.25 | 0.117 | 0.5548 | 0.9023 | 14/17 |
+| 8 *(şimdiki)* | 261 | 4.94 | 8.08 | 12.15 | 0.077 | 0.5655 | 0.9010 | 12/17 |
+| 12 | 252 | 4.77 | 8.36 | 12.59 | 0.063 | 0.5655 | 0.9010 | 12/17 |
+| 16 | 228 | 4.31 | 8.98 | 13.91 | 0.035 | 0.4444 | 0.8957 | 10/17 |
+| **20** | 218 | 4.13 | 9.70 | 14.54 | 0.023 | 0.4480 | 0.8854 | 8/17 |
+| 24 | 209 | 3.96 | 10.12 | 15.15 | 0.005 | 0.4480 | 0.8854 | 8/17 |
+| 32 | 201 | 3.82 | 10.56 | 15.71 | 0.005 | 0.4480 | 0.8854 | 8/17 |
+
+**Aktarım için iki ölçüt aynı sonuca varıyor.**
+- *Aynı ceza:* ctrl'de 20–32. BAR-ATH'ta model daha az emin olduğundan bu aralığın alt ucu (~20) daha uygun.
+- *Aynı çözülmüş hız:* Metrica'da ctrl optimumunda (pen 24–32) dekoder maç başına 225–233 spell üretiyor,
+  yani 3.9–4.0/canlı dk. BAR-ATH'ta aynı hız pen ≈ 22–30'da elde ediliyor (20'de 4.13, 24'te 3.96,
+  32'de 3.82).
+- Ham olay konvansiyonunda ise iki ölçüt 5–10 diyor. Metrica optimumu 5'te 279 spell, yani 4.84/dk;
+  BAR-ATH'ta bu hız 8 ile 10 arasında.
+
+**Public pencere çelişkisi.** 16+ değerlerinde v5 bu pencerede 12 yerine 8–10 spell üretiyor ve IoU
+eşikleri ortalamasında ~2–3 eşleşme kaybediyor. 17 possession'da bu 0.12 spellF1 demek. Resmi EVALUATION.md'ye göre bu pencerede
+"bir possession spellF1'i ~6 puan oynatıyor", bootstrap aralığı ~0.27–0.62. Bu sinyal ham olay
+konvansiyonuyla uyumlu ama zayıf. Kararı değiştirecek kanıt elle etiketlenmiş doğrulama setinden gelmeli.
+
+### 6. Öneri
+
+1. `model_v5` için **`pen_team = 20`** (k_team = 1, diğer dekoder ayarları aynı). Uygulamak için
+   `make_submission.py --params '{"pen_team": 20}'` ya da DEFAULT'ta 8 → 20 değişikliği (bu oturumda
+   yapılmadı). Gerekçe:
+   - GT'nin resmi tanımı ve public pencere istatistikleri kontrollü-possession konvansiyonuna işaret ediyor.
+     Bu konvansiyonda optimum 20–32.
+   - 20, beş konvansiyon üzerinde en kötü durum pişmanlığını en aza indiriyor (≤ 0.018).
+   - Ham olay konvansiyonu doğru çıkarsa kayıp 0.014 (gürültü bandının altında). Kontrollü konvansiyon
+     doğruysa kazanç +0.037 (9/9).
+2. **8'e dönme ya da 12'de durma koşulu.** Elle etiketlenmiş 20–30 dakikalık BAR-ATH doğrulama seti
+   (`tools/labeler.html`) tek dokunuşların / kazanılan hava toplarının possession değiştirdiğini gösterirse
+   (yani ham olay benzeri bir GT çıkarsa) 5–8 doğru aralık. Orta yol olarak 12:
+   - public pencereyi hiç değiştirmiyor (12/17, 0.5655),
+   - ctrl'de +0.017 (9/9) kazandırıyor, ham olayda −0.005 kaybettiriyor.
+3. **DFL-tuned 2–4 bu GT için uygun değil.** DFL'nin bayrağı çok sık dönüyor (8.3/dk). 2–4 yalnız ham
+   olay konvansiyonunda en iyiye yakın (≤ 0.007). tau2/tau3/ctrl'de 0.03–0.09 geride.
+
+### 7. Sınırlamalar ve sonraki adımlar
+
+- Örnek verilerde Metrica'nın possession bayrağı yok. Konvansiyon olaylardan kuruldu. D tarafı takiple
+  doğrulandı; possession tarafı yalnız resmi tanım + 17 possession'lık public pencere ile destekleniyor.
+- 3 anonim maç (lig/seviye bilinmiyor). Barça'nın stili possession'ları uzatıyor olabilir.
+- `sim.degrade` gerçek BAR-ATH hatalarının hepsini taklit etmiyor (izlerin takım karışması, yanlış top
+  tespitleri). Temiz Metrica verisinde top ölüyken zaten yok, bu yüzden ölü-top ipucu Metrica'da BAR-ATH'tan
+  daha güçlü; oracle koşusu bu farkı sınırlıyor.
+- Yan bulgu (ayrı iş): `sim.degrade` canlı oyunda top kaybını hedef %12 yerine fiilen %22 (Metrica) / %26
+  (DFL eğitim verisi) üretiyor. Sebep: ölü topta başlayan boşluklar (medyan 10.7 sn) sonraki canlı oyuna
+  taşıyor. Game 1 / 1. yarıda bu taşma canlı karelerin %23–34'ünü kaplıyor. Kalibrasyon döngüsü yalnız
+  canlıda başlayan boşlukları küçültebiliyor (%2–5'e iniyor), taşmayı düzeltemiyor. DFL modelleri bu yüzden
+  BAR-ATH'tan daha zor bir top-kaybı rejiminde eğitilmiş olabilir.
+- Resmi baseline'ların tam maç skorları GT possession sayısını anlamlı sınırlamıyor (yalnız n_gt ≥ 83).
+
+### 8. Yeniden üretim
+
+```bash
+.venv/Scripts/python.exe -I src/metrica_sample.py download     # veri (sabit commit)
+.venv/Scripts/python.exe -I src/metrica_sample.py stats        # spell istatistikleri (events)
+.venv/Scripts/python.exe -I src/metrica_calibration.py build   # bozulma + öznitelik + olasılıklar (~2.5 dk)
+.venv/Scripts/python.exe -I src/metrica_calibration.py sweep   # tarama -> reports/metrica_sweep.*  (~4 dk)
+.venv/Scripts/python.exe -I src/metrica_calibration.py tables  # bu rapordaki tablolar
+.venv/Scripts/python.exe -I src/metrica_calibration.py paired 8
+.venv/Scripts/python.exe -I src/metrica_calibration.py regret
+.venv/Scripts/python.exe -I src/metrica_calibration.py windows # public pencere vs 5 dk pencereler (toplu)
+.venv/Scripts/python.exe -I src/metrica_calibration.py barath  # v5 x pen_team, yalnız toplu
+.venv/Scripts/python.exe -I src/metrica_calibration.py plot 20
+```
+
+Tüm adımlar deterministik (sabit tohumlar; LightGBM `deterministic=True`).
+
+## Ek C — Simülatörde top kaybı düzeltmesi, `sim.degrade` önce / sonra (20 Ekim)
+
+*Tarihsel rapor; özgün başlığı: `sim.degrade` top-kaybı düzeltmesi: önce / sonra. Güncel durum için §1.*
+
+*20 Ekim 2026 · kod: `src/ball_gaps.py`, `src/simfix.py` (yeni); `src/sim.py`'ye yalnız ekleme
+(`ball_dropout_v2`, `V2`, `V2_TACTICAL`; varsayılan v1 yolu bit-bit aynı, doğrulandı) · ham çıktılar
+`reports/simfix/` · önbellek `cache/dfl_v2`, `cache/dfl_v2t`, `cache/simfix`. `cache/dfl`, `cache/metrica`,
+`model_v5.py` ve `cache/dfl/models_all.pkl` değişmedi.*
+
+> **Veri politikası.** BAR-ATH tarafında yalnız toplu istatistik üretildi: oranlar, medyanlar, sayılar,
+> public-pencere skorları. Metrica örnek verisi ve açık DFL verisi kısıtsız.
+
+### Özet
+
+- **BAR-ATH'ın gerçek oranları (modelin gördüğü birleşik top, tam maç, v5 etiketleri):**
+  - Top canlı oyunda karelerin **%6.6**'sında, ölü topta **%69**'unda yok. Yalnız tactical kamerada bu
+    oranlar %10.7 ve %73.
+  - Duraklamada kaybolan top, yeniden başlamaların yalnız **%22**'sinde (tactical %29) oyun başladıktan
+    sonra da kayıp kalıyor. Bu taşmanın medyanı ~2 sn, p90'ı ~6 sn.
+  - Toplam taşma canlı karelerin yalnız **%1.9**'u.
+  - Ayrıca duraklamaların %24'ünde top, ölü toptan medyan 2.9 sn önce kayboluyor.
+- **v1 simülasyonu:** canlıda %25 kayıp. Bunun %24 puanı taşma: yeniden başlamaların %71'inde top hâlâ
+  yok, taşma medyanı 7.4 sn.
+- **Düzeltme (`params=sim.V2`):**
+  - Ölü topta başlayan boşluk yeniden başlamada kesiliyor. Kalibre edilmiş bir pay kısa bir süre devam
+    ediyor.
+  - Ölü top öncesi kayıp ve rastgele canlı boşluklar ekleniyor.
+  - Hedefler her yarıda tam tutuyor. Sonuç profili BAR-ATH'ınkiyle neredeyse aynı (Bölüm 2).
+- **DFL CV (aynı test verisinde, eşli):**
+  - v2 modelleri BAR-ATH benzeri (v2) bozulmada spellF1'i **0.571 → 0.587**, canlı/ölü doğruluğunu
+    0.969 → 0.980 çıkarıyor.
+  - Takım modeli neredeyse aynı: doğruluk 0.8908 → 0.8914, log-loss 0.2445 → 0.2413, güven aynı.
+  - Kazanç ölü-top modelinden geliyor. v5 bu modeli kullanmıyor. Bu model BAR-ATH'ta v2 ile de zayıf
+    (public pencerede ham canlı/ölü doğruluğu 0.759 → 0.766).
+- **"Takım modeli BAR-ATH'ta gereğinden az emin" hipotezi bu düzeltmeyle desteklenmiyor.**
+  - v1 modeli v2 verisinde v2 modeli kadar emin (medyan |logit| 3.46 / 3.50) ve kalibre.
+  - BAR-ATH'ta v2 modeli biraz daha az emin (2.93 → 2.78).
+  - Public penceredeki ~2 puanlık düşük güven üç model setinde de aynı. Kaynağı top kaybı değil.
+- **BAR-ATH v5 (toplu):** farklar gürültü bandında. v5 etiketleri %98 aynı.
+  - pen 8'de public spellF1 0.566 → 0.542, pen 20'de 0.448 → 0.578.
+  - Duran top proxy'si 0.815 → 0.926.
+- **Metrica `pen_team` optimumu yerinde.** v2 modelleri ve v2 bozulmasıyla:
+  - konvansiyon optimumları: events 5, ctrl 32 [24–32], tau3 32;
+  - minimax yine **20**.
+  - 20 ile 8 arasındaki fark ctrl'de +0.030 (9/9), events'te −0.019. Önceki koşuda bu farklar +0.037 ve
+    −0.014'tü.
+  - v2 modelleriyle "aynı çözülmüş hız" ölçütü 22–30'dan ~30–32'ye kayıyor.
+- **Öneri:** `pen_team` önerisi (20, aralık 16–24) değişmiyor.
+  - v2 modellerine geçmek ilkesel olarak daha doğru ama v5'e beklenen etkisi küçük. Metrica'da yalnız
+    takım kanıtıyla (oracle) +0.001–0.003.
+  - Karar ana oturumda; `models_all.pkl` değiştirilmedi.
+  - DFL ölü-top modelini kullanacak her yeni sürüm v2 verisiyle eğitilmeli.
+
+### 1. BAR-ATH'ta gerçek oranlar (görev 1)
+
+Tanımlar:
+- **Taşma:** ölü karede başlayan kayıp koşusunun kapsadığı canlı kareler.
+- **Yeniden başlamada top yok:** D'den sonraki ilk canlı karede top yok.
+- **D girişinde top yok:** D'den önceki son canlı karede top yok.
+
+Bloklar devre başına; 2. yarı santradan başlıyor. Çıktı: `reports/simfix/barath_ball_profile.txt`.
+
+**Birleşik top** (tactical + hizalanmış broadcast; `features_merged.pkl`, takım modelinin BAR-ATH girdisi):
+
+| etiket kaynağı | canlıda kayıp | ölüde kayıp | taşma / canlı | yeniden başlamada top yok | taşma > 3 sn | taşma medyan (p90) sn | D girişinde top yok | önden kayıp medyan sn | görünür koşu medyan sn |
+|---|---|---|---|---|---|---|---|---|---|
+| public GT penceresi (5 dk, 4 duraklama) | 0.039 | 0.336 | 0 | 0/4 | 0/4 | – | 1/4 | 0.8 | 34.4 |
+| v5 pen 8 (116 yeniden başlama) | **0.066** | **0.691** | **0.019** | **0.216** | 0.052 | 1.7 (5.8) | **0.237** | 2.9 | 15.9 |
+| v5, top-varlığı ipuçları kapalı | 0.076 | 0.672 | 0.023 | 0.226 | 0.070 | 2.2 (5.8) | 0.239 | 2.7 | 15.9 |
+| v3 canlı/ölü, top ipuçları kapalı | 0.091 | 0.681 | 0.019 | 0.235 | 0.070 | 2.2 (5.1) | 0.274 | 2.4 | 15.9 |
+| v3, top + saha dışı ipuçları kapalı | 0.092 | 0.690 | 0.016 | 0.266 | 0.073 | 2.0 (5.0) | 0.315 | 2.4 | 15.9 |
+| *tactical top, v5 pen 8* | *0.107* | *0.726* | *0.017* | *0.293* | *0.060* | *1.9 (5.4)* | *0.305* | *2.9* | *13.7* |
+
+**Etiket yanlılığı kontrolü.**
+- v5'in canlı/ölü kararı top ipuçlarını da kullanıyor. Bu yüzden v5 etiketleri canlıda kaybı aşağı çekebilir.
+- Topu hiç görmeyen etiketler (son iki satır) daha gürültülü: public pencerede canlı/ölü uyumu
+  0.935–0.950, v5'te 0.958. Etiket hatası canlı kaybı yukarı itiyor (ölü karelerin ~%70'i kayıp).
+- Bütün varyantlar aynı resmi veriyor:
+  - canlıda %6.5–9 kayıp,
+  - yeniden başlamaların ~%22–27'sinde top yok, medyan ~2 sn,
+  - taşma canlı karelerin ~%2'si.
+- Public pencerede (4 duraklama) v5'in D başlangıçları ortalama 0.7 sn erken, bitişleri 0.9 sn geç. Yani
+  taşma ve önden kayıp etiket gecikmesiyle açıklanamıyor; geç bitiş taşmayı olsa olsa küçük gösterir
+  (n = 4, zayıf kanıt).
+
+**Seçilen hedefler (`sim.V2`, birleşik top):** canlı %6.5, ölü %70, yeniden başlamada top yok %22 (taşma
+medyan 2 sn, σ 0.8), D girişinde top yok %24 (öncül medyan 2.7 sn, σ 0.75). `sim.V2_TACTICAL`: canlı %12,
+ölü %70 (v1 hedefleri), yeniden başlamada %30, D girişinde %30.
+
+### 2. Düzeltme: `sim.ball_dropout_v2` (görev 2)
+
+`sim.degrade(..., params=sim.V2)` ile açılıyor. Parametre verilmezse v1 aynen çalışıyor:
+`sim_orig` çıktısıyla `np.array_equal` doğrulandı.
+
+**Mekanizma:**
+- Ölü topta başlayan lognormal boşluklar (medyan 10.7 sn) yeniden başlamada kesiliyor.
+- Yeniden başlamaların bir payında top kısa bir lognormal süre daha kayıp kalıyor. Bu yalnız son ölü
+  karede top yoksa oluyor.
+- Duraklamaların bir payında top, ölü top başlamadan önce kayboluyor. Bu durumda ölü boşluk duraklamayla
+  birlikte başlıyor.
+- Kalan canlı kayıp, rastgele boşluklarla dolduruluyor. Havadaki topta bu boşluklar 2.5 kat daha olası.
+
+**Kalibrasyon:**
+- Rastgele sayılar bir kez çekiliyor (common random numbers).
+- Boşlukların birleşimi her parametrede monoton. Bu yüzden oranlar ikiye bölme (bisection) ile, olay
+  payları ise tam sayımla her yarıda tutturuluyor. Kaynağın kendi kayıpları da hesaba katılıyor.
+- v2 modunda oyuncu bozulması v1'le aynı rastgele akışı kullanıyor. Böylece v1/v2 verileri yalnız top
+  maskesinde farklı (eşli karşılaştırma).
+
+| profil (gerçek etiketler) | canlıda kayıp | ölüde kayıp | taşma / canlı | yeniden başlamada top yok | taşma > 3 / > 10 sn | taşma medyan (p90) | D girişinde top yok | önden kayıp medyan | D başına koşu | görünür koşu medyan |
+|---|---|---|---|---|---|---|---|---|---|---|
+| BAR-ATH birleşik (v5 pen 8) | 0.066 | 0.691 | 0.019 | 0.216 | 0.052 / 0.000 | 1.7 (5.8) | 0.237 | 2.9 | 1.02 | 15.9 |
+| **DFL, sim v2** | **0.066** | **0.700** | **0.016** | **0.223** | 0.067 / 0.003 | 2.2 (5.0) | **0.238** | 2.8 | 1.23 | **16.1** |
+| BAR-ATH tactical (v5 pen 8) | 0.107 | 0.726 | 0.017 | 0.293 | 0.060 / 0.009 | 1.9 (5.4) | 0.305 | 2.9 | 0.95 | 13.7 |
+| DFL, sim v2t | 0.120 | 0.700 | 0.019 | 0.306 | 0.089 / 0.009 | 2.1 (5.2) | 0.303 | 3.1 | 1.24 | 14.5 |
+| DFL, sim v1 (`cache/dfl`) | 0.253 | 0.676 | **0.242** | **0.710** | 0.546 / 0.266 | 7.4 (25.3) | 0.232 | 8.9 | 1.81 | 7.5 |
+| Metrica, sim v1 → v2 | 0.221 → 0.065 | 0.980 → 0.941 | 0.201 → 0.012 | 0.724 → 0.251 | | | 0.241 → 0.241 | | | 13.2 → 14.0 |
+
+**Yarı bazında tutarlılık.**
+- `cache/dfl`'de (v1) canlı kayıp yarıdan yarıya %17–35, ölü kayıp %58–73 arasında değişiyordu. v2'de
+  canlı %5.7–7.3, ölü %69.5–71.1, yeniden başlamada top yok %21–24.
+- Metrica'nın temiz takibinde top ölüyken zaten yok; bu yüzden ölü kayıp ~%94'ün altına inemiyor.
+
+### 3. DFL CV, önce / sonra (görev 3)
+
+**`train_dfl.cv()`, her varyant kendi bozulmasında.** Değerler 7 maçın ortalaması. Kaynaklar:
+`reports/dfl_cv.txt`, `reports/simfix/dfl_cv_v2.txt`, `reports/simfix/dfl_cv_v2t.txt`.
+
+| eğitim = test | kare doğruluğu | canlı/ölü | takım (canlı) | en iyi spellF1 (en kötü maç) | en iyi dekoder |
+|---|---|---|---|---|---|
+| v1 (önce) | 0.906 | 0.965 | 0.885 | 0.5492 (0.469) | pen_team 4, pen_dead 32 |
+| **v2** | **0.924** | **0.980** | **0.891** | **0.5874** (0.515) | pen_team 4, pen_dead 64 (32'de 0.5868) |
+| v2t | 0.917 | 0.974 | 0.889 | 0.5734 (0.516) | pen_team 4, pen_dead 64 |
+
+Bu tablo iki etkiyi karıştırıyor: v2 test verisi daha kolay. Bu yüzden her kat modeli her bozulmada
+değerlendirildi (`reports/simfix/dfl_cross.txt`). v1 kat modellerinin OOF'u `cache/dfl/oof.pkl` ile
+birebir aynı.
+
+| kat modelleri (eğitim) | test | kare | canlı/ölü | takım | takım, top yokken | takım log-loss | güven − doğruluk | medyan abs logit | spellF1 @4/32 | en iyi spellF1 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| v1 | **v2** | 0.9138 | 0.9694 | 0.8908 | 0.798 | 0.2445 | +0.004 | 3.46 | 0.5714 | 0.5715 |
+| v2t | **v2** | 0.9232 | 0.9795 | 0.8914 | 0.805 | 0.2425 | +0.003 | 3.51 | 0.5834 | 0.5841 |
+| **v2** | **v2** | **0.9245** | **0.9802** | **0.8914** | 0.800 | **0.2413** | +0.002 | 3.50 | **0.5868** | **0.5874** |
+| v1 | v1 | 0.9060 | 0.9649 | 0.8851 | 0.850 | 0.2607 | +0.002 | 3.13 | 0.5492 | 0.5492 |
+| v2 | v1 | 0.8839 | 0.9366 | 0.8835 | 0.844 | 0.2635 | −0.003 | 3.01 | 0.5233 | 0.5244 |
+
+- BAR-ATH benzeri veride v2 modelleri **+0.015 spellF1** kazandırıyor. Kazancın tamamına yakını ölü-top
+  modelinden (canlı/ölü +0.011).
+- Takım modeli değişmiyor: doğruluk +0.0006, log-loss −0.003, güven ve kalibrasyon aynı.
+- v1'in taşma rejiminde (gerçekçi değil) v2 modelleri −0.026 kaybediyor.
+- v1'de top yokken takım doğruluğu yüksek (0.85): kayıp kareler çoğunlukla yeniden başlamadan sonra ve
+  takım belli. v2'de kayıp kareler duraklama öncesine kayıyor ve takım doğruluğu 0.80'e iniyor.
+
+### 4. BAR-ATH'ta v5 (yalnız toplu; `reports/simfix/barath_v5.txt`)
+
+- v5 dekoderi ve canlı/ölü kanıtı (v3) aynı; yalnız takım olasılıkları değişti.
+- `model_v5.py` değiştirilmedi. Olasılıklar `model_v5.team_logp(f, path)` ile yüklendi.
+- v1 olasılıkları `cache/dfl/barath_probs.pkl` ile birebir aynı.
+
+| | v1 modelleri (şimdiki) | v2 | v2t |
+|---|---|---|---|
+| ham takım modeli, public canlı kareler: doğruluk / log-loss / güven − doğruluk | 0.915 / 0.211 / −0.020 | 0.912 / 0.213 / −0.020 | 0.913 / 0.213 / −0.021 |
+| v5-canlı kareler, tam maç: medyan abs logit (top yokken) · p > 0.9 payı | 2.93 (1.25) · 0.612 | 2.78 (0.98) · 0.593 | 2.76 (1.13) · 0.589 |
+| v5 pen 8: public spellF1 (tahmin/gerçek) · macroF1 · takım | 0.566 (12/17) · 0.901 · 0.929 | 0.542 (14/17) · 0.895 · 0.921 | 0.578 (10/17) · 0.891 · 0.915 |
+| v5 pen 8: possession (canlı dk başına) · tag_team · setpiece_ok | 261 (4.94) · 0.866 · 0.815 | 277 (5.25) · 0.860 · 0.926 | 272 (5.14) · 0.865 · 0.889 |
+| v5 pen 20: public spellF1 · macroF1 · possession (canlı dk başına) | 0.448 (8/17) · 0.885 · 218 (4.13) | 0.578 (10/17) · 0.892 · 236 (4.48) | 0.578 (10/17) · 0.891 · 222 (4.21) |
+
+- **D tarafı aynı:** dead share 0.501/0.502, adF1 0.974; restart ve ballout proxy'leri aynı.
+- **v5 pen 8 etiketleri:** v1 modelleriyle kare uyumu 0.980.
+- **Public pencere:** 17 possession; bir possession ≈ 0.06 spellF1. Değişimler gürültü bandında.
+- **pen 20'deki public düşüşü:** Metrica raporunun ana karşı-sinyali, v1'de 0.448. v2 modelleriyle
+  kayboluyor (0.578). Kanıt zayıf, aynı 17 possession.
+- **DFL ölü-top modeli BAR-ATH'a yine taşınmıyor** (`reports/simfix/barath_dead_model.txt`).
+  - Ham kare bazında public pencerede canlı/ölü doğruluğu v1 0.759, v2 0.766, v2t 0.769. Log-loss
+    1.00 / 0.99 / 0.90.
+  - v3 kurallarının adF1'i 0.974. Alan farkı sürüyor.
+  - v2'nin DFL'deki ölü-top kazancı burada görünmüyor (4 duraklama, zayıf kanıt).
+
+### 5. Metrica `pen_team` kalibrasyonu (görev 4)
+
+- `metrica_calibration` taraması yönlendirilmiş yollarla yeniden koşuldu. Çıktılar:
+  `reports/simfix/metrica_<model>_<bozulma>/metrica_sweep.*` ve `reports/simfix/metrica_regret_paired.txt`.
+- Aynı 3 maç × 3 tohum kullanıldı. v1 × v1 olasılıkları `cache/metrica` ile birebir aynı.
+- Değerler: v5 dekoderi, öğrenilmiş ölü-top kanıtı; en iyi `pen_team` ve [en iyiden ≤ 0.005 aralık].
+
+| modeller × Metrica bozulması | events | tau1 | tau2 | tau3 | ctrl | DFL kendi | minimax (öğrenilmiş / oracle) |
+|---|---|---|---|---|---|---|---|
+| v1 × v1 (önceki rapor) | 5 [3–8] | 6 [5–12] | 24 [16–32] | 32 [32] | 32 [20–32] | 2 | 20 / 20 |
+| v1 × v2 | 5 [3–8] | 6 [4–12] | 20 [16–32] | 32 [32] | 32 [32] | 2 | 20 / 20 |
+| v2 × v1 | 4 [3–8] | 8 [5–12] | 16 [12–24] | 32 [32–48] | 24 [24–48] | 3 | 20 / 20 |
+| **v2 × v2** | **5 [3–12]** | 12 [5–16] | 16 [12–32] | 32 [32–48] | **32 [24–32]** | 3 | **20 / 20** |
+| v2t × v2 | 6 [3–12] | 12 [6–12] | 24 [16–24] | 32 [32] | 32 [24–48] | 3 | 24 / 20 |
+
+- **pen_team 20 − 8 (eşli, 9 koşu):**
+  - v2 × v2: ctrl +0.0295 (9/9), tau2 +0.0103 (7/9), events −0.0192 (0/9).
+  - Önceki v1 × v1: ctrl +0.0373 (9/9), tau2 +0.0136 (7/9), events −0.0140 (1/9).
+- **Beklenen pişmanlık en iyileri (v2 × v2):** ctrl-ağırlıklı 32, eşit önsel 24, public-pencere ağırlıklı
+  32, yalnız events 5. Önceki koşuda: 24 / 20 / 32 / 5.
+  - Eşit önselde 16–32 arası farklar ≤ 0.0015.
+  - ctrl-ağırlıklı ve public-pencere ağırlıklı önsellerde 32'nin pişmanlığı 20'ninkinden 0.006 / 0.009
+    daha az.
+- **Takım modelinin payı (v2 bozulmasında v1 → v2 modelleri):** ctrl optimumunda spellF1 öğrenilmiş
+  kanıtla 0.800 → 0.808, oracle'da 0.865 → 0.867. Fark ölü-top modelinden.
+- **Aynı çözülmüş hız ölçütü:**
+  - Metrica ctrl optimumu (pen 24–32) her iki koşuda maç başına 227–234 spell üretiyor, canlı dk başına
+    ~3.9–4.1.
+  - BAR-ATH'ta v1 modelleriyle bu hıza ~22–30'da ulaşılıyor (20: 4.13, 24: 3.96, 32: 3.82; önceki rapor).
+  - v2 modelleriyle ~30–32'de ulaşılıyor (24: 4.30, 28: 4.19, 32: 3.93).
+
+### 6. Sonuç
+
+1. Yan bulgu doğrulandı ve düzeltildi. Sorunun kaynağı ölü topta başlayan boşlukların canlı oyuna taşması.
+   BAR-ATH'ta bu taşma canlı karelerin ~%2'si, v1'de ~%24'üydü. `sim.V2` BAR-ATH profilini canlı/ölü
+   oranlarında, yeniden başlama ve giriş davranışında ve görünür koşu uzunluğunda yakalıyor.
+2. Düzeltme DFL'de eşli **+0.015 spellF1** veriyor. Kazanç ölü-top modelinden geliyor. Takım modeli ve onun
+   BAR-ATH güveni değişmiyor; "fazla zor rejim takım modelini çekingen yapıyor" etkisi yok.
+3. `pen_team` önerisi değişmiyor: 20 (aralık 16–24). v2 modelleriyle hız ölçütü biraz yukarı (24–32)
+   işaret ediyor. Elle etiketlenmiş doğrulama seti yine asıl karar yeri.
+4. Ana oturuma kalan kararlar:
+   - (a) v5 için `cache/dfl_v2/barath_probs.pkl`'yi kullanmak. Etki küçük ve gürültü bandında. Duran top
+     proxy'si +0.11, pen 20 public düşüşü yok.
+   - (b) `models_all.pkl`'yi v2 ile değiştirmek. Bu oturumda yapılmadı.
+   - DFL ölü-top olasılığını kullanacak her sürüm v2 ile eğitilmeli. Ancak bu model BAR-ATH'ta v2 ile de
+     zayıf (public pencerede ham doğruluk 0.77). v5'in v3 tabanlı canlı/ölü kanıtının yerini tutmuyor.
+
+### 7. Yeniden üretim
+
+```bash
+.venv/Scripts/python.exe -I src/ball_gaps.py barath            # görev 1, BAR-ATH toplu profil (~15 sn)
+.venv/Scripts/python.exe -I src/simfix.py build v2 v2t         # bozulmuş DFL öznitelikleri (~1 dk, 7 süreç)
+.venv/Scripts/python.exe -I src/simfix.py cv v2                # train_dfl.cv -> cache/dfl_v2 (+ kat modelleri)
+.venv/Scripts/python.exe -I src/simfix.py cv v2t
+.venv/Scripts/python.exe -I src/simfix.py folds v1             # v1 kat modelleri (cache/dfl'ye yazmaz)
+.venv/Scripts/python.exe -I src/simfix.py cross                # eşli çapraz tablo
+.venv/Scripts/python.exe -I src/simfix.py models v2 v2t        # tüm-DFL modelleri -> cache/dfl_<v>/models_all.pkl
+.venv/Scripts/python.exe -I src/simfix.py barath               # v5 x model seti, yalnız toplu
+.venv/Scripts/python.exe -I src/simfix.py metrica_build        # Metrica v1/v2 bozulma x model setleri
+.venv/Scripts/python.exe -I src/simfix.py metrica_sweep v2 v2  # (ve v1 v2, v2 v1, v2t v2)
+.venv/Scripts/python.exe -I src/simfix.py metrica_summary
+```
+
+Her adım deterministik: sabit tohumlar ve LightGBM `deterministic=True`. v1 yolları mevcut önbelleklerle
+birebir aynı.
+
+## Ek D — Hakem düdüğü tespiti ve D sınırı zamanlaması (20 Ekim)
+
+*Tarihsel rapor; özgün başlığı: Hakem düdüğü tespiti ve D sınırı zamanlaması — değerlendirme. Güncel durum için §1.*
+
+*20 Ekim 2026 · tüm sayılar toplu istatistik (veri politikası: ham satır / görüntü / spektrogram yok; kare bazlı
+çıktılar yalnızca `cache/` içinde). Ayrıntılı çıktı: `reports/whistle_eval_output.txt`.*
+
+### Karar
+
+1. **Hazır AudioSet modelleri (PANNs CNN14, "Whistle" sınıfı) hakem düdüğünü ayırt etmiyor.** Lokal CPU'da üç
+   varyant (SED 32 kHz, clip 16 kHz, clip 32 kHz) denendi. v5 D başlangıçlarına yakınlıkta lift ≈ 1.0–1.9 (anlamsız ya da
+   zayıf). En iyi PANNs varyantı (clip16 + 30 sn medyan çıkarma) top-200'de lift 2.5'e çıkıyor, ama iki santra
+   düdüğünü de kaçırıyor (persentil 89 / 93). Yani düdüğü değil, muhtemelen tribün tepkisini yakalıyor.
+2. **Santra düdüğünden örnekle arama (query-by-example) açıkça ayırt edici.** `src/whistle_ref.py`'nin dayandığı
+   fikir şu: hakem tüm maç aynı düdüğü çalar, ses parmak izi (ana ton ~3.8–4.3 kHz ve harmonikleri) sabittir; tribün
+   ıslıkları ise rastgele perdelerde. Detektör, 1. yarı santrasının şablonuyla 2. yarı santrasındaki düdüğü **~3000
+   tepe arasında 5. sırada** buluyor (−1.24 sn). Tersi de geçerli: 2. yarı şablonu 1. yarınınkini **9. sırada**
+   buluyor (−1.08 sn). v5 D başlangıçlarının ±1 sn içinde **12/118 isabet**, rastgele %3 (**lift 3.2, p = 4e-4**).
+   En güçlü 100 tepenin **%74'ü tahmini D içinde** (D payı %50).
+3. **`model_v6` (v5 + düdük) D başlangıç zamanlamasını biraz iyileştiriyor, başka hiçbir şeyi değiştirmiyor.**
+   Tam maçta **9 D başlangıcı öne çekiliyor** (medyan 0.56 sn). Değişen kareler 135 (%0.08), hepsi canlı→D yönünde.
+   Yeni ya da silinen segment yok, takım değişimi yok.
+   - Public pencere: macroF1 **0.901 → 0.908**, alive/dead F1 0.974 → 0.977, geçiş-F1 (±1 sn) **0.389 → 0.444**.
+     **spellF1 değişmedi: 0.566.** Tam maç tanıları ve tüm vekil metrikler birebir aynı.
+   - Kazanç küçük ve resmi gürültü bandının içinde (macroF1 farkı < 0.01, 4 D başlangıcından 2'si etkilendi).
+     Ama yön tutarlı ve parametrelere karşı kararlı. **Düşük riskli bir iyileştirme; sıralama metriği (spellF1)
+     etkilenmiyor.**
+
+### 1. Detektör karşılaştırması
+
+v5 olayları = `submissions/baseline_v5.csv`'deki 118 canlı→D ve 117 D→canlı geçişi (değerlendirilen kareler).
+İsabet = skorun en güçlü 100 yerel tepesinden (±1 sn bastırma) biri pencereye düşüyor mu? Rastgele = aynı pencere tüm
+değerlendirilen karelere ya da tüm tahmini-canlı karelere konunca isabet oranı (büyüğü). p = tek yönlü binom testi.
+
+| Detektör | Santra 1: persentil / sıra / ofset | Santra 2: persentil / sıra / ofset | D başl. ±1 sn: isabet (rastgele) lift, p | D başl. [−3,+1] sn: lift | D bitişi [−4,+1] sn: lift | Top-100 tepe D içinde |
+|---|---|---|---|---|---|---|
+| Eski bant tonalitesi (`whistle.py`) | 99.91 / 56 / −1.08 sn | 99.61 / 184 / −1.24 sn | 4/118 (0.03) 1.1, p=0.52 | 0.8 | 1.6 (p=0.05) | 0.56 |
+| PANNs SED "Whistle" | 97.30 / 196 / −1.80 sn | 98.06 / 147 / −1.60 sn | 5/118 (0.03) 1.3, p=0.33 | 1.0 | 0.9 | 0.61 |
+| PANNs clip16 "Whistle" −medyan | 88.76 / 589 / −3.00 sn | 92.86 / 431 / +0.20 sn | 8/118 (0.03) 2.1, p=0.04 | 1.7 | 1.0 | 0.63 |
+| PANNs clip32 "Whistle" | 99.64 / 35 / −1.24 sn | 99.68 / 30 / −0.88 sn | 7/118 (0.03) 1.9, p=0.09 | 1.5 | 1.1 | 0.59 |
+| **Santra şablonu (`ref:s`)** | **sıra 9, −1.08 sn** (dışarıda bırakılmış) | **sıra 5, −1.24 sn** (dışarıda bırakılmış) | **12/118 (0.03) 3.2, p=4e-4** | **2.3 (p=2e-3)** | **2.2 (p=9e-4)** | **0.74** |
+
+- Şablon satırındaki santra sıraları **leave-one-out** (bir santranın şablonu → öbür santra). İki şablonun ortalaması
+  (`ref:s`, v6'da kullanılan) kendi santralarında 5. / 8. sırada.
+- Kendi kendini eğitme (en güçlü 30 tespitten şablon, santralar dışarıda): ±1 sn lift 3.8 (14/118). Fark gürültü
+  düzeyinde, bu yüzden v6 daha basit iki-santra şablonunu kullanıyor.
+- **Public GT çevresinde olay-tetiklemeli ortalama (n = 4 D başlangıcı, sağlam z-skoru):** [−1,0] / [0,+1] sn
+  aralığında şablon +4.3 / +3.4. Diğerleri: clip32 +2.4 / +1.6, SED +1.6 / +0.9, eski detektör +1.3 / +0.1.
+  4 GT D başlangıcından 2'sinde top-100 düdük var ve sınıra çok yakın: **−0.28 sn ve +0.08 sn**.
+  4 GT D bitişinin (yeniden başlama) hiçbirinde düdük tepesi yok.
+- Düdüğün yeri: top-100 tepenin 26'sı v5-canlı karelerde. Bunların 12'sinde v5'in D başlangıcı sonraki 3 sn
+  içinde, yani v5 geç kalmış. 74'ü v5-D içinde, 50'si duraklamanın başından >10 sn sonra (serbest vuruş
+  işaretleri, kartlar vb.).
+
+### 2. model_v6
+
+**Tasarım.** v5 skorları + Viterbi'de **D'ye giriş bonusu** (`wh_bonus = 30`), düdük tepesinin ±0.32 sn'sinde.
+Bonus yalnızca *v5 geç kaldığında* uygulanıyor: düdük anında v5 topu canlı sayıyor ve v5'in kendi canlı→D geçişi
+sonraki 3 sn içinde geliyor. Bu kısıt şart. Bonus her düdüğe verilince Viterbi D başlangıçlarını düdüğe kadar
+*geciktiriyor* (11 hareketin 6'sı geriye) ve duraklama ortasındaki düdükleri tekrar toplamak için duraklamaları
+bölüyor. `wh_bonus=80, top-200` ile D segmenti 119 → 160 oluyor, public spellF1 0.566 → 0.533 düşüyor.
+
+**compare.py** (`FEAT=features_merged.pkl`):
+
+```
+model                         macro  spell  np | Npos  mean   Nd   dsh |  tagA  spOK   rst  bout
+model_v5                      0.901  0.566  12 |  261  12.2  119 0.501 | 0.866 0.815 0.932 0.891
+model_v6                      0.908  0.566  12 |  261  12.1  119 0.502 | 0.866 0.815 0.932 0.891
+```
+
+**Resmi skorlayıcı, public, 1000 bootstrap:**
+
+| | macroF1 [%5–95] | spellF1 [%5–95] | alive/dead F1 | geçiş-F1 ±0.5 sn | geçiş-F1 ±1 sn | eşleşen geçiş |
+|---|---|---|---|---|---|---|
+| v5 | 0.9010 [0.771–0.937] | 0.5655 [0.359–0.760] | 0.9737 | 0.167 | 0.389 | 7/20 |
+| v6 | 0.9081 [0.777–0.944] | 0.5655 [0.359–0.760] | 0.9769 | 0.222 | 0.444 | 8/20 |
+
+Public D-başlangıç ofsetleri (tahmin − GT, kare): v5 `+7 +44 −116 −1` → v6 `+1 +10 −116 −1`. D bitişleri
+değişmiyor (`+4 +18 +16 +49`).
+
+**Kararlılık.** `wh_bonus` 15–100 ve öne çekme sınırı 2–5 sn aralığında sonuç birebir aynı (aynı 9 hareket). Top-50
+düdükle 4 hareket (macroF1 0.907). Top-200 ile 11 hareket (0.905); buradaki fazladan bir hareket, zaten 4.6 sn erken
+olan public sınırı daha da erkene çekiyor. Taşınan 9 sınırın hiçbirinde v5'in başlangıcında top saha dışında
+değildi. Yani taç/aut/korner sınırlarına dokunulmadı; düdük–faul sınırlarıyla tutarlı.
+
+**Belirleyicilik.** `make_submission.py --model model_v6` iki kez çalıştırıldı: aynı MD5, `validate_submission.py`:
+Valid. v6 sadece numpy/scipy kullanıyor; torch gerekmiyor.
+
+### 3. Sınırlar ve sonraki adımlar
+
+- Public pencerede yalnızca 4 D başlangıcı var. Tam maçtaki 9 hareket etiketsiz doğrulanamaz. Elle etiketlenmiş
+  doğrulama seti (`tools/labeler.html`) çıkınca düdüğe çekilen sınırlar ilk kontrol edilecek şey.
+- Yeniden başlama düdükleri: v5'in public D bitişlerinin hepsi geç (+0.16…+2 sn), ama GT D bitişlerinde düdük
+  görülmedi (0/4). Bu yüzden D bitişine düdük kanıtı eklenmedi.
+- Kaçırılmış kısa duraklamalar: canlı oyunda, yakınında v5 D'si olmayan güçlü düdükler var (top-100'de ~10).
+  Ama sadece düdükle segment yaratmak spellF1'i düşürdü (yukarıda).
+
+### Yeniden üretim
+
+```bash
+.venv/Scripts/python.exe src/whistle_ref.py                 # şablon detektörü -> cache/whistle_ref.npz (~30 sn CPU)
+.venv/Scripts/python.exe src/whistle_eval.py ref:s ref:s1 ref:s2 naive:tonal_ex
+FEAT=features_merged.pkl .venv/Scripts/python.exe src/compare.py model_v5 model_v6
+.venv/Scripts/python.exe src/make_submission.py --model model_v6 --out submissions/baseline_v6.csv
+# yalnızca PANNs karşılaştırması (torch CPU + panns_inference, varyant başına ~6 dk):
+.venv/Scripts/python.exe src/whistle_panns.py sed clip16 clip32
+.venv/Scripts/python.exe src/whistle_eval.py sed:Whistle clip16:Whistle@exc clip32:Whistle
+```
+
+- Yeni dosyalar: `src/whistle_ref.py`, `src/whistle_panns.py`, `src/whistle_eval.py`, `src/model_v6.py`.
+  Mevcut hiçbir dosya değiştirilmedi.
+- PANNs için `.venv`'e uv ile kuruldu: `torch 2.14.1+cpu`, `panns_inference 0.1.1` (+ `librosa`, `torchlibrosa`).
+  Ağırlıklar Zenodo 3987831'den `~/panns_data`'ya indirildi ve `torch.load(weights_only=True)` + yalnızca numpy
+  dizi kurucuları allowlist ile yüklendi. Ses yalnızca lokal işlendi; hiçbir bulut servisine gönderilmedi.
+- `cache/` altındaki kare bazlı çıktılar: `tactical_audio_32k.wav`, `whistle_panns_{sed,clip16,clip32}.npz`,
+  `whistle_ref.npz`, `whistle_ref_P.npy`.

@@ -1,4 +1,4 @@
-"""Shared CPU test bench for model ideas (docs/FIKIRLER.md). AGGREGATE output only.
+"""Shared CPU test bench for model ideas (docs/RAPOR.md). AGGREGATE output only.
 
 Sources (each a list of half-match "blocks" with degraded inputs, cached under cache/bench/inputs):
   dfl      7 open DFL matches, sim.V2 degradation, seeds as train_dfl / simfix (1000 * mi + h)
@@ -58,6 +58,9 @@ EPS = 1e-4
 VARIANTS = {"v2": sim.V2, "v3": sim.V3, "v4": sim.V4}   # degradations; "dfl" / "metrica" alone mean @v2
 VARIANTS.update({"v3b%d" % k: dict(sim.V3, ball_every=k) for k in (5, 10, 15, 25, 50, 250)})   # ball every k frames
 VARIANTS.update({"v5": sim.V5, "v5c": sim.V5C, "v3c": sim.V3C})   # ATD-like fabricated ball runs (+ cleaned)
+VARIANTS["v3s2"] = dict(sim.V3, seed_offset=50000)   # a second, independently degraded copy (training augmentation)
+# exact positions (round 10, src/exp_clean.py): V3's masks (same random stream) without position noise / aerial parallax
+VARIANTS["v3p0"] = dict(sim.V3, ball_noise=0.0, p_noise=0.0, cam=(0.5, -0.45, 1e6))
 LGB_DEAD = dict(td.LGB_DEAD, num_threads=THREADS)
 
 
@@ -96,8 +99,8 @@ def _dfl_job(job):
     blocks = []
     for h in (1, 2):
         t = "h%d" % h
-        Pn, Bn = sim.degrade(d[t + "_players"], d[t + "_ball"], d[t + "_labels"], pitch, seed=1000 * mi + h,
-                             params=VARIANTS[var])
+        Pn, Bn = sim.degrade(d[t + "_players"], d[t + "_ball"], d[t + "_labels"], pitch,
+                             seed=1000 * mi + h + VARIANTS[var].get("seed_offset", 0), params=VARIANTS[var])
         blocks.append({"key": "%s/%s/h%d" % (src_name("dfl", var), m, h), "group": m, "P": Pn[:, :, :2].astype(np.float32),
                        "B": Bn[:, :2].astype(np.float32), "team": d[t + "_team"], "gk": d[t + "_gk"],
                        "pitch": pitch, "lab": d[t + "_labels"]})
@@ -117,7 +120,8 @@ def _metrica_job(job):
     for h in (1, 2):
         t = "h%d" % h
         Pn, Bn = sim.degrade(d[t + "_players"], d[t + "_ball"], d[t + "_labels"], pitch,
-                             seed=7000 + 100 * g + 10 * s + h, params=VARIANTS[var])
+                             seed=7000 + 100 * g + 10 * s + h + VARIANTS[var].get("seed_offset", 0),
+                             params=VARIANTS[var])
         blocks.append({"key": "%s/g%d/s%d/h%d" % (src_name("metrica", var), g, s, h), "group": "g%d" % g, "seed": s,
                        "P": Pn[:, :, :2].astype(np.float32), "B": Bn[:, :2].astype(np.float32),
                        "team": d[t + "_team"], "gk": d[t + "_gk"], "pitch": pitch, "lab": d[t + "_labels"]})
@@ -137,7 +141,7 @@ def _sc_job(job):
     for h in (1, 2):
         t = "h%d" % h
         Pn, Bn = sim.degrade(d[t + "_players"], d[t + "_ball"], d[t + "_labels"], pitch,
-                             seed=20000 + 10 * mi + h, params=VARIANTS[var])
+                             seed=20000 + 10 * mi + h + VARIANTS[var].get("seed_offset", 0), params=VARIANTS[var])
         blocks.append({"key": "%s/%s/h%d" % (src_name("sc", var), m, h), "group": m,
                        "P": Pn[:, :, :2].astype(np.float32), "B": Bn[:, :2].astype(np.float32),
                        "team": d[t + "_team"], "gk": d[t + "_gk"], "pitch": pitch, "lab": d[t + "_labels"]})
@@ -263,6 +267,15 @@ def labels(src, conv):
     key = (src, conv)
     if key in _labels:
         return _labels[key]
+    if src == "dfl" and conv in ("evctrl", "phase"):   # round 12: from the synchronised DFL events (src/dfl_events.py)
+        import dfl_events as de
+        fn = de.evctrl_labels if conv == "evctrl" else de.phase_labels
+        out = []
+        for m in dfl.MATCHES:
+            d, ev = dfl.parse(m), de.synced(m)
+            out += [fn(d["h%d_labels" % (h + 1)], ev[h]) for h in (0, 1)]
+        _labels[key] = out
+        return out
     if src == "dfl":
         path = os.path.join(CACHE, "dfl_conv.pkl")
         if not os.path.isfile(path):
@@ -281,6 +294,15 @@ def labels(src, conv):
             _labels[key] = [b["lab"] for b in blocks("sc@v3")]
         elif conv == "pp":                           # team from the dynamic events' player possessions
             _labels[key] = [scr.parse(m)["h%d_labels_pp" % h] for m in scr.matches() for h in (1, 2)]
+        elif conv == "ctrl":                         # pp put into the controlled convention with trk_ctrl's rule
+            out = []
+            for m in scr.matches():
+                d = scr.parse(m)
+                for h in (1, 2):
+                    t = "h%d" % h
+                    out.append(trk_ctrl(d[t + "_labels_pp"], d[t + "_players"], d[t + "_ball"], d[t + "_team"],
+                                        tuple(float(v) for v in d["pitch"])))
+            _labels[key] = out
         else:
             raise ValueError(conv)
     else:

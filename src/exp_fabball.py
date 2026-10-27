@@ -1,4 +1,4 @@
-"""Round 6, idea 8 (docs/FIKIRLER.md): BAR-ATH ball frames that the ATD filled in by prediction.
+"""Round 6, idea 8 (docs/RAPOR.md): BAR-ATH ball frames that the ATD filled in by prediction.
 
 Over-smooth runs of the tactical ball (|2nd difference| < 2 mm for >= 8 frames while moving) are 3.1% of the seen
 graded frames, and there the two cameras disagree by 1.66 m (median; 3.15 m for runs >= 25 frames) against

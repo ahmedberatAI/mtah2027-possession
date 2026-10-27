@@ -1,4 +1,4 @@
-"""Generalised segment decoder for the decoder ideas in docs/FIKIRLER.md (B1 restart-aware, B2 duration-aware,
+"""Generalised segment decoder for the decoder ideas in docs/RAPOR.md (B1 restart-aware, B2 duration-aware,
 B4 typed penalties, B5 context-dependent switch costs).
 
 Macro-states m = 0..M-1. Each has an emission column (0 H, 1 A, 2 D), an output label and a chain of L[m]

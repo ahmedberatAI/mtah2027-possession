@@ -1,4 +1,4 @@
-"""Player-level controller model (round 7, docs/FIKIRLER.md; research R1/R2: "which candidate controls the ball",
+"""Player-level controller model (round 7, docs/RAPOR.md; research R1/R2: "which candidate controls the ball",
 with the presser as a hard negative, instead of team-pooled nearest-player cues).
 
 Candidates per frame: the 3 players of each team nearest to the ball. Features follow the SAME player through time

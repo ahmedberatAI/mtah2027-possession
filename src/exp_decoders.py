@@ -1,4 +1,4 @@
-"""Decoder ideas (docs/FIKIRLER.md B1, B2, B4, B5, B6, G1, G2) on cached bench probabilities. AGGREGATE output
+"""Decoder ideas (docs/RAPOR.md B1, B2, B4, B5, B6, G1, G2) on cached bench probabilities. AGGREGATE output
 only (scores, counts, shares); nothing per frame is printed.
 
 Data: DFL leave-one-match-out team probabilities (cache/bench/oof/base_native[_v3].pkl) + DFL dead OOF

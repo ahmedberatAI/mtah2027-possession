@@ -1,4 +1,4 @@
-"""Round-2 ideas N1 / E2 (docs/FIKIRLER.md). AGGREGATE output only.
+"""Round-2 ideas N1 / E2 (docs/RAPOR.md). AGGREGATE output only.
 
 N1  alive/dead evidence = blend of the hand-made rules (model_v2.aliveness with v3's look-ahead; no
     broadcast cues outside BAR-ATH) and the learned dead-ball model (sim V3), a = w_r * a_rule +

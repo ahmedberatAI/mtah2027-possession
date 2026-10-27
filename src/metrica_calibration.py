@@ -276,7 +276,7 @@ def plot(recommended=None, decoder="v5", mode="model", convs=("events", "ctrl", 
 
 
 def tables():
-    """Markdown tables for reports/metrica_calibration.md (spell statistics + sweep summaries)."""
+    """Markdown tables for docs/RAPOR.md Ek B (spell statistics + sweep summaries)."""
     out = ["| set | convention | spells/match | per alive min | median s | mean s | < 2 s | < 1 s | "
            "D segs/match | D share |", "|---|---|---|---|---|---|---|---|---|---|"]
     fmt = "| %s | %s | %.0f | %.2f | %.2f | %.2f | %.3f | %.3f | %.0f | %.3f |"

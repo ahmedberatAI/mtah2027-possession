@@ -1,4 +1,4 @@
-"""Round 6, idea N26 (docs/FIKIRLER.md): train v7's team model on DFL degraded with sim.V4 (V3 on pre-smoothed
+"""Round 6, idea N26 (docs/RAPOR.md): train v7's team model on DFL degraded with sim.V4 (V3 on pre-smoothed
 tracks, matching the frame-to-frame smoothness of BAR-ATH's ATD, SkillCorner and Metrica) instead of V3.
 External sets keep their V3 inputs (already as smooth as BAR-ATH); dead-ball evidence = base V3 DFL model or true D.
 Also BAR-ATH: v7 decoder with the V4 team probabilities -> full-match spell rate, self-lag at 1 s (label-free

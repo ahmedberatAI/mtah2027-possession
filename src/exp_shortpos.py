@@ -1,4 +1,4 @@
-"""Round 6, idea 3 (docs/FIKIRLER.md): verify short possessions at the possession level.
+"""Round 6, idea 3 (docs/RAPOR.md): verify short possessions at the possession level.
 
 Backbone = v7's decode (B2 soft minimum, pen 12). A low-penalty decode (standard decoder, pen 2, min 5 frames)
 proposes candidates: its runs of the other team inside a backbone spell (insertions). Backbone spells shorter

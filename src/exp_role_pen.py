@@ -1,5 +1,5 @@
 """Round 7c follow-up: does the role model's frame gain turn into spellF1 once the team-switch penalty is re-chosen?
-Same protocol as v7's pen_team decision (docs/DENEMELER.md, "Açık sorular"): spellF1 of v7 and of the role model
+Same protocol as v7's pen_team decision (docs/RAPOR.md, "Açık sorular"): spellF1 of v7 and of the role model
 (src/exp_role.py, cached probabilities) for pen_team in PENS with the v7 decoder otherwise unchanged, on DFL-trk
 (learned D), Metrica-ctrl (learned / true D) and SkillCorner phase and player-possession labels (learned / true D);
 worst-case regret = max over sets of (best of all (model, pen) on that set - this one). AGGREGATE output only.

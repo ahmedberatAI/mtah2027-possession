@@ -1,4 +1,4 @@
-"""Idea N25 (docs/FIKIRLER.md): a bidirectional GRU team model over per-frame feature sequences, as an
+"""Idea N25 (docs/RAPOR.md): a bidirectional GRU team model over per-frame feature sequences, as an
 alternative / complement to the windowed LightGBM team model. Runs on a GPU (Colab); CPU works but is slow.
 
 Input per frame = the bench features of one half (XF + both team views), standardised with training

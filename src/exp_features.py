@@ -1,4 +1,4 @@
-"""Driver for the team-feature ideas (docs/FIKIRLER.md group C, src/feat_team2.py) on sim V3.
+"""Driver for the team-feature ideas (docs/RAPOR.md group C, src/feat_team2.py) on sim V3.
 AGGREGATE output only.
 
 Each version is "base+feat_team2:<fn>"; feat_team2 adds team-perspective (T) columns only, so the frame

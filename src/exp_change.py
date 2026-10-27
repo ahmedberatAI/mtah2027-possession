@@ -1,4 +1,4 @@
-"""Round 6, idea 2 (docs/FIKIRLER.md): a possession-change model and a time-dependent team-switch cost.
+"""Round 6, idea 2 (docs/RAPOR.md): a possession-change model and a time-dependent team-switch cost.
 
 A LightGBM learns "is there an in-play change of possession within +-K frames of t?" on degraded DFL with the
 controlled-possession labels (trk), leave one match out. Inputs: v7's features plus direction-free cues from

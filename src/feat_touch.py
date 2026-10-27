@@ -1,4 +1,4 @@
-"""Ball-touch events per team (idea C7, docs/FIKIRLER.md), as a bench feature plugin.
+"""Ball-touch events per team (idea C7, docs/RAPOR.md), as a bench feature plugin.
 
 The remaining main error everywhere is a short spell after a turnover given to the wrong team (SkillCorner
 with true dead balls: 20% of turnover spells). Nearest-player cues confuse the player in control with the

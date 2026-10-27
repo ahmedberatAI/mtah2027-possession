@@ -1,4 +1,4 @@
-"""External check of idea 8 on SkillCorner (docs/FIKIRLER.md): SkillCorner marks its own extrapolated ball positions
+"""External check of idea 8 on SkillCorner (docs/RAPOR.md): SkillCorner marks its own extrapolated ball positions
 (ball_data.is_detected = False), the analogue of the ATD frames BAR-ATH fills in by prediction.
   1. detector check: src/exp_fabball.fabricated() on the clean SkillCorner ball vs those flags
   2. effect: v7's team model on SkillCorner with extrapolated ball frames dropped (by SkillCorner's flag, and by the
