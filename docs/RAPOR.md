@@ -15,7 +15,7 @@ Veri politikası: yalnız toplu istatistik. Ham satır, kare bazlı çıktı, vi
 İçindekiler: 1. Özet · 2. Kalıcı kurallar ve tuzaklar · 3. Deneme günlüğü · 4. Fikir havuzu ve tur kayıtları ·
 Ek A İlk analiz ve baseline'lar · Ek B Metrica kalibrasyonu · Ek C Simülatörde top kaybı · Ek D Hakem düdüğü
 
-## 1. Özet — şu anki durum (25 Ekim 2026)
+## 1. Özet — şu anki durum (27 Ekim 2026)
 
 **Görev.** BAR-ATH maçının 199,319 karesinin her birine H / A / D etiketi (X: cevap yok). Sıralama, tam maçın gizli
 etiketleri üzerinde spellF1 ile yapılıyor (possession spell'leri, IoU 0.3–0.7); eşitlikte macroF1. Son teslim 17 Kasım
@@ -67,6 +67,16 @@ ortalaması; `cache/bench/vers_table.log`, sürümlerin tamamı §4'te "Sürüml
 
 v10 public'te canlı/ölü F1 0.98, canlı karelerde takım doğruluğu 0.95; 17 gerçek spell'e karşı 10 spell üretiyor (kaçanlar
 kısa top kayıpları). Tam maçta 203 possession, 118 ölü top bölümü, %49 ölü pay (etiketsiz; literatürle uyumlu).
+
+
+**27 Ekim, tur 13:** yerel çalışma GitHub'daki iki ortak commit ile birleştirildi; v10 MD5'si ve paylaşılan BiGRU
+CSV SHA256'sı birebir doğrulandı, 52 test geçti. Altı sabit karışım, üç eşli eğitim tohumu ve sabit toplulukla dış
+veride ölçüldü (216 skor hücresi). %75 BiGRU / %25 v10 **olasılık** karışımı, ardından ±25 logit yumuşatma:
+üç tohum ortalamasında SC faz +0.0216 / +0.0195, SC pp +0.0295 / +0.0263; Metrica +0.0009 / +0.0015.
+SC farklarının eşli maç-bootstrap %95 aralıkları pozitif; Metrica'nın yalnız üç maçında aralıklar sıfırı kapsıyor.
+Altı bağlamdaki en kötü pişmanlık v10 0.0390 → bu aday 0.0101; logit %75 0.0082 ile 0.005 beraberlik sınırı içinde.
+Daha basit olasılık karışımı **sonraki doğrulama adayıdır**. DFL maç-dışı BiGRU doğrulaması yok; varsayılan **v10 kalır**.
+Kullanıcı 27 Ekim'de ara istedi; çalışan iki kendi CPU işi durduruldu. Ayrıntı: §4 Tur 13.
 
 **Model zinciri** (ayrıntı §3'teki "Modeller" tablosunda):
 - v1–v4 (20 Ekim): kurallar + en kısa süreli Viterbi. v3'ün canlı/ölü kuralları bugün de kullanılıyor.
@@ -138,7 +148,7 @@ kısa top kayıpları). Tam maçta 203 possession, 118 ölü top bölümü, %49 
   modeli `models/v10_team.txt` olarak repoda (yalnız açık veriden eğitilmiş; varsayılan çalıştırma yalnız verilen veriyle
   ~1 dk); `requirements.txt` sürümleri sabitli; teknik doküman taslağı `docs/TECHNICAL_DOCUMENT.md` (İngilizce; takım
   adı / üyeler / repo adresi boş); herkese açık repo içeriği `tools/export_public.py` ile ayrı klasöre çıkarılıyor
-  (`docs/RAPOR.md` ve `reports/` dahil değil). Repo henüz açılmadı, commit / push yapılmadı (kullanıcı kararı bekleniyor).
+  (`docs/RAPOR.md` ve `reports/` dahil değil). Herkese açık repo henüz açılmadı; yerel commit ve birleştirme 27 Ekim’de yapıldı, push için kullanıcı onayı gerekiyor.
 - Video ile dokunuş tespiti (topa kim dokundu): yerelde hazır model yok. Adaylar (tur 11 araştırması): SoccerNet 2025
   Team-BAS baseline'ı (47 MB; takımlı pas / top sürme), kendi takibimizle etiketlenen "topa sahip oyuncu" görüntü
   sınıflandırıcısı, yayın karesinde top + forma rengi. Hepsinde aynı engel: yayın videosu taşıyan etiketli bir dış set
@@ -148,7 +158,7 @@ kısa top kayıpları). Tam maçta 203 possession, 118 ölü top bölümü, %49 
 - Teslim için herkese açık repo gerekiyor (şu an özel; veri, cache ve submissions gitignore'lu). Repo açılmadan önce bu
   belge BAR-ATH sayıları açısından gözden geçirilmeli. Teknik dokümanda kaynaklar: Metrica Sports sample data,
   IDSSE / open DFL (CC BY 4.0), SkillCorner open data (MIT).
-- Tur 9–10 çalışması henüz commit edilmedi.
+- Tur 9–12 çalışması `541b79e` ile korundu; Alperen’in `a3b3070` / `39fd4de` commit’leri `de5d862` ile birleştirildi. Çalışma dalı `codex/rounds9-13-integration`; henüz push yapılmadı.
 
 ## 2. Kalıcı kurallar ve tuzaklar
 
@@ -353,7 +363,6 @@ Public sütunu yalnız bilgi içindir (17 spell, aralık ~0.4); v7'den itibaren 
 | R12-3b DFL'yi olay tabanlı kontrollü etiketle (evctrl) eğitmek (`COMBO_DFLCONV=evctrl`, tohum 0) | v7'ye göre (±25): DFL-trk −0.006 / −0.003, Metrica −0.006 / −0.002, SC faz ≈ 0, SC pp −0.020 / −0.022, DFL-evctrl +0.009 / +0.008 (v10: +0.023 / +0.026) | ❌ her yerde v10'dan kötü; ders yine: model sık dönen etiketle eğitilir, kontrollü kuralı decoder taşır |
 | Önbellekteki ~35 adayı DFL-evctrl'de yeniden puanlamak (`src/exp_evctrl.py`) | v10 3 tohum ortalaması 0.7820 / 0.8082; öne çıkan: dokunuş v2 +0.008 / +0.006 (tur 9'da SC pp yüzünden reddedilmişti), DFL tau0.4 +0.002 / +0.001; DFL trk ile eğitim −0.022 | bilgi: dokunuş v2 yeni tohumlarla doğrulanıyor (seçim yanlılığına karşı) |
 | **Ekip arkadaşının BiGRU topluluğu** (Alperen Aydın, GitHub commit a3b3070, 26 Ekim; v7 özellikleri üzerinde BiGRU, DFL + 64 PFF World Cup maçı, 3 tohum, eşit ağırlık; onun raporlarındaki sayılar bizim bench'imizde, v7 referansı birebir tutuyor) | bizim v10'a göre (öğrenilmiş / gerçek D): SC pp +0.041 / +0.040, SC faz +0.025 / +0.022 (20/20 maç), Metrica-ctrl −0.017 / −0.018; DFL karşılaştırılamıyor (bütün DFL eğitimde); BAR-ATH public 0.772 vs 0.667 (karar için kullanılamaz: yeni kurallar). En kötü durum pişmanlığı bu altı bağlamda BiGRU 0.018, v10 0.041 | ≈ güçlü aday; karar dış veriyle, ideal olarak v10 + BiGRU birleşimi test edilerek (modelleri ve PFF verisi yalnız onun makinesinde) |
-
 | Alperen: üç kapı deneyi (24 Eki; `src/exp_data_gate.py`) | DFL 2→7 maç Metrica 0.8022→0.8147, SC pp 0.5792→0.5829; temas vekilleri Metrica −0.0254, SC +0.0269 | ≈ / ❌; ayrıntılı kayıt aşağıda |
 | Alperen: PFF 64 maç (24 Eki; `src/exp_pff.py`) | DFL+PFF, SC pp +0.0084; Metrica-ctrl ≈ 0; ham top, smoothed top hariç | ≈ tek başına genel yükseltme değil |
 | Alperen: dengeli TCN / BiGRU (24 Eki; `src/exp_seq_pff.py`) | tek tohum SC pp 0.6265 / 0.6284, Metrica-ctrl 0.8168 / 0.8120 | bilgi; üç tohum kontrolü esas |
@@ -362,6 +371,10 @@ Public sütunu yalnız bilgi içindir (17 spell, aralık ~0.4); v7'den itibaren 
 | Alperen: dış veri eşit BiGRU topluluğu (25 Eki; `src/exp_external_ensemble.py`) | v7'ye göre SC pp +0.0507 (%95 +0.0436…+0.0586), faz +0.0405; Metrica-ctrl −0.0076 | güçlü fakat Metrica'da üstün değil |
 | Alperen: iç ayrımda dengeli LGB + BiGRU harmanı (25 Eki; `src/exp_hybrid.py`) | 2 DFL + 12 PFF seçiminde saf BiGRU 0.6947, %75/%25 0.6828 | ❌ o LGB ile karışım; v10 bu deneyde yok |
 | Alperen: kontrollü DFL etiketiyle BiGRU (25 Eki; `src/exp_controlled_dfl.py`) | Metrica-ctrl 0.8071→0.8176; SC pp 0.6336→0.5778 (20/20 kayıp) | ❌ native etiket korunur |
+| R13 entegrasyon ve yeniden üretim (27 Eki; `src/reproduce_shared_bigru.py --device cpu`) | tur 9–12 `541b79e`, ortak merge `de5d862`; v10 MD5 ca20c5b6… ve BiGRU SHA256 f4a4b865… birebir; üç ağırlık hash'i ve 52 test geçti; `-I` import yolu düzeltildi | ✅ yerel commit; push yapılmadı |
+| R13 v10 + paylaşılan BiGRU, 6 sabit karışım, 3 eşli tohum (`src/exp_shared_blend.py`) | %75 BiGRU olasılık karışımı + ±25 yumuşatma: SC faz +0.0216 / +0.0195, pp +0.0295 / +0.0263; Metrica +0.0009 / +0.0015; en kötü pişmanlık 0.0390→0.0101 (logit %75 0.0082, eşik içinde); önceki altı BiGRU topluluk skoru birebir doğrulandı | ✅ güçlü dış aday; DFL LOMO yok, varsayılan v10 korunur |
+| Dokunuş v2 doğrulama, tohum 1 (`TOUCH_V=2 LGB_SEED=1 src/exp_touch.py`) | DFL-evctrl −0.0005 / −0.0029; trk +0.0001 / −0.0061; Metrica +0.0030 / −0.0017; SC pp −0.0017 / −0.0002; tohum 2 eğitiminde kullanıcı ara istedi, nihai olasılık dosyası oluşmadı | ❌ ilk taramadaki kazanç tohum 1'de tekrarlanmadı; 3-tohum özeti henüz yok |
+| Kamera artık katkısının ölçek dayanıklılığı (`src/camera_sc.py robust`) | core/norm varyantlarının 3 tohum için 6 LOMO olasılık önbelleği tamamlandı; değerlendirme kullanıcı isteğiyle durduruldu, nihai toplu skor tablosu çıkmadı | bekliyor; mevcut önbelleklerle yeniden skorlanacak |
 
 ### Ekip arkadaşının GitHub kayıtları — 27 Ekim birleştirmesi
 
@@ -1477,6 +1490,62 @@ Yenilik kontrolü §3 tablosu ve §1'deki listeyle yapıldı; aşağıdakilerin 
 3. Dokunuş v2'yi yeni tohumlarla doğrulamak: `TOUCH_V=2 LGB_SEED=1/2 src/exp_touch.py`; tohum 0'da DFL-evctrl
    +0.007 / +0.005, SC pp −0.004.
 4. R12-4 / R12-5.
+
+
+#### Tur 13 — 27 Ekim: ortak repo entegrasyonu ve BiGRU karışımı (kullanıcı isteğiyle ara verildi)
+
+**Koruma ve birleştirme.** `codex/rounds9-13-integration` dalında tur 9–12'nin 114 dosyalık işi `541b79e` ile
+korundu. GitHub ana dalının `39fd4de` olduğu uzaktan doğrulandı; gerekli nesneler zaten diskteydi, model/paket/veri
+indirilmedi. `origin/main`, `de5d862` ile birleştirildi. `DENEMELER.md` silinmiş kaldı, Alperen'in eklemeleri §3'e
+eksiksiz taşındı. README iki tarafı içeriyor; `.pt` istisnaları ve `decode2.py` içindeki `nogil=True` alındı.
+Resmî klon `f8f2629`'a ff-only ilerletildi, uzaktaki ana dal ile aynı olduğu doğrulandı. Push yapılmadı.
+
+**Kontroller.** v10 varsayılan komutuyla yeniden üretildi: MD5 `ca20c5b657a395d2f7c0e310cdaabd64`. Paylaşılan BiGRU
+CPU'da üç ağırlıkla yeniden üretildi: SHA256 `f4a4b86501fab3e94e5ef9e288b064a431818c35908982678af39c0ee1cfd225`,
+referans CSV ile aynı. Betik izole Python (`-I`) için kendi import yolunu ekliyor. Eksik `orjson` 3.12.0, yerel uv
+önbelleğinden `--offline` kuruldu; ağdan paket indirilmedi. Eski 48 + yeni 4 test = **52/52** geçti.
+`reports/integration_20261027.json` yalnız toplu doğrulama kaydıdır.
+
+**Önceden sabitlenmiş deney.** `src/exp_shared_blend.py`: olasılık / logit, BiGRU ağırlığı .25 / .5 / .75; ham takım
+çıktıları birleştirildikten sonra ±25 kare logit yumuşatma, aynı B2 ve ölü-top kanalı. Kontroller: v10, ham BiGRU,
+yumuşatılmış BiGRU. Eşli eğitim tohumları (0,20261025), (1,20261026), (2,20261027). Ayrıca v10 tohum 0 + eşit üç
+BiGRU olasılık topluluğu ölçüldü. Metrica'nın üç bozulma kopyası önce maç içinde ortalandı; bootstrap üç bağımsız
+Metrica / yirmi SkillCorner maçını 10.000 kez eşli örnekliyor. Toplam 216 skor hücresi. Hiçbir BAR-ATH/public skoru
+bu seçimde kullanılmadı. Önceki altı BiGRU topluluk skoru maç bazında birebir yeniden üretildi.
+
+Üç tohum ortalamasında %75 **olasılık** karışımının v10'a farkı (öğrenilmiş / gerçek D):
+- Metrica-ctrl: **+0.00095 / +0.00145**; %95 aralıkları [−0.00837,+0.00922] / [−0.00866,+0.01094].
+- SC faz: **+0.02161 / +0.01953**; aralıklar [+0.01528,+0.02820] / [+0.01261,+0.02631].
+- SC pp: **+0.02950 / +0.02633**; aralıklar [+0.02409,+0.03574] / [+0.02096,+0.03224].
+
+Sabit BiGRU topluluğu + mevcut v10 tohum 0 kullanıldığında aynı karışım: Metrica −0.00041 / +0.00261,
+SC faz +0.02359 / +0.02206, SC pp +0.03018 / +0.02806. En kötü pişmanlık (tohum ortalaması / sabit topluluk):
+v10 0.03902 / 0.04133, ham BiGRU 0.02905 / 0.02431, logit %75 0.00824 / 0.01174,
+olasılık %75 **0.01011 / 0.01211**. Son iki adayın farkı <0.005; daha basit olasılık karışımı sonraki doğrulamaya
+adaydır. Sırf ham BiGRU'yu yumuşatmak Metrica'da ≈ +0.008 getiriyor, karışımı yakalamıyor.
+
+**Karar sınırı.** Bütün DFL maçları paylaşılan sinir ağı eğitiminde olduğundan DFL doğrulaması yapılamaz. Bu eksik
+bağlamlar olmadan aday varsayılan yapılmadı, yeni gönderim modeli/CSV'si üretilmedi. Metrica yalnız üç maç; dış
+setler daha önce araştırmada kullanıldı, yeni ve dokunulmamış holdout değiller. Bootstrap, eğitim verisi ve aday
+seçimi belirsizliğini kapsamıyor. Sonuçlar `reports/shared_blend/RESULTS.md`, donmuş tasarım `design.json`.
+
+**Ara verilen yan işler.** Dokunuş v2 tohum 1 bitti; ilk DFL-evctrl kazancı tekrarlanmadı (§3). Tohum 2'de bütün DFL
+ve Metrica'nın ilk iki fold'u bitti fakat tek nihai olasılık dosyası henüz yazılmamıştı; Ctrl-C ile durduruldu.
+Yeniden başlatınca bu tohum eğitimi baştan çalışır. `src/exp_touch_verify.py`, üç tamamlanmış tohumun eşli maç
+bootstrap'lı özetini çıkaracak şekilde eklendi; derleme kontrolü geçti, veri değerlendirmesi henüz çalıştırılmadı.
+Kamera robust işi de Ctrl-C ile durduruldu; core/norm × 3 tohum olasılık dosyalarının altısı diskte mevcut, nihai
+skor özeti henüz çıkmadı. Başkasının süreçlerine dokunulmadı. Colab oturumu açılmadı.
+
+**Devam sırası.** Kullanıcı açıkça devam dediğinde:
+1. `src/exp_shared_blend.py --stage report` mevcut tamamlanmış sonuçları tekrar raporlayabilir. DFL maç-dışı
+   BiGRU + PFF + Metrica Colab eğitimi, model terfisi için eksik doğrulama.
+2. PFF yerelde yok; bağlı Drive'da PFF / Gradient / World Cup adlarıyla erişilebilir klasör bulunamadı. Kullanıcıya
+   PFF erişim bağlantısı soruldu; yanıtı geliştirmeye ara verme isteği oldu. Bağlantı/OAuth uydurulmaz.
+3. `TOUCH_V=2 LGB_SEED=2` ile `src/exp_touch.py`, ardından `src/exp_touch_verify.py`.
+4. `src/camera_sc.py robust`: mevcut altı olasılık önbelleğini kullanarak eksik toplu skor tablosunu tamamla.
+5. Public'e bakılarak kurulmuş ölü-top sabitlerini dış veriden yeniden türetme ihtiyacı sürüyor.
+6. Push öncesi kullanıcı onayı gerekiyor. Varsayılan gönderim halen düdüksüz **v10**.
+
 
 ## Ek A — İlk analiz, araştırma ve baseline'lar (20 Ekim)
 

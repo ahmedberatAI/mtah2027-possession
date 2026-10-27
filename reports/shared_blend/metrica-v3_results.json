@@ -1,0 +1,938 @@
+[
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "trial": "0",
+    "model": "v10",
+    "spellF1": 0.8237339778038711,
+    "spell_by_match": {
+      "g1": 0.8060204021675655,
+      "g2": 0.8278824651122475,
+      "g3": 0.8372990661318003
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "trial": "0",
+    "model": "bigru_raw",
+    "spellF1": 0.7997198103137132,
+    "spell_by_match": {
+      "g1": 0.7756609211116565,
+      "g2": 0.8013197753219817,
+      "g3": 0.8221787345075017
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "trial": "0",
+    "model": "bigru_smooth25",
+    "spellF1": 0.807302225899344,
+    "spell_by_match": {
+      "g1": 0.7850398324873575,
+      "g2": 0.8046944434935622,
+      "g3": 0.8321724017171119
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "trial": "0",
+    "model": "probability_b0.25",
+    "spellF1": 0.8256074519287036,
+    "spell_by_match": {
+      "g1": 0.8116772504932294,
+      "g2": 0.8218935613974742,
+      "g3": 0.843251543895407
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "trial": "0",
+    "model": "probability_b0.5",
+    "spellF1": 0.8253118575722213,
+    "spell_by_match": {
+      "g1": 0.8101891155156413,
+      "g2": 0.8180125150596825,
+      "g3": 0.8477339421413398
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "trial": "0",
+    "model": "probability_b0.75",
+    "spellF1": 0.8230696775663585,
+    "spell_by_match": {
+      "g1": 0.8086321888179473,
+      "g2": 0.8155683727060188,
+      "g3": 0.8450084711751096
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "trial": "0",
+    "model": "logit_b0.25",
+    "spellF1": 0.8280417382981491,
+    "spell_by_match": {
+      "g1": 0.8156559525196894,
+      "g2": 0.8244592647050242,
+      "g3": 0.8440099976697338
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "trial": "0",
+    "model": "logit_b0.5",
+    "spellF1": 0.8262549373809591,
+    "spell_by_match": {
+      "g1": 0.8131607030649283,
+      "g2": 0.817656763083065,
+      "g3": 0.8479473459948842
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "trial": "0",
+    "model": "logit_b0.75",
+    "spellF1": 0.8229245295507942,
+    "spell_by_match": {
+      "g1": 0.808272118569454,
+      "g2": 0.8186651427376189,
+      "g3": 0.8418363273453094
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "trial": "0",
+    "model": "v10",
+    "spellF1": 0.8816928562931504,
+    "spell_by_match": {
+      "g1": 0.8689858896829761,
+      "g2": 0.8881785699613672,
+      "g3": 0.8879141092351078
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "trial": "0",
+    "model": "bigru_raw",
+    "spellF1": 0.8567498843116401,
+    "spell_by_match": {
+      "g1": 0.8324300061718005,
+      "g2": 0.862135987940119,
+      "g3": 0.8756836588230007
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "trial": "0",
+    "model": "bigru_smooth25",
+    "spellF1": 0.8633778364800714,
+    "spell_by_match": {
+      "g1": 0.8401213687088561,
+      "g2": 0.8649534715878165,
+      "g3": 0.8850586691435417
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "trial": "0",
+    "model": "probability_b0.25",
+    "spellF1": 0.8831111729498194,
+    "spell_by_match": {
+      "g1": 0.8709624807643842,
+      "g2": 0.8819227805259234,
+      "g3": 0.8964482575591509
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "trial": "0",
+    "model": "probability_b0.5",
+    "spellF1": 0.8860533415277749,
+    "spell_by_match": {
+      "g1": 0.8728781400461925,
+      "g2": 0.8839333558482494,
+      "g3": 0.9013485286888828
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "trial": "0",
+    "model": "probability_b0.75",
+    "spellF1": 0.8830309865820465,
+    "spell_by_match": {
+      "g1": 0.8705573685254739,
+      "g2": 0.8803493934449884,
+      "g3": 0.898186197775677
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "trial": "0",
+    "model": "logit_b0.25",
+    "spellF1": 0.88423592265211,
+    "spell_by_match": {
+      "g1": 0.8713891365695696,
+      "g2": 0.884595459738262,
+      "g3": 0.8967231716484981
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "trial": "0",
+    "model": "logit_b0.5",
+    "spellF1": 0.8869874610888515,
+    "spell_by_match": {
+      "g1": 0.8761034911515523,
+      "g2": 0.8822977835642716,
+      "g3": 0.9025611085507306
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "trial": "0",
+    "model": "logit_b0.75",
+    "spellF1": 0.8804522616464835,
+    "spell_by_match": {
+      "g1": 0.8691752910358845,
+      "g2": 0.8787707680694276,
+      "g3": 0.8934107258341384
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "trial": "1",
+    "model": "v10",
+    "spellF1": 0.8221785076594416,
+    "spell_by_match": {
+      "g1": 0.8051498411756534,
+      "g2": 0.8241463645350606,
+      "g3": 0.8372393172676106
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "trial": "1",
+    "model": "bigru_raw",
+    "spellF1": 0.808593510787627,
+    "spell_by_match": {
+      "g1": 0.7887107923732266,
+      "g2": 0.8047690875947775,
+      "g3": 0.8323006523948768
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "trial": "1",
+    "model": "bigru_smooth25",
+    "spellF1": 0.8132339918668275,
+    "spell_by_match": {
+      "g1": 0.7941224557879455,
+      "g2": 0.8107457928907996,
+      "g3": 0.8348337269217373
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "trial": "1",
+    "model": "probability_b0.25",
+    "spellF1": 0.8249399827216902,
+    "spell_by_match": {
+      "g1": 0.8126667003812152,
+      "g2": 0.8186072444579519,
+      "g3": 0.8435460033259033
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "trial": "1",
+    "model": "probability_b0.5",
+    "spellF1": 0.8271915312861989,
+    "spell_by_match": {
+      "g1": 0.8152897006595637,
+      "g2": 0.8201968013966553,
+      "g3": 0.8460880918023775
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "trial": "1",
+    "model": "probability_b0.75",
+    "spellF1": 0.8299483153415119,
+    "spell_by_match": {
+      "g1": 0.8146503241531561,
+      "g2": 0.8248242515010095,
+      "g3": 0.8503703703703703
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "trial": "1",
+    "model": "logit_b0.25",
+    "spellF1": 0.8242439052110478,
+    "spell_by_match": {
+      "g1": 0.812972022608118,
+      "g2": 0.8179615624563378,
+      "g3": 0.8417981305686876
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "trial": "1",
+    "model": "logit_b0.5",
+    "spellF1": 0.8276211111714514,
+    "spell_by_match": {
+      "g1": 0.8158957549617517,
+      "g2": 0.8166629058089055,
+      "g3": 0.8503046727436971
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "trial": "1",
+    "model": "logit_b0.75",
+    "spellF1": 0.8271094976951132,
+    "spell_by_match": {
+      "g1": 0.8098719257215811,
+      "g2": 0.8244614246279064,
+      "g3": 0.8469951427358521
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "trial": "1",
+    "model": "v10",
+    "spellF1": 0.8829133773866294,
+    "spell_by_match": {
+      "g1": 0.8689358045289876,
+      "g2": 0.8875523218501518,
+      "g3": 0.8922520057807493
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "trial": "1",
+    "model": "bigru_raw",
+    "spellF1": 0.8639318281485598,
+    "spell_by_match": {
+      "g1": 0.8435544758709778,
+      "g2": 0.8635818742783942,
+      "g3": 0.8846591342963075
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "trial": "1",
+    "model": "bigru_smooth25",
+    "spellF1": 0.868809972676874,
+    "spell_by_match": {
+      "g1": 0.8513818573524045,
+      "g2": 0.8679902383003157,
+      "g3": 0.8870578223779019
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "trial": "1",
+    "model": "probability_b0.25",
+    "spellF1": 0.8822257183651742,
+    "spell_by_match": {
+      "g1": 0.8721539398253116,
+      "g2": 0.8787863706116786,
+      "g3": 0.8957368446585324
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "trial": "1",
+    "model": "probability_b0.5",
+    "spellF1": 0.8872303384918553,
+    "spell_by_match": {
+      "g1": 0.8784546865907689,
+      "g2": 0.8817282326885719,
+      "g3": 0.9015080961962251
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "trial": "1",
+    "model": "probability_b0.75",
+    "spellF1": 0.8883273166192672,
+    "spell_by_match": {
+      "g1": 0.8739183853520059,
+      "g2": 0.8866967783648162,
+      "g3": 0.9043667861409798
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "trial": "1",
+    "model": "logit_b0.25",
+    "spellF1": 0.8828525107616322,
+    "spell_by_match": {
+      "g1": 0.8744856701735916,
+      "g2": 0.8787863706116786,
+      "g3": 0.8952854914996263
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "trial": "1",
+    "model": "logit_b0.5",
+    "spellF1": 0.8880710081116051,
+    "spell_by_match": {
+      "g1": 0.8787647641101488,
+      "g2": 0.8816234108177237,
+      "g3": 0.9038248494069427
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "trial": "1",
+    "model": "logit_b0.75",
+    "spellF1": 0.8855066753895233,
+    "spell_by_match": {
+      "g1": 0.8708480966839162,
+      "g2": 0.8856678891785604,
+      "g3": 0.9000040403060936
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "trial": "2",
+    "model": "v10",
+    "spellF1": 0.8240019847978851,
+    "spell_by_match": {
+      "g1": 0.8069973866088059,
+      "g2": 0.8243841928052454,
+      "g3": 0.840624374979604
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "trial": "2",
+    "model": "bigru_raw",
+    "spellF1": 0.799011531646561,
+    "spell_by_match": {
+      "g1": 0.774867529855311,
+      "g2": 0.7966851916955218,
+      "g3": 0.8254818733888502
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "trial": "2",
+    "model": "bigru_smooth25",
+    "spellF1": 0.8099314493274107,
+    "spell_by_match": {
+      "g1": 0.7830280219367441,
+      "g2": 0.811593056640063,
+      "g3": 0.8351732694054249
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "trial": "2",
+    "model": "probability_b0.25",
+    "spellF1": 0.825951538277567,
+    "spell_by_match": {
+      "g1": 0.8169944193616249,
+      "g2": 0.8176708170895703,
+      "g3": 0.8431893783815058
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "trial": "2",
+    "model": "probability_b0.5",
+    "spellF1": 0.827223894592536,
+    "spell_by_match": {
+      "g1": 0.8156426878937492,
+      "g2": 0.8150328345842639,
+      "g3": 0.8509961612995948
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "trial": "2",
+    "model": "probability_b0.75",
+    "spellF1": 0.8197349608874509,
+    "spell_by_match": {
+      "g1": 0.8008391587911751,
+      "g2": 0.8109243572069058,
+      "g3": 0.8474413666642716
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "trial": "2",
+    "model": "logit_b0.25",
+    "spellF1": 0.8262009784447341,
+    "spell_by_match": {
+      "g1": 0.8156730523627075,
+      "g2": 0.8185427423981642,
+      "g3": 0.8443871405733306
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "trial": "2",
+    "model": "logit_b0.5",
+    "spellF1": 0.825953876248696,
+    "spell_by_match": {
+      "g1": 0.8129342426075638,
+      "g2": 0.8153487903504568,
+      "g3": 0.8495785957880674
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "trial": "2",
+    "model": "logit_b0.75",
+    "spellF1": 0.8154583596221542,
+    "spell_by_match": {
+      "g1": 0.793469004705217,
+      "g2": 0.8102576203574129,
+      "g3": 0.8426484538038324
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "trial": "2",
+    "model": "v10",
+    "spellF1": 0.8822543962636619,
+    "spell_by_match": {
+      "g1": 0.8672158127873285,
+      "g2": 0.8853140145680642,
+      "g3": 0.8942333614355927
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "trial": "2",
+    "model": "bigru_raw",
+    "spellF1": 0.8537123881303196,
+    "spell_by_match": {
+      "g1": 0.8333057871935493,
+      "g2": 0.8507527608962526,
+      "g3": 0.8770786163011567
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "trial": "2",
+    "model": "bigru_smooth25",
+    "spellF1": 0.8667390318543235,
+    "spell_by_match": {
+      "g1": 0.8465974485535465,
+      "g2": 0.8650750096874128,
+      "g3": 0.8885446373220115
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "trial": "2",
+    "model": "probability_b0.25",
+    "spellF1": 0.8853079022928393,
+    "spell_by_match": {
+      "g1": 0.8793663126996462,
+      "g2": 0.8798896285495585,
+      "g3": 0.8966677656293133
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "trial": "2",
+    "model": "probability_b0.5",
+    "spellF1": 0.8882611161769147,
+    "spell_by_match": {
+      "g1": 0.8761458251768328,
+      "g2": 0.8810979668155946,
+      "g3": 0.9075395565383166
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "trial": "2",
+    "model": "probability_b0.75",
+    "spellF1": 0.8798537767217799,
+    "spell_by_match": {
+      "g1": 0.8668760840381166,
+      "g2": 0.8680246709012245,
+      "g3": 0.9046605752259987
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "trial": "2",
+    "model": "logit_b0.25",
+    "spellF1": 0.8862682100683227,
+    "spell_by_match": {
+      "g1": 0.8786657435252376,
+      "g2": 0.8815627887567438,
+      "g3": 0.898576097922987
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "trial": "2",
+    "model": "logit_b0.5",
+    "spellF1": 0.8862302726381911,
+    "spell_by_match": {
+      "g1": 0.8789085296394704,
+      "g2": 0.8774566624749663,
+      "g3": 0.9023256258001368
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "trial": "2",
+    "model": "logit_b0.75",
+    "spellF1": 0.87664205497365,
+    "spell_by_match": {
+      "g1": 0.8620310974917716,
+      "g2": 0.8677730985741804,
+      "g3": 0.9001219688549978
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "trial": "ensemble",
+    "model": "v10",
+    "spellF1": 0.8237339778038711,
+    "spell_by_match": {
+      "g1": 0.8060204021675655,
+      "g2": 0.8278824651122475,
+      "g3": 0.8372990661318003
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "trial": "ensemble",
+    "model": "bigru_raw",
+    "spellF1": 0.8071477054911331,
+    "spell_by_match": {
+      "g1": 0.7795475572656528,
+      "g2": 0.8074785709646134,
+      "g3": 0.834416988243133
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "trial": "ensemble",
+    "model": "bigru_smooth25",
+    "spellF1": 0.8141794915781478,
+    "spell_by_match": {
+      "g1": 0.7891353612006154,
+      "g2": 0.8110750712057859,
+      "g3": 0.8423280423280423
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "trial": "ensemble",
+    "model": "probability_b0.25",
+    "spellF1": 0.8262671080678178,
+    "spell_by_match": {
+      "g1": 0.814139959682396,
+      "g2": 0.8205939533638342,
+      "g3": 0.8440674111572227
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "trial": "ensemble",
+    "model": "probability_b0.5",
+    "spellF1": 0.8260582558977728,
+    "spell_by_match": {
+      "g1": 0.8168045979009695,
+      "g2": 0.8153577963169094,
+      "g3": 0.8460123734754393
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "trial": "ensemble",
+    "model": "probability_b0.75",
+    "spellF1": 0.8233246903539572,
+    "spell_by_match": {
+      "g1": 0.810705571296381,
+      "g2": 0.8137226816967408,
+      "g3": 0.8455458180687497
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "trial": "ensemble",
+    "model": "logit_b0.25",
+    "spellF1": 0.8263862649887938,
+    "spell_by_match": {
+      "g1": 0.8132362419604778,
+      "g2": 0.8221888496955726,
+      "g3": 0.8437337033103308
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "trial": "ensemble",
+    "model": "logit_b0.5",
+    "spellF1": 0.8245913240190766,
+    "spell_by_match": {
+      "g1": 0.8155691315740192,
+      "g2": 0.8134545425371712,
+      "g3": 0.8447502979460392
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "trial": "ensemble",
+    "model": "logit_b0.75",
+    "spellF1": 0.81969112635847,
+    "spell_by_match": {
+      "g1": 0.8011880356957836,
+      "g2": 0.8145931660181774,
+      "g3": 0.8432921773614487
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "trial": "ensemble",
+    "model": "v10",
+    "spellF1": 0.8816928562931504,
+    "spell_by_match": {
+      "g1": 0.8689858896829761,
+      "g2": 0.8881785699613672,
+      "g3": 0.8879141092351078
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "trial": "ensemble",
+    "model": "bigru_raw",
+    "spellF1": 0.8635209160138775,
+    "spell_by_match": {
+      "g1": 0.8383067878415108,
+      "g2": 0.8645549368083086,
+      "g3": 0.8877010233918128
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "trial": "ensemble",
+    "model": "bigru_smooth25",
+    "spellF1": 0.8697617168754181,
+    "spell_by_match": {
+      "g1": 0.8488623189768078,
+      "g2": 0.8683405919294117,
+      "g3": 0.8920822397200351
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "trial": "ensemble",
+    "model": "probability_b0.25",
+    "spellF1": 0.8833456694608017,
+    "spell_by_match": {
+      "g1": 0.8739679400273417,
+      "g2": 0.8795609107740322,
+      "g3": 0.8965081575810312
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "trial": "ensemble",
+    "model": "probability_b0.5",
+    "spellF1": 0.8869341217747061,
+    "spell_by_match": {
+      "g1": 0.8779169376622312,
+      "g2": 0.882447416393415,
+      "g3": 0.9004380112684721
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "trial": "ensemble",
+    "model": "probability_b0.75",
+    "spellF1": 0.8843027234223585,
+    "spell_by_match": {
+      "g1": 0.8731630927514765,
+      "g2": 0.8780777374482592,
+      "g3": 0.90166734006734
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "trial": "ensemble",
+    "model": "logit_b0.25",
+    "spellF1": 0.8836958861956359,
+    "spell_by_match": {
+      "g1": 0.8736600108510523,
+      "g2": 0.8815273996835828,
+      "g3": 0.8959002480522728
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "trial": "ensemble",
+    "model": "logit_b0.5",
+    "spellF1": 0.8878275290014987,
+    "spell_by_match": {
+      "g1": 0.8804612765058234,
+      "g2": 0.8829655268625034,
+      "g3": 0.9000557836361694
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "trial": "ensemble",
+    "model": "logit_b0.75",
+    "spellF1": 0.8806252046284054,
+    "spell_by_match": {
+      "g1": 0.8635041296700913,
+      "g2": 0.8807085700323743,
+      "g3": 0.8976629141827503
+    }
+  }
+]

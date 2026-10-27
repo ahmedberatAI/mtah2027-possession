@@ -1,3 +1,24 @@
+# Güncel devam noktası — 27 Ekim 2026, kullanıcı ara verdi
+
+Önce `AGENTS.md` ve `docs/RAPOR.md` §4 **Tur 13** kaydını oku. Aşağıdaki eski devam notundaki
+112 değişiklik / GitHub birleştirmesi bilgileri artık tarihsel: tur 9–12 `541b79e` ile korundu,
+`origin/main` (`39fd4de`) `de5d862` ile birleştirildi. Dal: `codex/rounds9-13-integration`.
+Push yapılmadı; push için onay gerekiyor. Kullanıcı ara verdiği için hiçbir deney kendi kendine yeniden başlatılmaz.
+
+- v10 ve paylaşılan BiGRU referans CSV'leri birebir üretildi; 52 test geçti, ağırlık hash'leri doğrulandı.
+- `src/exp_shared_blend.py` tamamlandı: 216 dış skor hücresi, üç eşli tohum. %75 BiGRU olasılık karışımı
+  SC fazda ≈ +0.022, pp'de ≈ +0.029; Metrica ≈ 0. DFL LOMO eksik; varsayılan **v10 değişmedi**.
+- Tam sonuçlar `reports/shared_blend/RESULTS.md`; ayrıntılı gerekçe ve güven aralıkları RAPOR Tur 13.
+- Dokunuş v2 tohum 1 bitti, DFL-evctrl kazancı tekrarlanmadı. Tohum 2 nihai dosyayı yazmadan durduruldu;
+  eğitimi baştan çalışacak. Ardından yeni `src/exp_touch_verify.py` üç tohum özeti çıkarır (henüz çalıştırılmadı).
+- Kamera robust işi durduruldu; core/norm × 3 tohum önbellekleri mevcut, nihai skor tablosu bekliyor.
+- İki kendi CPU işi Ctrl-C ile durduruldu; Colab açılmadı, paket/veri/ağırlık indirilmedi.
+- PFF 64 maç yerelde yok, bağlı Drive aramasında bulunamadı. Colab yeniden eğitimi için erişim bağlantısı gerekiyor.
+
+---
+
+# Önceki devam notu (tarihsel; yukarıdaki güncellemeler önceliklidir)
+
 # Devam promptu — MTAH 2027 possession modeli (27 Ekim 2026)
 
 Sen bu projede modeli geliştirmeye kaldığımız yerden devam edecek bir kodlama ajanısın. Kullanıcıyla Türkçe konuş; kısa

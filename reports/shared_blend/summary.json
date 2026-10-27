@@ -1,0 +1,1838 @@
+[
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "model": "bigru_raw",
+    "seed_mean": 0.8024416175826338,
+    "seed_sd": 0.005339452890682459,
+    "seed_deltas": [
+      -0.024014167490157945,
+      -0.01358499687181458,
+      -0.024990453151324088
+    ],
+    "versus_v10": {
+      "delta": -0.020863205837765502,
+      "ci95": [
+        -0.02630946220394348,
+        -0.011733832695928759
+      ],
+      "probability_positive": 0.0,
+      "wins": 0,
+      "matches": 3
+    },
+    "ensemble": 0.8071477054911331,
+    "ensemble_versus_v10": {
+      "delta": -0.016586272312738015,
+      "ci95": [
+        -0.026472844901912707,
+        -0.002882077888667234
+      ],
+      "probability_positive": 0.0,
+      "wins": 0,
+      "matches": 3
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "model": "bigru_smooth25",
+    "seed_mean": 0.810155889031194,
+    "seed_sd": 0.0029722452386579507,
+    "seed_deltas": [
+      -0.01643175190452717,
+      -0.008944515792614016,
+      -0.014070535470474432
+    ],
+    "versus_v10": {
+      "delta": -0.013148934389205244,
+      "ci95": [
+        -0.01865910657999248,
+        -0.004327786778246967
+      ],
+      "probability_positive": 0.0,
+      "wins": 0,
+      "matches": 3
+    },
+    "ensemble": 0.8141794915781478,
+    "ensemble_versus_v10": {
+      "delta": -0.009554486225723227,
+      "ci95": [
+        -0.016885040966950093,
+        0.0050289761962419854
+      ],
+      "probability_positive": 0.0399,
+      "wins": 1,
+      "matches": 3
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "model": "logit_b0.25",
+    "seed_mean": 0.826162207317977,
+    "seed_sd": 0.0018992133738926623,
+    "seed_deltas": [
+      0.004307760494277946,
+      0.002065397551606285,
+      0.0021989936468489457
+    ],
+    "versus_v10": {
+      "delta": 0.0028573838975777255,
+      "ci95": [
+        -0.00514981763100919,
+        0.008711132512829955
+      ],
+      "probability_positive": 0.7411,
+      "wins": 2,
+      "matches": 3
+    },
+    "ensemble": 0.8263862649887938,
+    "ensemble_versus_v10": {
+      "delta": 0.002652287184922645,
+      "ci95": [
+        -0.005693615416674902,
+        0.007215839792912293
+      ],
+      "probability_positive": 0.7411,
+      "wins": 2,
+      "matches": 3
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "model": "logit_b0.5",
+    "seed_mean": 0.8266099749337021,
+    "seed_sd": 0.0008885138264580767,
+    "seed_deltas": [
+      0.002520959577087978,
+      0.005442603512009869,
+      0.001951891450810872
+    ],
+    "versus_v10": {
+      "delta": 0.0033051515133029805,
+      "ci95": [
+        -0.008914854403375472,
+        0.010889285382544744
+      ],
+      "probability_positive": 0.7411,
+      "wins": 2,
+      "matches": 3
+    },
+    "ensemble": 0.8245913240190766,
+    "ensemble_versus_v10": {
+      "delta": 0.0008573462152054271,
+      "ci95": [
+        -0.014427922575076302,
+        0.009548729406453682
+      ],
+      "probability_positive": 0.7411,
+      "wins": 2,
+      "matches": 3
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "model": "logit_b0.75",
+    "seed_mean": 0.8218307956226871,
+    "seed_sd": 0.005902071248969141,
+    "seed_deltas": [
+      -0.0008094482530769387,
+      0.004930990035671656,
+      -0.008543625175730929
+    ],
+    "versus_v10": {
+      "delta": -0.0014740277977121075,
+      "ci95": [
+        -0.007676278243205159,
+        0.005439055168659723
+      ],
+      "probability_positive": 0.3705,
+      "wins": 1,
+      "matches": 3
+    },
+    "ensemble": 0.81969112635847,
+    "ensemble_versus_v10": {
+      "delta": -0.004042851445401212,
+      "ci95": [
+        -0.013289299094070062,
+        0.005993111229648407
+      ],
+      "probability_positive": 0.1506,
+      "wins": 1,
+      "matches": 3
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "model": "probability_b0.25",
+    "seed_mean": 0.8254996576426535,
+    "seed_sd": 0.0005143207819396745,
+    "seed_deltas": [
+      0.0018734741248324083,
+      0.002761475062248664,
+      0.0019495534796818426
+    ],
+    "versus_v10": {
+      "delta": 0.002194834222254305,
+      "ci95": [
+        -0.006080466502519144,
+        0.007723580094681548
+      ],
+      "probability_positive": 0.7411,
+      "wins": 2,
+      "matches": 3
+    },
+    "ensemble": 0.8262671080678178,
+    "ensemble_versus_v10": {
+      "delta": 0.0025331302639465627,
+      "ci95": [
+        -0.007288511748413273,
+        0.008119557514830511
+      ],
+      "probability_positive": 0.7411,
+      "wins": 2,
+      "matches": 3
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "model": "probability_b0.5",
+    "seed_mean": 0.8265757611503187,
+    "seed_sd": 0.0010946922110552152,
+    "seed_deltas": [
+      0.00157787976835011,
+      0.0050130236267573736,
+      0.003221909794650868
+    ],
+    "versus_v10": {
+      "delta": 0.0032709377299194133,
+      "ci95": [
+        -0.007723623803983948,
+        0.00988514562143239
+      ],
+      "probability_positive": 0.7411,
+      "wins": 2,
+      "matches": 3
+    },
+    "ensemble": 0.8260582558977728,
+    "ensemble_versus_v10": {
+      "delta": 0.0023242780939016403,
+      "ci95": [
+        -0.01252466879533809,
+        0.010784195733403945
+      ],
+      "probability_positive": 0.7411,
+      "wins": 2,
+      "matches": 3
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "model": "probability_b0.75",
+    "seed_mean": 0.8242509845984404,
+    "seed_sd": 0.005208144298030411,
+    "seed_deltas": [
+      -0.0006643002375126272,
+      0.007769807682070362,
+      -0.004267023910434209
+    ],
+    "versus_v10": {
+      "delta": 0.0009461611780412124,
+      "ci95": [
+        -0.008365347012873281,
+        0.009219149943578975
+      ],
+      "probability_positive": 0.6273,
+      "wins": 2,
+      "matches": 3
+    },
+    "ensemble": 0.8233246903539572,
+    "ensemble_versus_v10": {
+      "delta": -0.00040928744991393834,
+      "ci95": [
+        -0.014159783415506721,
+        0.008246751936949459
+      ],
+      "probability_positive": 0.4072,
+      "wins": 2,
+      "matches": 3
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "learned",
+    "model": "v10",
+    "seed_mean": 0.8233048234203992,
+    "seed_sd": 0.0009845797744451247,
+    "seed_deltas": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "versus_v10": {
+      "delta": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "probability_positive": 0.0,
+      "wins": 0,
+      "matches": 3
+    },
+    "ensemble": 0.8237339778038711,
+    "ensemble_versus_v10": {
+      "delta": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "probability_positive": 0.0,
+      "wins": 0,
+      "matches": 3
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "model": "bigru_raw",
+    "seed_mean": 0.8581313668635064,
+    "seed_sd": 0.0052479147384876705,
+    "seed_deltas": [
+      -0.024942971981510298,
+      -0.018981549238069606,
+      -0.02854200813334229
+    ],
+    "versus_v10": {
+      "delta": -0.024155509784307472,
+      "ci95": [
+        -0.031949079254321444,
+        -0.012326022343661758
+      ],
+      "probability_positive": 0.0,
+      "wins": 0,
+      "matches": 3
+    },
+    "ensemble": 0.8635209160138775,
+    "ensemble_versus_v10": {
+      "delta": -0.018171940279272974,
+      "ci95": [
+        -0.030679101841465273,
+        -0.00021308584329504665
+      ],
+      "probability_positive": 0.0,
+      "wins": 0,
+      "matches": 3
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "model": "bigru_smooth25",
+    "seed_mean": 0.8663089470037564,
+    "seed_sd": 0.002741487853186451,
+    "seed_deltas": [
+      -0.018315019813079036,
+      -0.014103404709755463,
+      -0.015515364409338317
+    ],
+    "versus_v10": {
+      "delta": -0.01597792964405753,
+      "ci95": [
+        -0.02234561079482822,
+        -0.004579449202664954
+      ],
+      "probability_positive": 0.0,
+      "wins": 0,
+      "matches": 3
+    },
+    "ensemble": 0.8697617168754181,
+    "ensemble_versus_v10": {
+      "delta": -0.011931139417732198,
+      "ci95": [
+        -0.020123570706168326,
+        0.004168130484927257
+      ],
+      "probability_positive": 0.0399,
+      "wins": 1,
+      "matches": 3
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "model": "logit_b0.25",
+    "seed_mean": 0.8844522144940216,
+    "seed_sd": 0.0017180911090770546,
+    "seed_deltas": [
+      0.0025430663589596225,
+      -6.0866624997268914e-05,
+      0.004013813804660815
+    ],
+    "versus_v10": {
+      "delta": 0.0021653378462076858,
+      "ci95": [
+        -0.005366762424299676,
+        0.006467681089702304
+      ],
+      "probability_positive": 0.7411,
+      "wins": 2,
+      "matches": 3
+    },
+    "ensemble": 0.8836958861956359,
+    "ensemble_versus_v10": {
+      "delta": 0.0020030299024855758,
+      "ci95": [
+        -0.006651170277784391,
+        0.007986138817164923
+      ],
+      "probability_positive": 0.7411,
+      "wins": 2,
+      "matches": 3
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "model": "logit_b0.5",
+    "seed_mean": 0.8870962472795493,
+    "seed_sd": 0.000925177062640481,
+    "seed_deltas": [
+      0.005294604795701097,
+      0.005157630724975659,
+      0.00397587637452923
+    ],
+    "versus_v10": {
+      "delta": 0.004809370631735366,
+      "ci95": [
+        -0.006555683174207183,
+        0.01143736910212001
+      ],
+      "probability_positive": 0.7411,
+      "wins": 2,
+      "matches": 3
+    },
+    "ensemble": 0.8878275290014987,
+    "ensemble_versus_v10": {
+      "delta": 0.006134672708348369,
+      "ci95": [
+        -0.005213043098863834,
+        0.01214167440106162
+      ],
+      "probability_positive": 0.9631,
+      "wins": 2,
+      "matches": 3
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "model": "logit_b0.75",
+    "seed_mean": 0.8808669973365522,
+    "seed_sd": 0.004446839107595659,
+    "seed_deltas": [
+      -0.001240594646666926,
+      0.0025932980028938735,
+      -0.0056123412900118685
+    ],
+    "versus_v10": {
+      "delta": -0.0014198793112616774,
+      "ci95": [
+        -0.009611050185804992,
+        0.00637908618125993
+      ],
+      "probability_positive": 0.3705,
+      "wins": 1,
+      "matches": 3
+    },
+    "ensemble": 0.8806252046284054,
+    "ensemble_versus_v10": {
+      "delta": -0.001067651664745058,
+      "ci95": [
+        -0.0074699999289928876,
+        0.00974880494764252
+      ],
+      "probability_positive": 0.2577,
+      "wins": 1,
+      "matches": 3
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "model": "probability_b0.25",
+    "seed_mean": 0.8835482645359445,
+    "seed_sd": 0.0015868998808951883,
+    "seed_deltas": [
+      0.0014183166566690275,
+      -0.0006876590214552891,
+      0.003053506029177422
+    ],
+    "versus_v10": {
+      "delta": 0.0012613878881304978,
+      "ci95": [
+        -0.006815375564140802,
+        0.005781742096683362
+      ],
+      "probability_positive": 0.7411,
+      "wins": 2,
+      "matches": 3
+    },
+    "ensemble": 0.8833456694608017,
+    "ensemble_versus_v10": {
+      "delta": 0.0016528131676513125,
+      "ci95": [
+        -0.008617659187335036,
+        0.008594048345923366
+      ],
+      "probability_positive": 0.7411,
+      "wins": 2,
+      "matches": 3
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "model": "probability_b0.5",
+    "seed_mean": 0.8871815987321816,
+    "seed_sd": 0.0011046940293474332,
+    "seed_deltas": [
+      0.0043604852346245115,
+      0.004316961105225836,
+      0.006006719913252856
+    ],
+    "versus_v10": {
+      "delta": 0.0048947220843676975,
+      "ci95": [
+        -0.004761783675722442,
+        0.011998901657324867
+      ],
+      "probability_positive": 0.8481,
+      "wins": 2,
+      "matches": 3
+    },
+    "ensemble": 0.8869341217747061,
+    "ensemble_versus_v10": {
+      "delta": 0.0052412654815557165,
+      "ci95": [
+        -0.005731153567952285,
+        0.012523902033364287
+      ],
+      "probability_positive": 0.8481,
+      "wins": 2,
+      "matches": 3
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "model": "probability_b0.75",
+    "seed_mean": 0.8837373599743646,
+    "seed_sd": 0.004280705797600275,
+    "seed_deltas": [
+      0.0013381302888960667,
+      0.005413939232637777,
+      -0.0024006195418819765
+    ],
+    "versus_v10": {
+      "delta": 0.0014504833265506962,
+      "ci95": [
+        -0.008658021222851309,
+        0.010938027563735186
+      ],
+      "probability_positive": 0.6273,
+      "wins": 2,
+      "matches": 3
+    },
+    "ensemble": 0.8843027234223585,
+    "ensemble_versus_v10": {
+      "delta": 0.0026098671292081876,
+      "ci95": [
+        -0.010100832513108005,
+        0.013753230832232122
+      ],
+      "probability_positive": 0.6273,
+      "wins": 2,
+      "matches": 3
+    }
+  },
+  {
+    "source": "metrica@v3",
+    "conv": "ctrl",
+    "dead": "oracle",
+    "model": "v10",
+    "seed_mean": 0.8822868766478139,
+    "seed_sd": 0.0006109084763062397,
+    "seed_deltas": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "versus_v10": {
+      "delta": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "probability_positive": 0.0,
+      "wins": 0,
+      "matches": 3
+    },
+    "ensemble": 0.8816928562931504,
+    "ensemble_versus_v10": {
+      "delta": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "probability_positive": 0.0,
+      "wins": 0,
+      "matches": 3
+    }
+  },
+  {
+    "source": "sc@v3",
+    "conv": "phase",
+    "dead": "learned",
+    "model": "bigru_raw",
+    "seed_mean": 0.6193769671436044,
+    "seed_sd": 0.00239844753292831,
+    "seed_deltas": [
+      0.019017876990503835,
+      0.024546523134166054,
+      0.022641434637656777
+    ],
+    "versus_v10": {
+      "delta": 0.022068611587442194,
+      "ci95": [
+        0.01348352690771323,
+        0.029960095856697993
+      ],
+      "probability_positive": 1.0,
+      "wins": 17,
+      "matches": 20
+    },
+    "ensemble": 0.6221349792263717,
+    "ensemble_versus_v10": {
+      "delta": 0.024539692045264988,
+      "ci95": [
+        0.01562737555574429,
+        0.032979714687185635
+      ],
+      "probability_positive": 1.0,
+      "wins": 17,
+      "matches": 20
+    }
+  },
+  {
+    "source": "sc@v3",
+    "conv": "phase",
+    "dead": "learned",
+    "model": "bigru_smooth25",
+    "seed_mean": 0.6193878876876973,
+    "seed_sd": 0.0027632466218585595,
+    "seed_deltas": [
+      0.02067016467270333,
+      0.02099652588289236,
+      0.02457190583900981
+    ],
+    "versus_v10": {
+      "delta": 0.022079532131535084,
+      "ci95": [
+        0.014553292477373142,
+        0.02926893889835075
+      ],
+      "probability_positive": 1.0,
+      "wins": 17,
+      "matches": 20
+    },
+    "ensemble": 0.623565680491341,
+    "ensemble_versus_v10": {
+      "delta": 0.025970393310234218,
+      "ci95": [
+        0.017846349390831306,
+        0.034361009733439175
+      ],
+      "probability_positive": 1.0,
+      "wins": 18,
+      "matches": 20
+    }
+  },
+  {
+    "source": "sc@v3",
+    "conv": "phase",
+    "dead": "learned",
+    "model": "logit_b0.25",
+    "seed_mean": 0.6069337028813169,
+    "seed_sd": 0.0030930577551899906,
+    "seed_deltas": [
+      0.0077775213067490245,
+      0.008566162652545617,
+      0.01253235801616992
+    ],
+    "versus_v10": {
+      "delta": 0.009625347325154732,
+      "ci95": [
+        0.00656190152497228,
+        0.013193003801309435
+      ],
+      "probability_positive": 1.0,
+      "wins": 19,
+      "matches": 20
+    },
+    "ensemble": 0.6078856956938188,
+    "ensemble_versus_v10": {
+      "delta": 0.010290408512712079,
+      "ci95": [
+        0.006653048666794018,
+        0.014109939876172557
+      ],
+      "probability_positive": 1.0,
+      "wins": 19,
+      "matches": 20
+    }
+  },
+  {
+    "source": "sc@v3",
+    "conv": "phase",
+    "dead": "learned",
+    "model": "logit_b0.5",
+    "seed_mean": 0.6151012605955721,
+    "seed_sd": 0.0037379945187950583,
+    "seed_deltas": [
+      0.01617852318979207,
+      0.015842206389107716,
+      0.021357985539330326
+    ],
+    "versus_v10": {
+      "delta": 0.01779290503941005,
+      "ci95": [
+        0.013213715464175133,
+        0.022703704205190477
+      ],
+      "probability_positive": 1.0,
+      "wins": 19,
+      "matches": 20
+    },
+    "ensemble": 0.6170414967865284,
+    "ensemble_versus_v10": {
+      "delta": 0.019446209605421698,
+      "ci95": [
+        0.014365368643976986,
+        0.024409439110990236
+      ],
+      "probability_positive": 1.0,
+      "wins": 19,
+      "matches": 20
+    }
+  },
+  {
+    "source": "sc@v3",
+    "conv": "phase",
+    "dead": "learned",
+    "model": "logit_b0.75",
+    "seed_mean": 0.6190941558353115,
+    "seed_sd": 0.0026809482260995903,
+    "seed_deltas": [
+      0.020935515386071968,
+      0.020373696467992364,
+      0.024048188983383456
+    ],
+    "versus_v10": {
+      "delta": 0.02178580027914919,
+      "ci95": [
+        0.014819871332024673,
+        0.02863894239395674
+      ],
+      "probability_positive": 1.0,
+      "wins": 19,
+      "matches": 20
+    },
+    "ensemble": 0.6210814799606004,
+    "ensemble_versus_v10": {
+      "delta": 0.023486192779493674,
+      "ci95": [
+        0.016499608600505224,
+        0.030385389555811694
+      ],
+      "probability_positive": 1.0,
+      "wins": 19,
+      "matches": 20
+    }
+  },
+  {
+    "source": "sc@v3",
+    "conv": "phase",
+    "dead": "learned",
+    "model": "probability_b0.25",
+    "seed_mean": 0.6052300257774571,
+    "seed_sd": 0.0026602660548324442,
+    "seed_deltas": [
+      0.006031402984239986,
+      0.00739659891530442,
+      0.01033700876434096
+    ],
+    "versus_v10": {
+      "delta": 0.007921670221294946,
+      "ci95": [
+        0.005084552970002772,
+        0.01109296164129248
+      ],
+      "probability_positive": 1.0,
+      "wins": 19,
+      "matches": 20
+    },
+    "ensemble": 0.6065308639037899,
+    "ensemble_versus_v10": {
+      "delta": 0.008935576722683141,
+      "ci95": [
+        0.005896468503573271,
+        0.012115455201283534
+      ],
+      "probability_positive": 1.0,
+      "wins": 19,
+      "matches": 20
+    }
+  },
+  {
+    "source": "sc@v3",
+    "conv": "phase",
+    "dead": "learned",
+    "model": "probability_b0.5",
+    "seed_mean": 0.6144730567547145,
+    "seed_sd": 0.0024614751746470077,
+    "seed_deltas": [
+      0.016030436696407357,
+      0.01618122074651651,
+      0.01928244615273378
+    ],
+    "versus_v10": {
+      "delta": 0.017164701198552478,
+      "ci95": [
+        0.013144796127324061,
+        0.0216537028774745
+      ],
+      "probability_positive": 1.0,
+      "wins": 20,
+      "matches": 20
+    },
+    "ensemble": 0.617827082187608,
+    "ensemble_versus_v10": {
+      "delta": 0.020231795006501248,
+      "ci95": [
+        0.015415761757916773,
+        0.02523358178992478
+      ],
+      "probability_positive": 1.0,
+      "wins": 20,
+      "matches": 20
+    }
+  },
+  {
+    "source": "sc@v3",
+    "conv": "phase",
+    "dead": "learned",
+    "model": "probability_b0.75",
+    "seed_mean": 0.6189227734414524,
+    "seed_sd": 0.0023492056350875997,
+    "seed_deltas": [
+      0.021536920667022508,
+      0.020109909319632524,
+      0.023196423669215926
+    ],
+    "versus_v10": {
+      "delta": 0.021614417885290272,
+      "ci95": [
+        0.015276703861268085,
+        0.02820152515920236
+      ],
+      "probability_positive": 1.0,
+      "wins": 19,
+      "matches": 20
+    },
+    "ensemble": 0.6211809722087792,
+    "ensemble_versus_v10": {
+      "delta": 0.02358568502767248,
+      "ci95": [
+        0.016997741871431413,
+        0.030314743474950476
+      ],
+      "probability_positive": 1.0,
+      "wins": 19,
+      "matches": 20
+    }
+  },
+  {
+    "source": "sc@v3",
+    "conv": "phase",
+    "dead": "learned",
+    "model": "v10",
+    "seed_mean": 0.5973083555561622,
+    "seed_sd": 0.0008366877847726457,
+    "seed_deltas": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "versus_v10": {
+      "delta": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "probability_positive": 0.0,
+      "wins": 0,
+      "matches": 20
+    },
+    "ensemble": 0.5975952871811067,
+    "ensemble_versus_v10": {
+      "delta": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "probability_positive": 0.0,
+      "wins": 0,
+      "matches": 20
+    }
+  },
+  {
+    "source": "sc@v3",
+    "conv": "phase",
+    "dead": "oracle",
+    "model": "bigru_raw",
+    "seed_mean": 0.7772886644520364,
+    "seed_sd": 0.003917661993786017,
+    "seed_deltas": [
+      0.014338315736352136,
+      0.019209005204466223,
+      0.02032055992969417
+    ],
+    "versus_v10": {
+      "delta": 0.017955960290170863,
+      "ci95": [
+        0.009204811769773481,
+        0.026572841986216112
+      ],
+      "probability_positive": 1.0,
+      "wins": 16,
+      "matches": 20
+    },
+    "ensemble": 0.7814732160947113,
+    "ensemble_versus_v10": {
+      "delta": 0.02210028616963113,
+      "ci95": [
+        0.012262628910819789,
+        0.03185446110907989
+      ],
+      "probability_positive": 1.0,
+      "wins": 16,
+      "matches": 20
+    }
+  },
+  {
+    "source": "sc@v3",
+    "conv": "phase",
+    "dead": "oracle",
+    "model": "bigru_smooth25",
+    "seed_mean": 0.7792701289152124,
+    "seed_sd": 0.004489364304749454,
+    "seed_deltas": [
+      0.017297137998973033,
+      0.019215797325898953,
+      0.023299338935168667
+    ],
+    "versus_v10": {
+      "delta": 0.01993742475334693,
+      "ci95": [
+        0.011970072284744043,
+        0.0275829451258415
+      ],
+      "probability_positive": 1.0,
+      "wins": 17,
+      "matches": 20
+    },
+    "ensemble": 0.7828130933567967,
+    "ensemble_versus_v10": {
+      "delta": 0.02344016343171665,
+      "ci95": [
+        0.01345147669376543,
+        0.033274416151139616
+      ],
+      "probability_positive": 1.0,
+      "wins": 15,
+      "matches": 20
+    }
+  },
+  {
+    "source": "sc@v3",
+    "conv": "phase",
+    "dead": "oracle",
+    "model": "logit_b0.25",
+    "seed_mean": 0.7679358833967542,
+    "seed_sd": 0.003978636233934802,
+    "seed_deltas": [
+      0.005998285201658904,
+      0.00844671770438532,
+      0.011364534798622317
+    ],
+    "versus_v10": {
+      "delta": 0.008603179234888824,
+      "ci95": [
+        0.005628073513720685,
+        0.011726110996016293
+      ],
+      "probability_positive": 1.0,
+      "wins": 18,
+      "matches": 20
+    },
+    "ensemble": 0.7686719564406026,
+    "ensemble_versus_v10": {
+      "delta": 0.009299026515522456,
+      "ci95": [
+        0.005170061989753651,
+        0.013604336470350836
+      ],
+      "probability_positive": 1.0,
+      "wins": 15,
+      "matches": 20
+    }
+  },
+  {
+    "source": "sc@v3",
+    "conv": "phase",
+    "dead": "oracle",
+    "model": "logit_b0.5",
+    "seed_mean": 0.7752847535359192,
+    "seed_sd": 0.004505024405106134,
+    "seed_deltas": [
+      0.013598502802593337,
+      0.014935830954054818,
+      0.0193218143655135
+    ],
+    "versus_v10": {
+      "delta": 0.015952049374053784,
+      "ci95": [
+        0.010737500232385714,
+        0.021258737630275564
+      ],
+      "probability_positive": 1.0,
+      "wins": 19,
+      "matches": 20
+    },
+    "ensemble": 0.7760285105824668,
+    "ensemble_versus_v10": {
+      "delta": 0.016655580657386693,
+      "ci95": [
+        0.011475836381230179,
+        0.021756525912660456
+      ],
+      "probability_positive": 1.0,
+      "wins": 19,
+      "matches": 20
+    }
+  },
+  {
+    "source": "sc@v3",
+    "conv": "phase",
+    "dead": "oracle",
+    "model": "logit_b0.75",
+    "seed_mean": 0.7796542461403042,
+    "seed_sd": 0.004592186730859182,
+    "seed_deltas": [
+      0.01867637931697852,
+      0.01860939244092652,
+      0.023678854177411446
+    ],
+    "versus_v10": {
+      "delta": 0.0203215419784388,
+      "ci95": [
+        0.01278714592975318,
+        0.02761842230022094
+      ],
+      "probability_positive": 1.0,
+      "wins": 18,
+      "matches": 20
+    },
+    "ensemble": 0.7809649913651252,
+    "ensemble_versus_v10": {
+      "delta": 0.021592061440045072,
+      "ci95": [
+        0.014190011192182163,
+        0.02872923928912663
+      ],
+      "probability_positive": 1.0,
+      "wins": 18,
+      "matches": 20
+    }
+  },
+  {
+    "source": "sc@v3",
+    "conv": "phase",
+    "dead": "oracle",
+    "model": "probability_b0.25",
+    "seed_mean": 0.7662340871442562,
+    "seed_sd": 0.004274226926203366,
+    "seed_deltas": [
+      0.005193188025121143,
+      0.005574803559354358,
+      0.009936157362696485
+    ],
+    "versus_v10": {
+      "delta": 0.006901382982390669,
+      "ci95": [
+        0.0040409864527083976,
+        0.00990938376512122
+      ],
+      "probability_positive": 1.0,
+      "wins": 17,
+      "matches": 20
+    },
+    "ensemble": 0.7673191686392024,
+    "ensemble_versus_v10": {
+      "delta": 0.007946238714122178,
+      "ci95": [
+        0.003857822478597877,
+        0.012360306265363457
+      ],
+      "probability_positive": 1.0,
+      "wins": 13,
+      "matches": 20
+    }
+  },
+  {
+    "source": "sc@v3",
+    "conv": "phase",
+    "dead": "oracle",
+    "model": "probability_b0.5",
+    "seed_mean": 0.773626548740783,
+    "seed_sd": 0.0035216809162267222,
+    "seed_deltas": [
+      0.012385074176811894,
+      0.013962409940437404,
+      0.01653404961950322
+    ],
+    "versus_v10": {
+      "delta": 0.014293844578917492,
+      "ci95": [
+        0.010007740604058565,
+        0.018749812985772368
+      ],
+      "probability_positive": 1.0,
+      "wins": 19,
+      "matches": 20
+    },
+    "ensemble": 0.7756220581709534,
+    "ensemble_versus_v10": {
+      "delta": 0.016249128245873358,
+      "ci95": [
+        0.011446559133942756,
+        0.020803726629983588
+      ],
+      "probability_positive": 1.0,
+      "wins": 18,
+      "matches": 20
+    }
+  },
+  {
+    "source": "sc@v3",
+    "conv": "phase",
+    "dead": "oracle",
+    "model": "probability_b0.75",
+    "seed_mean": 0.778864964129889,
+    "seed_sd": 0.004655327814472722,
+    "seed_deltas": [
+      0.018421821828169538,
+      0.017367407217745212,
+      0.022807550858156223
+    ],
+    "versus_v10": {
+      "delta": 0.019532259968023574,
+      "ci95": [
+        0.01260716772078121,
+        0.026308107764771573
+      ],
+      "probability_positive": 1.0,
+      "wins": 19,
+      "matches": 20
+    },
+    "ensemble": 0.7814286847452022,
+    "ensemble_versus_v10": {
+      "delta": 0.022055754820122085,
+      "ci95": [
+        0.01526905558494477,
+        0.028918642830332016
+      ],
+      "probability_positive": 1.0,
+      "wins": 19,
+      "matches": 20
+    }
+  },
+  {
+    "source": "sc@v3",
+    "conv": "phase",
+    "dead": "oracle",
+    "model": "v10",
+    "seed_mean": 0.7593327041618655,
+    "seed_sd": 0.0018423909598056212,
+    "seed_deltas": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "versus_v10": {
+      "delta": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "probability_positive": 0.0,
+      "wins": 0,
+      "matches": 20
+    },
+    "ensemble": 0.7593729299250802,
+    "ensemble_versus_v10": {
+      "delta": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "probability_positive": 0.0,
+      "wins": 0,
+      "matches": 20
+    }
+  },
+  {
+    "source": "sc@v3",
+    "conv": "pp",
+    "dead": "learned",
+    "model": "bigru_raw",
+    "seed_mean": 0.6307350632069888,
+    "seed_sd": 0.002013926749297508,
+    "seed_deltas": [
+      0.03612781607055715,
+      0.04122531572922705,
+      0.039708456929408054
+    ],
+    "versus_v10": {
+      "delta": 0.0390205295763975,
+      "ci95": [
+        0.031896368180838804,
+        0.04692447733987366
+      ],
+      "probability_positive": 1.0,
+      "wins": 20,
+      "matches": 20
+    },
+    "ensemble": 0.633613642859997,
+    "ensemble_versus_v10": {
+      "delta": 0.04132686945955892,
+      "ci95": [
+        0.03419830029786909,
+        0.049651377332115644
+      ],
+      "probability_positive": 1.0,
+      "wins": 20,
+      "matches": 20
+    }
+  },
+  {
+    "source": "sc@v3",
+    "conv": "pp",
+    "dead": "learned",
+    "model": "bigru_smooth25",
+    "seed_mean": 0.6274539223618739,
+    "seed_sd": 0.002233897712016981,
+    "seed_deltas": [
+      0.034046778879432193,
+      0.03519983416499661,
+      0.0379715531494188
+    ],
+    "versus_v10": {
+      "delta": 0.03573938873128255,
+      "ci95": [
+        0.029911822365952044,
+        0.04228122759572413
+      ],
+      "probability_positive": 1.0,
+      "wins": 20,
+      "matches": 20
+    },
+    "ensemble": 0.6297118979213888,
+    "ensemble_versus_v10": {
+      "delta": 0.037425124520950766,
+      "ci95": [
+        0.03035154015086532,
+        0.04507211373696259
+      ],
+      "probability_positive": 1.0,
+      "wins": 20,
+      "matches": 20
+    }
+  },
+  {
+    "source": "sc@v3",
+    "conv": "pp",
+    "dead": "learned",
+    "model": "logit_b0.25",
+    "seed_mean": 0.6034066346617136,
+    "seed_sd": 0.0028354543790687775,
+    "seed_deltas": [
+      0.010190907632882551,
+      0.010350089493273651,
+      0.01453530596721031
+    ],
+    "versus_v10": {
+      "delta": 0.011692101031122138,
+      "ci95": [
+        0.008308181183840732,
+        0.015438809175017625
+      ],
+      "probability_positive": 1.0,
+      "wins": 20,
+      "matches": 20
+    },
+    "ensemble": 0.603533792431078,
+    "ensemble_versus_v10": {
+      "delta": 0.011247019030639942,
+      "ci95": [
+        0.008252152933939988,
+        0.01450791702704233
+      ],
+      "probability_positive": 1.0,
+      "wins": 20,
+      "matches": 20
+    }
+  },
+  {
+    "source": "sc@v3",
+    "conv": "pp",
+    "dead": "learned",
+    "model": "logit_b0.5",
+    "seed_mean": 0.614280216181103,
+    "seed_sd": 0.0043331519510166,
+    "seed_deltas": [
+      0.020938814174547127,
+      0.0197696367087139,
+      0.02698859676827392
+    ],
+    "versus_v10": {
+      "delta": 0.02256568255051164,
+      "ci95": [
+        0.018021330747448716,
+        0.02752396669227574
+      ],
+      "probability_positive": 1.0,
+      "wins": 20,
+      "matches": 20
+    },
+    "ensemble": 0.6158151621720142,
+    "ensemble_versus_v10": {
+      "delta": 0.023528388771576102,
+      "ci95": [
+        0.01903482072722018,
+        0.028036160819409715
+      ],
+      "probability_positive": 1.0,
+      "wins": 20,
+      "matches": 20
+    }
+  },
+  {
+    "source": "sc@v3",
+    "conv": "pp",
+    "dead": "learned",
+    "model": "logit_b0.75",
+    "seed_mean": 0.6224958117715557,
+    "seed_sd": 0.003064571274558806,
+    "seed_deltas": [
+      0.029127046973619786,
+      0.02931691449538143,
+      0.03389987295389152
+    ],
+    "versus_v10": {
+      "delta": 0.030781278140964215,
+      "ci95": [
+        0.024959733570860135,
+        0.03720502012725848
+      ],
+      "probability_positive": 1.0,
+      "wins": 20,
+      "matches": 20
+    },
+    "ensemble": 0.6236203317873101,
+    "ensemble_versus_v10": {
+      "delta": 0.03133355838687219,
+      "ci95": [
+        0.025784035011399427,
+        0.03770641155506387
+      ],
+      "probability_positive": 1.0,
+      "wins": 20,
+      "matches": 20
+    }
+  },
+  {
+    "source": "sc@v3",
+    "conv": "pp",
+    "dead": "learned",
+    "model": "probability_b0.25",
+    "seed_mean": 0.6007830391335522,
+    "seed_sd": 0.001357606145003493,
+    "seed_deltas": [
+      0.007884705855595975,
+      0.009036691887517434,
+      0.010284118765768846
+    ],
+    "versus_v10": {
+      "delta": 0.009068505502960756,
+      "ci95": [
+        0.006264680909777381,
+        0.012334373644580605
+      ],
+      "probability_positive": 1.0,
+      "wins": 20,
+      "matches": 20
+    },
+    "ensemble": 0.6014461712754692,
+    "ensemble_versus_v10": {
+      "delta": 0.009159397875031177,
+      "ci95": [
+        0.00618920893854694,
+        0.012470736415651475
+      ],
+      "probability_positive": 1.0,
+      "wins": 19,
+      "matches": 20
+    }
+  },
+  {
+    "source": "sc@v3",
+    "conv": "pp",
+    "dead": "learned",
+    "model": "probability_b0.5",
+    "seed_mean": 0.6122924416886875,
+    "seed_sd": 0.002111390226050375,
+    "seed_deltas": [
+      0.01956553049767329,
+      0.019633720773704844,
+      0.02253447290291033
+    ],
+    "versus_v10": {
+      "delta": 0.020577908058096173,
+      "ci95": [
+        0.016520876001641843,
+        0.02524098978213707
+      ],
+      "probability_positive": 1.0,
+      "wins": 20,
+      "matches": 20
+    },
+    "ensemble": 0.6147237355123087,
+    "ensemble_versus_v10": {
+      "delta": 0.02243696211187089,
+      "ci95": [
+        0.018159288472131378,
+        0.02699977499682992
+      ],
+      "probability_positive": 1.0,
+      "wins": 20,
+      "matches": 20
+    }
+  },
+  {
+    "source": "sc@v3",
+    "conv": "pp",
+    "dead": "learned",
+    "model": "probability_b0.75",
+    "seed_mean": 0.6212138428860806,
+    "seed_sd": 0.0026068580370918306,
+    "seed_deltas": [
+      0.02820254495955965,
+      0.028243795334589983,
+      0.032051587472318066
+    ],
+    "versus_v10": {
+      "delta": 0.029499309255489138,
+      "ci95": [
+        0.024089376021436484,
+        0.03573976182794905
+      ],
+      "probability_positive": 1.0,
+      "wins": 20,
+      "matches": 20
+    },
+    "ensemble": 0.6224713382621483,
+    "ensemble_versus_v10": {
+      "delta": 0.030184564861710346,
+      "ci95": [
+        0.024542429119124222,
+        0.03662039504023069
+      ],
+      "probability_positive": 1.0,
+      "wins": 20,
+      "matches": 20
+    }
+  },
+  {
+    "source": "sc@v3",
+    "conv": "pp",
+    "dead": "learned",
+    "model": "v10",
+    "seed_mean": 0.5917145336305915,
+    "seed_sd": 0.0007986700705906905,
+    "seed_deltas": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "versus_v10": {
+      "delta": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "probability_positive": 0.0,
+      "wins": 0,
+      "matches": 20
+    },
+    "ensemble": 0.592286773400438,
+    "ensemble_versus_v10": {
+      "delta": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "probability_positive": 0.0,
+      "wins": 0,
+      "matches": 20
+    }
+  },
+  {
+    "source": "sc@v3",
+    "conv": "pp",
+    "dead": "oracle",
+    "model": "bigru_raw",
+    "seed_mean": 0.7840137290679074,
+    "seed_sd": 0.003631966415065403,
+    "seed_deltas": [
+      0.03299183511869119,
+      0.03688916916311202,
+      0.03944958933517584
+    ],
+    "versus_v10": {
+      "delta": 0.03644353120565973,
+      "ci95": [
+        0.02882116535573533,
+        0.045070825287898554
+      ],
+      "probability_positive": 1.0,
+      "wins": 20,
+      "matches": 20
+    },
+    "ensemble": 0.7880581407173408,
+    "ensemble_versus_v10": {
+      "delta": 0.04016665895285511,
+      "ci95": [
+        0.03157856793287555,
+        0.05000212374140584
+      ],
+      "probability_positive": 1.0,
+      "wins": 20,
+      "matches": 20
+    }
+  },
+  {
+    "source": "sc@v3",
+    "conv": "pp",
+    "dead": "oracle",
+    "model": "bigru_smooth25",
+    "seed_mean": 0.7811566837127885,
+    "seed_sd": 0.004388252868303679,
+    "seed_deltas": [
+      0.03128744955785179,
+      0.031832537906180236,
+      0.03763947008759039
+    ],
+    "versus_v10": {
+      "delta": 0.03358648585054085,
+      "ci95": [
+        0.027398422871485115,
+        0.0403773678065542
+      ],
+      "probability_positive": 1.0,
+      "wins": 20,
+      "matches": 20
+    },
+    "ensemble": 0.7822508625234288,
+    "ensemble_versus_v10": {
+      "delta": 0.03435938075894296,
+      "ci95": [
+        0.026459976852037485,
+        0.04253212109981839
+      ],
+      "probability_positive": 1.0,
+      "wins": 20,
+      "matches": 20
+    }
+  },
+  {
+    "source": "sc@v3",
+    "conv": "pp",
+    "dead": "oracle",
+    "model": "logit_b0.25",
+    "seed_mean": 0.7591573951130947,
+    "seed_sd": 0.0035927515046478126,
+    "seed_deltas": [
+      0.009559941651354653,
+      0.01046262772189066,
+      0.014739022379295585
+    ],
+    "versus_v10": {
+      "delta": 0.011587197250847014,
+      "ci95": [
+        0.008373035932154086,
+        0.01508516055260472
+      ],
+      "probability_positive": 1.0,
+      "wins": 20,
+      "matches": 20
+    },
+    "ensemble": 0.7593158760538469,
+    "ensemble_versus_v10": {
+      "delta": 0.011424394289361017,
+      "ci95": [
+        0.007545963568945375,
+        0.015511046109925604
+      ],
+      "probability_positive": 1.0,
+      "wins": 18,
+      "matches": 20
+    }
+  },
+  {
+    "source": "sc@v3",
+    "conv": "pp",
+    "dead": "oracle",
+    "model": "logit_b0.5",
+    "seed_mean": 0.7678571715222127,
+    "seed_sd": 0.004926063698983568,
+    "seed_deltas": [
+      0.01807310057800493,
+      0.017885240299097882,
+      0.024902580102791894
+    ],
+    "versus_v10": {
+      "delta": 0.02028697365996493,
+      "ci95": [
+        0.01584609902595609,
+        0.025150439031325834
+      ],
+      "probability_positive": 1.0,
+      "wins": 20,
+      "matches": 20
+    },
+    "ensemble": 0.7689132972903623,
+    "ensemble_versus_v10": {
+      "delta": 0.021021815525876654,
+      "ci95": [
+        0.016281584532308005,
+        0.025744360917185218
+      ],
+      "probability_positive": 1.0,
+      "wins": 20,
+      "matches": 20
+    }
+  },
+  {
+    "source": "sc@v3",
+    "conv": "pp",
+    "dead": "oracle",
+    "model": "logit_b0.75",
+    "seed_mean": 0.7758624905363506,
+    "seed_sd": 0.0048702715642221775,
+    "seed_deltas": [
+      0.025916662624846265,
+      0.026083147457552247,
+      0.032877067939910076
+    ],
+    "versus_v10": {
+      "delta": 0.028292292674102965,
+      "ci95": [
+        0.022348284876862943,
+        0.03467323995645188
+      ],
+      "probability_positive": 1.0,
+      "wins": 20,
+      "matches": 20
+    },
+    "ensemble": 0.7763152563685748,
+    "ensemble_versus_v10": {
+      "delta": 0.028423774604088892,
+      "ci95": [
+        0.022323355873309855,
+        0.03468065865386468
+      ],
+      "probability_positive": 1.0,
+      "wins": 20,
+      "matches": 20
+    }
+  },
+  {
+    "source": "sc@v3",
+    "conv": "pp",
+    "dead": "oracle",
+    "model": "probability_b0.25",
+    "seed_mean": 0.7560117318649707,
+    "seed_sd": 0.0026524035020785326,
+    "seed_deltas": [
+      0.007146210333294434,
+      0.007711227026235501,
+      0.010467164648639171
+    ],
+    "versus_v10": {
+      "delta": 0.008441534002723067,
+      "ci95": [
+        0.0057913840955140395,
+        0.011289434856236702
+      ],
+      "probability_positive": 1.0,
+      "wins": 19,
+      "matches": 20
+    },
+    "ensemble": 0.7566679238639831,
+    "ensemble_versus_v10": {
+      "delta": 0.00877644209949725,
+      "ci95": [
+        0.004959136331363057,
+        0.012938668993683008
+      ],
+      "probability_positive": 1.0,
+      "wins": 18,
+      "matches": 20
+    }
+  },
+  {
+    "source": "sc@v3",
+    "conv": "pp",
+    "dead": "oracle",
+    "model": "probability_b0.5",
+    "seed_mean": 0.7650544636866079,
+    "seed_sd": 0.003080367616315481,
+    "seed_deltas": [
+      0.015492677019141698,
+      0.01689718378669358,
+      0.020062936667245013
+    ],
+    "versus_v10": {
+      "delta": 0.017484265824360135,
+      "ci95": [
+        0.013351691973902256,
+        0.02197275038644807
+      ],
+      "probability_positive": 1.0,
+      "wins": 20,
+      "matches": 20
+    },
+    "ensemble": 0.7673598965568218,
+    "ensemble_versus_v10": {
+      "delta": 0.019468414792335943,
+      "ci95": [
+        0.014673756811188834,
+        0.02423524191581924
+      ],
+      "probability_positive": 1.0,
+      "wins": 20,
+      "matches": 20
+    }
+  },
+  {
+    "source": "sc@v3",
+    "conv": "pp",
+    "dead": "oracle",
+    "model": "probability_b0.75",
+    "seed_mean": 0.7739036191961934,
+    "seed_sd": 0.004621588822996996,
+    "seed_deltas": [
+      0.024450786198334518,
+      0.02399210534437668,
+      0.03055737245912593
+    ],
+    "versus_v10": {
+      "delta": 0.02633342133394581,
+      "ci95": [
+        0.020955980056984617,
+        0.03224004702968879
+      ],
+      "probability_positive": 1.0,
+      "wins": 20,
+      "matches": 20
+    },
+    "ensemble": 0.7759488440086679,
+    "ensemble_versus_v10": {
+      "delta": 0.028057362244182187,
+      "ci95": [
+        0.021948529919295637,
+        0.034583100301406176
+      ],
+      "probability_positive": 1.0,
+      "wins": 20,
+      "matches": 20
+    }
+  },
+  {
+    "source": "sc@v3",
+    "conv": "pp",
+    "dead": "oracle",
+    "model": "v10",
+    "seed_mean": 0.7475701978622478,
+    "seed_sd": 0.0011702814388298806,
+    "seed_deltas": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "versus_v10": {
+      "delta": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "probability_positive": 0.0,
+      "wins": 0,
+      "matches": 20
+    },
+    "ensemble": 0.7478914817644858,
+    "ensemble_versus_v10": {
+      "delta": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "probability_positive": 0.0,
+      "wins": 0,
+      "matches": 20
+    }
+  }
+]

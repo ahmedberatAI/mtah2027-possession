@@ -1,0 +1,68 @@
+{
+  "cells": 216,
+  "external_reproduction": [
+    {
+      "source": "metrica@v3",
+      "conv": "ctrl",
+      "dead": "learned",
+      "prior": 0.8071477054911331,
+      "reproduced": 0.8071477054911331,
+      "max_match_score_difference": 0.0,
+      "exact": true
+    },
+    {
+      "source": "metrica@v3",
+      "conv": "ctrl",
+      "dead": "oracle",
+      "prior": 0.8635209160138775,
+      "reproduced": 0.8635209160138775,
+      "max_match_score_difference": 0.0,
+      "exact": true
+    },
+    {
+      "source": "sc@v3",
+      "conv": "phase",
+      "dead": "learned",
+      "prior": 0.6221349792263717,
+      "reproduced": 0.6221349792263717,
+      "max_match_score_difference": 0.0,
+      "exact": true
+    },
+    {
+      "source": "sc@v3",
+      "conv": "phase",
+      "dead": "oracle",
+      "prior": 0.7814732160947113,
+      "reproduced": 0.7814732160947113,
+      "max_match_score_difference": 0.0,
+      "exact": true
+    },
+    {
+      "source": "sc@v3",
+      "conv": "pp",
+      "dead": "learned",
+      "prior": 0.633613642859997,
+      "reproduced": 0.633613642859997,
+      "max_match_score_difference": 0.0,
+      "exact": true
+    },
+    {
+      "source": "sc@v3",
+      "conv": "pp",
+      "dead": "oracle",
+      "prior": 0.7880581407173408,
+      "reproduced": 0.7880581407173408,
+      "max_match_score_difference": 0.0,
+      "exact": true
+    }
+  ],
+  "all_prior_ensemble_scores_exact": true,
+  "checkpoints_verified": true,
+  "independent_matches": {
+    "metrica": 3,
+    "skillcorner": 20
+  },
+  "dfl_evaluated": false,
+  "default_changed": false,
+  "public_used": false
+}

@@ -1,0 +1,47 @@
+[
+  {
+    "model": "logit_b0.75",
+    "seed_mean_worst_regret": 0.008239251435433137,
+    "ensemble_worst_regret": 0.011742884348766025
+  },
+  {
+    "model": "probability_b0.75",
+    "seed_mean_worst_regret": 0.010110109871714013,
+    "ensemble_worst_regret": 0.01210929670867289
+  },
+  {
+    "model": "logit_b0.5",
+    "seed_mean_worst_regret": 0.016454847025885844,
+    "ensemble_worst_regret": 0.01914484342697853
+  },
+  {
+    "model": "probability_b0.5",
+    "seed_mean_worst_regret": 0.01895926538129955,
+    "ensemble_worst_regret": 0.02069824416051902
+  },
+  {
+    "model": "bigru_smooth25",
+    "seed_mean_worst_regret": 0.02087265172842523,
+    "ensemble_worst_regret": 0.018065812126080605
+  },
+  {
+    "model": "logit_b0.25",
+    "seed_mean_worst_regret": 0.027328428545275174,
+    "ensemble_worst_regret": 0.03007985042891903
+  },
+  {
+    "model": "bigru_raw",
+    "seed_mean_worst_regret": 0.02905023186867517,
+    "ensemble_worst_regret": 0.024306612987621268
+  },
+  {
+    "model": "probability_b0.25",
+    "seed_mean_worst_regret": 0.029952024073436556,
+    "ensemble_worst_regret": 0.03216747158452782
+  },
+  {
+    "model": "v10",
+    "seed_mean_worst_regret": 0.039020529576397345,
+    "ensemble_worst_regret": 0.04132686945955899
+  }
+]

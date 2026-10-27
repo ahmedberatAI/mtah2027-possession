@@ -1,0 +1,103 @@
+{
+  "date": "2026-10-27",
+  "sources": [
+    "metrica@v3",
+    "sc@v3"
+  ],
+  "conventions": {
+    "metrica@v3": [
+      "ctrl"
+    ],
+    "sc@v3": [
+      "phase",
+      "pp"
+    ]
+  },
+  "paired_seeds": [
+    [
+      0,
+      20261025
+    ],
+    [
+      1,
+      20261026
+    ],
+    [
+      2,
+      20261027
+    ]
+  ],
+  "grid": [
+    [
+      "probability",
+      0.25
+    ],
+    [
+      "probability",
+      0.5
+    ],
+    [
+      "probability",
+      0.75
+    ],
+    [
+      "logit",
+      0.25
+    ],
+    [
+      "logit",
+      0.5
+    ],
+    [
+      "logit",
+      0.75
+    ]
+  ],
+  "weight_means": "BiGRU contribution; remainder is raw v10",
+  "smoothing": "blend raw probabilities/logits, then centered +/-25-frame logit mean",
+  "controls": [
+    "v10 +/-25",
+    "BiGRU raw",
+    "BiGRU +/-25"
+  ],
+  "ensemble": "fixed v10 seed 0 plus equal probability mean of all three BiGRU members",
+  "decoder": {
+    "pen_team": 12,
+    "pen_dead": 30,
+    "min_poss": 8,
+    "min_dead": 50,
+    "D0": 175,
+    "c": 48
+  },
+  "dead": "same seven-DFL learned-D for every candidate; oracle-D diagnostic",
+  "aggregation": "average Metrica degradation draws within match before bootstrap",
+  "uncertainty": "paired match bootstrap of seed-mean scores, 10000 draws, 95% CI",
+  "selection": "worst regret across six external contexts; differences <0.005 keep simpler/current",
+  "limitations": [
+    "DFL cannot be evaluated without leave-match-out neural retraining",
+    "external sets have been reused in prior research",
+    "Metrica has only three independent matches",
+    "label conventions and dead modes are dependent views"
+  ],
+  "barath_or_public_used": false,
+  "default_change_authorized_by_this_test": false,
+  "features": "base+feat_fix:own_half+feat_ctrl:control+feat_team2:c145",
+  "manifest_sha256": "d97a91129019dc01c574f10b5b9c350dbfd4068567fabfa082865cfa7025d63e",
+  "v10_sha256": {
+    "0": "8a4721e1ae653a0fc57c9b5aa0cc3ed7e9f4a859c7483ced987354dff48edd15",
+    "1": "b629a74be411c1a38951cac514c35e66dd1b0dc3d11f7b0d99268c6ab0f23927",
+    "2": "4882f63e6f6872aaaf01d09369ffbd787a5366809669677a4d2ff4afea2ccef7"
+  },
+  "code": {
+    "exp_shared_blend.py": "ddaa98fe0e2bd261fac7cdbf1130f2aafcb4a97c6582b2918c58a39c53866557",
+    "seq_pff.py": "ddd567baa05a37c77e74e1d2353a8691697c40cdaa229815dbaf871fcf8e19bf",
+    "bench.py": "19bc81c57f6464da3d6f4e333385b1e8871787220ea54e309d9a6a68bb8bc2da",
+    "decode2.py": "f60415ef02e8ea8a9c4656ebdcf8c1d471482f80a5bc1e4557744d8a040f9d80",
+    "exp_ctrl2.py": "882c5901bd4eede40b32023c726db7c60fe6fb2ceb0338b90994273eccaa1b09",
+    "exp_smooth.py": "bf25f121e4dd61acf8bfd8cceca1c17953e7624fa3b97d2f07cbe1c5b642210d"
+  },
+  "runtime": {
+    "torch": "2.11.0+cu128",
+    "numpy": "2.5.4"
+  }
+}

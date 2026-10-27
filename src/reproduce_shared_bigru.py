@@ -8,7 +8,11 @@ os.environ.setdefault('CUBLAS_WORKSPACE_CONFIG', ':4096:8')
 import argparse
 import hashlib
 import json
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
 import numpy as np
 import torch
 import atd
