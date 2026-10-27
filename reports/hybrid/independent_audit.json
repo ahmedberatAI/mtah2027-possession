@@ -1,0 +1,42 @@
+{
+  "models": [
+    {
+      "kind": "bigru",
+      "seed": 20261025,
+      "sha256": "55cf97ae9de4a5afc506cb5f72ebbdd691fbb1b835d62330d1279ff4244045d2"
+    },
+    {
+      "kind": "lgb_balanced",
+      "seed": 20261025,
+      "sha256": "f7e568bd489c68061dbf2d88b2bec957c11cbbb2657fa5448837ac228f0c8655"
+    },
+    {
+      "kind": "bigru",
+      "seed": 20261026,
+      "sha256": "e7c6ae5abc2f915b9f621b4fb8e9af8b6b20b1eebd2c9b84a75a6adde2bf3219"
+    },
+    {
+      "kind": "lgb_balanced",
+      "seed": 20261026,
+      "sha256": "2d57dbcf85cfe2c3dc46058c9787c85403a1c8bf2b981e056675b851ff8e9bfb"
+    },
+    {
+      "kind": "bigru",
+      "seed": 20261027,
+      "sha256": "d1b6c248cecac1fdab93a36386612b8811173892cbd916c55114d4348a1961ab"
+    },
+    {
+      "kind": "lgb_balanced",
+      "seed": 20261027,
+      "sha256": "5664316d760401ef85e564076a1f904fc249c9ab7ef978c74bbe90347cf7f87f"
+    }
+  ],
+  "train_validation_disjoint": true,
+  "scalers_recomputed_from_train_only": true,
+  "lgb_row_alignment_verified": true,
+  "source_weights_equal": true,
+  "internal_selection_recomputed": true,
+  "external_cells": 32,
+  "selected_alpha": 1.0,
+  "selection_sha256": "e32bffd9cd5a4b3e4966604bce579f57370c2b2c83783a9b3897f4defc050fc4"
+}

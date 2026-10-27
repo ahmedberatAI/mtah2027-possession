@@ -1,0 +1,9 @@
+building rows dfl_pff_controlled
+training dfl_pff_controlled rows 5892500 features 172
+trained dfl_pff_controlled 141 seconds
+building rows pff_controlled
+training pff_controlled rows 5339416 features 172
+trained pff_controlled 129 seconds
+building rows dfl_pff_native
+training dfl_pff_native rows 5892500 features 172
+trained dfl_pff_native 151 seconds

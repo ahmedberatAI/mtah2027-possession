@@ -1,0 +1,155 @@
+{
+  "designs": [
+    [
+      2,
+      0,
+      [
+        "J03WPY",
+        "J03WR9"
+      ]
+    ],
+    [
+      2,
+      1,
+      [
+        "J03WR9",
+        "J03WOH"
+      ]
+    ],
+    [
+      2,
+      2,
+      [
+        "J03WOH",
+        "J03WQQ"
+      ]
+    ],
+    [
+      2,
+      3,
+      [
+        "J03WQQ",
+        "J03WMX"
+      ]
+    ],
+    [
+      2,
+      4,
+      [
+        "J03WMX",
+        "J03WOY"
+      ]
+    ],
+    [
+      2,
+      5,
+      [
+        "J03WOY",
+        "J03WN1"
+      ]
+    ],
+    [
+      2,
+      6,
+      [
+        "J03WN1",
+        "J03WPY"
+      ]
+    ],
+    [
+      4,
+      0,
+      [
+        "J03WPY",
+        "J03WR9",
+        "J03WOH",
+        "J03WQQ"
+      ]
+    ],
+    [
+      4,
+      1,
+      [
+        "J03WR9",
+        "J03WOH",
+        "J03WQQ",
+        "J03WMX"
+      ]
+    ],
+    [
+      4,
+      2,
+      [
+        "J03WOH",
+        "J03WQQ",
+        "J03WMX",
+        "J03WOY"
+      ]
+    ],
+    [
+      4,
+      3,
+      [
+        "J03WQQ",
+        "J03WMX",
+        "J03WOY",
+        "J03WN1"
+      ]
+    ],
+    [
+      4,
+      4,
+      [
+        "J03WMX",
+        "J03WOY",
+        "J03WN1",
+        "J03WPY"
+      ]
+    ],
+    [
+      4,
+      5,
+      [
+        "J03WOY",
+        "J03WN1",
+        "J03WPY",
+        "J03WR9"
+      ]
+    ],
+    [
+      4,
+      6,
+      [
+        "J03WN1",
+        "J03WPY",
+        "J03WR9",
+        "J03WOH"
+      ]
+    ],
+    [
+      7,
+      0,
+      [
+        "J03WPY",
+        "J03WR9",
+        "J03WOH",
+        "J03WQQ",
+        "J03WMX",
+        "J03WOY",
+        "J03WN1"
+      ]
+    ]
+  ],
+  "features": "base+feat_fix:own_half+feat_ctrl:control+feat_team2:c145",
+  "rounds": 400,
+  "stride": 2,
+  "threads": 8,
+  "decoder": {
+    "pen_team": 12,
+    "pen_dead": 30,
+    "min_poss": 8,
+    "min_dead": 50,
+    "b2_D0": 175,
+    "b2_c": 48
+  }
+}

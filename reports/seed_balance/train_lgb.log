@@ -1,0 +1,12 @@
+training lgb_unbalanced 20261025
+trained lgb_unbalanced 20261025 149 seconds
+training lgb_balanced 20261025
+trained lgb_balanced 20261025 138 seconds
+training lgb_unbalanced 20261026
+trained lgb_unbalanced 20261026 144 seconds
+training lgb_balanced 20261026
+trained lgb_balanced 20261026 130 seconds
+training lgb_unbalanced 20261027
+trained lgb_unbalanced 20261027 133 seconds
+training lgb_balanced 20261027
+trained lgb_balanced 20261027 122 seconds

@@ -1,0 +1,11 @@
+scoreboard  gt\BAR-ATH_possession_gt_public.csv  199319 frames  7500 graded  21 gt segments
+ground truth has 17 possessions of mean 14.2 s  <- compare the poss and dur columns
+ranked on spell_f1_mean; gaps below ~0.35 are within noise (widest bootstrap interval, 17 possessions, 1000 draws)
+spellF1 = mean possession-spell F1 over IoU 0.3/0.4/0.5/0.6/0.7; transF1/lat_f at +/-25 frames
+
+rank  submission                macroF1  spellF1   poss     dur  transF1  lat_f  shareE  frag
+----  ------------------------  -------  -------  -----  ------  -------  -----  ------  ----
+   1  bigru_ensemble_equal       0.9433   0.7724     12    19.8   0.6286   +6.2   0.028  0.76
+
+Wrote cache/barath_bigru_ensemble/official\scoreboard.csv
+Wrote 1 per-submission reports to cache/barath_bigru_ensemble/official\reports

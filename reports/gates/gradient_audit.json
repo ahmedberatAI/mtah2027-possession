@@ -1,0 +1,537 @@
+{
+  "inventory": {
+    "events": {
+      "expected": 64,
+      "complete": 64,
+      "expected_bytes": 1149120881
+    },
+    "tracking": {
+      "expected": 64,
+      "complete": 64,
+      "expected_bytes": 2776070163
+    },
+    "metadata": {
+      "expected": 64,
+      "complete": 64,
+      "expected_bytes": 63141
+    },
+    "rosters": {
+      "expected": 64,
+      "complete": 64,
+      "expected_bytes": 483962
+    }
+  },
+  "event_totals": {
+    "rows": 144541,
+    "initial_non_event": 1082,
+    "event_non_event": 1081,
+    "video_missing": 4616,
+    "deflector_nonnull": 236,
+    "missing_home_team": 7749
+  },
+  "event_counts": {
+    "event_type": {
+      "PA": 66715,
+      "IT": 47097,
+      "CH": 11555,
+      "RE": 2544,
+      "CL": 2956,
+      "CR": 2412,
+      "SH": 1559,
+      "TC": 1290,
+      "BC": 855,
+      "FO": 28
+    },
+    "challenge_type": {
+      "D": 1972,
+      "FIFTY": 1422,
+      "B": 2525,
+      "A": 2834,
+      "H": 390,
+      "T": 1560,
+      "S": 507,
+      "L": 338,
+      "G": 4,
+      "K": 3
+    },
+    "challenge_outcome": {
+      "R": 3177,
+      "D": 3264,
+      "P": 2021,
+      "O": 542,
+      "S": 101,
+      "N": 129,
+      "F": 1511,
+      "L": 51,
+      "M": 165,
+      "K": 337,
+      "B": 49,
+      "C": 192,
+      "I": 16
+    },
+    "touch_type": {
+      "F": 720,
+      "H": 493,
+      "T": 169,
+      "G": 20,
+      "C": 4,
+      "S": 6,
+      "P": 9,
+      "D": 15,
+      "L": 5
+    },
+    "rebound_outcome": {
+      "P": 1698,
+      "T": 804,
+      "R": 22,
+      "D": 6,
+      "A": 1
+    },
+    "initial_touch_type": {
+      "S": 135130,
+      "M": 1204,
+      "B": 652,
+      "G": 239
+    },
+    "period": {
+      "1": 71381,
+      "2": 69554,
+      "3": 1844,
+      "4": 1761,
+      "0": 1
+    }
+  },
+  "per_match": {
+    "10502": {
+      "rows": 2240,
+      "unique_game_events": 1383,
+      "sequences": 290,
+      "sequences_with_multiple_actor_teams": 92
+    },
+    "10503": {
+      "rows": 2492,
+      "unique_game_events": 1519,
+      "sequences": 254,
+      "sequences_with_multiple_actor_teams": 90
+    },
+    "10504": {
+      "rows": 2261,
+      "unique_game_events": 1374,
+      "sequences": 238,
+      "sequences_with_multiple_actor_teams": 74
+    },
+    "10505": {
+      "rows": 2096,
+      "unique_game_events": 1311,
+      "sequences": 242,
+      "sequences_with_multiple_actor_teams": 75
+    },
+    "10506": {
+      "rows": 2881,
+      "unique_game_events": 1824,
+      "sequences": 396,
+      "sequences_with_multiple_actor_teams": 129
+    },
+    "10507": {
+      "rows": 2432,
+      "unique_game_events": 1490,
+      "sequences": 224,
+      "sequences_with_multiple_actor_teams": 74
+    },
+    "10508": {
+      "rows": 3044,
+      "unique_game_events": 1872,
+      "sequences": 336,
+      "sequences_with_multiple_actor_teams": 95
+    },
+    "10509": {
+      "rows": 2085,
+      "unique_game_events": 1308,
+      "sequences": 243,
+      "sequences_with_multiple_actor_teams": 74
+    },
+    "10510": {
+      "rows": 3160,
+      "unique_game_events": 1927,
+      "sequences": 311,
+      "sequences_with_multiple_actor_teams": 97
+    },
+    "10511": {
+      "rows": 2832,
+      "unique_game_events": 1764,
+      "sequences": 336,
+      "sequences_with_multiple_actor_teams": 87
+    },
+    "10512": {
+      "rows": 2103,
+      "unique_game_events": 1334,
+      "sequences": 263,
+      "sequences_with_multiple_actor_teams": 87
+    },
+    "10513": {
+      "rows": 2007,
+      "unique_game_events": 1225,
+      "sequences": 229,
+      "sequences_with_multiple_actor_teams": 71
+    },
+    "10514": {
+      "rows": 2271,
+      "unique_game_events": 1390,
+      "sequences": 249,
+      "sequences_with_multiple_actor_teams": 74
+    },
+    "10515": {
+      "rows": 2174,
+      "unique_game_events": 1320,
+      "sequences": 241,
+      "sequences_with_multiple_actor_teams": 59
+    },
+    "10516": {
+      "rows": 2199,
+      "unique_game_events": 1350,
+      "sequences": 254,
+      "sequences_with_multiple_actor_teams": 75
+    },
+    "10517": {
+      "rows": 2814,
+      "unique_game_events": 1778,
+      "sequences": 404,
+      "sequences_with_multiple_actor_teams": 117
+    },
+    "3812": {
+      "rows": 2010,
+      "unique_game_events": 1259,
+      "sequences": 279,
+      "sequences_with_multiple_actor_teams": 88
+    },
+    "3813": {
+      "rows": 2218,
+      "unique_game_events": 1400,
+      "sequences": 243,
+      "sequences_with_multiple_actor_teams": 72
+    },
+    "3814": {
+      "rows": 2034,
+      "unique_game_events": 1279,
+      "sequences": 248,
+      "sequences_with_multiple_actor_teams": 77
+    },
+    "3815": {
+      "rows": 2273,
+      "unique_game_events": 1422,
+      "sequences": 275,
+      "sequences_with_multiple_actor_teams": 80
+    },
+    "3816": {
+      "rows": 2099,
+      "unique_game_events": 1311,
+      "sequences": 278,
+      "sequences_with_multiple_actor_teams": 82
+    },
+    "3817": {
+      "rows": 2220,
+      "unique_game_events": 1421,
+      "sequences": 289,
+      "sequences_with_multiple_actor_teams": 97
+    },
+    "3818": {
+      "rows": 1975,
+      "unique_game_events": 1254,
+      "sequences": 278,
+      "sequences_with_multiple_actor_teams": 85
+    },
+    "3819": {
+      "rows": 2520,
+      "unique_game_events": 1519,
+      "sequences": 225,
+      "sequences_with_multiple_actor_teams": 68
+    },
+    "3820": {
+      "rows": 2282,
+      "unique_game_events": 1394,
+      "sequences": 256,
+      "sequences_with_multiple_actor_teams": 86
+    },
+    "3821": {
+      "rows": 2296,
+      "unique_game_events": 1473,
+      "sequences": 254,
+      "sequences_with_multiple_actor_teams": 88
+    },
+    "3822": {
+      "rows": 2697,
+      "unique_game_events": 1633,
+      "sequences": 237,
+      "sequences_with_multiple_actor_teams": 60
+    },
+    "3823": {
+      "rows": 2202,
+      "unique_game_events": 1363,
+      "sequences": 263,
+      "sequences_with_multiple_actor_teams": 70
+    },
+    "3824": {
+      "rows": 2234,
+      "unique_game_events": 1368,
+      "sequences": 268,
+      "sequences_with_multiple_actor_teams": 79
+    },
+    "3825": {
+      "rows": 2161,
+      "unique_game_events": 1357,
+      "sequences": 272,
+      "sequences_with_multiple_actor_teams": 94
+    },
+    "3826": {
+      "rows": 2240,
+      "unique_game_events": 1351,
+      "sequences": 251,
+      "sequences_with_multiple_actor_teams": 71
+    },
+    "3827": {
+      "rows": 2231,
+      "unique_game_events": 1391,
+      "sequences": 254,
+      "sequences_with_multiple_actor_teams": 83
+    },
+    "3828": {
+      "rows": 1981,
+      "unique_game_events": 1291,
+      "sequences": 309,
+      "sequences_with_multiple_actor_teams": 103
+    },
+    "3829": {
+      "rows": 2159,
+      "unique_game_events": 1339,
+      "sequences": 254,
+      "sequences_with_multiple_actor_teams": 80
+    },
+    "3830": {
+      "rows": 2118,
+      "unique_game_events": 1356,
+      "sequences": 295,
+      "sequences_with_multiple_actor_teams": 93
+    },
+    "3831": {
+      "rows": 2173,
+      "unique_game_events": 1312,
+      "sequences": 231,
+      "sequences_with_multiple_actor_teams": 70
+    },
+    "3832": {
+      "rows": 2068,
+      "unique_game_events": 1366,
+      "sequences": 336,
+      "sequences_with_multiple_actor_teams": 122
+    },
+    "3833": {
+      "rows": 2030,
+      "unique_game_events": 1307,
+      "sequences": 266,
+      "sequences_with_multiple_actor_teams": 84
+    },
+    "3834": {
+      "rows": 2304,
+      "unique_game_events": 1419,
+      "sequences": 237,
+      "sequences_with_multiple_actor_teams": 73
+    },
+    "3835": {
+      "rows": 2060,
+      "unique_game_events": 1292,
+      "sequences": 268,
+      "sequences_with_multiple_actor_teams": 92
+    },
+    "3836": {
+      "rows": 2270,
+      "unique_game_events": 1403,
+      "sequences": 256,
+      "sequences_with_multiple_actor_teams": 77
+    },
+    "3837": {
+      "rows": 2199,
+      "unique_game_events": 1355,
+      "sequences": 234,
+      "sequences_with_multiple_actor_teams": 68
+    },
+    "3838": {
+      "rows": 2247,
+      "unique_game_events": 1373,
+      "sequences": 269,
+      "sequences_with_multiple_actor_teams": 89
+    },
+    "3839": {
+      "rows": 2191,
+      "unique_game_events": 1380,
+      "sequences": 274,
+      "sequences_with_multiple_actor_teams": 78
+    },
+    "3840": {
+      "rows": 1991,
+      "unique_game_events": 1259,
+      "sequences": 292,
+      "sequences_with_multiple_actor_teams": 87
+    },
+    "3841": {
+      "rows": 2100,
+      "unique_game_events": 1318,
+      "sequences": 225,
+      "sequences_with_multiple_actor_teams": 92
+    },
+    "3842": {
+      "rows": 2305,
+      "unique_game_events": 1429,
+      "sequences": 254,
+      "sequences_with_multiple_actor_teams": 81
+    },
+    "3843": {
+      "rows": 2187,
+      "unique_game_events": 1407,
+      "sequences": 313,
+      "sequences_with_multiple_actor_teams": 89
+    },
+    "3844": {
+      "rows": 1789,
+      "unique_game_events": 1144,
+      "sequences": 298,
+      "sequences_with_multiple_actor_teams": 102
+    },
+    "3845": {
+      "rows": 2576,
+      "unique_game_events": 1561,
+      "sequences": 226,
+      "sequences_with_multiple_actor_teams": 63
+    },
+    "3846": {
+      "rows": 1977,
+      "unique_game_events": 1259,
+      "sequences": 225,
+      "sequences_with_multiple_actor_teams": 73
+    },
+    "3847": {
+      "rows": 2200,
+      "unique_game_events": 1355,
+      "sequences": 296,
+      "sequences_with_multiple_actor_teams": 87
+    },
+    "3848": {
+      "rows": 2202,
+      "unique_game_events": 1417,
+      "sequences": 322,
+      "sequences_with_multiple_actor_teams": 97
+    },
+    "3849": {
+      "rows": 2270,
+      "unique_game_events": 1427,
+      "sequences": 297,
+      "sequences_with_multiple_actor_teams": 95
+    },
+    "3850": {
+      "rows": 2554,
+      "unique_game_events": 1540,
+      "sequences": 211,
+      "sequences_with_multiple_actor_teams": 72
+    },
+    "3851": {
+      "rows": 1856,
+      "unique_game_events": 1235,
+      "sequences": 343,
+      "sequences_with_multiple_actor_teams": 113
+    },
+    "3852": {
+      "rows": 2539,
+      "unique_game_events": 1547,
+      "sequences": 242,
+      "sequences_with_multiple_actor_teams": 85
+    },
+    "3853": {
+      "rows": 2051,
+      "unique_game_events": 1292,
+      "sequences": 266,
+      "sequences_with_multiple_actor_teams": 71
+    },
+    "3854": {
+      "rows": 2665,
+      "unique_game_events": 1572,
+      "sequences": 217,
+      "sequences_with_multiple_actor_teams": 61
+    },
+    "3855": {
+      "rows": 2417,
+      "unique_game_events": 1500,
+      "sequences": 256,
+      "sequences_with_multiple_actor_teams": 97
+    },
+    "3856": {
+      "rows": 2113,
+      "unique_game_events": 1348,
+      "sequences": 317,
+      "sequences_with_multiple_actor_teams": 99
+    },
+    "3857": {
+      "rows": 2118,
+      "unique_game_events": 1309,
+      "sequences": 240,
+      "sequences_with_multiple_actor_teams": 77
+    },
+    "3858": {
+      "rows": 2003,
+      "unique_game_events": 1278,
+      "sequences": 292,
+      "sequences_with_multiple_actor_teams": 81
+    },
+    "3859": {
+      "rows": 2045,
+      "unique_game_events": 1261,
+      "sequences": 266,
+      "sequences_with_multiple_actor_teams": 78
+    }
+  },
+  "tracking_sample": {
+    "match": "10511",
+    "counts": {
+      "rows": 196098,
+      "home_ball_null_rows": 143305,
+      "actor_differs_from_sequence_team": 0,
+      "ball_visible_rows": 75791
+    },
+    "unique_frames": 195468,
+    "duplicate_rows": 630,
+    "ownership_conflict_frames": 0,
+    "frame_step_histogram": {
+      "1": 195466,
+      "2002": 1
+    },
+    "milliseconds_per_frame": {
+      "33.367": 136832,
+      "33.366": 58634,
+      "33.3667": 1
+    },
+    "game_event_types": {
+      "FIRSTKICKOFF": 1,
+      "None": 143296,
+      "OTB": 52692,
+      "OUT": 99,
+      "OFF": 1,
+      "ON": 1,
+      "END": 1,
+      "SECONDKICKOFF": 1,
+      "SUB": 6
+    },
+    "possession_event_types": {
+      "PA": 1268,
+      "None": 194196,
+      "CH": 435,
+      "RE": 42,
+      "BC": 44,
+      "CL": 63,
+      "SH": 20,
+      "CR": 30
+    },
+    "periods": {
+      "1": 92017,
+      "2": 104081
+    }
+  },
+  "status": "schema_audit_only_not_training_labels"
+}

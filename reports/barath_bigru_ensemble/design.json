@@ -1,0 +1,71 @@
+{
+  "date": "2026-10-25",
+  "members": [
+    {
+      "seed": 20261025,
+      "weight": 0.3333333333333333,
+      "model_sha256": "c4a8872c224dd3032cf293855e64dac5df0ab180c4d909920bd12eb568a3435d",
+      "probabilities": "D:\\barca\\mtah2027-possession\\cache\\barath_public_v1\\bigru_s20261025_probs.pkl",
+      "probabilities_sha256": "1b6736be1b04b3179edc39f2e3a79cb7084e6244309d7cff8156c86ca1b0575a",
+      "source_csv_sha256": "1d44cae7737cfaae590e6bae92939789dd1a497c0700f4dabb98b9242f4c7c78"
+    },
+    {
+      "seed": 20261026,
+      "weight": 0.3333333333333333,
+      "model_sha256": "f6f2781c04557d3c63bbc58df53f2562cd6c4cc9593862a1df62af02175f08a7",
+      "probabilities": "D:\\barca\\mtah2027-possession\\cache\\barath_public_v1\\bigru_s20261026_probs.pkl",
+      "probabilities_sha256": "507a304d9d94f6a9012fffe580150e6542be494f36640c2f84bc43e65b726b7a",
+      "source_csv_sha256": "ecaded6f4c2c05224a9c44cd65f604f017c7e739198f29a963ebabb0865c858a"
+    },
+    {
+      "seed": 20261027,
+      "weight": 0.3333333333333333,
+      "model_sha256": "35b7425242ae33b5f5f380be8a58d8c01ba97912b0563a89dd322015e9dffc31",
+      "probabilities": "D:\\barca\\mtah2027-possession\\cache\\barath_public_v1\\bigru_s20261027_probs.pkl",
+      "probabilities_sha256": "35bbb2ffcf34ae0ff432d3ca2704a3c6129a85e3d0cd43f110eaf06b8bae5ce4",
+      "source_csv_sha256": "8ffece243a085024e6389ea2eb6e2472e66889968be9521fa37c4b6c1dcf1689"
+    }
+  ],
+  "operation": "arithmetic mean of P(home) at each frame before decoding",
+  "decoder_and_evidence": {
+    "v0": 1.55,
+    "kv": 2.2,
+    "v_clip": 2.5,
+    "v0_long": 1.55,
+    "kv_long": 1.2,
+    "out_margin": 0.5,
+    "w_out": 4.0,
+    "w_missing": 0.25,
+    "missing_after": 25,
+    "still_disp": 0.6,
+    "w_still": 0.8,
+    "ball_fast": 5.0,
+    "w_ballmove": 0.6,
+    "r_ctrl": 1.5,
+    "r_sigma": 1.0,
+    "ctrl_rel": 2.5,
+    "ctrl_boost": 1.0,
+    "contest_scale": 1.0,
+    "w_team": 2.0,
+    "pen_team": 12.0,
+    "pen_dead": 30.0,
+    "min_poss": 8,
+    "min_dead": 50,
+    "spd_shift": 37,
+    "w_binvalid": 1.5,
+    "w_blive": 0.4,
+    "dis_lo": 1.0,
+    "dis_hi": 2.5,
+    "w_dis_mid": 0.7,
+    "w_dis_hi": 0.35,
+    "k_team": 1.0,
+    "mix_rule": 0.0,
+    "b2_D0": 175,
+    "b2_c": 48.0
+  },
+  "public_weight_search": false,
+  "public_scores_previously_seen": true,
+  "code_sha256": "f72f322a56e2dd82ff7850e1fe7996bb62f0f875efa84ec9d4bc4f3196f2da7e",
+  "merged_features_sha256": "16c025fc9339f57502a0af57015f6e926701791fa3d00e41504c41e366575664",
+  "original_prediction_manifest_sha256": "dd9828bb60ac109a3bb851fd1dee4fbee838d87ba6fb9627cbe3f3caf814e7ca"
+}

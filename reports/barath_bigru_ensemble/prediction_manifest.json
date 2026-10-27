@@ -1,0 +1,10 @@
+{
+  "csv": "D:\\barca\\mtah2027-possession\\submissions\\barath_bigru_ensemble\\bigru_ensemble_equal.csv",
+  "rows": 199319,
+  "csv_sha256": "f4a4b86501fab3e94e5ef9e288b064a431818c35908982678af39c0ee1cfd225",
+  "probabilities": "D:\\barca\\mtah2027-possession\\cache\\barath_bigru_ensemble\\equal_probabilities.pkl",
+  "probabilities_sha256": "2d1f29850dccd58ca466852db1d43d3144f708d22c06b681c601c712ed1fdd86",
+  "design_sha256": "c2e2840823afdb915365b2fb8b56ba4d031647e72f1872b82cc38f3df1d4cca9",
+  "frozen_at": "2026-10-25T08:17:00.268252+00:00",
+  "source_predictions_reproduced": true
+}

@@ -1,0 +1,66 @@
+{
+  "date": "2026-10-25",
+  "members": [
+    {
+      "seed": 20261025,
+      "weight": 0.3333333333333333,
+      "model_sha256": "c4a8872c224dd3032cf293855e64dac5df0ab180c4d909920bd12eb568a3435d"
+    },
+    {
+      "seed": 20261026,
+      "weight": 0.3333333333333333,
+      "model_sha256": "f6f2781c04557d3c63bbc58df53f2562cd6c4cc9593862a1df62af02175f08a7"
+    },
+    {
+      "seed": 20261027,
+      "weight": 0.3333333333333333,
+      "model_sha256": "35b7425242ae33b5f5f380be8a58d8c01ba97912b0563a89dd322015e9dffc31"
+    }
+  ],
+  "v7_model": "D:\\barca\\mtah2027-possession\\cache\\barath_public_v1\\v7_team.txt",
+  "v7_sha256": "5df1685093786013830f107e546c94dbf7abad234061ee8f04359c0c63449e7c",
+  "operation": "float64 arithmetic mean of P(home), then fixed B2",
+  "sources": [
+    "metrica@v3",
+    "sc@v3"
+  ],
+  "conventions": {
+    "metrica@v3": [
+      "ctrl",
+      "events"
+    ],
+    "sc@v3": [
+      "pp",
+      "phase"
+    ]
+  },
+  "features": "base+feat_fix:own_half+feat_ctrl:control+feat_team2:c145",
+  "decoder": {
+    "pen_team": 12,
+    "pen_dead": 30,
+    "min_poss": 8,
+    "min_dead": 50,
+    "D0": 175,
+    "c": 48
+  },
+  "dead": "same fixed seven-DFL learned-D for both; oracle-D diagnostic only",
+  "aggregation": "equal matches; average three Metrica noise seeds within match first",
+  "uncertainty": "paired match bootstrap 10000 draws; fixed trained ensemble, no training-seed resampling",
+  "external_tuning": false,
+  "previous_individual_external_results_already_seen": true,
+  "probabilities": {
+    "D:\\barca\\mtah2027-possession\\cache\\seed_balance_v1\\bigru_s20261025_metrica-v3_probs.pkl": "b140ff1be936b189579f1f4e867668aa704523457e3342f4bead0c0d84794f69",
+    "D:\\barca\\mtah2027-possession\\cache\\seed_balance_v1\\bigru_s20261026_metrica-v3_probs.pkl": "d7b893317be2a77294968015455bada8c8a35c62c13ae9972a919561e439cef4",
+    "D:\\barca\\mtah2027-possession\\cache\\seed_balance_v1\\bigru_s20261027_metrica-v3_probs.pkl": "3dea214be0f65b687f3f811b3e01f28d997c877b35a6e0bc0aba0f21d7ba5d4a",
+    "D:\\barca\\mtah2027-possession\\cache\\seed_balance_v1\\bigru_s20261025_sc-v3_probs.pkl": "d8de51cbdf0bd28be917058d84f8ffa16457cc50075314334a077f6a86f5d03a",
+    "D:\\barca\\mtah2027-possession\\cache\\seed_balance_v1\\bigru_s20261026_sc-v3_probs.pkl": "4c9ba2c7630b75009757bb813a08fd212d7a074d0427f8e9a627810d5f9c440d",
+    "D:\\barca\\mtah2027-possession\\cache\\seed_balance_v1\\bigru_s20261027_sc-v3_probs.pkl": "3eb2590940995ed1874267c252fa5200dbd4bf077ebb8cbef146a842e8fd311e"
+  },
+  "code": {
+    "exp_external_ensemble.py": "250caea61f112c6aa8cc6e21570663427e46c897ddb5ea70add5f7fc3eab4174",
+    "bench.py": "57f1dadaf4976a38abb41deb670abcdbc52cb5e4da579cb7bb376006101b86cc",
+    "exp_data_gate.py": "69008b5c65da370c9e0435ff099231601b5ca763e0d5be32bfb02b8fbf7eedbd",
+    "exp_ctrl2.py": "77a33e553741dab46335b243c77d1d97442a1f59e72f2d236dd7af6b8dac22a4",
+    "decode2.py": "fb70031d5010efb35933b65e565b8ff59ab9c4b105613856b8d378de4477fb4a"
+  }
+}

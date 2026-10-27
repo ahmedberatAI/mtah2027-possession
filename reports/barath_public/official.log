@@ -1,0 +1,26 @@
+scoreboard  gt\BAR-ATH_possession_gt_public.csv  199319 frames  7500 graded  21 gt segments
+ground truth has 17 possessions of mean 14.2 s  <- compare the poss and dur columns
+ranked on spell_f1_mean; gaps below ~0.38 are within noise (widest bootstrap interval, 17 possessions, 1000 draws)
+spellF1 = mean possession-spell F1 over IoU 0.3/0.4/0.5/0.6/0.7; transF1/lat_f at +/-25 frames
+
+rank  submission                macroF1  spellF1   poss     dur  transF1  lat_f  shareE  frag
+----  ------------------------  -------  -------  -----  ------  -------  -----  ------  ----
+   1  bigru_s20261027            0.9434   0.7862     12    19.8   0.6286   +6.9   0.029  0.76
+   2  bigru_s20261025            0.9440   0.7724     12    19.7   0.6286   +3.1   0.031  0.76
+   3  bigru_s20261026            0.9412   0.7724     12    19.8   0.6286   +7.4   0.028  0.76
+   4  lgb_balanced_s20261025     0.9250   0.6667     10    23.6   0.4848   +9.1   0.028  0.67
+   5  lgb_balanced_s20261026     0.9244   0.6667     10    23.6   0.4848   +9.4   0.028  0.67
+   6  lgb_balanced_s20261027     0.9243   0.6667     10    23.6   0.4848   +9.6   0.029  0.67
+   7  v7                         0.9244   0.6519     10    23.5   0.5455   +7.9   0.029  0.67
+
+macroF1 would order the field differently -- these move, biggest first:
+  lgb_balanced_s20261027     board #4   -> macroF1 #7    DOWN 3
+  lgb_balanced_s20261026     board #4   -> macroF1 #6    DOWN 2
+  v7                         board #7   -> macroF1 #5    up 2
+  bigru_s20261027            board #1   -> macroF1 #2    DOWN 1
+  bigru_s20261025            board #2   -> macroF1 #1    up 1
+  bigru_s20261026            board #2   -> macroF1 #3    DOWN 1
+  one that rises under macroF1 is trading possession structure for per-frame accuracy
+
+Wrote cache/barath_public_v1/official\scoreboard.csv
+Wrote 7 per-submission reports to cache/barath_public_v1/official\reports

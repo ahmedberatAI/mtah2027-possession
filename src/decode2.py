@@ -16,7 +16,7 @@ from numba import njit
 INF = 1e300
 
 
-@njit(cache=True)
+@njit(cache=True, nogil=True)
 def _run(emis, emis_idx, offs, L, min_exit, exit_cost, adv, pen, ch, chan, init, back):
     n = emis.shape[0]
     M = L.shape[0]

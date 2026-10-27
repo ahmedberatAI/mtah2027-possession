@@ -1,0 +1,46 @@
+{
+  "matches": 64,
+  "halves": 134,
+  "frames25": 9884621,
+  "controlled_label_counts": [
+    2695495,
+    2644102,
+    4309635,
+    235389
+  ],
+  "controlled_label_hours": [
+    29.949944444444444,
+    29.378911111111112,
+    47.88483333333333,
+    2.6154333333333333
+  ],
+  "accepted_halves": 134,
+  "rejected": [],
+  "duplicate_rows": 42950,
+  "geometry_conflicts": 0,
+  "max_accepted_alignment_p95": 0.03285560000022088,
+  "median_native_control_disagree": 0.02213626055253986,
+  "ignored_event_periods": {
+    "10510": [
+      3,
+      4
+    ],
+    "10511": [
+      3,
+      4
+    ]
+  },
+  "label_dir": "D:\\barca\\mtah2027-possession\\cache\\pff25\\raw_control_v2\\labels",
+  "source_hashes": {
+    "gradient.py": "64e9a2a73a9a1858bc0c0107fd3cc8f2c945191dc051ab61ec4001925594e7fd",
+    "exp_pff.py": "3480d83942c5dd3c2109cd41f90f9a97a2e918a72789b0c7128fd335fbfd9f20",
+    "report_pff.py": "30a6bfdad00c5c95012817109a1747dc4b81eff82eb38827df102fac893d8297"
+  },
+  "known_live_team_transitions": {
+    "native": 15249,
+    "controlled": 12473
+  },
+  "common_live_frames": 5339329,
+  "common_live_disagreement_frames": 116301,
+  "common_live_disagreement_fraction": 0.021781950503518326
+}

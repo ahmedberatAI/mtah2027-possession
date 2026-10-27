@@ -1,0 +1,68 @@
+{
+  "date": "2026-10-25",
+  "official_head": "f8f2629ff1e0985f81d7e59d8413678514ee1530",
+  "project_remote_head": "681a731517bcb0ee1399a899afaba52189835eed",
+  "both_remote_heads_match_local": true,
+  "inputs": [
+    {
+      "name": "baseline_raw",
+      "source": "external\\more-than-a-hack-2027\\evaluation\\results\\baseline_raw.csv",
+      "sha256": "2a639a6b3c7816ab619d543cc870b021dca6945980eae8978325be0cc311fd63"
+    },
+    {
+      "name": "baseline_smooth125",
+      "source": "external\\more-than-a-hack-2027\\evaluation\\results\\baseline_smooth125.csv",
+      "sha256": "9b81f2027bd19224d900bdd7529de3fac078ce21160b5228201bbe86f94b7991"
+    },
+    {
+      "name": "baseline_smooth25",
+      "source": "external\\more-than-a-hack-2027\\evaluation\\results\\baseline_smooth25.csv",
+      "sha256": "57330f8bc13846751ceaf745f300f8bdb33cb92849b708d5350724eb7f843532"
+    },
+    {
+      "name": "baseline_smooth50",
+      "source": "external\\more-than-a-hack-2027\\evaluation\\results\\baseline_smooth50.csv",
+      "sha256": "d444caa1aebb6fb58386033a5967c83302b8dd984ea91c86381bf208332702ff"
+    },
+    {
+      "name": "bigru_s20261025",
+      "source": "submissions\\barath_public_v1\\bigru_s20261025.csv",
+      "sha256": "1d44cae7737cfaae590e6bae92939789dd1a497c0700f4dabb98b9242f4c7c78"
+    },
+    {
+      "name": "bigru_s20261026",
+      "source": "submissions\\barath_public_v1\\bigru_s20261026.csv",
+      "sha256": "ecaded6f4c2c05224a9c44cd65f604f017c7e739198f29a963ebabb0865c858a"
+    },
+    {
+      "name": "bigru_s20261027",
+      "source": "submissions\\barath_public_v1\\bigru_s20261027.csv",
+      "sha256": "8ffece243a085024e6389ea2eb6e2472e66889968be9521fa37c4b6c1dcf1689"
+    },
+    {
+      "name": "lgb_balanced_s20261025",
+      "source": "submissions\\barath_public_v1\\lgb_balanced_s20261025.csv",
+      "sha256": "b555520f91fd623c5c3814d793527ee5abb9aae20a6e83f985ca4f1e1d8859e1"
+    },
+    {
+      "name": "lgb_balanced_s20261026",
+      "source": "submissions\\barath_public_v1\\lgb_balanced_s20261026.csv",
+      "sha256": "47269e3028b238ac80e1b094be65b1f85519742737eb1c04e46518d11ecf56e6"
+    },
+    {
+      "name": "lgb_balanced_s20261027",
+      "source": "submissions\\barath_public_v1\\lgb_balanced_s20261027.csv",
+      "sha256": "5ff58ec6ac8047243c74e0efaf43b118d6cfed69b63c89e8e596229a2e0c7abc"
+    },
+    {
+      "name": "v7",
+      "source": "submissions\\barath_public_v1\\v7.csv",
+      "sha256": "0df6c5592980546ba5b4fcdbc77ccb12e0460ee25edf222e53d2c6d8e2dc08f3"
+    },
+    {
+      "name": "bigru_ensemble_equal",
+      "source": "submissions\\barath_bigru_ensemble\\bigru_ensemble_equal.csv",
+      "sha256": "f4a4b86501fab3e94e5ef9e288b064a431818c35908982678af39c0ee1cfd225"
+    }
+  ]
+}

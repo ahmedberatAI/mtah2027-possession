@@ -1,0 +1,10 @@
+{
+  "repository": "atomscott/soccertrack-v2",
+  "tag": "v1.2",
+  "revision": "325bd4c57ee8e135ab652f3921d274526ada496b",
+  "status": "access_required",
+  "gated": "auto",
+  "metadata_files": 11,
+  "license": "CC-BY-4.0 (public dataset card)",
+  "caveat": "Annotations require authorized HF access. No event content audited."
+}

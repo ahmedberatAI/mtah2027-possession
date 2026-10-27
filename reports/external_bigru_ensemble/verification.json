@@ -1,0 +1,178 @@
+{
+  "cells": 40,
+  "previous_seed_cells_reproduced": [
+    {
+      "source": "metrica@v3",
+      "conv": "ctrl",
+      "dead": "learned",
+      "seed": 20261025,
+      "old_scores_reproduced": true
+    },
+    {
+      "source": "metrica@v3",
+      "conv": "events",
+      "dead": "learned",
+      "seed": 20261025,
+      "old_scores_reproduced": true
+    },
+    {
+      "source": "metrica@v3",
+      "conv": "ctrl",
+      "dead": "learned",
+      "seed": 20261026,
+      "old_scores_reproduced": true
+    },
+    {
+      "source": "metrica@v3",
+      "conv": "events",
+      "dead": "learned",
+      "seed": 20261026,
+      "old_scores_reproduced": true
+    },
+    {
+      "source": "metrica@v3",
+      "conv": "ctrl",
+      "dead": "learned",
+      "seed": 20261027,
+      "old_scores_reproduced": true
+    },
+    {
+      "source": "metrica@v3",
+      "conv": "events",
+      "dead": "learned",
+      "seed": 20261027,
+      "old_scores_reproduced": true
+    },
+    {
+      "source": "metrica@v3",
+      "conv": "ctrl",
+      "dead": "oracle",
+      "seed": 20261025,
+      "old_scores_reproduced": true
+    },
+    {
+      "source": "metrica@v3",
+      "conv": "events",
+      "dead": "oracle",
+      "seed": 20261025,
+      "old_scores_reproduced": true
+    },
+    {
+      "source": "metrica@v3",
+      "conv": "ctrl",
+      "dead": "oracle",
+      "seed": 20261026,
+      "old_scores_reproduced": true
+    },
+    {
+      "source": "metrica@v3",
+      "conv": "events",
+      "dead": "oracle",
+      "seed": 20261026,
+      "old_scores_reproduced": true
+    },
+    {
+      "source": "metrica@v3",
+      "conv": "ctrl",
+      "dead": "oracle",
+      "seed": 20261027,
+      "old_scores_reproduced": true
+    },
+    {
+      "source": "metrica@v3",
+      "conv": "events",
+      "dead": "oracle",
+      "seed": 20261027,
+      "old_scores_reproduced": true
+    },
+    {
+      "source": "sc@v3",
+      "conv": "pp",
+      "dead": "learned",
+      "seed": 20261025,
+      "old_scores_reproduced": true
+    },
+    {
+      "source": "sc@v3",
+      "conv": "phase",
+      "dead": "learned",
+      "seed": 20261025,
+      "old_scores_reproduced": true
+    },
+    {
+      "source": "sc@v3",
+      "conv": "pp",
+      "dead": "learned",
+      "seed": 20261026,
+      "old_scores_reproduced": true
+    },
+    {
+      "source": "sc@v3",
+      "conv": "phase",
+      "dead": "learned",
+      "seed": 20261026,
+      "old_scores_reproduced": true
+    },
+    {
+      "source": "sc@v3",
+      "conv": "pp",
+      "dead": "learned",
+      "seed": 20261027,
+      "old_scores_reproduced": true
+    },
+    {
+      "source": "sc@v3",
+      "conv": "phase",
+      "dead": "learned",
+      "seed": 20261027,
+      "old_scores_reproduced": true
+    },
+    {
+      "source": "sc@v3",
+      "conv": "pp",
+      "dead": "oracle",
+      "seed": 20261025,
+      "old_scores_reproduced": true
+    },
+    {
+      "source": "sc@v3",
+      "conv": "phase",
+      "dead": "oracle",
+      "seed": 20261025,
+      "old_scores_reproduced": true
+    },
+    {
+      "source": "sc@v3",
+      "conv": "pp",
+      "dead": "oracle",
+      "seed": 20261026,
+      "old_scores_reproduced": true
+    },
+    {
+      "source": "sc@v3",
+      "conv": "phase",
+      "dead": "oracle",
+      "seed": 20261026,
+      "old_scores_reproduced": true
+    },
+    {
+      "source": "sc@v3",
+      "conv": "pp",
+      "dead": "oracle",
+      "seed": 20261027,
+      "old_scores_reproduced": true
+    },
+    {
+      "source": "sc@v3",
+      "conv": "phase",
+      "dead": "oracle",
+      "seed": 20261027,
+      "old_scores_reproduced": true
+    }
+  ],
+  "model_hashes_verified": true,
+  "actual_barath_v7_artifact": true,
+  "exact_equal_probability_average": true,
+  "identical_dead_and_decoder": true,
+  "design_sha256": "2726257eba005e29644acdc651484a4f679706a4f6c22d2d9be52fd8700440d0"
+}

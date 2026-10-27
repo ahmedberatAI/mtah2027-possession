@@ -1,0 +1,16 @@
+[
+  {
+    "source": "metrica@v3",
+    "frames": 1289769,
+    "blocks": 18,
+    "ensemble_sha256": "dd1a72141c9858db5fd69ae0925044820ddad43ec21f51d133dbe2c0cfd51ae0",
+    "v7_probabilities_sha256": "1aca51f8654034e0534c773607954b155d82bc955af08058f17b2e0013185777"
+  },
+  {
+    "source": "sc@v3",
+    "frames": 2955547,
+    "blocks": 40,
+    "ensemble_sha256": "51da34c9fc6b7602e4f6cacbf7d1c9c5b489e2024023bdee5bc1f156c34455ea",
+    "v7_probabilities_sha256": "4bb73ccdfd5817b96e974ac488c3b2810e7603fcab5f95fd6f0ff27c13dab4e1"
+  }
+]

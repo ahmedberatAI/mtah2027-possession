@@ -1,0 +1,157 @@
+{
+  "by_half": [
+    {
+      "frames": 70708,
+      "live": 47225,
+      "changed": 2689,
+      "native_changes": 209,
+      "controlled_changes": 84,
+      "match": "J03WMX",
+      "half": 1
+    },
+    {
+      "frames": 75259,
+      "live": 38144,
+      "changed": 3355,
+      "native_changes": 199,
+      "controlled_changes": 73,
+      "match": "J03WMX",
+      "half": 2
+    },
+    {
+      "frames": 69288,
+      "live": 38748,
+      "changed": 2450,
+      "native_changes": 182,
+      "controlled_changes": 80,
+      "match": "J03WN1",
+      "half": 1
+    },
+    {
+      "frames": 72273,
+      "live": 29629,
+      "changed": 2914,
+      "native_changes": 212,
+      "controlled_changes": 92,
+      "match": "J03WN1",
+      "half": 2
+    },
+    {
+      "frames": 69424,
+      "live": 37844,
+      "changed": 3193,
+      "native_changes": 174,
+      "controlled_changes": 58,
+      "match": "J03WOH",
+      "half": 1
+    },
+    {
+      "frames": 67790,
+      "live": 34101,
+      "changed": 1745,
+      "native_changes": 127,
+      "controlled_changes": 68,
+      "match": "J03WOH",
+      "half": 2
+    },
+    {
+      "frames": 69111,
+      "live": 37750,
+      "changed": 2472,
+      "native_changes": 152,
+      "controlled_changes": 65,
+      "match": "J03WOY",
+      "half": 1
+    },
+    {
+      "frames": 73425,
+      "live": 38536,
+      "changed": 3156,
+      "native_changes": 192,
+      "controlled_changes": 72,
+      "match": "J03WOY",
+      "half": 2
+    },
+    {
+      "frames": 69131,
+      "live": 46180,
+      "changed": 2807,
+      "native_changes": 166,
+      "controlled_changes": 56,
+      "match": "J03WPY",
+      "half": 1
+    },
+    {
+      "frames": 77080,
+      "live": 35280,
+      "changed": 2401,
+      "native_changes": 158,
+      "controlled_changes": 71,
+      "match": "J03WPY",
+      "half": 2
+    },
+    {
+      "frames": 69204,
+      "live": 47079,
+      "changed": 2615,
+      "native_changes": 154,
+      "controlled_changes": 70,
+      "match": "J03WQQ",
+      "half": 1
+    },
+    {
+      "frames": 73141,
+      "live": 37273,
+      "changed": 2464,
+      "native_changes": 148,
+      "controlled_changes": 60,
+      "match": "J03WQQ",
+      "half": 2
+    },
+    {
+      "frames": 68354,
+      "live": 44286,
+      "changed": 2261,
+      "native_changes": 137,
+      "controlled_changes": 58,
+      "match": "J03WR9",
+      "half": 1
+    },
+    {
+      "frames": 78456,
+      "live": 41030,
+      "changed": 2423,
+      "native_changes": 141,
+      "controlled_changes": 65,
+      "match": "J03WR9",
+      "half": 2
+    }
+  ],
+  "total": {
+    "frames": 1002644,
+    "live": 553105,
+    "changed": 36945,
+    "native_changes": 2351,
+    "controlled_changes": 972
+  },
+  "changed_live_fraction": 0.06679563554840401,
+  "cached_labels_recomputed_identically": true,
+  "labels": {
+    "dfl_J03WMX_h1": "787c23cc2cdc8464279e81b6c7f4623561bbcfe255051df9fc9d04960ee4bf83",
+    "dfl_J03WMX_h2": "8858eb6a3183bc31e42641367341f62d9ea2bb0aa2aab8ce68b810f4af39adf5",
+    "dfl_J03WN1_h1": "f4379703d1a90b4a5febeb9fadd54d32d2242d42b922adbbab6abbfcf2db1a62",
+    "dfl_J03WN1_h2": "f062575631b36c7019561dd2c779d96acb001d96e8e967df41a32ae30a789380",
+    "dfl_J03WOH_h1": "3fcf2881f998cf4eb339d9bca77fbe8477a7b4b185bd063750b08b2686cf5300",
+    "dfl_J03WOH_h2": "db039d73805504a4afc542eed59199a0644788b455cf854e5a77325bc7e27377",
+    "dfl_J03WOY_h1": "89826a82c08092fcd3a46221efd66b6cc5e2b845dcb79ff743b82a72d834fcd4",
+    "dfl_J03WOY_h2": "03861699795efdb64479c8718aa5399fa9be01f696d8c04c02423af7f86a92ec",
+    "dfl_J03WPY_h1": "22a9e72774702346a5aa036b95971eb62c83f72910613c4eaeb3d9fe13d47010",
+    "dfl_J03WPY_h2": "87865ec79587d7dac4bbc266ec7ac41a0cc3474ee4f4dc1a09eb17233d79b7b5",
+    "dfl_J03WQQ_h1": "779517e43fdce85d5055fb2a5cb7aaecf183073b92d4ec491c4f1e61819031ba",
+    "dfl_J03WQQ_h2": "c9910ac69620293d881e0cdfed107f0c5d702350fab2cbdd2e096ba73e658b0e",
+    "dfl_J03WR9_h1": "2e3e1e50146000c6293e614379f2a5920a99a251bc0e294298749d8e94c89e0e",
+    "dfl_J03WR9_h2": "e28e2fc8e5418f9deeb9c79c9d00036c42c8521df8e5cf53f8a7f48f754c5ea5"
+  },
+  "index_sha256": "64854e4b8a892469bba69fb8e86eead90e025641059d35756226e7708dbe7e28",
+  "dead_unknown_and_live_masks_unchanged": true
+}

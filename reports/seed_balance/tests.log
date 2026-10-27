@@ -1,0 +1,34 @@
+test_contact_extraction_adds_recovery_not_lost_duel (test_contact_gate.ContactTests.test_contact_extraction_adds_recovery_not_lost_duel) ... ok
+test_dedup_preserves_opposing_contacts (test_contact_gate.ContactTests.test_dedup_preserves_opposing_contacts) ... ok
+test_evidence_clips_and_cancels (test_contact_gate.ContactTests.test_evidence_clips_and_cancels) ... ok
+test_parallel_decode_matches_serial (test_contact_gate.ContactTests.test_parallel_decode_matches_serial) ... ok
+test_perfect_is_identity_in_bounds (test_contact_gate.ContactTests.test_perfect_is_identity_in_bounds) ... ok
+test_precision_and_team_accuracy_are_separate (test_contact_gate.ContactTests.test_precision_and_team_accuracy_are_separate) ... ok
+test_recovery_evidence_is_after_contact (test_contact_gate.ContactTests.test_recovery_evidence_is_after_contact) ... ok
+test_aerial_duel_waits_for_control (test_gradient.GradientTests.test_aerial_duel_waits_for_control) ... ok
+test_conflicting_simultaneous_controls_are_unknown (test_gradient.GradientTests.test_conflicting_simultaneous_controls_are_unknown) ... ok
+test_invalid_group_resets_owner (test_gradient.GradientTests.test_invalid_group_resets_owner) ... ok
+test_no_interpolation_across_video_cut (test_gradient.GradientTests.test_no_interpolation_across_video_cut) ... ok
+test_offset_applies_to_all_event_times (test_gradient.GradientTests.test_offset_applies_to_all_event_times) ... ok
+test_pass_after_duel_not_backdated (test_gradient.GradientTests.test_pass_after_duel_not_backdated) ... ok
+test_rebound_and_failed_trap_do_not_switch (test_gradient.GradientTests.test_rebound_and_failed_trap_do_not_switch) ... ok
+test_resample_30_to_25_uses_time_not_row_number (test_gradient.GradientTests.test_resample_30_to_25_uses_time_not_row_number) ... ok
+test_stoppage_ends_at_kick_not_ball_placement (test_gradient.GradientTests.test_stoppage_ends_at_kick_not_ball_placement) ... ok
+test_stream_parser_deduplicates_and_never_uses_smoothed_ball (test_gradient.GradientTests.test_stream_parser_deduplicates_and_never_uses_smoothed_ball) ... ok
+test_constant_paired_difference_has_point_interval (test_seed_balance.SeedBalanceTests.test_constant_paired_difference_has_point_interval) ... ok
+test_missing_source_is_rejected (test_seed_balance.SeedBalanceTests.test_missing_source_is_rejected) ... ok
+test_seed_uncertainty_is_kept_with_identical_matches (test_seed_balance.SeedBalanceTests.test_seed_uncertainty_is_kept_with_identical_matches) ... ok
+test_shared_match_uncertainty_not_shrunk_by_seed_replication (test_seed_balance.SeedBalanceTests.test_shared_match_uncertainty_not_shrunk_by_seed_replication) ... ok
+test_weight_ratio_is_inverse_source_size (test_seed_balance.SeedBalanceTests.test_weight_ratio_is_inverse_source_size) ... ok
+test_weights_preserve_total_mass_and_equalize_sources (test_seed_balance.SeedBalanceTests.test_weights_preserve_total_mass_and_equalize_sources) ... ok
+test_both_architectures_backpropagate_masked_sequence (test_sequence_pff.SequenceTests.test_both_architectures_backpropagate_masked_sequence) ... ok
+test_prediction_covers_tail_and_is_side_symmetric (test_sequence_pff.SequenceTests.test_prediction_covers_tail_and_is_side_symmetric) ... ok
+test_scaler_sources_equally_weighted_and_missing_safe (test_sequence_pff.SequenceTests.test_scaler_sources_equally_weighted_and_missing_safe) ... ok
+test_source_loss_not_dominated_by_more_live_frames (test_sequence_pff.SequenceTests.test_source_loss_not_dominated_by_more_live_frames) ... ok
+test_tcn_halo_preserves_full_sequence_context_at_chunk_seams (test_sequence_pff.SequenceTests.test_tcn_halo_preserves_full_sequence_context_at_chunk_seams) ... ok
+test_window_cannot_wrap_across_half_boundaries (test_sequence_pff.SequenceTests.test_window_cannot_wrap_across_half_boundaries) ... ok
+
+----------------------------------------------------------------------
+Ran 29 tests in 0.914s
+
+OK

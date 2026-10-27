@@ -1,0 +1,32 @@
+{
+  "kind": "lgb_unbalanced",
+  "seed": 20261027,
+  "path": "D:\\barca\\mtah2027-possession\\cache\\seed_balance_v1\\lgb_unbalanced_s20261027.txt",
+  "sha256": "b478f4dc4e0d6ac45c2c0c6f6fa4307682d274fbaed80315d9e2a0b9ad24935d",
+  "rounds": 400,
+  "parameters": {
+    "objective": "binary",
+    "learning_rate": 0.05,
+    "num_leaves": 63,
+    "min_data_in_leaf": 200,
+    "feature_fraction": 0.8,
+    "bagging_fraction": 0.7,
+    "bagging_freq": 1,
+    "lambda_l2": 1.0,
+    "verbose": -1,
+    "seed": 20261027,
+    "num_threads": 8,
+    "deterministic": true,
+    "force_row_wise": true,
+    "data_random_seed": 20261027,
+    "feature_fraction_seed": 20261027,
+    "bagging_seed": 20261027
+  },
+  "seconds": 132.75907492637634,
+  "source_code": {
+    "exp_seed_balance.py": "3f1eeacae41aa81d017b0d094d9f7f036c019daea3bda644eec33b5999f5843e",
+    "exp_seq_pff.py": "03885e3e9a7ecb65fbd26840d53f1f16749372e7b2a1a5d6d1a76a2144409cc7",
+    "seq_pff.py": "561611ad37cd6969530fbe1d9f1695645c8abf40ee39d549193682d6b62ba279",
+    "exp_pff.py": "3480d83942c5dd3c2109cd41f90f9a97a2e918a72789b0c7128fd335fbfd9f20"
+  }
+}

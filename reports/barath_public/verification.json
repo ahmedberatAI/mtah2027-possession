@@ -1,0 +1,94 @@
+{
+  "checks": [
+    {
+      "model": "v7",
+      "rows": 199319,
+      "csv_valid": true,
+      "model_hash_valid": true,
+      "prediction_hash_valid": true,
+      "official_score_agrees": true,
+      "official_ci95": [
+        0.42963,
+        0.810837
+      ]
+    },
+    {
+      "model": "bigru_s20261025",
+      "rows": 199319,
+      "csv_valid": true,
+      "model_hash_valid": true,
+      "prediction_hash_valid": true,
+      "official_score_agrees": true,
+      "official_ci95": [
+        0.551034,
+        0.901808
+      ]
+    },
+    {
+      "model": "bigru_s20261026",
+      "rows": 199319,
+      "csv_valid": true,
+      "model_hash_valid": true,
+      "prediction_hash_valid": true,
+      "official_score_agrees": true,
+      "official_ci95": [
+        0.551034,
+        0.901808
+      ]
+    },
+    {
+      "model": "bigru_s20261027",
+      "rows": 199319,
+      "csv_valid": true,
+      "model_hash_valid": true,
+      "prediction_hash_valid": true,
+      "official_score_agrees": true,
+      "official_ci95": [
+        0.551724,
+        0.916935
+      ]
+    },
+    {
+      "model": "lgb_balanced_s20261025",
+      "rows": 199319,
+      "csv_valid": true,
+      "model_hash_valid": true,
+      "prediction_hash_valid": true,
+      "official_score_agrees": true,
+      "official_ci95": [
+        0.444444,
+        0.827586
+      ]
+    },
+    {
+      "model": "lgb_balanced_s20261026",
+      "rows": 199319,
+      "csv_valid": true,
+      "model_hash_valid": true,
+      "prediction_hash_valid": true,
+      "official_score_agrees": true,
+      "official_ci95": [
+        0.444444,
+        0.827586
+      ]
+    },
+    {
+      "model": "lgb_balanced_s20261027",
+      "rows": 199319,
+      "csv_valid": true,
+      "model_hash_valid": true,
+      "prediction_hash_valid": true,
+      "official_score_agrees": true,
+      "official_ci95": [
+        0.444444,
+        0.827586
+      ]
+    }
+  ],
+  "all_seven_models_frozen_before_scoring": true,
+  "source_asset_hashes_valid": true,
+  "scorer_and_driver_unchanged": true,
+  "tests_passed": 32,
+  "videos_downloaded": false,
+  "official_bootstrap_replicates": 1000
+}

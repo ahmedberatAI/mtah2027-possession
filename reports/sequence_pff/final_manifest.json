@@ -1,0 +1,25 @@
+{
+  "models": {
+    "tcn": {
+      "path": "D:\\barca\\mtah2027-possession\\cache\\sequence_pff_v1\\tcn_final.pt",
+      "sha256": "c38ff0c86e2aea8333d622714eaa5c53a459a4857990b0170af1edd2efcd128d"
+    },
+    "bigru": {
+      "path": "D:\\barca\\mtah2027-possession\\cache\\sequence_pff_v1\\bigru_final.pt",
+      "sha256": "a50a53eeae3e4ccdea0da84c2e96dfa8fe33b82b9f45b292dcb7d9533e318045"
+    }
+  },
+  "selection_sha256": "00c1471b823a1d9dadb07a5d39f489f27a4f56778951dd5d342c5c64fa75a5e7",
+  "source_code": {
+    "seq_pff.py": "561611ad37cd6969530fbe1d9f1695645c8abf40ee39d549193682d6b62ba279",
+    "exp_seq_pff.py": "03885e3e9a7ecb65fbd26840d53f1f16749372e7b2a1a5d6d1a76a2144409cc7",
+    "gradient.py": "64e9a2a73a9a1858bc0c0107fd3cc8f2c945191dc051ab61ec4001925594e7fd"
+  },
+  "torch": "2.9.0+cu128",
+  "cuda": "12.8",
+  "device": "NVIDIA GeForce RTX 5070 Ti Laptop GPU",
+  "train_matches": {
+    "dfl": 7,
+    "pff": 64
+  }
+}
