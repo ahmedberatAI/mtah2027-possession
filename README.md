@@ -146,6 +146,13 @@ Driver: `src/exp_controlled_dfl.py`; nine fits and 24 external cells audited.
 
 ## Tools
 
+The three original BiGRU checkpoints are shared in
+[`models/bigru_dfl_pff_v1/`](models/bigru_dfl_pff_v1/README.md), with SHA256
+checks and a portable inference-only command:
+`python src/reproduce_shared_bigru.py --device cuda --score`.
+It reproduced the frozen BAR-ATH ensemble CSV byte-for-byte on 2026-10-27.
+The participant's BAR-ATH assets are required; DFL/PFF training data are not.
+
 - `tools/labeler.html` — local hand-labelling of H/A/D transitions for other games only.
   The current rules prohibit hand labels on BAR-ATH for training or validation.
 - `tools/transitions_to_gt.py` — marks -> 199,319-row `frame,label` file usable as `--gt` by the

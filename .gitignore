@@ -23,3 +23,7 @@ reports/official_*/
 *.nbi
 *.nbc
 runs/
+# Explicitly shared external-data-trained BiGRU checkpoints (no match data).
+!models/bigru_dfl_pff_v1/bigru_s20261025.pt
+!models/bigru_dfl_pff_v1/bigru_s20261026.pt
+!models/bigru_dfl_pff_v1/bigru_s20261027.pt
