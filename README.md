@@ -195,9 +195,7 @@ checks and a portable inference-only command:
 It reproduced the frozen BAR-ATH ensemble CSV byte-for-byte on 2026-10-27.
 The participant's BAR-ATH assets are required; DFL/PFF training data are not.
 
-- `tools/labeler.html` — local hand-labelling of H/A/D transitions for other games only.
-  The current rules prohibit hand labels on BAR-ATH for training or validation.
-- `tools/transitions_to_gt.py` — marks -> 199,319-row `frame,label` file usable as `--gt` by the
-  official scorer. Keep it in `cache/` (frame-level derived data).
+- The hand-labelling tools (`tools/labeler.html`, `tools/transitions_to_gt.py`) were removed on 2026-10-29: the
+  current rules forbid hand labels on BAR-ATH for any purpose, and they were not used. They remain in git history.
 - `colab/ball_detector_colab.py` — self-supervised ball detector (ATD balls projected through the
   homography as pseudo-labels) for a Colab GPU.
