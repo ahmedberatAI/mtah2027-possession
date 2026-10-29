@@ -375,6 +375,8 @@ Public sütunu yalnız bilgi içindir (17 spell, aralık ~0.4); v7'den itibaren 
 | R13 v10 + paylaşılan BiGRU, 6 sabit karışım, 3 eşli tohum (`src/exp_shared_blend.py`) | %75 BiGRU olasılık karışımı + ±25 yumuşatma: SC faz +0.0216 / +0.0195, pp +0.0295 / +0.0263; Metrica +0.0009 / +0.0015; en kötü pişmanlık 0.0390→0.0101 (logit %75 0.0082, eşik içinde); önceki altı BiGRU topluluk skoru birebir doğrulandı | ✅ güçlü dış aday; DFL LOMO yok, varsayılan v10 korunur |
 | Dokunuş v2 doğrulama, tohum 1 (`TOUCH_V=2 LGB_SEED=1 src/exp_touch.py`) | DFL-evctrl −0.0005 / −0.0029; trk +0.0001 / −0.0061; Metrica +0.0030 / −0.0017; SC pp −0.0017 / −0.0002; tohum 2 eğitiminde kullanıcı ara istedi, nihai olasılık dosyası oluşmadı | ❌ ilk taramadaki kazanç tohum 1'de tekrarlanmadı; 3-tohum özeti henüz yok |
 | Kamera artık katkısının ölçek dayanıklılığı (`src/camera_sc.py robust`) | core/norm varyantlarının 3 tohum için 6 LOMO olasılık önbelleği tamamlandı; değerlendirme kullanıcı isteğiyle durduruldu, nihai toplu skor tablosu çıkmadı | bekliyor; mevcut önbelleklerle yeniden skorlanacak |
+| Klasör temizliği (29 Ekim, kullanıcı isteği) | kullanılmayan 131.6 GB, kalıcı silinmeden `C:\Users\omen\Desktop\barcahackathon_arsiv_20261029` klasörüne taşındı (arşivi kullanıcı siler). Taşınanlar: ana simülasyon (v3) dışındaki varyantların girdi ve özellik önbellekleri (v2, v3b*, v3p0, v3s2, v4, v5, v5c); v10'un kullanmadığı eski özellik sürümleri (`base` kaldı); biten ya da reddedilen deneylerin önbellekleri (TTA, rol, kontrolcü, mücadele, oyuncu ölü top, top hızı, yükseklik vb.); ses, düdük ve spiker transkripti; YOLO / WASB ağırlıkları; eski aday CSV'ler; elle etiketleme araçları (commit e310d05). Kontrol: gönderim MD5 ca20c5b6… aynı, v10 / BiGRU / kamera / dokunuş v2 önbellekleri yerinde, testler 52/52 | bilgi: stres testleri (V4 / V5) ya da eski varyantlar gerekirse önbellekleri yeniden üretilir (bench kendisi kurar) |
+| **Kısa possession teşhisi: v10 ve tur 13 karışımı** (`src/exp_short.py`, 29 Eki, kullanıcı sorusu; v10 3 tohum, %75 BiGRU olasılık karışımı 3 eşli tohum, dış setler, öğrenilmiş / gerçek D, B2 rampası c 48 / 24 / 0; BAR-ATH yalnız etiketsiz, public skoru hesaplanmadı; `reports/short14/`) | <4 sn gerçek spell'ler tüm spell'lerin %18–33'ü. v10 (öğrenilmiş D) bunların DFL-trk'ta %37'sini, Metrica'da %41'ini, SC faz / pp'de %18 / %17'sini buluyor (>8 sn: %78–95); Metrica'da 0–1 sn 0.05, 1–2 sn 0.22, 2–4 sn 0.50. v10 kısa spell'leri gerçekte olanın 0.35–0.78 katı kadar üretiyor (öğrenilmiş D ile <1 sn hiç yok); kaybedilen kredinin %36–47'si (gerçek D %44–55) kısa spell'lerden; kaçanları kâhinle eklemek +0.060…+0.167, sahte kısa spell'leri silmek +0.012…+0.026. Kısa gerçek spell'lerin %71–84'ünde ±25 olasılık karelerin çoğunda doğru takımı gösteriyor, ama uzun spell'lerin içinde canlı dk başına 1.0–1.6 kez ≥0.5 sn yanlış dönüş var (gerçek kısa spell 0.8–1.7/dk). Rampayı gevşetmek DFL'de −0.005…−0.036, Metrica'da −0.0005…−0.012; yalnız SC pp'de artı (en çok +0.010). Karışım kısa spell'i düzeltmiyor: Metrica'da <4 sn geri çağrım +0.02…+0.03, isabet −0.06…−0.08; SC kazancı 2–16 sn kovalarında, <2 sn'de yok. BAR-ATH (etiketsiz): v10 203 spell, <2 sn %0, <4 sn %8; karışım 218 spell, %0 / %7 | bilgi: kısa possession en büyük kayıp havuzu; decoder bu kanıtla optimumda, darboğaz kanıtın ayırt ediciliği (tur 14). Varsayılan değişmedi |
 
 ### Ekip arkadaşının GitHub kayıtları — 27 Ekim birleştirmesi
 
@@ -509,7 +511,6 @@ Tam rapor: [SONUC.md](../reports/gates/SONUC.md); ayrıntılı tablolar ve komut
 | Sonradan eklenen tür ayrımlı pencere (keşifsel; olay türü doğru varsayılır) | Δ Metrica-ctrl −0.0204; SC-pp +0.0430 (20/20); SC-phase +0.0307 (20/20) | umut verici fakat konvansiyona bağlı; bağımsız video sonucu değil |
 | B2 açık/kapalı, sabit pen 12 | Metrica-ctrl +0.0424; Metrica-events −0.0345; SC-pp +0.0097 | upstream GT sahiplik konvansiyonunu netleştirmek öncelikli |
 | Gradient / SoccerTrack erişim kontrolü | PFF formu gönderildi, 64 maç (~3.93 GB) indirildi; CH/RE/TC/IT doğrulandı. SoccerTrack CC BY 4.0 fakat HF auto-gated/401 | Gradient etiket adaptörü gerekiyor (örnek tracking 29.97 fps, seyrek sahiplik); SoccerTrack olay içerikleri henüz doğrulanmadı |
-| Klasör temizliği (29 Ekim, kullanıcı isteği) | kullanılmayan 131.6 GB, kalıcı silinmeden `C:\Users\omen\Desktop\barcahackathon_arsiv_20261029` klasörüne taşındı (arşivi kullanıcı siler). Taşınanlar: ana simülasyon (v3) dışındaki varyantların girdi ve özellik önbellekleri (v2, v3b*, v3p0, v3s2, v4, v5, v5c); v10'un kullanmadığı eski özellik sürümleri (`base` kaldı); biten ya da reddedilen deneylerin önbellekleri (TTA, rol, kontrolcü, mücadele, oyuncu ölü top, top hızı, yükseklik vb.); ses, düdük ve spiker transkripti; YOLO / WASB ağırlıkları; eski aday CSV'ler; elle etiketleme araçları (commit e310d05). Kontrol: gönderim MD5 ca20c5b6… aynı, v10 / BiGRU / kamera / dokunuş v2 önbellekleri yerinde, testler 52/52 | bilgi: stres testleri (V4 / V5) ya da eski varyantlar gerekirse önbellekleri yeniden üretilir (bench kendisi kurar) |
 
 ## 4. Fikir havuzu ve tur kayıtları (21–24 Ekim)
 
@@ -1546,6 +1547,55 @@ skor özeti henüz çıkmadı. Başkasının süreçlerine dokunulmadı. Colab o
 4. `src/camera_sc.py robust`: mevcut altı olasılık önbelleğini kullanarak eksik toplu skor tablosunu tamamla.
 5. Public'e bakılarak kurulmuş ölü-top sabitlerini dış veriden yeniden türetme ihtiyacı sürüyor.
 6. Push öncesi kullanıcı onayı gerekiyor. Varsayılan gönderim halen düdüksüz **v10**.
+
+
+#### Tur 14 — 29 Ekim: kısa possession teşhisi (kullanıcı sorusu: "son modelde kısa possession'larda sorunumuz var mı?")
+
+**Kurulum.** `src/exp_short.py`. Modeller: v10'un üç LightGBM tohumu ve tur 13 adayı (%25 v10 + %75 paylaşılan BiGRU
+olasılığı, eşli tohumlar, ardından ±25). Bağlamlar: DFL-trk ve DFL-evctrl (yalnız v10; BiGRU bütün DFL'de eğitildi),
+Metrica-ctrl, SC faz / pp; öğrenilmiş ve gerçek D. Decoder sevk edilen B2 (c 48), teşhis için c 24 / 0. Ölçüler: süre
+kovalarına göre gerçek spell geri çağrımı (beş IoU eşiğinin ortalaması), hiçbir aynı takım tahmininin değmediği pay,
+tahmin spell isabeti, tahmin / gerçek sayı oranı, kaybedilen kredinin (FN + FP) kısa spell payı ve iki kâhin. BAR-ATH'ta
+yalnız etiketsiz süre profili ölçüldü; gönderim CSV'si (MD5 ca20c5b6…) ile yeniden çözülen v10 birebir aynı, public
+skoru hesaplanmadı. Toplu çıktılar `reports/short14/`.
+
+**Bulgular** (v10, öğrenilmiş D; köşeli parantezde gerçek D):
+- **Sorun var ve büyük.** <4 sn spell'lerde geri çağrım DFL-trk 0.37 [0.44], Metrica 0.41 [0.54], SC faz 0.18 [0.35],
+  SC pp 0.17 [0.32]; >8 sn spell'lerde 0.78–0.95. Metrica süre kovaları: 0–1 sn 0.05, 1–2 sn 0.22, 2–4 sn 0.50,
+  4–8 sn 0.79, 8–16 sn 0.90, >16 sn 0.95.
+- **Az üretim.** v10 kısa spell'leri gerçekte olanın Metrica'da 0.50, DFL-trk'ta 0.62, SC'de 0.35–0.42 katı kadar
+  üretiyor; öğrenilmiş D ile 1 sn'den kısa tahmin spell'i hiç yok. 1–2 sn gerçek spell'lerin yarısına (0.49–0.53)
+  hiçbir aynı takım tahmini değmiyor.
+- **Kayıp payı.** Kaybedilen kredinin %36–47'si [%44–55] kısa spell'lerden (kaçanlar ve sahteler). Kaçan kısa
+  spell'leri kâhinle eklemek DFL-trk +0.083, Metrica +0.065, SC faz / pp +0.136 / +0.167; sahte kısa spell'leri
+  silmek yalnız +0.012…+0.026.
+- **Kanıt var, ayrım yok.** Kısa gerçek spell'lerin DFL-trk'ta %77'sinde, Metrica'da %84'ünde, SC'de %71'inde ±25
+  olasılık karelerin çoğunda doğru takımı gösteriyor. Ama uzun (≥8 sn) gerçek spell'lerin içinde canlı dakikada
+  DFL'de 1.5–1.6, Metrica'da 1.0, SC'de 1.2–1.4 kez ≥0.5 sn süren yanlış takım dönüşü var. Gerçek kısa spell sıklığı
+  1.0 / 0.8 / 1.4–1.7 dk⁻¹. Yanlış dönüş en az gerçeği kadar sık olduğu için decoder kısa dönüşleri bastırmak zorunda.
+  ±25 yumuşatma bu dengeyi az değiştiriyor: ham olasılıkta doğru takımı gösteren kısa spell payı %73–86, yanlış dönüş 1.1–1.8.
+- **Rampa.** c 24 / c 0, c 48'e göre: DFL-trk −0.006 / −0.032, DFL-evctrl −0.006 / −0.036, Metrica −0.005 / −0.012
+  [−0.0005 / −0.006], SC faz −0.003 / −0.010 [+0.001 / −0.003], SC pp −0.0001 / −0.0004 [+0.006 / +0.010]. Kısa
+  spell geri çağrımı artıyor ama isabet daha hızlı düşüyor. Tur 10'daki geniş ızgara doğrulandı; c 48 kalır.
+- **Tur 13 karışımı** (c 48): Metrica 0.8243 [0.8837], v10 0.8233 [0.8823]. <4 sn geri çağrım 0.43 [0.57], isabet
+  0.56 [0.75]; v10'da isabet 0.64 [0.80]. SC faz 0.6189 / v10 0.5973, pp 0.6212 / 0.5917; kazanç 2–4 sn (0.28→0.33),
+  4–8 sn (0.59→0.64) ve 8–16 sn kovalarında, <2 sn'de yok. Karışımla rampayı gevşetmek Metrica'da daha çok
+  kaybettiriyor (−0.008 / −0.024 [−0.008 / −0.021]), SC pp'de kazandırıyor (+0.006 / +0.002 [+0.010 / +0.017]).
+- **BAR-ATH (etiketsiz; karar için değil):** v10 203 spell, canlı dk başına 3.79, medyan 10.7 sn, <2 sn %0, <4 sn %8.
+  Karışım 218 spell, 4.11, 10.0 sn, %0 / %7; karelerin %1.45'i farklı. Aynı modeller dış setlerde %11–14 kısa spell
+  üretiyor, dış gerçeklerde kısa spell payı %18–33.
+
+**Yorum.** Kısa possession v10'un en büyük kayıp havuzu; tur 13 adayı da bunu çözmüyor. Decoder bu kanıtla doğru
+noktada, çünkü kısa dönüşleri serbest bırakmak gerçek kısa spell'den çok sahte getiriyor. Darboğaz, gerçek bir kısa
+possession'ı aynı süreli gürültü dönüşünden ayıracak kanıtın olmaması (tur 7: "sorun görmek değil ayırt etmek").
+
+Henüz denenmemiş yollar:
+- R12-5 serbest top durumlu HMM. Resmî tanıma göre çekişmeli ya da serbest topta sahiplik son takımda kalır; yanlış
+  dönüşlerin hedefi bu anlar.
+- R-8 kısa spell'e tavanlı ağırlık.
+- R12-4 öğrenilmiş dokunuş-takım dedektörü.
+
+Başarı ölçütü: aynı yanlış dönüş sıklığında daha yüksek kısa spell geri çağrımı. Varsayılan değişmedi.
 
 
 ## Ek A — İlk analiz, araştırma ve baseline'lar (20 Ekim)

@@ -1,0 +1,222 @@
+
+=== dfl@v3 (14 halves; conventions trk, evctrl) ===
+  truth trk    1682 spells, 4.56 / alive min, median 8.5 s, <1 s 1%, <2 s 7%, <4 s 22%
+  evidence trk    v10   raw: short favoured 0.786, false runs 1.73/alive min | +-25: short favoured 0.773, false runs 1.50/alive min
+  truth evctrl 1604 spells, 4.35 / alive min, median 9.0 s, <1 s 1%, <2 s 5%, <4 s 18%
+  evidence evctrl v10   raw: short favoured 0.838, false runs 1.83/alive min | +-25: short favoured 0.828, false runs 1.58/alive min
+  [dfl trk | learned D | v10 | ramp c 48] spellF1 0.7690 (seeds 0.7729 0.7687 0.7654); oracle insert missed <4 s +0.0826, drop spurious <4 s +0.0264
+    predicted profile: 1574 spells, 4.31 / alive min, median 9.4 s, <1 s 0%, <2 s 1%, <4 s 14%
+    true  (n/recall/unseen): 0-1s 60/0.03/0.70 1-2s 285/0.19/0.53 2-4s 777/0.47/0.35 4-8s 1290/0.76/0.08 8-16s 1302/0.87/0.01 >16s 1332/0.93/0.00
+    pred  (n/precision/pred:true): 0-1s 0/0.00/0.00 1-2s 63/0.57/0.22 2-4s 632/0.60/0.81 4-8s 1412/0.71/1.09 8-16s 1322/0.83/1.02 >16s 1339/0.93/1.01
+    <4 s: true 1122 recall 0.374, pred 695 precision 0.597, pred:true 0.62; share of lost credit 43.1%
+  [dfl evctrl | learned D | v10 | ramp c 48] spellF1 0.7820 (seeds 0.7831 0.7814 0.7814); oracle insert missed <4 s +0.0600, drop spurious <4 s +0.0256
+    predicted profile: 1574 spells, 4.31 / alive min, median 9.4 s, <1 s 0%, <2 s 1%, <4 s 14%
+    true  (n/recall/unseen): 0-1s 45/0.07/0.60 1-2s 177/0.30/0.38 2-4s 666/0.53/0.31 4-8s 1260/0.75/0.09 8-16s 1290/0.87/0.01 >16s 1374/0.92/0.00
+    pred  (n/precision/pred:true): 0-1s 0/0.00/0.00 1-2s 63/0.61/0.36 2-4s 632/0.60/0.95 4-8s 1412/0.69/1.12 8-16s 1322/0.84/1.02 >16s 1339/0.92/0.97
+    <4 s: true 888 recall 0.459, pred 695 precision 0.604, pred:true 0.78; share of lost credit 36.0%
+  [dfl trk | learned D | v10 | ramp c 24] spellF1 0.7626 (seeds 0.7624 0.7631 0.7624); oracle insert missed <4 s +0.0734, drop spurious <4 s +0.0448
+    true  (n/recall/unseen): 0-1s 60/0.03/0.70 1-2s 285/0.25/0.48 2-4s 777/0.52/0.31 4-8s 1290/0.78/0.07 8-16s 1302/0.87/0.00 >16s 1332/0.92/0.00
+    pred  (n/precision/pred:true): 0-1s 0/0.00/0.00 1-2s 118/0.53/0.41 2-4s 831/0.53/1.07 4-8s 1425/0.70/1.10 8-16s 1339/0.83/1.03 >16s 1310/0.93/0.98
+    <4 s: true 1122 recall 0.427, pred 949 precision 0.532, pred:true 0.85; share of lost credit 45.3%
+  [dfl evctrl | learned D | v10 | ramp c 24] spellF1 0.7762 (seeds 0.7739 0.7771 0.7774); oracle insert missed <4 s +0.0515, drop spurious <4 s +0.0447
+    true  (n/recall/unseen): 0-1s 45/0.07/0.64 1-2s 177/0.38/0.32 2-4s 666/0.59/0.26 4-8s 1260/0.77/0.08 8-16s 1290/0.87/0.00 >16s 1374/0.91/0.00
+    pred  (n/precision/pred:true): 0-1s 0/0.00/0.00 1-2s 118/0.50/0.67 2-4s 831/0.54/1.25 4-8s 1425/0.69/1.13 8-16s 1339/0.83/1.04 >16s 1310/0.92/0.95
+    <4 s: true 888 recall 0.520, pred 949 precision 0.532, pred:true 1.07; share of lost credit 39.3%
+  [dfl trk | learned D | v10 | ramp c 0] spellF1 0.7368 (seeds 0.7333 0.7386 0.7383); oracle insert missed <4 s +0.0653, drop spurious <4 s +0.0772
+    true  (n/recall/unseen): 0-1s 60/0.05/0.68 1-2s 285/0.32/0.39 2-4s 777/0.55/0.25 4-8s 1290/0.78/0.07 8-16s 1302/0.86/0.00 >16s 1332/0.92/0.00
+    pred  (n/precision/pred:true): 0-1s 25/0.08/0.42 1-2s 304/0.31/1.07 2-4s 1079/0.45/1.39 4-8s 1442/0.68/1.12 8-16s 1357/0.83/1.04 >16s 1273/0.93/0.96
+    <4 s: true 1122 recall 0.468, pred 1408 precision 0.414, pred:true 1.25; share of lost credit 51.1%
+  [dfl evctrl | learned D | v10 | ramp c 0] spellF1 0.7460 (seeds 0.7420 0.7484 0.7474); oracle insert missed <4 s +0.0451, drop spurious <4 s +0.0828
+    true  (n/recall/unseen): 0-1s 45/0.09/0.64 1-2s 177/0.43/0.27 2-4s 666/0.63/0.21 4-8s 1260/0.77/0.07 8-16s 1290/0.87/0.00 >16s 1374/0.91/0.00
+    pred  (n/precision/pred:true): 0-1s 25/0.04/0.56 1-2s 304/0.28/1.72 2-4s 1079/0.45/1.62 4-8s 1442/0.66/1.14 8-16s 1357/0.83/1.05 >16s 1273/0.92/0.93
+    <4 s: true 888 recall 0.563, pred 1408 precision 0.406, pred:true 1.59; share of lost credit 46.7%
+  [dfl trk | true D | v10 | ramp c 48] spellF1 0.7979 (seeds 0.8005 0.7996 0.7935); oracle insert missed <4 s +0.0793, drop spurious <4 s +0.0270
+    true  (n/recall/unseen): 0-1s 60/0.08/0.65 1-2s 285/0.24/0.48 2-4s 777/0.54/0.28 4-8s 1290/0.79/0.07 8-16s 1302/0.88/0.00 >16s 1332/0.94/0.00
+    pred  (n/precision/pred:true): 0-1s 3/1.00/0.05 1-2s 80/0.65/0.28 2-4s 654/0.65/0.84 4-8s 1421/0.75/1.10 8-16s 1280/0.85/0.98 >16s 1352/0.94/1.02
+    <4 s: true 1122 recall 0.440, pred 737 precision 0.655, pred:true 0.66; share of lost credit 44.1%
+  [dfl evctrl | true D | v10 | ramp c 48] spellF1 0.8082 (seeds 0.8090 0.8088 0.8068); oracle insert missed <4 s +0.0539, drop spurious <4 s +0.0288
+    true  (n/recall/unseen): 0-1s 45/0.15/0.53 1-2s 177/0.38/0.28 2-4s 666/0.60/0.26 4-8s 1260/0.78/0.08 8-16s 1290/0.88/0.00 >16s 1374/0.93/0.00
+    pred  (n/precision/pred:true): 0-1s 3/1.00/0.07 1-2s 80/0.67/0.45 2-4s 654/0.64/0.98 4-8s 1421/0.74/1.13 8-16s 1280/0.85/0.99 >16s 1352/0.93/0.98
+    <4 s: true 888 recall 0.534, pred 737 precision 0.645, pred:true 0.83; share of lost credit 36.4%
+  [dfl trk | true D | v10 | ramp c 24] spellF1 0.7905 (seeds 0.7909 0.7908 0.7899); oracle insert missed <4 s +0.0699, drop spurious <4 s +0.0451
+    true  (n/recall/unseen): 0-1s 60/0.18/0.55 1-2s 285/0.30/0.44 2-4s 777/0.59/0.24 4-8s 1290/0.80/0.06 8-16s 1302/0.88/0.00 >16s 1332/0.94/0.00
+    pred  (n/precision/pred:true): 0-1s 9/1.00/0.15 1-2s 134/0.55/0.47 2-4s 846/0.58/1.09 4-8s 1426/0.75/1.11 8-16s 1298/0.85/1.00 >16s 1325/0.94/0.99
+    <4 s: true 1122 recall 0.491, pred 989 precision 0.580, pred:true 0.88; share of lost credit 46.5%
+  [dfl evctrl | true D | v10 | ramp c 24] spellF1 0.8036 (seeds 0.8020 0.8050 0.8040); oracle insert missed <4 s +0.0443, drop spurious <4 s +0.0472
+    true  (n/recall/unseen): 0-1s 45/0.28/0.42 1-2s 177/0.44/0.23 2-4s 666/0.66/0.20 4-8s 1260/0.80/0.07 8-16s 1290/0.88/0.00 >16s 1374/0.93/0.00
+    pred  (n/precision/pred:true): 0-1s 9/1.00/0.20 1-2s 134/0.53/0.76 2-4s 846/0.57/1.27 4-8s 1426/0.74/1.13 8-16s 1298/0.85/1.01 >16s 1325/0.93/0.96
+    <4 s: true 888 recall 0.597, pred 989 precision 0.569, pred:true 1.11; share of lost credit 40.3%
+  [dfl trk | true D | v10 | ramp c 0] spellF1 0.7660 (seeds 0.7632 0.7670 0.7678); oracle insert missed <4 s +0.0593, drop spurious <4 s +0.0775
+    true  (n/recall/unseen): 0-1s 60/0.18/0.55 1-2s 285/0.38/0.35 2-4s 777/0.62/0.20 4-8s 1290/0.81/0.05 8-16s 1302/0.88/0.00 >16s 1332/0.93/0.00
+    pred  (n/precision/pred:true): 0-1s 47/0.30/0.78 1-2s 301/0.35/1.06 2-4s 1097/0.50/1.41 4-8s 1431/0.72/1.11 8-16s 1317/0.85/1.01 >16s 1291/0.94/0.97
+    <4 s: true 1122 recall 0.539, pred 1445 precision 0.460, pred:true 1.29; share of lost credit 52.4%
+  [dfl evctrl | true D | v10 | ramp c 0] spellF1 0.7740 (seeds 0.7715 0.7751 0.7754); oracle insert missed <4 s +0.0382, drop spurious <4 s +0.0849
+    true  (n/recall/unseen): 0-1s 45/0.28/0.47 1-2s 177/0.51/0.19 2-4s 666/0.70/0.17 4-8s 1260/0.80/0.05 8-16s 1290/0.88/0.00 >16s 1374/0.92/0.00
+    pred  (n/precision/pred:true): 0-1s 47/0.19/1.04 1-2s 301/0.29/1.70 2-4s 1097/0.49/1.65 4-8s 1431/0.71/1.14 8-16s 1317/0.85/1.02 >16s 1291/0.94/0.94
+    <4 s: true 888 recall 0.639, pred 1445 precision 0.439, pred:true 1.63; share of lost credit 48.4%
+  (dfl@v3 done in 21 s)
+
+=== metrica@v3 (18 halves; conventions ctrl) ===
+  truth ctrl   2079 spells, 4.01 / alive min, median 10.3 s, <1 s 1%, <2 s 6%, <4 s 20%
+  evidence ctrl   v10   raw: short favoured 0.859, false runs 1.10/alive min | +-25: short favoured 0.839, false runs 1.03/alive min
+  evidence ctrl   blend raw: short favoured 0.861, false runs 1.20/alive min | +-25: short favoured 0.842, false runs 1.22/alive min
+  [metrica ctrl | learned D | v10 | ramp c 48] spellF1 0.8233 (seeds 0.8237 0.8222 0.8240); oracle insert missed <4 s +0.0652, drop spurious <4 s +0.0117
+    predicted profile: 1934 spells, 3.68 / alive min, median 11.6 s, <1 s 0%, <2 s 1%, <4 s 11%
+    true  (n/recall/unseen): 0-1s 81/0.05/0.52 1-2s 297/0.22/0.50 2-4s 900/0.50/0.28 4-8s 1224/0.79/0.06 8-16s 1701/0.90/0.01 >16s 2034/0.95/0.00
+    pred  (n/precision/pred:true): 0-1s 0/0.00/0.00 1-2s 75/0.69/0.25 2-4s 567/0.63/0.63 4-8s 1459/0.78/1.19 8-16s 1557/0.91/0.92 >16s 2146/0.93/1.06
+    <4 s: true 1278 recall 0.406, pred 642 precision 0.640, pred:true 0.50; share of lost credit 46.7%
+  [metrica ctrl | learned D | v10 | ramp c 24] spellF1 0.8187 (seeds 0.8198 0.8178 0.8185); oracle insert missed <4 s +0.0590, drop spurious <4 s +0.0219
+    true  (n/recall/unseen): 0-1s 81/0.05/0.48 1-2s 297/0.27/0.45 2-4s 900/0.53/0.25 4-8s 1224/0.80/0.05 8-16s 1701/0.90/0.00 >16s 2034/0.96/0.00
+    pred  (n/precision/pred:true): 0-1s 3/0.80/0.04 1-2s 108/0.58/0.36 2-4s 751/0.57/0.83 4-8s 1434/0.77/1.17 8-16s 1556/0.90/0.91 >16s 2143/0.93/1.05
+    <4 s: true 1278 recall 0.440, pred 862 precision 0.572, pred:true 0.67; share of lost credit 49.0%
+  [metrica ctrl | learned D | v10 | ramp c 0] spellF1 0.8116 (seeds 0.8132 0.8107 0.8108); oracle insert missed <4 s +0.0461, drop spurious <4 s +0.0383
+    true  (n/recall/unseen): 0-1s 81/0.06/0.44 1-2s 297/0.37/0.38 2-4s 900/0.60/0.17 4-8s 1224/0.81/0.04 8-16s 1701/0.90/0.00 >16s 2034/0.96/0.00
+    pred  (n/precision/pred:true): 0-1s 19/0.36/0.23 1-2s 233/0.40/0.78 2-4s 1015/0.53/1.13 4-8s 1395/0.77/1.14 8-16s 1576/0.90/0.93 >16s 2129/0.94/1.05
+    <4 s: true 1278 recall 0.513, pred 1267 precision 0.500, pred:true 0.99; share of lost credit 53.0%
+  [metrica ctrl | learned D | blend | ramp c 48] spellF1 0.8243 (seeds 0.8231 0.8299 0.8197); oracle insert missed <4 s +0.0579, drop spurious <4 s +0.0228
+    predicted profile: 2014 spells, 3.84 / alive min, median 10.8 s, <1 s 0%, <2 s 1%, <4 s 11%
+    true  (n/recall/unseen): 0-1s 81/0.04/0.57 1-2s 297/0.24/0.54 2-4s 900/0.53/0.24 4-8s 1224/0.82/0.04 8-16s 1701/0.92/0.00 >16s 2034/0.96/0.00
+    pred  (n/precision/pred:true): 0-1s 1/0.80/0.01 1-2s 75/0.61/0.25 2-4s 630/0.55/0.70 4-8s 1617/0.76/1.32 8-16s 1598/0.90/0.94 >16s 2135/0.94/1.05
+    <4 s: true 1278 recall 0.430, pred 706 precision 0.558, pred:true 0.55; share of lost credit 48.4%
+  [metrica ctrl | learned D | blend | ramp c 24] spellF1 0.8160 (seeds 0.8167 0.8156 0.8156); oracle insert missed <4 s +0.0536, drop spurious <4 s +0.0366
+    true  (n/recall/unseen): 0-1s 81/0.05/0.56 1-2s 297/0.33/0.46 2-4s 900/0.55/0.21 4-8s 1224/0.83/0.03 8-16s 1701/0.92/0.00 >16s 2034/0.96/0.00
+    pred  (n/precision/pred:true): 0-1s 3/0.80/0.04 1-2s 108/0.59/0.36 2-4s 853/0.49/0.95 4-8s 1609/0.76/1.31 8-16s 1599/0.90/0.94 >16s 2135/0.93/1.05
+    <4 s: true 1278 recall 0.471, pred 964 precision 0.503, pred:true 0.75; share of lost credit 50.3%
+  [metrica ctrl | learned D | blend | ramp c 0] spellF1 0.8002 (seeds 0.7976 0.8069 0.7961); oracle insert missed <4 s +0.0442, drop spurious <4 s +0.0600
+    true  (n/recall/unseen): 0-1s 81/0.06/0.54 1-2s 297/0.42/0.39 2-4s 900/0.61/0.16 4-8s 1224/0.83/0.02 8-16s 1701/0.91/0.00 >16s 2034/0.95/0.00
+    pred  (n/precision/pred:true): 0-1s 9/0.44/0.11 1-2s 268/0.34/0.90 2-4s 1089/0.46/1.21 4-8s 1613/0.75/1.32 8-16s 1581/0.89/0.93 >16s 2142/0.92/1.05
+    <4 s: true 1278 recall 0.530, pred 1366 precision 0.439, pred:true 1.07; share of lost credit 53.0%
+  [metrica ctrl | true D | v10 | ramp c 48] spellF1 0.8823 (seeds 0.8817 0.8829 0.8823); oracle insert missed <4 s +0.0612, drop spurious <4 s +0.0124
+    true  (n/recall/unseen): 0-1s 81/0.28/0.67 1-2s 297/0.40/0.42 2-4s 900/0.61/0.23 4-8s 1224/0.87/0.04 8-16s 1701/0.92/0.01 >16s 2034/0.98/0.00
+    pred  (n/precision/pred:true): 0-1s 27/0.67/0.33 1-2s 153/0.83/0.52 2-4s 606/0.80/0.67 4-8s 1424/0.85/1.16 8-16s 1502/0.96/0.88 >16s 2083/0.98/1.02
+    <4 s: true 1278 recall 0.543, pred 786 precision 0.802, pred:true 0.62; share of lost credit 52.4%
+  [metrica ctrl | true D | v10 | ramp c 24] spellF1 0.8818 (seeds 0.8824 0.8819 0.8812); oracle insert missed <4 s +0.0537, drop spurious <4 s +0.0190
+    true  (n/recall/unseen): 0-1s 81/0.29/0.67 1-2s 297/0.43/0.40 2-4s 900/0.66/0.19 4-8s 1224/0.87/0.04 8-16s 1701/0.92/0.00 >16s 2034/0.98/0.00
+    pred  (n/precision/pred:true): 0-1s 27/0.67/0.33 1-2s 176/0.80/0.59 2-4s 743/0.75/0.83 4-8s 1396/0.84/1.14 8-16s 1513/0.95/0.89 >16s 2083/0.98/1.02
+    <4 s: true 1278 recall 0.584, pred 946 precision 0.757, pred:true 0.74; share of lost credit 53.1%
+  [metrica ctrl | true D | v10 | ramp c 0] spellF1 0.8761 (seeds 0.8771 0.8757 0.8755); oracle insert missed <4 s +0.0397, drop spurious <4 s +0.0360
+    true  (n/recall/unseen): 0-1s 81/0.30/0.65 1-2s 297/0.56/0.32 2-4s 900/0.73/0.12 4-8s 1224/0.88/0.03 8-16s 1701/0.92/0.00 >16s 2034/0.98/0.00
+    pred  (n/precision/pred:true): 0-1s 49/0.54/0.60 1-2s 278/0.63/0.94 2-4s 967/0.67/1.07 4-8s 1382/0.84/1.13 8-16s 1524/0.94/0.90 >16s 2075/0.98/1.02
+    <4 s: true 1278 recall 0.662, pred 1294 precision 0.660, pred:true 1.01; share of lost credit 56.2%
+  [metrica ctrl | true D | blend | ramp c 48] spellF1 0.8837 (seeds 0.8830 0.8883 0.8799); oracle insert missed <4 s +0.0531, drop spurious <4 s +0.0232
+    true  (n/recall/unseen): 0-1s 81/0.28/0.67 1-2s 297/0.42/0.46 2-4s 900/0.65/0.19 4-8s 1224/0.89/0.03 8-16s 1701/0.94/0.00 >16s 2034/0.99/0.00
+    pred  (n/precision/pred:true): 0-1s 27/0.67/0.33 1-2s 144/0.88/0.48 2-4s 679/0.72/0.75 4-8s 1541/0.83/1.26 8-16s 1545/0.95/0.91 >16s 2089/0.98/1.03
+    <4 s: true 1278 recall 0.571, pred 850 precision 0.745, pred:true 0.67; share of lost credit 54.0%
+  [metrica ctrl | true D | blend | ramp c 24] spellF1 0.8753 (seeds 0.8761 0.8749 0.8748); oracle insert missed <4 s +0.0482, drop spurious <4 s +0.0386
+    true  (n/recall/unseen): 0-1s 81/0.29/0.67 1-2s 297/0.49/0.41 2-4s 900/0.68/0.16 4-8s 1224/0.90/0.02 8-16s 1701/0.94/0.00 >16s 2034/0.98/0.00
+    pred  (n/precision/pred:true): 0-1s 27/0.67/0.33 1-2s 176/0.82/0.59 2-4s 870/0.63/0.97 4-8s 1545/0.83/1.26 8-16s 1545/0.94/0.91 >16s 2088/0.97/1.03
+    <4 s: true 1278 recall 0.609, pred 1073 precision 0.665, pred:true 0.84; share of lost credit 55.5%
+  [metrica ctrl | true D | blend | ramp c 0] spellF1 0.8623 (seeds 0.8599 0.8694 0.8577); oracle insert missed <4 s +0.0359, drop spurious <4 s +0.0616
+    true  (n/recall/unseen): 0-1s 81/0.29/0.67 1-2s 297/0.61/0.33 2-4s 900/0.74/0.11 4-8s 1224/0.91/0.01 8-16s 1701/0.93/0.00 >16s 2034/0.97/0.00
+    pred  (n/precision/pred:true): 0-1s 39/0.62/0.48 1-2s 322/0.57/1.08 2-4s 1085/0.59/1.21 4-8s 1555/0.82/1.27 8-16s 1544/0.93/0.91 >16s 2085/0.96/1.03
+    <4 s: true 1278 recall 0.682, pred 1446 precision 0.584, pred:true 1.13; share of lost credit 57.2%
+  (metrica@v3 done in 31 s)
+
+=== sc@v3 (40 halves; conventions phase, pp) ===
+  truth phase  5092 spells, 4.83 / alive min, median 7.4 s, <1 s 1%, <2 s 13%, <4 s 29%
+  evidence phase  v10   raw: short favoured 0.735, false runs 1.60/alive min | +-25: short favoured 0.712, false runs 1.36/alive min
+  evidence phase  blend raw: short favoured 0.782, false runs 1.46/alive min | +-25: short favoured 0.758, false runs 1.38/alive min
+  truth pp     5510 spells, 5.23 / alive min, median 6.7 s, <1 s 2%, <2 s 15%, <4 s 33%
+  evidence pp     v10   raw: short favoured 0.734, false runs 1.42/alive min | +-25: short favoured 0.706, false runs 1.22/alive min
+  evidence pp     blend raw: short favoured 0.787, false runs 1.29/alive min | +-25: short favoured 0.759, false runs 1.22/alive min
+  [sc phase | learned D | v10 | ramp c 48] spellF1 0.5973 (seeds 0.5976 0.5964 0.5980); oracle insert missed <4 s +0.1360, drop spurious <4 s +0.0239
+    predicted profile: 4761 spells, 4.08 / alive min, median 9.5 s, <1 s 0%, <2 s 1%, <4 s 13%
+    true  (n/recall/unseen): 0-1s 225/0.01/0.68 1-2s 1791/0.05/0.51 2-4s 2469/0.28/0.35 4-8s 3531/0.59/0.10 8-16s 3240/0.78/0.01 >16s 4020/0.85/0.00
+    pred  (n/precision/pred:true): 0-1s 0/0.00/0.00 1-2s 205/0.17/0.11 2-4s 1680/0.34/0.68 4-8s 4361/0.46/1.24 8-16s 3758/0.68/1.16 >16s 4315/0.85/1.07
+    <4 s: true 4485 recall 0.175, pred 1885 precision 0.321, pred:true 0.42; share of lost credit 41.6%
+  [sc pp | learned D | v10 | ramp c 48] spellF1 0.5917 (seeds 0.5923 0.5908 0.5921); oracle insert missed <4 s +0.1666, drop spurious <4 s +0.0194
+    predicted profile: 4761 spells, 4.08 / alive min, median 9.5 s, <1 s 0%, <2 s 1%, <4 s 13%
+    true  (n/recall/unseen): 0-1s 282/0.01/0.70 1-2s 2154/0.06/0.49 2-4s 2958/0.27/0.38 4-8s 3831/0.58/0.10 8-16s 3372/0.78/0.01 >16s 3933/0.85/0.00
+    pred  (n/precision/pred:true): 0-1s 0/0.00/0.00 1-2s 205/0.22/0.10 2-4s 1680/0.38/0.57 4-8s 4361/0.48/1.14 8-16s 3758/0.70/1.11 >16s 4315/0.85/1.10
+    <4 s: true 5394 recall 0.169, pred 1885 precision 0.364, pred:true 0.35; share of lost credit 44.9%
+  [sc phase | learned D | v10 | ramp c 24] spellF1 0.5943 (seeds 0.5946 0.5935 0.5948); oracle insert missed <4 s +0.1261, drop spurious <4 s +0.0386
+    true  (n/recall/unseen): 0-1s 225/0.03/0.64 1-2s 1791/0.07/0.48 2-4s 2469/0.31/0.31 4-8s 3531/0.61/0.09 8-16s 3240/0.78/0.01 >16s 4020/0.85/0.00
+    pred  (n/precision/pred:true): 0-1s 8/0.00/0.04 1-2s 410/0.16/0.23 2-4s 2358/0.31/0.96 4-8s 4397/0.45/1.25 8-16s 3756/0.69/1.16 >16s 4270/0.85/1.06
+    <4 s: true 4485 recall 0.204, pred 2776 precision 0.285, pred:true 0.62; share of lost credit 44.7%
+  [sc pp | learned D | v10 | ramp c 24] spellF1 0.5916 (seeds 0.5917 0.5908 0.5923); oracle insert missed <4 s +0.1562, drop spurious <4 s +0.0328
+    true  (n/recall/unseen): 0-1s 282/0.03/0.67 1-2s 2154/0.08/0.47 2-4s 2958/0.30/0.34 4-8s 3831/0.60/0.08 8-16s 3372/0.78/0.01 >16s 3933/0.86/0.00
+    pred  (n/precision/pred:true): 0-1s 8/0.00/0.03 1-2s 410/0.19/0.19 2-4s 2358/0.35/0.80 4-8s 4397/0.48/1.15 8-16s 3756/0.71/1.11 >16s 4270/0.86/1.09
+    <4 s: true 5394 recall 0.198, pred 2776 precision 0.325, pred:true 0.51; share of lost credit 47.7%
+  [sc phase | learned D | v10 | ramp c 0] spellF1 0.5870 (seeds 0.5878 0.5868 0.5864); oracle insert missed <4 s +0.1103, drop spurious <4 s +0.0667
+    true  (n/recall/unseen): 0-1s 225/0.03/0.65 1-2s 1791/0.10/0.45 2-4s 2469/0.38/0.25 4-8s 3531/0.64/0.06 8-16s 3240/0.78/0.01 >16s 4020/0.85/0.00
+    pred  (n/precision/pred:true): 0-1s 68/0.02/0.30 1-2s 950/0.13/0.53 2-4s 3296/0.29/1.33 4-8s 4435/0.47/1.26 8-16s 3787/0.70/1.17 >16s 4183/0.86/1.04
+    <4 s: true 4485 recall 0.254, pred 4314 precision 0.248, pred:true 0.96; share of lost credit 49.7%
+  [sc pp | learned D | v10 | ramp c 0] spellF1 0.5913 (seeds 0.5924 0.5914 0.5902); oracle insert missed <4 s +0.1361, drop spurious <4 s +0.0581
+    true  (n/recall/unseen): 0-1s 282/0.03/0.65 1-2s 2154/0.11/0.43 2-4s 2958/0.37/0.28 4-8s 3831/0.63/0.05 8-16s 3372/0.79/0.01 >16s 3933/0.86/0.00
+    pred  (n/precision/pred:true): 0-1s 68/0.03/0.24 1-2s 950/0.15/0.44 2-4s 3296/0.33/1.11 4-8s 4435/0.50/1.16 8-16s 3787/0.72/1.12 >16s 4183/0.87/1.06
+    <4 s: true 5394 recall 0.250, pred 4314 precision 0.289, pred:true 0.80; share of lost credit 52.3%
+  [sc phase | learned D | blend | ramp c 48] spellF1 0.6189 (seeds 0.6191 0.6165 0.6212); oracle insert missed <4 s +0.1196, drop spurious <4 s +0.0226
+    predicted profile: 4922 spells, 4.23 / alive min, median 9.2 s, <1 s 0%, <2 s 1%, <4 s 12%
+    true  (n/recall/unseen): 0-1s 225/0.00/0.73 1-2s 1791/0.05/0.50 2-4s 2469/0.33/0.27 4-8s 3531/0.64/0.07 8-16s 3240/0.81/0.01 >16s 4020/0.86/0.00
+    pred  (n/precision/pred:true): 0-1s 0/0.00/0.00 1-2s 176/0.16/0.10 2-4s 1617/0.38/0.65 4-8s 4719/0.47/1.34 8-16s 3940/0.70/1.22 >16s 4276/0.86/1.06
+    <4 s: true 4485 recall 0.204, pred 1793 precision 0.361, pred:true 0.40; share of lost credit 41.1%
+  [sc pp | learned D | blend | ramp c 48] spellF1 0.6212 (seeds 0.6205 0.6190 0.6241); oracle insert missed <4 s +0.1449, drop spurious <4 s +0.0177
+    predicted profile: 4922 spells, 4.23 / alive min, median 9.2 s, <1 s 0%, <2 s 1%, <4 s 12%
+    true  (n/recall/unseen): 0-1s 282/0.00/0.72 1-2s 2154/0.06/0.48 2-4s 2958/0.33/0.30 4-8s 3831/0.63/0.07 8-16s 3372/0.81/0.00 >16s 3933/0.87/0.00
+    pred  (n/precision/pred:true): 0-1s 0/0.00/0.00 1-2s 176/0.22/0.08 2-4s 1617/0.45/0.55 4-8s 4719/0.51/1.23 8-16s 3940/0.71/1.17 >16s 4276/0.86/1.09
+    <4 s: true 5394 recall 0.206, pred 1793 precision 0.425, pred:true 0.33; share of lost credit 44.7%
+  [sc phase | learned D | blend | ramp c 24] spellF1 0.6168 (seeds 0.6167 0.6149 0.6188); oracle insert missed <4 s +0.1081, drop spurious <4 s +0.0387
+    true  (n/recall/unseen): 0-1s 225/0.02/0.69 1-2s 1791/0.08/0.46 2-4s 2469/0.38/0.24 4-8s 3531/0.66/0.06 8-16s 3240/0.81/0.01 >16s 4020/0.86/0.00
+    pred  (n/precision/pred:true): 0-1s 5/0.00/0.02 1-2s 341/0.18/0.19 2-4s 2335/0.35/0.95 4-8s 4769/0.47/1.35 8-16s 3935/0.70/1.21 >16s 4226/0.86/1.05
+    <4 s: true 4485 recall 0.240, pred 2681 precision 0.325, pred:true 0.60; share of lost credit 43.9%
+  [sc pp | learned D | blend | ramp c 24] spellF1 0.6269 (seeds 0.6271 0.6262 0.6274); oracle insert missed <4 s +0.1287, drop spurious <4 s +0.0304
+    true  (n/recall/unseen): 0-1s 282/0.02/0.67 1-2s 2154/0.09/0.44 2-4s 2958/0.39/0.26 4-8s 3831/0.66/0.05 8-16s 3372/0.82/0.00 >16s 3933/0.87/0.00
+    pred  (n/precision/pred:true): 0-1s 5/0.00/0.02 1-2s 341/0.23/0.16 2-4s 2335/0.42/0.79 4-8s 4769/0.52/1.24 8-16s 3935/0.73/1.17 >16s 4226/0.87/1.07
+    <4 s: true 5394 recall 0.247, pred 2681 precision 0.397, pred:true 0.50; share of lost credit 47.2%
+  [sc phase | learned D | blend | ramp c 0] spellF1 0.6061 (seeds 0.6043 0.6058 0.6081); oracle insert missed <4 s +0.0936, drop spurious <4 s +0.0698
+    true  (n/recall/unseen): 0-1s 225/0.03/0.65 1-2s 1791/0.11/0.41 2-4s 2469/0.44/0.19 4-8s 3531/0.69/0.04 8-16s 3240/0.81/0.01 >16s 4020/0.86/0.00
+    pred  (n/precision/pred:true): 0-1s 50/0.06/0.22 1-2s 827/0.14/0.46 2-4s 3417/0.31/1.38 4-8s 4798/0.47/1.36 8-16s 3928/0.71/1.21 >16s 4141/0.86/1.03
+    <4 s: true 4485 recall 0.289, pred 4294 precision 0.273, pred:true 0.96; share of lost credit 49.3%
+  [sc pp | learned D | blend | ramp c 0] spellF1 0.6234 (seeds 0.6232 0.6237 0.6233); oracle insert missed <4 s +0.1109, drop spurious <4 s +0.0578
+    true  (n/recall/unseen): 0-1s 282/0.03/0.63 1-2s 2154/0.12/0.39 2-4s 2958/0.45/0.21 4-8s 3831/0.69/0.04 8-16s 3372/0.83/0.00 >16s 3933/0.87/0.00
+    pred  (n/precision/pred:true): 0-1s 50/0.06/0.18 1-2s 827/0.17/0.38 2-4s 3417/0.38/1.16 4-8s 4798/0.52/1.25 8-16s 3928/0.74/1.16 >16s 4141/0.88/1.05
+    <4 s: true 5394 recall 0.300, pred 4294 precision 0.336, pred:true 0.80; share of lost credit 52.1%
+  [sc phase | true D | v10 | ramp c 48] spellF1 0.7593 (seeds 0.7594 0.7575 0.7612); oracle insert missed <4 s +0.1340, drop spurious <4 s +0.0163
+    true  (n/recall/unseen): 0-1s 225/0.12/0.61 1-2s 1791/0.29/0.46 2-4s 2469/0.42/0.35 4-8s 3531/0.72/0.10 8-16s 3240/0.86/0.01 >16s 4020/0.92/0.00
+    pred  (n/precision/pred:true): 0-1s 35/0.71/0.16 1-2s 586/0.79/0.33 2-4s 1413/0.71/0.57 4-8s 3411/0.74/0.97 8-16s 3288/0.86/1.01 >16s 4081/0.92/1.02
+    <4 s: true 4485 recall 0.354, pred 2034 precision 0.735, pred:true 0.45; share of lost credit 50.4%
+  [sc pp | true D | v10 | ramp c 48] spellF1 0.7476 (seeds 0.7479 0.7463 0.7485); oracle insert missed <4 s +0.1648, drop spurious <4 s +0.0110
+    true  (n/recall/unseen): 0-1s 282/0.10/0.65 1-2s 2154/0.26/0.47 2-4s 2958/0.39/0.37 4-8s 3831/0.69/0.10 8-16s 3372/0.86/0.00 >16s 3933/0.92/0.00
+    pred  (n/precision/pred:true): 0-1s 35/0.71/0.12 1-2s 586/0.83/0.27 2-4s 1413/0.76/0.48 4-8s 3411/0.79/0.89 8-16s 3288/0.88/0.98 >16s 4081/0.92/1.04
+    <4 s: true 5394 recall 0.324, pred 2034 precision 0.783, pred:true 0.38; share of lost credit 54.7%
+  [sc phase | true D | v10 | ramp c 24] spellF1 0.7604 (seeds 0.7589 0.7605 0.7617); oracle insert missed <4 s +0.1226, drop spurious <4 s +0.0271
+    true  (n/recall/unseen): 0-1s 225/0.14/0.57 1-2s 1791/0.32/0.44 2-4s 2469/0.47/0.30 4-8s 3531/0.73/0.08 8-16s 3240/0.86/0.01 >16s 4020/0.93/0.00
+    pred  (n/precision/pred:true): 0-1s 35/0.70/0.16 1-2s 779/0.69/0.43 2-4s 1845/0.64/0.75 4-8s 3399/0.74/0.96 8-16s 3324/0.86/1.03 >16s 4033/0.93/1.00
+    <4 s: true 4485 recall 0.393, pred 2659 precision 0.659, pred:true 0.59; share of lost credit 52.4%
+  [sc pp | true D | v10 | ramp c 24] spellF1 0.7531 (seeds 0.7518 0.7537 0.7537); oracle insert missed <4 s +0.1522, drop spurious <4 s +0.0198
+    true  (n/recall/unseen): 0-1s 282/0.12/0.61 1-2s 2154/0.29/0.44 2-4s 2958/0.44/0.33 4-8s 3831/0.71/0.07 8-16s 3372/0.86/0.00 >16s 3933/0.92/0.00
+    pred  (n/precision/pred:true): 0-1s 35/0.70/0.12 1-2s 779/0.75/0.36 2-4s 1845/0.70/0.62 4-8s 3399/0.78/0.89 8-16s 3324/0.88/0.99 >16s 4033/0.93/1.03
+    <4 s: true 5394 recall 0.365, pred 2659 precision 0.716, pred:true 0.49; share of lost credit 56.1%
+  [sc phase | true D | v10 | ramp c 0] spellF1 0.7559 (seeds 0.7573 0.7552 0.7553); oracle insert missed <4 s +0.1034, drop spurious <4 s +0.0509
+    true  (n/recall/unseen): 0-1s 225/0.18/0.52 1-2s 1791/0.38/0.39 2-4s 2469/0.55/0.23 4-8s 3531/0.76/0.05 8-16s 3240/0.86/0.01 >16s 4020/0.93/0.00
+    pred  (n/precision/pred:true): 0-1s 104/0.41/0.46 1-2s 1164/0.57/0.65 2-4s 2572/0.57/1.04 4-8s 3464/0.73/0.98 8-16s 3342/0.86/1.03 >16s 3964/0.93/0.99
+    <4 s: true 4485 recall 0.461, pred 3840 precision 0.563, pred:true 0.86; share of lost credit 55.8%
+  [sc pp | true D | v10 | ramp c 0] spellF1 0.7580 (seeds 0.7598 0.7574 0.7568); oracle insert missed <4 s +0.1289, drop spurious <4 s +0.0393
+    true  (n/recall/unseen): 0-1s 282/0.15/0.55 1-2s 2154/0.37/0.38 2-4s 2958/0.51/0.26 4-8s 3831/0.75/0.04 8-16s 3372/0.87/0.00 >16s 3933/0.93/0.00
+    pred  (n/precision/pred:true): 0-1s 104/0.44/0.37 1-2s 1164/0.63/0.54 2-4s 2572/0.63/0.87 4-8s 3464/0.78/0.90 8-16s 3342/0.89/0.99 >16s 3964/0.93/1.01
+    <4 s: true 5394 recall 0.436, pred 3840 precision 0.627, pred:true 0.71; share of lost credit 59.1%
+  [sc phase | true D | blend | ramp c 48] spellF1 0.7789 (seeds 0.7778 0.7748 0.7840); oracle insert missed <4 s +0.1194, drop spurious <4 s +0.0166
+    true  (n/recall/unseen): 0-1s 225/0.13/0.64 1-2s 1791/0.30/0.47 2-4s 2469/0.48/0.29 4-8s 3531/0.78/0.06 8-16s 3240/0.89/0.01 >16s 4020/0.94/0.00
+    pred  (n/precision/pred:true): 0-1s 33/0.79/0.15 1-2s 569/0.82/0.32 2-4s 1547/0.72/0.63 4-8s 3813/0.74/1.08 8-16s 3394/0.87/1.05 >16s 4033/0.93/1.00
+    <4 s: true 4485 recall 0.390, pred 2149 precision 0.746, pred:true 0.48; share of lost credit 51.4%
+  [sc pp | true D | blend | ramp c 48] spellF1 0.7739 (seeds 0.7723 0.7703 0.7791); oracle insert missed <4 s +0.1468, drop spurious <4 s +0.0110
+    true  (n/recall/unseen): 0-1s 282/0.11/0.63 1-2s 2154/0.26/0.48 2-4s 2958/0.46/0.31 4-8s 3831/0.76/0.06 8-16s 3372/0.89/0.00 >16s 3933/0.94/0.00
+    pred  (n/precision/pred:true): 0-1s 33/0.79/0.12 1-2s 569/0.85/0.26 2-4s 1547/0.78/0.52 4-8s 3813/0.80/1.00 8-16s 3394/0.89/1.01 >16s 4033/0.94/1.03
+    <4 s: true 5394 recall 0.364, pred 2149 precision 0.801, pred:true 0.40; share of lost credit 56.6%
+  [sc phase | true D | blend | ramp c 24] spellF1 0.7793 (seeds 0.7755 0.7780 0.7844); oracle insert missed <4 s +0.1074, drop spurious <4 s +0.0290
+    true  (n/recall/unseen): 0-1s 225/0.15/0.60 1-2s 1791/0.33/0.45 2-4s 2469/0.54/0.24 4-8s 3531/0.79/0.05 8-16s 3240/0.89/0.01 >16s 4020/0.94/0.00
+    pred  (n/precision/pred:true): 0-1s 33/0.79/0.15 1-2s 721/0.74/0.40 2-4s 2044/0.65/0.83 4-8s 3810/0.74/1.08 8-16s 3400/0.87/1.05 >16s 4003/0.93/1.00
+    <4 s: true 4485 recall 0.435, pred 2798 precision 0.674, pred:true 0.62; share of lost credit 53.0%
+  [sc pp | true D | blend | ramp c 24] spellF1 0.7836 (seeds 0.7809 0.7825 0.7875); oracle insert missed <4 s +0.1297, drop spurious <4 s +0.0185
+    true  (n/recall/unseen): 0-1s 282/0.13/0.60 1-2s 2154/0.31/0.44 2-4s 2958/0.52/0.26 4-8s 3831/0.78/0.05 8-16s 3372/0.89/0.00 >16s 3933/0.94/0.00
+    pred  (n/precision/pred:true): 0-1s 33/0.79/0.12 1-2s 721/0.80/0.33 2-4s 2044/0.74/0.69 4-8s 3810/0.80/0.99 8-16s 3400/0.89/1.01 >16s 4003/0.94/1.02
+    <4 s: true 5394 recall 0.416, pred 2798 precision 0.752, pred:true 0.52; share of lost credit 57.8%
+  [sc phase | true D | blend | ramp c 0] spellF1 0.7744 (seeds 0.7707 0.7738 0.7786); oracle insert missed <4 s +0.0870, drop spurious <4 s +0.0544
+    true  (n/recall/unseen): 0-1s 225/0.16/0.56 1-2s 1791/0.41/0.36 2-4s 2469/0.62/0.17 4-8s 3531/0.81/0.03 8-16s 3240/0.89/0.00 >16s 4020/0.93/0.00
+    pred  (n/precision/pred:true): 0-1s 97/0.54/0.43 1-2s 1149/0.60/0.64 2-4s 2781/0.58/1.13 4-8s 3833/0.73/1.09 8-16s 3379/0.87/1.04 >16s 3950/0.93/0.98
+    <4 s: true 4485 recall 0.514, pred 4027 precision 0.584, pred:true 0.90; share of lost credit 55.8%
+  [sc pp | true D | blend | ramp c 0] spellF1 0.7906 (seeds 0.7890 0.7907 0.7921); oracle insert missed <4 s +0.1039, drop spurious <4 s +0.0384
+    true  (n/recall/unseen): 0-1s 282/0.14/0.56 1-2s 2154/0.41/0.35 2-4s 2958/0.61/0.19 4-8s 3831/0.80/0.03 8-16s 3372/0.90/0.00 >16s 3933/0.94/0.00
+    pred  (n/precision/pred:true): 0-1s 97/0.57/0.34 1-2s 1149/0.68/0.53 2-4s 2781/0.67/0.94 4-8s 3833/0.80/1.00 8-16s 3379/0.90/1.00 >16s 3950/0.94/1.00
+    <4 s: true 5394 recall 0.502, pred 4027 precision 0.670, pred:true 0.75; share of lost credit 60.1%
+  (sc@v3 done in 115 s)

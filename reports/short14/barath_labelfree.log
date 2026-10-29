@@ -1,0 +1,6 @@
+
+=== BAR-ATH full match, label-free (no public score) ===
+  shipped CSV MD5 matches ca20c5b6: True; recomputed v10 probabilities vs cache max diff 0.0e+00; re-decoded v10 equals the CSV on 1.0000 of frames
+  v10 (shipped CSV)  203 spells, 3.79 / alive min, median 10.7 s, <1 s 0%, <2 s 0%, <4 s 8%
+  blend 0.75         218 spells, 4.11 / alive min, median 10.0 s, <1 s 0%, <2 s 0%, <4 s 7%
+  frames that differ v10 vs blend: 1.45%
