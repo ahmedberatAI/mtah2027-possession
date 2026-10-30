@@ -485,6 +485,14 @@ def lomo_bigru():
     return [[np.asarray(d[s][k], np.float64) for k in keys] for s in bl.SEEDS]
 
 
+def gru_mean4(src):
+    """The BiGRU's equal mean as an evaluation may use it: held out on DFL (leave-one-match-out), shared elsewhere."""
+    if not src.startswith("dfl"):
+        return gru_mean(src)
+    members = lomo_bigru()
+    return [np.mean([m[i] for m in members], axis=0) for i in range(len(members[0]))]
+
+
 def build4():
     """The blend's candidates on DFL (paired seeds), with the held-out BiGRU margin (mean of the three seeds)."""
     src, convs, dec, prim = SOURCES[0]
@@ -493,7 +501,7 @@ def build4():
     learned = bench.dead_probs(src, "base")
     true_d = [np.where(g == 2, 1 - es.EPS, es.EPS) for g in labs]
     members = lomo_bigru()
-    gru = [np.mean([m[i] for m in members], axis=0) for i in range(len(blocks))]
+    gru = gru_mean4(src)
     raws = {seed: es.blend(es.v10_raw(seed, src), members[seed]) for seed in es.SEEDS}
     smos = {seed: exp_smooth.smooth(raws[seed], 25) for seed in es.SEEDS}
     bases = {(seed, dname): es.decode(dec, 48.0, pds, smos[seed])
