@@ -7,6 +7,8 @@ the provided data and open data:
 - **Team in possession:** a LightGBM classifier on team-level tracking features. It is trained on open tracking (IDSSE /
   DFL, Metrica Sports sample games) degraded to look like automatic single-camera tracking.
 - **Decoding:** a duration-aware Viterbi decoder per half.
+- **Short possessions:** a verifier re-examines the decoder's short decisions with two LightGBM classifiers trained on
+  open data; one of its inputs is a bidirectional GRU's margin (`models/bigru_dfl_pff_v1`).
 
 The approach, the validation protocol and the results are in **[docs/TECHNICAL_DOCUMENT.md](docs/TECHNICAL_DOCUMENT.md)**.
 
@@ -18,8 +20,8 @@ uv venv --python 3.12 .venv
 uv pip install --python .venv/Scripts/python.exe -r requirements.txt
 git clone https://github.com/metrica-sports/more-than-a-hack-2027 external/more-than-a-hack-2027
 # unpack the match bundle into ./data/{tactical,broadcast}  (or set MTAH_DATA_DIR)
-.venv/Scripts/python.exe src/make_submission.py           # -> submissions/candidate_v10.csv (about a minute)
-python external/more-than-a-hack-2027/evaluation/validate_submission.py submissions/candidate_v10.csv
+.venv/Scripts/python.exe src/make_submission.py           # -> submissions/candidate_v13.csv (a few minutes)
+python external/more-than-a-hack-2027/evaluation/validate_submission.py submissions/candidate_v13.csv
 
 # optional: retrain the team classifier from the open data (rewrites models/v10_team.txt, about 7 min on 24 cores)
 .venv/Scripts/python.exe src/download_idsse.py            # open DFL / IDSSE data, CC BY 4.0, ~2.6 GB
@@ -28,18 +30,22 @@ MTAH_RETRAIN=1 .venv/Scripts/python.exe src/make_submission.py
 ```
 
 - On Linux / macOS, use `.venv/bin/python` instead of `.venv/Scripts/python.exe`.
-- `models/v10_team.txt` is the team classifier, trained only on the open data, so the default run needs only the
-  provided data.
+- `models/v10_team.txt` is the team classifier and `models/short_verifier_{ins,del}_g.txt` the verifier, all trained
+  only on open data, so the default run needs only the provided data. On its first run it rebuilds the BiGRU's BAR-ATH
+  probabilities on the CPU (`src/reproduce_shared_bigru.py`, checked against `models/bigru_dfl_pff_v1/manifest.json`).
 - The run is deterministic: fixed simulation seeds, LightGBM deterministic mode with a fixed seed and thread count,
-  and no GPU. Both the default run and a retrain from an empty `cache/` write the submitted file, MD5
-  `ca20c5b657a395d2f7c0e310cdaabd64`.
+  and no GPU. Both the default run and a retrain of the team classifier from an empty `cache/` write the submitted
+  file, MD5 `ed8ad739207f367017bb8d8c8204c82a`.
 
 ## Layout
 
 ```
-src/make_submission.py   end to end: provided data -> submissions/candidate_v10.csv
-src/model_v10.py         the submitted model (team classifier training + prediction, decoder settings)
+src/make_submission.py   end to end: provided data -> submissions/candidate_v13.csv
+src/model_v13.py         the submitted model: model_v10 + the short-possession verifier (src/short_verifier.py)
+src/model_v10.py         team classifier training + prediction, decoder settings
 models/v10_team.txt      the team classifier (LightGBM, trained on the open data only)
+models/short_verifier_*  the verifier's two classifiers (LightGBM, open data only)
+models/bigru_dfl_pff_v1/ the shared BiGRU checkpoints; src/reproduce_shared_bigru.py and src/seq_pff.py run them
 src/model_v2/3/5/7/9.py  dead-ball evidence, emission scores, the B2 soft-minimum decoder (decode2.py)
 src/bench.py, sim.py     open-data inputs: parsing (dfl.py, metrica_sample.py), simulated degradation, features
 src/mlfeat.py, feat_*.py, bfree.py   team-level features

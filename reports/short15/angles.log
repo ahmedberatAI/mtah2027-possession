@@ -1,0 +1,80 @@
+
+=== dfl trk: true short spells 374 (1.01 / alive min), false flips 338 (0.92 / alive min) ===
+  true short spells by kind (n, seen by v10 +-25): between opponents 110 (72%) | after restart 107 (96%) | before stoppage 100 (72%) | between stoppages 56 (95%) | other 1 (0%)
+  situations, %% of items  [T all | T seen | F]:
+    ball mostly missing (>50%)        20.9 |  19.5 |   6.5
+    ball in flight >30% of visible    44.9 |  48.9 |  63.0
+    contested >50% of visible         18.2 |  15.3 |   8.0
+    team k touch detected             45.7 |  45.9 |  33.7
+    2+ team-k holders                 14.4 |  14.0 |   5.0
+    held >= 1 s by one k player       12.0 |  13.7 |   3.8
+    within 5 s of a restart           54.5 |  59.9 |  18.3
+    within 5 m of a touchline         24.1 |  26.1 |  18.6
+    final third of team k             30.7 |  35.2 |  17.8
+  feature medians [T seen | F] and AUC (T seen vs F):
+    dur 2.72|2.00 AUC 0.61 ; miss 0.00|0.00 AUC 0.58 ; bspeed 9.75|13.05 AUC 0.45 ; fly 0.38|0.56 AUC 0.49
+    near_k 0.69|0.59 AUC 0.54 ; dmin_k 0.57|1.41 AUC 0.31 ; touch_k 0.00|0.00 AUC 0.58 ; touch_o 0.00|0.00 AUC 0.58
+    two_k 1.00|0.00 AUC 0.59 ; hold_k 0.12|0.00 AUC 0.62 ; contested 0.13|0.00 AUC 0.68 ; depth 0.54|0.37 AUC 0.65
+    edge 11.34|15.45 AUC 0.42 ; since_restart 0.00|17.24 AUC 0.22 ; cen_k 0.53|1.48 AUC 0.34 ; cen_o 0.67|1.46 AUC 0.36
+    m_s 1.58|0.69 AUC 0.70 ; m_raw 1.74|0.94 AUC 0.70
+  leave-one-match-out LightGBM on all features: AUC 0.956 (v10 margin alone 0.705); base rate 0.48; recall 0.3 -> precision 0.99; recall 0.5 -> precision 0.99; recall 0.7 -> precision 0.98; recall 0.9 -> precision 0.88
+
+=== metrica ctrl: true short spells 426 (0.82 / alive min), false flips 239 (0.46 / alive min) ===
+  true short spells by kind (n, seen by v10 +-25): between opponents 105 (74%) | after restart 111 (100%) | before stoppage 78 (76%) | between stoppages 132 (92%)
+  situations, %% of items  [T all | T seen | F]:
+    ball mostly missing (>50%)        17.8 |  16.8 |   8.4
+    ball in flight >30% of visible    40.1 |  43.9 |  14.2
+    contested >50% of visible         21.4 |  19.8 |  26.8
+    team k touch detected             47.9 |  48.2 |  44.4
+    2+ team-k holders                 44.4 |  47.2 |  15.1
+    held >= 1 s by one k player       19.7 |  21.1 |  17.6
+    within 5 s of a restart           65.5 |  69.4 |  16.3
+    within 5 m of a touchline         18.3 |  18.7 |  10.9
+    final third of team k             25.8 |  27.6 |  16.7
+  feature medians [T seen | F] and AUC (T seen vs F):
+    dur 2.84|1.64 AUC 0.68 ; miss 0.00|0.00 AUC 0.54 ; bspeed 9.37|6.75 AUC 0.67 ; fly 0.31|0.00 AUC 0.74
+    near_k 0.66|0.72 AUC 0.42 ; dmin_k 0.26|0.53 AUC 0.31 ; touch_k 0.00|0.00 AUC 0.54 ; touch_o 0.00|0.00 AUC 0.55
+    two_k 1.00|1.00 AUC 0.68 ; hold_k 0.24|0.28 AUC 0.54 ; contested 0.23|0.15 AUC 0.54 ; depth 0.48|0.43 AUC 0.60
+    edge 18.37|17.66 AUC 0.48 ; since_restart 0.00|22.68 AUC 0.16 ; cen_k 0.51|0.98 AUC 0.44 ; cen_o 0.39|0.96 AUC 0.42
+    m_s 2.16|0.61 AUC 0.78 ; m_raw 2.38|0.83 AUC 0.78 ; m_gru 1.94|0.85 AUC 0.75
+  leave-one-match-out LightGBM on all features: AUC 0.937 (v10 margin alone 0.775); base rate 0.61; recall 0.3 -> precision 1.00; recall 0.5 -> precision 1.00; recall 0.7 -> precision 0.98; recall 0.9 -> precision 0.86
+
+=== sc phase: true short spells 1495 (1.42 / alive min), false flips 859 (0.82 / alive min) ===
+  true short spells by kind (n, seen by v10 +-25): between opponents 525 (66%) | after restart 342 (89%) | before stoppage 353 (66%) | between stoppages 274 (96%) | other 1 (0%)
+  situations, %% of items  [T all | T seen | F]:
+    ball mostly missing (>50%)        15.4 |  13.9 |  14.3
+    ball in flight >30% of visible    50.0 |  53.4 |  37.6
+    contested >50% of visible         12.8 |  12.7 |  14.3
+    team k touch detected             39.4 |  43.2 |  36.8
+    2+ team-k holders                  9.7 |  11.3 |  10.2
+    held >= 1 s by one k player        9.6 |  11.8 |   8.6
+    within 5 s of a restart           54.2 |  60.9 |  19.4
+    within 5 m of a touchline         23.4 |  24.1 |  17.5
+    final third of team k             22.8 |  25.2 |  16.9
+  feature medians [T seen | F] and AUC (T seen vs F):
+    dur 2.32|1.88 AUC 0.54 ; miss 0.00|0.00 AUC 0.52 ; bspeed 10.68|7.52 AUC 0.62 ; fly 0.42|0.20 AUC 0.63
+    near_k 0.64|0.56 AUC 0.56 ; dmin_k 1.14|1.47 AUC 0.44 ; touch_k 0.00|0.00 AUC 0.53 ; touch_o 0.00|0.00 AUC 0.51
+    two_k 0.00|0.00 AUC 0.54 ; hold_k 0.04|0.00 AUC 0.54 ; contested 0.06|0.00 AUC 0.53 ; depth 0.50|0.32 AUC 0.64
+    edge 11.86|16.19 AUC 0.42 ; since_restart 1.20|17.76 AUC 0.24 ; cen_k 0.72|1.10 AUC 0.44 ; cen_o 0.75|1.12 AUC 0.44
+    m_s 1.39|0.59 AUC 0.69 ; m_raw 1.56|0.77 AUC 0.69 ; m_gru 1.75|0.62 AUC 0.74
+  leave-one-match-out LightGBM on all features: AUC 0.955 (v10 margin alone 0.690); base rate 0.57; recall 0.3 -> precision 1.00; recall 0.5 -> precision 1.00; recall 0.7 -> precision 0.99; recall 0.9 -> precision 0.88
+
+=== sc pp: true short spells 1798 (1.71 / alive min), false flips 686 (0.65 / alive min) ===
+  true short spells by kind (n, seen by v10 +-25): between opponents 731 (68%) | after restart 378 (90%) | before stoppage 422 (68%) | between stoppages 267 (96%)
+  situations, %% of items  [T all | T seen | F]:
+    ball mostly missing (>50%)        14.5 |  13.2 |  16.0
+    ball in flight >30% of visible    50.6 |  53.9 |  34.8
+    contested >50% of visible         13.5 |  13.4 |  12.4
+    team k touch detected             40.9 |  44.6 |  32.9
+    2+ team-k holders                  9.3 |  10.7 |   8.3
+    held >= 1 s by one k player        9.9 |  12.0 |   7.3
+    within 5 s of a restart           49.0 |  55.0 |  17.8
+    within 5 m of a touchline         21.2 |  22.1 |  17.8
+    final third of team k             24.0 |  26.3 |  14.4
+  feature medians [T seen | F] and AUC (T seen vs F):
+    dur 2.32|1.68 AUC 0.59 ; miss 0.00|0.00 AUC 0.50 ; bspeed 10.69|7.35 AUC 0.63 ; fly 0.42|0.18 AUC 0.63
+    near_k 0.62|0.63 AUC 0.51 ; dmin_k 1.10|1.65 AUC 0.41 ; touch_k 0.00|0.00 AUC 0.56 ; touch_o 0.00|0.00 AUC 0.55
+    two_k 0.00|0.00 AUC 0.56 ; hold_k 0.08|0.00 AUC 0.57 ; contested 0.07|0.00 AUC 0.56 ; depth 0.48|0.31 AUC 0.64
+    edge 13.01|15.95 AUC 0.44 ; since_restart 3.28|19.16 AUC 0.26 ; cen_k 0.84|1.04 AUC 0.47 ; cen_o 0.82|1.07 AUC 0.47
+    m_s 1.28|0.49 AUC 0.69 ; m_raw 1.46|0.69 AUC 0.69 ; m_gru 1.72|0.40 AUC 0.77
+  leave-one-match-out LightGBM on all features: AUC 0.949 (v10 margin alone 0.689); base rate 0.67; recall 0.3 -> precision 1.00; recall 0.5 -> precision 1.00; recall 0.7 -> precision 0.98; recall 0.9 -> precision 0.91

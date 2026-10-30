@@ -1,6 +1,6 @@
 """End-to-end, deterministic: provided data -> submission CSV.
 
-    .venv/Scripts/python.exe src/make_submission.py      # the submission: model_v10 -> submissions/candidate_v10.csv
+    .venv/Scripts/python.exe src/make_submission.py      # the submission: model_v13 -> submissions/candidate_v13.csv
     .venv/Scripts/python.exe src/make_submission.py --model model_v3 --out submissions/baseline_v3.csv
 
 Steps: parse ATD (cached), align the broadcast (fixed per-half lags), build per-frame features
@@ -45,9 +45,9 @@ def merged_features(refresh=False):
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("--model", default="model_v10")
+    ap.add_argument("--model", default="model_v13")
     ap.add_argument("--params", default="{}", help="JSON overrides of the model's DEFAULT")
-    ap.add_argument("--out", default=os.path.join(ROOT, "submissions", "candidate_v10.csv"))
+    ap.add_argument("--out", default=os.path.join(ROOT, "submissions", "candidate_v13.csv"))
     ap.add_argument("--refresh", action="store_true", help="rebuild the feature cache")
     args = ap.parse_args()
     sys.stdout.reconfigure(encoding="utf-8")

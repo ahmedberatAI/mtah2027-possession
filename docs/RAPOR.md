@@ -15,16 +15,17 @@ Veri politikası: yalnız toplu istatistik. Ham satır, kare bazlı çıktı, vi
 İçindekiler: 1. Özet · 2. Kalıcı kurallar ve tuzaklar · 3. Deneme günlüğü · 4. Fikir havuzu ve tur kayıtları ·
 Ek A İlk analiz ve baseline'lar · Ek B Metrica kalibrasyonu · Ek C Simülatörde top kaybı · Ek D Hakem düdüğü
 
-## 1. Özet — şu anki durum (27 Ekim 2026)
+## 1. Özet — şu anki durum (30 Ekim 2026)
 
 **Görev.** BAR-ATH maçının 199,319 karesinin her birine H / A / D etiketi (X: cevap yok). Sıralama, tam maçın gizli
 etiketleri üzerinde spellF1 ile yapılıyor (possession spell'leri, IoU 0.3–0.7); eşitlikte macroF1. Son teslim 17 Kasım
 2026: CSV + dosyayı birebir yeniden üreten herkese açık repo (verisiz) + kısa teknik doküman. Teslimden önce geri bildirim
 yok; elimizdeki göstergeler public 5 dakika (17 spell) ve dış veri setleri.
 
-**Şu anki model: v10** (`src/model_v10.py`). **Gönderim (25 Ekim kararı): düdüksüz `submissions/candidate_v10.csv`**
-(MD5 ca20c5b6…); üretmek için `src/make_submission.py` (varsayılanlar artık model_v10 ve bu dosya). Düdüklü sürüm
-(`candidate_v10w.csv`, `--params '{"wh_bonus": 30}'`) artık önerilmiyor: tek dayanağı public pencereydi.
+**Şu anki model: v13 = v10 + kısa possession doğrulayıcısı** (`src/model_v13.py`, tur 15, 30 Ekim). **Gönderim:
+`submissions/candidate_v13.csv`** (MD5 ed8ad739…), `src/make_submission.py`'nin varsayılanı; iki çalıştırmada ve boş
+önbellekten temiz dışa aktarımda birebir aynı. v10 `--model model_v10` ile aynen üretiliyor (MD5 ca20c5b6…). Düdüklü
+sürüm (`candidate_v10w.csv`, `--params '{"wh_bonus": 30}'`) önerilmiyor: tek dayanağı public pencereydi.
 1. **Ölü top mu, canlı mı:** v3 kuralları. Oyuncu temposu (±1 ve ±3 sn; hakeme tepki gecikmesi için 1.5 sn ileriye
    bakılıyor); top çizgi dışında mı, 1 sn'den uzun görünmüyor mu, duruyor mu, hızlı mı; hizalanmış yayın görüntüsünden
    tekrar / yakın çekim ve canlılık ipuçları. Yayının topu taktik topun boşluklarını dolduruyor.
@@ -37,19 +38,29 @@ yok; elimizdeki göstergeler public 5 dakika (17 spell) ve dış veri setleri.
    ölü top; 7 sn'den kısa bir possession'ı bitirmeye süre kısaldıkça artan ek maliyet (B2: 175 kare, 48).
 4. **Düdük (yalnız v10w):** taktik videonun sesinde, iki santra düdüğünden yapılan şablonla hakem düdüğü aranıyor. Model
    ölü topa bir düdükten sonraki 3 sn içinde geçiyorsa geçiş düdük anına çekiliyor.
+5. **Kısa possession doğrulayıcısı (v13, tur 15):** decoder'ın bastırdığı ≥0.5 sn'lik ters takım dönüşleri ("ekle") ve
+   çözülmüş <4 sn possession'lar ("sil") iki LightGBM sınıflandırıcısıyla yeniden değerlendiriliyor
+   (`src/short_verifier.py`, `models/short_verifier_{ins,del}_g.txt`, yalnız açık veriden). Kanıt yalnız aday
+   aralığından: top görünürlüğü / hızı / havada payı, topa en yakın oyuncunun takımı ve mesafesi, dokunuşlar, topu tutan
+   farklı oyuncular ve en uzun tutma, çekişme, derinlik, takım merkezlerinin tepkisi, son duruştan beri süre, komşu
+   possession süreleri, v10 marjları ve paylaşılan BiGRU'nun marjı. Ekleme p ≥ 0.65; silme p < 0.35 (kareler komşu
+   possession'ı tutan takıma geçer, iki duruş arasında hiç). BAR-ATH'ta karelerin %0.19'u, 6 bölge değişiyor
+   (203 → 214 possession; public pencerede değişen kare yok).
 
 Kapalı seçenekler: v11 (dokunuş özellikleri), v12 (dokunuşa göre geçiş kolaylığı), `po_lam` (yalnız oyunculara dayalı
 ölü top), `clean_ball` (ATD'nin tahminle doldurduğu top karelerini atmak).
 
 **Skorlar — dış setler** (spellF1, öğrenilmiş D / gerçek D; her maç eğitimden dışarıda; v10 = 3 LightGBM tohumunun
-ortalaması; `cache/bench/vers_table.log`, sürümlerin tamamı §4'te "Sürümlerin mutlak skorları"):
+ortalaması, v13 = aynı üç tohum ve her maçı görmemiş doğrulayıcı; `cache/bench/vers_table.log`, `reports/short15/`;
+sürümlerin tamamı §4'te "Sürümlerin mutlak skorları"). 10 bağlamda en kötü durum pişmanlığı v10 0.019 → v13 0.004:
 
-| Set | v7 | v10 | Fark |
-|---|---|---|---|
-| DFL-trk (7 maç) | 0.760 / 0.782 | 0.769 / 0.798 | +0.010 / +0.016 |
-| Metrica-ctrl (3 maç) | 0.815 / 0.872 | 0.823 / 0.882 | +0.009 / +0.011 |
-| SkillCorner faz (20 maç) | 0.582 / 0.746 | 0.597 / 0.759 | +0.016 / +0.014 |
-| SkillCorner oyuncu possession | 0.583 / 0.741 | 0.592 / 0.748 | +0.009 / +0.007 |
+| Set | v7 | v10 | **v13** | v13 − v10 |
+|---|---|---|---|---|
+| DFL-trk (7 maç) | 0.760 / 0.782 | 0.769 / 0.798 | **0.774 / 0.803** | +0.005 / +0.005 |
+| DFL-evctrl (7 maç, tur 12) | — | 0.782 / 0.808 | 0.783 / 0.810 | +0.001 / +0.002 |
+| Metrica-ctrl (3 maç) | 0.815 / 0.872 | 0.823 / 0.882 | 0.823 / 0.882 | −0.000 / −0.001 |
+| SkillCorner faz (20 maç) | 0.582 / 0.746 | 0.597 / 0.759 | **0.608 / 0.769** | +0.011 / +0.010 |
+| SkillCorner oyuncu possession | 0.583 / 0.741 | 0.592 / 0.748 | **0.606 / 0.762** | +0.015 / +0.015 |
 
 Öğrenilmiş D: ölü topu model kendisi buluyor (dış setlerde yayın yok, öğrenilmiş ölü top modeli kullanılıyor). Gerçek D:
 ölü top doğru veriliyor, yalnız takım kararı ölçülüyor. BAR-ATH'a en yakın set Metrica: aynı sağlayıcı, aynı possession mantığı.
@@ -67,6 +78,8 @@ ortalaması; `cache/bench/vers_table.log`, sürümlerin tamamı §4'te "Sürüml
 
 v10 public'te canlı/ölü F1 0.98, canlı karelerde takım doğruluğu 0.95; 17 gerçek spell'e karşı 10 spell üretiyor (kaçanlar
 kısa top kayıpları). Tam maçta 203 possession, 118 ölü top bölümü, %49 ölü pay (etiketsiz; literatürle uyumlu).
+v13 public penceredeki hiçbir kareyi değiştirmiyor; hat kontrolü v10'unkiyle aynı. v13 tam maçta 214 possession
+(canlı dakika başına 4.00; v10 3.79), 4 sn altı pay %13 (v10 %8).
 
 
 **27 Ekim, tur 13:** yerel çalışma GitHub'daki iki ortak commit ile birleştirildi; v10 MD5'si ve paylaşılan BiGRU
@@ -78,12 +91,19 @@ Altı bağlamdaki en kötü pişmanlık v10 0.0390 → bu aday 0.0101; logit %75
 Daha basit olasılık karışımı **sonraki doğrulama adayıdır**. DFL maç-dışı BiGRU doğrulaması yok; varsayılan **v10 kalır**.
 Kullanıcı 27 Ekim'de ara istedi; çalışan iki kendi CPU işi durduruldu. Ayrıntı: §4 Tur 13.
 
+**29–30 Ekim, tur 14–15:** kullanıcı önce "son modelde kısa possession sorunu var mı?" diye sordu (tur 14: evet, en
+büyük kayıp havuzu), sonra literatür taraması, farklı açılardan teşhis ve çözecek en sağlam yeteneği istedi. Üç web
+araştırması, dört teşhis ve iki yetenek denendi; sınırları yeniden konumlandırma ❌, kısa possession doğrulayıcısı ✅.
+Doğrulayıcı 3 v10 tohumu, 2 ölü top kanalı, 2 doğrulayıcı tohumu ve komşu eşiklerle ölçüldü; DFL'de BiGRU marjı
+kullanılmadığı için DFL geçerli bir dış test. Varsayılan v13 oldu. Ayrıntı: §4 Tur 15.
+
 **Model zinciri** (ayrıntı §3'teki "Modeller" tablosunda):
 - v1–v4 (20 Ekim): kurallar + en kısa süreli Viterbi. v3'ün canlı/ölü kuralları bugün de kullanılıyor.
 - v5: DFL'de öğrenilmiş takım olasılıkları. v6: hakem düdüğü.
 - v7 (22 Ekim): `sim.V3` ile eğitim, C6 + own_half + c145 özellikleri, B2 decoder, ceza 12.
 - v8: Metrica maçları eğitime. v9: topsuz özellikler + ±1 sn yumuşatma.
-- **v10 (23 Ekim): Metrica ağırlığı 2 — varsayılan.** v11 / v12: dokunuş seçenekleri, v10'a eşit (≈).
+- v10 (23 Ekim): Metrica ağırlığı 2 (25–30 Ekim arası gönderim). v11 / v12: dokunuş seçenekleri, v10'a eşit (≈).
+- **v13 (30 Ekim): v10 + kısa possession doğrulayıcısı — varsayılan.**
 
 **Neler işe yaradı** (dış setlerde; ayrıntılar §3–§4):
 - Simülatör hatasının bulunması: `sim.V2`'nin her kareye bağımsız gürültüsü hızları ikiye katlıyordu (adversarial
@@ -97,6 +117,9 @@ Kullanıcı 27 Ekim'de ara istedi; çalışan iki kendi CPU işi durduruldu. Ayr
   Metrica ağırlığı 2 (v10). v10, v7'yi sekiz bağlamın hepsinde geçiyor (bootstrap P 0.95–1.00; tohum, ceza ve stres
   testlerine dayanıklı).
 - Ölü topta yayın görüntüsü ipuçları (v3; public canlı/ölü F1 0.97).
+- **Kısa possession doğrulayıcısı (v13, tur 15):** v10'un kendi kısa kararlarını aday aralığındaki izleme kanıtı ve
+  BiGRU marjıyla yeniden değerlendirmek: SC +0.010…+0.015, DFL-trk +0.005, Metrica ±0.001; en kötü pişmanlık
+  0.019 → 0.004.
 
 **Neler işe yaramadı** (hepsi ≤ +0.003 ya da eksi):
 - Decoder hileleri: B1 / B4 / B5 / B6 / G1 / G2, el değişimi modeli, kısa possession doğrulama, yeniden başlama muafiyeti,
@@ -112,6 +135,8 @@ Kullanıcı 27 Ekim'de ara istedi; çalışan iki kendi CPU işi durduruldu. Ayr
 - Yeni gözlemler (tur 11): yayın kamerasının kadrajı (BAR-ATH'ta v10-emin karelerde AUC 0.95, ama SkillCorner'da gerçek
   etiketle birleştirme her ayarda −0.014…−0.13, sahte değişim vetosu olarak da −0.0005…−0.038), spiker adları (dakikada
   5.5, %87'si ev sahibi, zayıf) ve top yüksekliği (DFL'nin gerçek yüksekliğiyle bile −0.005…−0.010).
+- Tur 15: decoder'ın değişimlerini az yumuşatılmış kanıtın değişim noktasına taşımak (her yerde −0.001…−0.003) ve
+  "oyunu başlatan takım topa son dokunmamıştır" kuralıyla duruş öncesi kısa spell aramak (isabet %4–19).
 
 **Dersler:**
 - Simülasyon içi CV simülasyon hatasını göremez; her yeni bozulma BAR-ATH'a karşı adversarial validation ile kontrol edilir.
@@ -122,6 +147,11 @@ Kullanıcı 27 Ekim'de ara istedi; çalışan iki kendi CPU işi durduruldu. Ayr
 - Kalan kayıp 4 sn'den kısa oyun içi top kaybı spell'lerinde (özellikle ikili mücadeleler) ve bunların aynası olan yanlış
   değişimlerde. Mücadele anlarında takip verisi v10'un kullandığından çok az fazla bilgi taşıyor; kusursuz konum bile
   ≈ +0.005. Bu havuzu ancak yeni bir gözlem açabilir: topa kimin dokunduğu (video).
+- Tur 15: kısa spell'lerin %59–75'i duruşa bitişik, yalnız %25–41'i oyun içi. Ayrılabilirlik modelin kendi
+  adaylarıyla ölçülmeli: gerçek aralıklarla ölçülen AUC (0.94–0.96) gerçek sınırları sızdırıyor, dağıtılabilir ölçümde
+  oyun içi ekleme DFL / Metrica'da 0.67–0.75. Kazancı taşıyan yeni bilgi BiGRU'nun marjı; o olmadan doğrulayıcı DFL'de
+  kaybettiriyor. Literatür de aynı sınırı gösteriyor: iskelet verisi ve sensörlü topla bile ayak düellosunda son
+  dokunuş %65–75 doğru.
 - Yeni bir ipucunun modelin emin olduğu karelerdeki uyumu, değerinin ölçüsü değildir (kamera kadrajı: AUC 0.95, ama
   birleştirme kaybettirdi). Değer, modelin belirsiz olduğu anlarda ve gerçek etiketle ölçülür; BAR-ATH'a özgü bir gözlem
   ancak aynı türden gözlemi taşıyan bir dış sette doğrulanabiliyorsa benimsenir.
@@ -159,6 +189,16 @@ Kullanıcı 27 Ekim'de ara istedi; çalışan iki kendi CPU işi durduruldu. Ayr
   belge BAR-ATH sayıları açısından gözden geçirilmeli. Teknik dokümanda kaynaklar: Metrica Sports sample data,
   IDSSE / open DFL (CC BY 4.0), SkillCorner open data (MIT).
 - Tur 9–12 çalışması `541b79e` ile korundu; Alperen’in `a3b3070` / `39fd4de` commit’leri `de5d862` ile birleştirildi. Çalışma dalı `codex/rounds9-13-integration`; henüz push yapılmadı.
+- **v13 ve herkese açık repo (tur 15):** v13 paylaşılan BiGRU ağırlıklarını (`models/bigru_dfl_pff_v1`) kullanıyor ve
+  bunlar dışa aktarım listesinde. Ağırlıkların eğitiminde PFF / Gradient Dünya Kupası 2022 verisi var; kendi README'leri
+  erişimin sağlayıcının koşullarıyla alındığını söylüyor. Repo açılmadan önce bu koşulların türetilmiş ağırlıkların
+  yayımlanmasına izin verdiği Alperen'le teyit edilmeli; izin yoksa v10'a dönülür ya da BiGRU'suz doğrulayıcı
+  (pişmanlık 0.012) değerlendirilir. `requirements.txt` artık torch 2.11.0 istiyor.
+- **Tur 15'ten sonraki kaldıraçlar:** PathCRF (topsuz, fiziksel aktarım kısıtlı CRF; kod ve ağırlıklar açık ama ağırlıklar
+  bütün DFL'de eğitilmiş, Colab'da maç-dışı yeniden eğitim gerekir) ikinci bağımsız kanıt olarak; ELASTIC ile kare
+  hassas eşlenmiş DFL olaylarından kontrol etiketi (indirme boyutu sorulmalı); R-8 kısa spell'e tavanlı ağırlık
+  (CPU, denenmedi); "D-bölme" (birleşmiş komşuları kurtarmak için 1 karelik D) — metriğe yönelik, canlı kareye D
+  yazıyor; denemeden önce kullanıcı kararı gerekir.
 
 ## 2. Kalıcı kurallar ve tuzaklar
 
@@ -377,6 +417,13 @@ Public sütunu yalnız bilgi içindir (17 spell, aralık ~0.4); v7'den itibaren 
 | Kamera artık katkısının ölçek dayanıklılığı (`src/camera_sc.py robust`) | core/norm varyantlarının 3 tohum için 6 LOMO olasılık önbelleği tamamlandı; değerlendirme kullanıcı isteğiyle durduruldu, nihai toplu skor tablosu çıkmadı | bekliyor; mevcut önbelleklerle yeniden skorlanacak |
 | Klasör temizliği (29 Ekim, kullanıcı isteği) | kullanılmayan 131.6 GB, kalıcı silinmeden `C:\Users\omen\Desktop\barcahackathon_arsiv_20261029` klasörüne taşındı (arşivi kullanıcı siler). Taşınanlar: ana simülasyon (v3) dışındaki varyantların girdi ve özellik önbellekleri (v2, v3b*, v3p0, v3s2, v4, v5, v5c); v10'un kullanmadığı eski özellik sürümleri (`base` kaldı); biten ya da reddedilen deneylerin önbellekleri (TTA, rol, kontrolcü, mücadele, oyuncu ölü top, top hızı, yükseklik vb.); ses, düdük ve spiker transkripti; YOLO / WASB ağırlıkları; eski aday CSV'ler; elle etiketleme araçları (commit e310d05). Kontrol: gönderim MD5 ca20c5b6… aynı, v10 / BiGRU / kamera / dokunuş v2 önbellekleri yerinde, testler 52/52 | bilgi: stres testleri (V4 / V5) ya da eski varyantlar gerekirse önbellekleri yeniden üretilir (bench kendisi kurar) |
 | **Kısa possession teşhisi: v10 ve tur 13 karışımı** (`src/exp_short.py`, 29 Eki, kullanıcı sorusu; v10 3 tohum, %75 BiGRU olasılık karışımı 3 eşli tohum, dış setler, öğrenilmiş / gerçek D, B2 rampası c 48 / 24 / 0; BAR-ATH yalnız etiketsiz, public skoru hesaplanmadı; `reports/short14/`) | <4 sn gerçek spell'ler tüm spell'lerin %18–33'ü. v10 (öğrenilmiş D) bunların DFL-trk'ta %37'sini, Metrica'da %41'ini, SC faz / pp'de %18 / %17'sini buluyor (>8 sn: %78–95); Metrica'da 0–1 sn 0.05, 1–2 sn 0.22, 2–4 sn 0.50. v10 kısa spell'leri gerçekte olanın 0.35–0.78 katı kadar üretiyor (öğrenilmiş D ile <1 sn hiç yok); kaybedilen kredinin %36–47'si (gerçek D %44–55) kısa spell'lerden; kaçanları kâhinle eklemek +0.060…+0.167, sahte kısa spell'leri silmek +0.012…+0.026. Kısa gerçek spell'lerin %71–84'ünde ±25 olasılık karelerin çoğunda doğru takımı gösteriyor, ama uzun spell'lerin içinde canlı dk başına 1.0–1.6 kez ≥0.5 sn yanlış dönüş var (gerçek kısa spell 0.8–1.7/dk). Rampayı gevşetmek DFL'de −0.005…−0.036, Metrica'da −0.0005…−0.012; yalnız SC pp'de artı (en çok +0.010). Karışım kısa spell'i düzeltmiyor: Metrica'da <4 sn geri çağrım +0.02…+0.03, isabet −0.06…−0.08; SC kazancı 2–16 sn kovalarında, <2 sn'de yok. BAR-ATH (etiketsiz): v10 203 spell, <2 sn %0, <4 sn %8; karışım 218 spell, %0 / %7 | bilgi: kısa possession en büyük kayıp havuzu; decoder bu kanıtla optimumda, darboğaz kanıtın ayırt ediciliği (tur 14). Varsayılan değişmedi |
+| Kısa spell türleri (`src/exp_short_kinds.py`, tur 15; v10 ve karışım, 3 tohum) | <4 sn gerçek spell'lerin %25–41'i oyun içi (rakip–kısa–rakip), %59–75'i duruşa bitişik. v10 geri çağrımı (öğrenilmiş / gerçek D): oyun içi DFL 0.21 / 0.21, Metrica 0.24 / 0.26, SC 0.14 / 0.14; duruştan sonra 0.52–0.58 / 0.58–0.66 (SC 0.31 / 0.49; görülme %89–100, yanlış takım kareleri %5–21); duruştan önce 0.10–0.35 / 0.22–0.43 (karelerin %37–63'ü önceki takımda); iki duruş arası 0.17–0.71 / 0.77–0.89. Karışım oyun içinde +0.04…+0.07 | bilgi |
+| Kısa spell zamanlaması (`src/exp_short_timing.py`) | bulunan kısa spell'ler gerçeğinden geniş: duruştan sonrakilerin bitişi medyan +16…+31 kare geç, oyun içindekiler 10–36 kare erken başlayıp 9–26 kare geç bitiyor; >4 sn spell'lerde sapma medyan 0; kısa spell'lerin türe göre %18–42'si bulundu ama IoU < 0.5 | bilgi |
+| Gerçek kısa spell / sahte dönüş ayrılabilirliği (`src/exp_short_angles.py`, `src/exp_short_cands.py`) | gerçek aralıklarla maç-dışı AUC 0.94–0.96 (sızıntılı: gerçek sınır ve duruş zamanı); v10'un kendi adaylarıyla ekleme AUC DFL 0.67 / Metrica 0.71 / SC 0.85, silme 0.81 / 0.87 / 0.92–0.94; oyun içi kısa spell'lerin yalnız %25–44'ine olumlu aday ulaşıyor; en ayırt edici gözlemler v10 ve BiGRU marjları, aday süresi, aday takımın topa en yakın mesafesi, top tutma, çekişme | bilgi |
+| Duruş mantığı: oyunu başlatan takım topa son dokunmamıştır (`src/exp_short_stop.py`) | taç çizgisi duruşlarının %52–57'sinde gerçek son possession oyunu başlatan takımın (top rakibe çarpıp çıkıyor; kural son dokunuşu söyler, son kontrolü değil); kaçırılan duruş öncesi spell'leri işaretleme isabeti %4–19 | ❌ |
+| Sınırları yeniden konumlandırma (`src/exp_refine.py`; decoder spell'lerin varlığına karar verir, her takım→takım değişimi ±2 sn içinde az yumuşatılmış kanıtın değişim noktasına taşınır) | ham / ±6 / ±12, tümü / yalnız kısa: 6 varyantın hepsi 10 bağlamın hepsinde −0.001…−0.003 (pişmanlık 0.0026–0.0030); gecikme takım modelinin özellik pencerelerinden de geliyor | ❌ |
+| **Kısa possession doğrulayıcısı → v13** (`src/exp_verify.py`, `src/short_verifier.py`, `src/model_v13.py`; 3 v10 tohumu × 2 ölü top kanalı × 2 doğrulayıcı tohumu, 30 maçta maç-dışı, 10 bağlam) | strict (ekle p ≥ 0.65, sil p < 0.35, BiGRU marjlı): DFL-trk +0.004…+0.0055, DFL-evctrl +0.000…+0.0015, Metrica −0.002…+0.004 (aralıklar sıfırı kapsıyor), SC faz +0.010…+0.011, SC pp +0.014…+0.017; en kötü pişmanlık v10 0.019–0.021 → 0.0037–0.0040; komşu eşikler 0.6/0.4 ve 0.7/0.3 benzer; BiGRU'suz strict 0.012; eşik 0.5/0.5 Metrica'da −0.002…−0.006; yalnız silme SC'de ≈ 0. Gönderim yapılandırması (iki ölü top kanalının adayları birleşik eğitim): 0.019 → 0.004. BAR-ATH (etiketsiz): 203 → 214 possession, karelerin %0.19'u, public pencerede değişen kare yok; MD5 ed8ad739…, iki çalıştırma ve boş önbellekten temiz dışa aktarım aynı; testler 57/57 | ✅ v13 varsayılan |
+| Literatür taraması (tur 15; 3 web ajanı, yalnız genel problem tanımı, veri yok) | PathCRF (KDD 2026; topsuz; fiziksel aktarım kısıtlı Viterbi / CRF ile olay F1 65 → 73 → 76), ELASTIC (olay–takip eşleme ±2 karede %88–96), Link & Hoernig kontrol tanımları, Wang 2025 (iskelet + sensörlü topla bile ayak düellosunda son dokunuş %65–75), Bauer & Anzer (karşı pres sinyalleri ilk 1–3 sn); segment uzunluğuna göre F1 veren bir TAS çalışması yok; öneriler MBR / yapısal kalibrasyon / semi-CRF eğitimi / kısa spell ağırlığı | bilgi; ayrıntı §4 Tur 15 |
 
 ### Ekip arkadaşının GitHub kayıtları — 27 Ekim birleştirmesi
 
@@ -1597,6 +1644,107 @@ Henüz denenmemiş yollar:
 
 Başarı ölçütü: aynı yanlış dönüş sıklığında daha yüksek kısa spell geri çağrımı. Varsayılan değişmedi.
 
+
+#### Tur 15 — 29–30 Ekim: kısa possession — literatür, açılar, yetenek (kullanıcı isteği)
+
+Kullanıcı: "kısa possession sorununu çözebilecek literatür taraması yap, farklı açılardan irdele ve çözecek en sağlam
+yeteneği modele kazandır." Üç web araştırma ajanı yalnız genel problem tanımıyla çalıştı, veri görmedi. Dört teşhis ve
+iki yetenek denendi; doğrulayıcı v13 olarak varsayılan yapıldı.
+
+**Literatür (öne çıkanlar).**
+- *Tanımlar:* Opta, Wyscout ve DFL'de kaybedilen düello ve hemen toplanan sekme possession'ı kırmıyor; değişim rakibin
+  kontrolüyle oluyor. DFL araya girmeyi kesen oyuncunun ilk dokunuşuna tarihliyor. Hiçbir sağlayıcı (Metrica dahil)
+  sahiplik kuralını, mesafe eşiğini ya da minimum süreyi yayımlamamış. DFL'nin kare bayrağını sahada bir operatör giriyor.
+- *Bilgi tavanı:* Wang 2025, Hawk-Eye iskelet verisi ve sensörlü topla bile düelloda son dokunuşu %82, ayak düellosunda
+  %65–75 doğru buluyor. Tur 10'daki "konum bilgisi yetmiyor" bulgusuyla tutarlı.
+- *Takım tepkisi:* Bauer & Anzer 2021'de karşı pres sinyalleri değişimden sonraki 1–3 sn'de ortaya çıkıyor.
+- *Takipten sahiplik:* PathCRF (KDD 2026) topu hiç kullanmıyor. Takım değişimine yalnız fiziksel bir yolla izin veren
+  kısıtlı çözümleme, aynı kanıtla olay F1'ini 65.3 → 73.1 (dinamik CRF 75.7) taşıyor; DFL'de kare takım doğruluğu %92.4.
+  Kod ve ağırlıklar açık ama ağırlıklar bütün DFL'de eğitilmiş. ELASTIC olayları takibe ±2 karede %88–96 doğrulukla
+  eşliyor; 7 DFL maçının eşlenmiş olayları PathCRF reposunda. Link & Hoernig 2017 bireysel kontrolü tanımlıyor,
+  Vidal-Codina 2022 sahiplik ve düello bölgeleri veriyor, TranSPORTmer ve Maksai açık "serbest top" durumları kullanıyor.
+- *Zamansal bölütleme:* segment uzunluğuna göre F1 kıran bir TAS çalışması bulunamadı. Aşırı bölünmeye karşı
+  yöntemlerin çoğu isabeti kısa segment pahasına artırıyor. Öneriler: MBR / beklenen-F çözümleme, yapısal posterior
+  kalibrasyonu, BiGRU için semi-CRF eğitimi, kısa spell'e ağırlık (R-8), "D-bölme" (birleşmiş komşuları kurtarmak için
+  1 karelik D; metriğe yönelik).
+- *Yeni veri:* FOOTPASS (Kasım 2025; 54 maç, yayından otomatik oyuncu takibi, topsuz, 103 bin olay; henüz yayımlanmadı).
+
+**Açı 1 — kısa spell türleri** (`src/exp_short_kinds.py`, v10 3 tohum). Gerçek <4 sn spell'lerin yalnız %25–41'i oyun içi
+(rakip–kısa–rakip); geri kalanı duruşa bitişik. Geri çağrım (öğrenilmiş / gerçek D):
+- oyun içi: DFL 0.21 / 0.21, Metrica 0.24 / 0.26, SC 0.14 / 0.14 (görülme %67–75);
+- duruştan sonra: 0.52–0.58 / 0.58–0.66 (SC 0.31 / 0.49); görülme %89–100, karelerin yalnız %5–21'i yanlış takım;
+- duruştan önce: 0.10–0.35 / 0.22–0.43; karelerin %37–63'ü önceki takımda;
+- iki duruş arası: öğrenilmiş D ile 0.17–0.71 (karelerin %26–28'i D), gerçek D ile 0.77–0.89.
+Tur 13 karışımı oyun içini Metrica'da 0.24 → 0.28, SC'de 0.14 → 0.20 taşıyor.
+
+**Açı 2 — zamanlama** (`src/exp_short_timing.py`). Bulunan kısa spell'ler gerçeğinden geniş:
+- duruştan sonrakilerin bitişi medyan +16…+31 kare geç (çeyrekler +48…+155'e kadar);
+- oyun içi kısa spell'ler 10–36 kare erken başlayıp 9–26 kare geç bitiyor;
+- >4 sn spell'lerde sapma medyan 0;
+- kısa spell'lerin türe göre %18–42'si "bulundu ama IoU < 0.5".
+
+**Açı 3 — ayrılabilirlik** (`src/exp_short_angles.py`, `src/exp_short_cands.py`).
+- Gerçek kısa spell'ler ile uzun spell'lerin içindeki ≥0.5 sn yanlış dönüşler, gerçek aralıklar üzerinden ölçülünce
+  maç-dışı LightGBM ile AUC 0.94–0.96. Bu iyimser: gerçek sınırlar ve gerçek duruş zamanı sızıyor.
+- Modelin kendi adaylarıyla (özellikler yalnız aday aralığından, duruş zamanı decoder'dan): ekleme AUC DFL 0.67,
+  Metrica 0.71, SC 0.85; silme 0.81 / 0.87 / 0.92–0.94.
+- Oyun içi kısa spell'lerin yalnız %25–44'ine olumlu bir aday ulaşıyor.
+- En ayırt edici gözlemler: v10 marjı, BiGRU marjı (SC'de 0.79–0.81), aday süresi, aday takım oyuncusunun topa en
+  yakın mesafesi, top tutma, çekişme. SC'nin sahte kısa spell'lerinde top yavaş (~3 m/s) ve duruşa yakın.
+
+**Açı 4 — duruş mantığı** (`src/exp_short_stop.py`; "oyunu başlatan takım topa son dokunmamıştır"). Gerçekte taç
+çizgisi duruşlarının %52–57'sinde son possession oyunu başlatan takımın: top rakibe çarpıp ya da müdahaleyle çıkıyor.
+Kural son dokunuşu söylüyor, son kontrolü değil. Kaçırılan duruş öncesi spell'leri işaretleme isabeti %4–19 → ❌.
+
+**Yetenek 1 — sınırları yeniden konumlandırma** (`src/exp_refine.py`). Decoder hangi spell'lerin var olduğuna karar
+veriyor; her takım→takım değişimi ±2 sn içinde az yumuşatılmış kanıtın iki parçalı olabilirlik optimumuna taşınıyor
+(ham / ±6 / ±12; tümü / yalnız kısa spell'ler). 6 varyantın hepsi 10 bağlamın hepsinde −0.001…−0.003 (pişmanlık
+0.0026–0.0030) → ❌. Gecikme yalnız decoder'dan değil, takım modelinin özellik pencerelerinden de geliyor.
+
+**Yetenek 2 — kısa possession doğrulayıcısı → v13** (`src/exp_verify.py`; gönderimde `src/short_verifier.py`,
+`src/model_v13.py`).
+- *Adaylar:* v10'un kendi çıktısından. "Ekle": çözülmüş bir possession'ın içinde ±25 olasılığın ≥12 kare boyunca
+  karşı takımı gösterdiği koşular. "Sil": çözülmüş <4 sn possession'lar.
+- *Özellikler:* açı 3'teki dağıtılabilir gözlemler, decoder bağlamı (sarmalayan / komşu spell süreleri, komşuda D) ve
+  "+G" sürümünde paylaşılan BiGRU'nun marjı (Metrica ve SC; DFL'de eksik bırakıldı, çünkü BiGRU bütün DFL'de eğitildi).
+- *Eğitim ve ölçüm:* DFL (trk), Metrica (ctrl) ve SC (faz) adayları tek LightGBM'de birleşik. Her maç onu görmemiş bir
+  modelle puanlanıyor (30 maçta maç-dışı); her v10 tohumu ve ölü top kanalı için ayrı; iki doğrulayıcı tohumu.
+- *Sonuç (3 v10 tohumu ortalaması, öğrenilmiş / gerçek D; doğrulayıcı tohumu 0 ve 1):*
+
+| Bağlam | V+G strict (0.65 / 0.35) | V+G 0.5 / 0.5 | BiGRU'suz strict |
+|---|---|---|---|
+| DFL-trk | +0.0053 / +0.0040 · +0.0044 / +0.0055 | +0.004 / +0.005 | −0.001…+0.0005 / −0.003 |
+| DFL-evctrl | +0.0011 / +0.0008 · +0.0003 / +0.0012 | +0.001 / −0.002 | ≈ 0 / −0.003…−0.005 |
+| Metrica-ctrl | +0.0022 / −0.0008 · +0.0039 / −0.0021 | −0.002 / −0.006 | +0.001…+0.002 / −0.000…−0.002 |
+| SC faz | +0.0107 / +0.0109 · +0.0111 / +0.0114 | +0.011 / +0.011 | +0.006 / +0.006 |
+| SC pp | +0.0141 / +0.0165 · +0.0143 / +0.0170 | +0.016 / +0.019 | +0.007 / +0.009 |
+| En kötü pişmanlık (v10 0.0202 / 0.0210) | **0.0037 / 0.0040** | 0.0062 | 0.012 |
+
+- Komşu eşikler 0.6/0.4 (0.0026 / 0.0039) ve 0.7/0.3 (0.0049 / 0.0048) benzer: sonuç eşik seçiminden doğmuyor.
+- Kazancın çoğu eklemeden: strict yalnız ekleme pişmanlığı 0.0070–0.0079, yalnız silme 0.020–0.021; 0.5 eşikli yalnız
+  silme SC'de ≈ 0, DFL'de +0.002…+0.007.
+- Gönderim yapılandırması (iki ölü top kanalının adayları tek modelde): DFL-trk +0.005 / +0.005 (aralıklar > 0),
+  DFL-evctrl +0.001 / +0.002, Metrica −0.000 / −0.001, SC faz +0.011 / +0.010, SC pp +0.015 / +0.015; pişmanlık
+  0.019 → 0.004.
+
+**Karar ve teslim.** Kural sağlanıyor: 3 tohum, eşli maç bootstrap'ı, 10 bağlamda en kötü pişmanlık farkı 0.015 > 0.005.
+DFL geçerli bir dış test, çünkü orada BiGRU marjı yok. BAR-ATH'a en yakın Metrica'da etki nötr; kazanç SC ve DFL-trk'tan.
+- Gönderim modelleri `models/short_verifier_{ins,del}_g.txt`: v10 tohum 0, iki ölü top kanalı, deterministik LightGBM.
+  Yeniden eğitim `MTAH_RETRAIN_VERIFIER=1` ile; araştırma önbelleklerine ihtiyaç duyduğu için `MTAH_RETRAIN=1`'in parçası değil.
+- BiGRU'nun BAR-ATH olasılıkları yoksa `src/reproduce_shared_bigru.py` CPU'da yeniden üretiyor (manifest ile doğrulanıyor).
+- BAR-ATH (etiketsiz): 203 → 214 possession, canlı dakika başına 3.79 → 4.00, 4 sn altı %8 → %13; karelerin %0.19'u,
+  6 bölge (151 kare H'ye, 229 kare A'ya, D'ye hiç); public pencerede değişen kare yok.
+- `submissions/candidate_v13.csv` MD5 ed8ad739…: iki çalıştırma ve boş önbellekten temiz dışa aktarım (veri ve resmî repo
+  yalnız bağlantıyla) aynı; resmî doğrulayıcı "Valid"; testler 57/57 (doğrulayıcının karar kuralları için 5 yeni test).
+- Dışa aktarım listesine doğrulayıcı zinciri, BiGRU betikleri ve ağırlıkları eklendi; `requirements.txt` torch 2.11.0.
+  README, herkese açık README, teknik doküman ve AGENTS.md güncellendi.
+
+**Açık konular.**
+1. PFF verisiyle eğitilmiş BiGRU ağırlıklarının herkese açık repoda yayımlanma koşulu Alperen'le teyit edilmeli.
+2. PathCRF'yi Colab'da DFL maç-dışı yeniden eğitip ikinci bağımsız kanıt yapmak; kodu ve ağırlıkların boyutu sorulmalı.
+3. ELASTIC-eşlenmiş DFL olaylarıyla kare hassas "kontrol" etiketi (indirme boyutu sorulmalı).
+4. R-8 kısa spell'e tavanlı ağırlık (CPU, denenmedi).
+5. "D-bölme" metriğe yönelik bir hile sayılabilir (canlı kareye D yazar); denemeden önce kullanıcı kararı.
 
 ## Ek A — İlk analiz, araştırma ve baseline'lar (20 Ekim)
 

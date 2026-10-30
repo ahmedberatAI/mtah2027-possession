@@ -1,0 +1,18 @@
+
+=== dfl trk (v10 seed 0, true D) ===
+  touchline stoppages  255 | truth: last = restart 0.57, last spell short after the other team 0.11 | v10: last = restart 0.61, last team wrong 0.13, missed short 8 | rule flags 155, precision 0.05, recall 0.88
+  goal line stoppages  164 | truth: last = restart 0.34, last spell short after the other team 0.10 | v10: last = restart 0.34, last team wrong 0.12, missed short 9 | rule flags 56, precision 0.07, recall 0.44
+  inside    stoppages  136 | truth: last = restart 0.68, last spell short after the other team 0.22 | v10: last = restart 0.69, last team wrong 0.19, missed short 20 | rule flags 42, precision 0.19, recall 0.40
+  unknown   stoppages  141 | truth: last = restart 0.49, last spell short after the other team 0.19 | v10: last = restart 0.48, last team wrong 0.18, missed short 14 | rule flags 0, precision 0.00, recall 0.00
+
+=== metrica ctrl (v10 seed 0, true D) ===
+  touchline stoppages  266 | truth: last = restart 0.53, last spell short after the other team 0.09 | v10: last = restart 0.50, last team wrong 0.13, missed short 13 | rule flags 133, precision 0.04, recall 0.38
+  goal line stoppages  211 | truth: last = restart 0.27, last spell short after the other team 0.07 | v10: last = restart 0.29, last team wrong 0.05, missed short 7 | rule flags 62, precision 0.08, recall 0.71
+  inside    stoppages  253 | truth: last = restart 0.62, last spell short after the other team 0.23 | v10: last = restart 0.64, last team wrong 0.16, missed short 26 | rule flags 91, precision 0.15, recall 0.54
+  unknown   stoppages  182 | truth: last = restart 0.42, last spell short after the other team 0.12 | v10: last = restart 0.44, last team wrong 0.12, missed short 10 | rule flags 0, precision 0.00, recall 0.00
+
+=== sc phase (v10 seed 0, true D) ===
+  touchline stoppages  402 | truth: last = restart 0.52, last spell short after the other team 0.26 | v10: last = restart 0.57, last team wrong 0.24, missed short 60 | rule flags 231, precision 0.19, recall 0.72
+  goal line stoppages  335 | truth: last = restart 0.30, last spell short after the other team 0.06 | v10: last = restart 0.33, last team wrong 0.09, missed short 14 | rule flags 112, precision 0.08, recall 0.64
+  inside    stoppages  865 | truth: last = restart 0.56, last spell short after the other team 0.21 | v10: last = restart 0.57, last team wrong 0.16, missed short 97 | rule flags 375, precision 0.11, recall 0.41
+  unknown   stoppages  433 | truth: last = restart 0.48, last spell short after the other team 0.19 | v10: last = restart 0.53, last team wrong 0.19, missed short 53 | rule flags 0, precision 0.00, recall 0.00

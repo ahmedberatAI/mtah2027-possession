@@ -1,0 +1,91 @@
+  candidates built for dfl@v3
+  candidates built for metrica@v3
+  candidates built for sc@v3
+    seed 0 learned D no G ins  dfl@v3     AUC 0.684 (n 273, positive 23%)
+    seed 0 learned D no G ins  metrica@v3 AUC 0.734 (n 207, positive 27%)
+    seed 0 learned D no G ins  sc@v3      AUC 0.832 (n 973, positive 22%)
+    seed 0 learned D no G del  dfl@v3     AUC 0.829 (n 199, positive 79%)
+    seed 0 learned D no G del  metrica@v3 AUC 0.883 (n 181, positive 84%)
+    seed 0 learned D no G del  sc@v3      AUC 0.927 (n 521, positive 46%)
+    seed 0 learned D G ins  dfl@v3     AUC 0.700 (n 273, positive 23%)
+    seed 0 learned D G ins  metrica@v3 AUC 0.750 (n 207, positive 27%)
+    seed 0 learned D G ins  sc@v3      AUC 0.854 (n 973, positive 22%)
+    seed 0 learned D G del  dfl@v3     AUC 0.836 (n 199, positive 79%)
+    seed 0 learned D G del  metrica@v3 AUC 0.918 (n 181, positive 84%)
+    seed 0 learned D G del  sc@v3      AUC 0.938 (n 521, positive 46%)
+    seed 0 true D no G ins  dfl@v3     AUC 0.707 (n 278, positive 23%)
+    seed 0 true D no G ins  metrica@v3 AUC 0.682 (n 210, positive 33%)
+    seed 0 true D no G ins  sc@v3      AUC 0.778 (n 819, positive 36%)
+    seed 0 true D no G del  dfl@v3     AUC 0.817 (n 218, positive 80%)
+    seed 0 true D no G del  metrica@v3 AUC 0.859 (n 247, positive 89%)
+    seed 0 true D no G del  sc@v3      AUC 0.890 (n 616, positive 86%)
+    seed 0 true D G ins  dfl@v3     AUC 0.718 (n 278, positive 23%)
+    seed 0 true D G ins  metrica@v3 AUC 0.670 (n 210, positive 33%)
+    seed 0 true D G ins  sc@v3      AUC 0.814 (n 819, positive 36%)
+    seed 0 true D G del  dfl@v3     AUC 0.814 (n 218, positive 80%)
+    seed 0 true D G del  metrica@v3 AUC 0.864 (n 247, positive 89%)
+    seed 0 true D G del  sc@v3      AUC 0.918 (n 616, positive 86%)
+  seed 0 evaluated
+    seed 1 learned D no G ins  dfl@v3     AUC 0.730 (n 262, positive 22%)
+    seed 1 learned D no G ins  metrica@v3 AUC 0.760 (n 204, positive 27%)
+    seed 1 learned D no G ins  sc@v3      AUC 0.841 (n 995, positive 21%)
+    seed 1 learned D no G del  dfl@v3     AUC 0.833 (n 207, positive 77%)
+    seed 1 learned D no G del  metrica@v3 AUC 0.900 (n 183, positive 83%)
+    seed 1 learned D no G del  sc@v3      AUC 0.930 (n 517, positive 47%)
+    seed 1 learned D G ins  dfl@v3     AUC 0.729 (n 262, positive 22%)
+    seed 1 learned D G ins  metrica@v3 AUC 0.783 (n 204, positive 27%)
+    seed 1 learned D G ins  sc@v3      AUC 0.862 (n 995, positive 21%)
+    seed 1 learned D G del  dfl@v3     AUC 0.853 (n 207, positive 77%)
+    seed 1 learned D G del  metrica@v3 AUC 0.920 (n 183, positive 83%)
+    seed 1 learned D G del  sc@v3      AUC 0.936 (n 517, positive 47%)
+    seed 1 true D no G ins  dfl@v3     AUC 0.712 (n 270, positive 22%)
+    seed 1 true D no G ins  metrica@v3 AUC 0.674 (n 216, positive 33%)
+    seed 1 true D no G ins  sc@v3      AUC 0.802 (n 806, positive 36%)
+    seed 1 true D no G del  dfl@v3     AUC 0.840 (n 224, positive 79%)
+    seed 1 true D no G del  metrica@v3 AUC 0.849 (n 247, positive 89%)
+    seed 1 true D no G del  sc@v3      AUC 0.902 (n 609, positive 86%)
+    seed 1 true D G ins  dfl@v3     AUC 0.721 (n 270, positive 22%)
+    seed 1 true D G ins  metrica@v3 AUC 0.704 (n 216, positive 33%)
+    seed 1 true D G ins  sc@v3      AUC 0.838 (n 806, positive 36%)
+    seed 1 true D G del  dfl@v3     AUC 0.843 (n 224, positive 79%)
+    seed 1 true D G del  metrica@v3 AUC 0.868 (n 247, positive 89%)
+    seed 1 true D G del  sc@v3      AUC 0.924 (n 609, positive 86%)
+  seed 1 evaluated
+    seed 2 learned D no G ins  dfl@v3     AUC 0.714 (n 258, positive 23%)
+    seed 2 learned D no G ins  metrica@v3 AUC 0.732 (n 219, positive 26%)
+    seed 2 learned D no G ins  sc@v3      AUC 0.835 (n 965, positive 22%)
+    seed 2 learned D no G del  dfl@v3     AUC 0.864 (n 210, positive 77%)
+    seed 2 learned D no G del  metrica@v3 AUC 0.846 (n 177, positive 85%)
+    seed 2 learned D no G del  sc@v3      AUC 0.923 (n 533, positive 46%)
+    seed 2 learned D G ins  dfl@v3     AUC 0.732 (n 258, positive 23%)
+    seed 2 learned D G ins  metrica@v3 AUC 0.727 (n 219, positive 26%)
+    seed 2 learned D G ins  sc@v3      AUC 0.851 (n 965, positive 22%)
+    seed 2 learned D G del  dfl@v3     AUC 0.863 (n 210, positive 77%)
+    seed 2 learned D G del  metrica@v3 AUC 0.861 (n 177, positive 85%)
+    seed 2 learned D G del  sc@v3      AUC 0.927 (n 533, positive 46%)
+    seed 2 true D no G ins  dfl@v3     AUC 0.712 (n 260, positive 25%)
+    seed 2 true D no G ins  metrica@v3 AUC 0.652 (n 222, positive 33%)
+    seed 2 true D no G ins  sc@v3      AUC 0.780 (n 806, positive 36%)
+    seed 2 true D no G del  dfl@v3     AUC 0.858 (n 227, positive 78%)
+    seed 2 true D no G del  metrica@v3 AUC 0.844 (n 246, positive 89%)
+    seed 2 true D no G del  sc@v3      AUC 0.900 (n 619, positive 87%)
+    seed 2 true D G ins  dfl@v3     AUC 0.725 (n 260, positive 25%)
+    seed 2 true D G ins  metrica@v3 AUC 0.677 (n 222, positive 33%)
+    seed 2 true D G ins  sc@v3      AUC 0.831 (n 806, positive 36%)
+    seed 2 true D G del  dfl@v3     AUC 0.849 (n 227, positive 78%)
+    seed 2 true D G del  metrica@v3 AUC 0.879 (n 246, positive 89%)
+    seed 2 true D G del  sc@v3      AUC 0.926 (n 619, positive 87%)
+  seed 2 evaluated
+
+context                                              v10                             V                           V+G                       V+G ins                       V+G del                    V+G strict
+dfl evctrl learned D                              0.7820   -0.0057 [-0.013,+0.001] 2/7   +0.0005 [-0.004,+0.006] 3/7   -0.0022 [-0.008,+0.003] 3/7   +0.0027 [-0.004,+0.009] 3/7   +0.0011 [-0.002,+0.005] 4/7
+dfl evctrl true D                                 0.8082   -0.0099 [-0.019,-0.001] 2/7   -0.0016 [-0.006,+0.002] 2/7   -0.0032 [-0.009,+0.002] 2/7   +0.0016 [-0.004,+0.008] 4/7   +0.0008 [-0.005,+0.006] 4/7
+dfl trk learned D                                 0.7690   -0.0031 [-0.012,+0.007] 2/7   +0.0044 [-0.000,+0.009] 5/7   -0.0009 [-0.006,+0.004] 4/7   +0.0053 [-0.001,+0.011] 5/7   +0.0053 [+0.002,+0.008] 6/7
+dfl trk true D                                    0.7979   -0.0088 [-0.017,-0.000] 2/7   +0.0053 [-0.003,+0.013] 5/7   -0.0012 [-0.007,+0.005] 4/7   +0.0065 [+0.001,+0.013] 5/7   +0.0040 [-0.003,+0.011] 5/7
+metrica ctrl learned D                            0.8233   -0.0036 [-0.011,+0.000] 1/3   -0.0023 [-0.010,+0.002] 2/3   -0.0035 [-0.008,-0.000] 0/3   +0.0013 [-0.002,+0.003] 2/3   +0.0022 [-0.008,+0.008] 2/3
+metrica ctrl true D                               0.8823   -0.0044 [-0.012,+0.001] 1/3   -0.0062 [-0.012,+0.002] 1/3   -0.0050 [-0.008,+0.001] 1/3   -0.0009 [-0.002,+0.001] 1/3   -0.0008 [-0.008,+0.008] 1/3
+sc phase learned D                                0.5973 +0.0062 [+0.002,+0.010] 15/20 +0.0107 [+0.005,+0.016] 16/20 +0.0089 [+0.004,+0.014] 17/20 +0.0016 [-0.001,+0.004] 14/20 +0.0107 [+0.006,+0.015] 17/20
+sc phase true D                                   0.7593 +0.0043 [-0.001,+0.010] 12/20 +0.0105 [+0.004,+0.017] 14/20 +0.0099 [+0.004,+0.016] 15/20 +0.0004 [-0.002,+0.002] 13/20 +0.0109 [+0.006,+0.016] 16/20
+sc pp learned D                                   0.5917 +0.0090 [+0.004,+0.014] 16/20 +0.0161 [+0.011,+0.021] 19/20 +0.0156 [+0.011,+0.020] 20/20 +0.0002 [-0.002,+0.003] 13/20 +0.0141 [+0.010,+0.018] 19/20
+sc pp true D                                      0.7476 +0.0090 [+0.004,+0.014] 14/20 +0.0193 [+0.014,+0.025] 20/20 +0.0202 [+0.015,+0.026] 20/20  -0.0012 [-0.003,+0.001] 9/20 +0.0165 [+0.012,+0.021] 19/20
+worst-case regret: v10 0.0202 | V 0.0153 | V+G 0.0062 | V+G ins 0.0077 | V+G del 0.0215 | V+G strict 0.0037

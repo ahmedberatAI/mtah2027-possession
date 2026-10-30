@@ -1,6 +1,8 @@
 # Files of the public repository (tools/export_public.py). Source modules: the import closure of
-# src/make_submission.py with model_v10 (incl. lazily imported option modules and the feature plugins named in
-# model_v7.VERSION), the open-data download script, and the team classifier trained on open data.
+# src/make_submission.py with model_v13 = model_v10 + the short-possession verifier (incl. lazily imported option
+# modules, the feature plugins named in model_v7.VERSION and src/reproduce_shared_bigru.py, which rebuilds the shared
+# BiGRU's BAR-ATH probabilities), the open-data download script, the team classifier and the two verifier
+# classifiers trained on open data, and the shared BiGRU checkpoints (open DFL + PFF data).
 src/atd.py
 src/ballclean.py
 src/bench.py
@@ -16,8 +18,14 @@ src/exp_bfree.py
 src/exp_ctrl.py
 src/exp_ctrl2.py
 src/exp_oracle.py
+src/exp_refine.py
+src/exp_short.py
+src/exp_short_angles.py
+src/exp_short_cands.py
+src/exp_smooth.py
 src/exp_v4.py
 src/exp_v7.py
+src/exp_verify.py
 src/feat_ctrl.py
 src/feat_fix.py
 src/feat_team2.py
@@ -26,6 +34,7 @@ src/make_submission.py
 src/metrica_sample.py
 src/mlfeat.py
 src/model_v10.py
+src/model_v13.py
 src/model_v2.py
 src/model_v3.py
 src/model_v5.py
@@ -35,6 +44,9 @@ src/model_v9.py
 src/podead.py
 src/podead_barath.py
 src/proxy.py
+src/reproduce_shared_bigru.py
+src/seq_pff.py
+src/short_verifier.py
 src/sim.py
 src/skillcorner.py
 src/snap.py
@@ -44,4 +56,11 @@ src/whistle.py
 src/whistle_eval.py
 src/whistle_panns.py
 src/whistle_ref.py
+models/bigru_dfl_pff_v1/README.md
+models/bigru_dfl_pff_v1/bigru_s20261025.pt
+models/bigru_dfl_pff_v1/bigru_s20261026.pt
+models/bigru_dfl_pff_v1/bigru_s20261027.pt
+models/bigru_dfl_pff_v1/manifest.json
+models/short_verifier_del_g.txt
+models/short_verifier_ins_g.txt
 models/v10_team.txt

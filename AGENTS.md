@@ -36,5 +36,6 @@ User instructions carried forward from the 27 October 2026 continuation note.
 - Python command convention on Windows: `.venv/Scripts/python.exe -I src/<script>.py`.
   Scripts must add their own `src/` import path when using isolated mode.
 
-Current submission: `model_v10`, without whistle; expected CSV MD5
-`ca20c5b657a395d2f7c0e310cdaabd64`. Recheck this after integration changes.
+Current submission (30 October 2026, round 15): `model_v13` = `model_v10` without whistle + the short-possession
+verifier; expected CSV MD5 `ed8ad739207f367017bb8d8c8204c82a` (`submissions/candidate_v13.csv`). v10 stays
+reproducible with `--model model_v10` (MD5 `ca20c5b657a395d2f7c0e310cdaabd64`). Recheck this after integration changes.
