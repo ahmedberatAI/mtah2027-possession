@@ -1,8 +1,9 @@
 # Files of the public repository (tools/export_public.py). Source modules: the import closure of
-# src/make_submission.py with model_v13 = model_v10 + the short-possession verifier (incl. lazily imported option
-# modules, the feature plugins named in model_v7.VERSION and src/reproduce_shared_bigru.py, which rebuilds the shared
-# BiGRU's BAR-ATH probabilities), the open-data download script, the team classifier and the two verifier
-# classifiers trained on open data, and the shared BiGRU checkpoints (open DFL + PFF data).
+# src/make_submission.py with model_v14 = the v10 / shared BiGRU blend + the short-possession verifier (incl. lazily
+# imported option modules, the feature plugins named in model_v7.VERSION, src/reproduce_shared_bigru.py, which
+# rebuilds the shared BiGRU's BAR-ATH probabilities, and src/exp_bigru_lomo.py, whose held-out DFL probabilities the
+# blend verifier was trained with), the open-data download script, the team classifier, the verifier classifiers
+# (v13's and v14's) trained on open data, and the shared BiGRU checkpoints (open DFL + PFF data).
 src/atd.py
 src/ballclean.py
 src/bench.py
@@ -15,6 +16,7 @@ src/dfl.py
 src/download_idsse.py
 src/evaluate.py
 src/exp_bfree.py
+src/exp_bigru_lomo.py
 src/exp_ctrl.py
 src/exp_ctrl2.py
 src/exp_oracle.py
@@ -35,6 +37,7 @@ src/metrica_sample.py
 src/mlfeat.py
 src/model_v10.py
 src/model_v13.py
+src/model_v14.py
 src/model_v2.py
 src/model_v3.py
 src/model_v5.py
@@ -62,5 +65,7 @@ models/bigru_dfl_pff_v1/bigru_s20261026.pt
 models/bigru_dfl_pff_v1/bigru_s20261027.pt
 models/bigru_dfl_pff_v1/manifest.json
 models/short_verifier_del_g.txt
+models/short_verifier_del_g_blend50.txt
 models/short_verifier_ins_g.txt
+models/short_verifier_ins_g_blend50.txt
 models/v10_team.txt

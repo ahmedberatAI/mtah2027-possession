@@ -22,10 +22,12 @@ etiketleri üzerinde spellF1 ile yapılıyor (possession spell'leri, IoU 0.3–0
 2026: CSV + dosyayı birebir yeniden üreten herkese açık repo (verisiz) + kısa teknik doküman. Teslimden önce geri bildirim
 yok; elimizdeki göstergeler public 5 dakika (17 spell) ve dış veri setleri.
 
-**Şu anki model: v13 = v10 + kısa possession doğrulayıcısı** (`src/model_v13.py`, tur 15, 30 Ekim). **Gönderim:
-`submissions/candidate_v13.csv`** (MD5 ed8ad739…), `src/make_submission.py`'nin varsayılanı; iki çalıştırmada ve boş
-önbellekten temiz dışa aktarımda birebir aynı. v10 `--model model_v10` ile aynen üretiliyor (MD5 ca20c5b6…). Düdüklü
-sürüm (`candidate_v10w.csv`, `--params '{"wh_bonus": 30}'`) önerilmiyor: tek dayanağı public pencereydi.
+**Şu anki model: v14 = %50 v10 + %50 paylaşılan BiGRU olasılık karışımı + karışımın adaylarında eğitilmiş kısa
+possession doğrulayıcısı** (`src/model_v14.py`, tur 17 / 17b, 30 Ekim). **Gönderim: `submissions/candidate_v14.csv`**
+(MD5 5e7363fc…), `src/make_submission.py`'nin varsayılanı; iki çalıştırmada, doğrulayıcı sıfırdan eğitilince ve boş
+önbellekten temiz dışa aktarımda birebir aynı. v13 `--model model_v13` (MD5 ed8ad739…) ve v10 `--model model_v10`
+(MD5 ca20c5b6…) ile aynen üretiliyor. Düdüklü sürüm (`candidate_v10w.csv`, `--params '{"wh_bonus": 30}'`) önerilmiyor:
+tek dayanağı public pencereydi.
 1. **Ölü top mu, canlı mı:** v3 kuralları. Oyuncu temposu (±1 ve ±3 sn; hakeme tepki gecikmesi için 1.5 sn ileriye
    bakılıyor); top çizgi dışında mı, 1 sn'den uzun görünmüyor mu, duruyor mu, hızlı mı; hizalanmış yayın görüntüsünden
    tekrar / yakın çekim ve canlılık ipuçları. Yayının topu taktik topun boşluklarını dolduruyor.
@@ -33,34 +35,39 @@ sürüm (`candidate_v10w.csv`, `--params '{"wh_bonus": 30}'`) önerilmiyor: tek 
    + 3 Metrica örnek maçı (kontrollü possession; her maç 2 DFL maçı ağırlığında). İkisi de `sim.V3` ile BAR-ATH'ın otomatik
    takibine benzetiliyor. Özellikler: topa yakınlık, baskı altında kontrol (C6), kendi yarı saha, duran top dizilimi /
    takım şekli / hareketi (c145), topsuz takım etkileşimleri (`src/bfree.py`). Oyuncu kimliği yok, hepsi takım düzeyinde.
-   Olasılıklar ±1 sn (±25 kare) logit ortalamasıyla yumuşatılıyor.
+   v14'te bu olasılık paylaşılan BiGRU'nun (Alperen; açık DFL + PFF, `models/bigru_dfl_pff_v1`, üç tohumun ortalaması)
+   olasılığıyla eşit ağırlıkta karıştırılıyor (tur 17b). Olasılıklar ±1 sn (±25 kare) logit ortalamasıyla yumuşatılıyor.
 3. **Decoder:** her devre için ayrı Viterbi. Takım değişimi cezası 12, ölü top cezası 30; en az 8 kare possession, 50 kare
    ölü top; 7 sn'den kısa bir possession'ı bitirmeye süre kısaldıkça artan ek maliyet (B2: 175 kare, 48).
 4. **Düdük (yalnız v10w):** taktik videonun sesinde, iki santra düdüğünden yapılan şablonla hakem düdüğü aranıyor. Model
    ölü topa bir düdükten sonraki 3 sn içinde geçiyorsa geçiş düdük anına çekiliyor.
-5. **Kısa possession doğrulayıcısı (v13, tur 15):** decoder'ın bastırdığı ≥0.5 sn'lik ters takım dönüşleri ("ekle") ve
+5. **Kısa possession doğrulayıcısı (tur 15; v14'te karışımın üstünde, tur 17):** decoder'ın bastırdığı ≥0.5 sn'lik ters takım dönüşleri ("ekle") ve
    çözülmüş <4 sn possession'lar ("sil") iki LightGBM sınıflandırıcısıyla yeniden değerlendiriliyor
-   (`src/short_verifier.py`, `models/short_verifier_{ins,del}_g.txt`, yalnız açık veriden). Kanıt yalnız aday
+   (`src/short_verifier.py`; v14: `models/short_verifier_{ins,del}_g_blend50.txt`, yalnız açık veriden; DFL satırlarının
+   BiGRU marjı maç-dışı BiGRU'dan). Kanıt yalnız aday
    aralığından: top görünürlüğü / hızı / havada payı, topa en yakın oyuncunun takımı ve mesafesi, dokunuşlar, topu tutan
    farklı oyuncular ve en uzun tutma, çekişme, derinlik, takım merkezlerinin tepkisi, son duruştan beri süre, komşu
-   possession süreleri, v10 marjları ve paylaşılan BiGRU'nun marjı. Ekleme p ≥ 0.65; silme p < 0.35 (kareler komşu
-   possession'ı tutan takıma geçer, iki duruş arasında hiç). BAR-ATH'ta karelerin %0.19'u, 6 bölge değişiyor
-   (203 → 214 possession; public pencerede değişen kare yok).
+   possession süreleri, takım olasılığının (v14'te karışımın) marjları ve paylaşılan BiGRU'nun marjı. Ekleme p ≥ 0.65; silme p < 0.35 (kareler komşu
+   possession'ı tutan takıma geçer, iki duruş arasında hiç). v14'te BAR-ATH'ta karelerin %0.17'si, 6 bölge
+   değişiyor (karışımın çözümü 211 → 216 possession; v13'te %0.19, 203 → 214).
 
 Kapalı seçenekler: v11 (dokunuş özellikleri), v12 (dokunuşa göre geçiş kolaylığı), `po_lam` (yalnız oyunculara dayalı
 ölü top), `clean_ball` (ATD'nin tahminle doldurduğu top karelerini atmak).
 
 **Skorlar — dış setler** (spellF1, öğrenilmiş D / gerçek D; her maç eğitimden dışarıda; v10 = 3 LightGBM tohumunun
-ortalaması, v13 = aynı üç tohum ve her maçı görmemiş doğrulayıcı; `cache/bench/vers_table.log`, `reports/short15/`;
-sürümlerin tamamı §4'te "Sürümlerin mutlak skorları"). 10 bağlamda en kötü durum pişmanlığı v10 0.019 → v13 0.004:
+ortalaması; v13 / v14 = aynı üç tohum, her maçı görmemiş doğrulayıcı (tur 17'de 2 doğrulayıcı tohumu); v14'ün BiGRU'su
+DFL'de maç-dışı; `cache/bench/vers_table.log`, `reports/short15/`, tur 17; sürümlerin tamamı §4'te "Sürümlerin mutlak
+skorları"). "v13, BAR-ATH koşulu": doğrulayıcısı DFL'de de, BAR-ATH'taki gibi, maçı görmemiş bir BiGRU'nun marjını
+görüyor (tur 17b). v13 ve 6 karışım varyantı içinde 10 bağlamda en kötü durum pişmanlığı v13 0.0165 → **v14 0.0039**
+(tur 15'te v10 0.019 → v13 0.004):
 
-| Set | v7 | v10 | **v13** | v13 − v10 |
-|---|---|---|---|---|
-| DFL-trk (7 maç) | 0.760 / 0.782 | 0.769 / 0.798 | **0.774 / 0.803** | +0.005 / +0.005 |
-| DFL-evctrl (7 maç, tur 12) | — | 0.782 / 0.808 | 0.783 / 0.810 | +0.001 / +0.002 |
-| Metrica-ctrl (3 maç) | 0.815 / 0.872 | 0.823 / 0.882 | 0.823 / 0.882 | −0.000 / −0.001 |
-| SkillCorner faz (20 maç) | 0.582 / 0.746 | 0.597 / 0.759 | **0.608 / 0.769** | +0.011 / +0.010 |
-| SkillCorner oyuncu possession | 0.583 / 0.741 | 0.592 / 0.748 | **0.606 / 0.762** | +0.015 / +0.015 |
+| Set | v10 | v13 (tur 15 ölçümü) | v13 (BAR-ATH koşulu) | **v14** | v14 − v13 (BAR-ATH koşulu) |
+|---|---|---|---|---|---|
+| DFL-trk (7 maç) | 0.769 / 0.798 | 0.774 / 0.803 | 0.764 / 0.792 | 0.770 / 0.794 | +0.006 / +0.002 |
+| DFL-evctrl (7 maç, tur 12) | 0.782 / 0.808 | 0.783 / 0.810 | 0.777 / 0.803 | 0.785 / 0.809 | +0.008 / +0.005 |
+| Metrica-ctrl (3 maç) | 0.823 / 0.882 | 0.823 / 0.882 | 0.823 / 0.882 | **0.828 / 0.888** | +0.005 / +0.006 |
+| SkillCorner faz (20 maç) | 0.597 / 0.759 | 0.608 / 0.769 | 0.608 / 0.770 | **0.620 / 0.780** | +0.012 / +0.010 |
+| SkillCorner oyuncu possession | 0.592 / 0.748 | 0.606 / 0.762 | 0.606 / 0.763 | **0.620 / 0.773** | +0.014 / +0.011 |
 
 Öğrenilmiş D: ölü topu model kendisi buluyor (dış setlerde yayın yok, öğrenilmiş ölü top modeli kullanılıyor). Gerçek D:
 ölü top doğru veriliyor, yalnız takım kararı ölçülüyor. BAR-ATH'a en yakın set Metrica: aynı sağlayıcı, aynı possession mantığı.
@@ -79,7 +86,9 @@ sürümlerin tamamı §4'te "Sürümlerin mutlak skorları"). 10 bağlamda en k�
 v10 public'te canlı/ölü F1 0.98, canlı karelerde takım doğruluğu 0.95; 17 gerçek spell'e karşı 10 spell üretiyor (kaçanlar
 kısa top kayıpları). Tam maçta 203 possession, 118 ölü top bölümü, %49 ölü pay (etiketsiz; literatürle uyumlu).
 v13 public penceredeki hiçbir kareyi değiştirmiyor; hat kontrolü v10'unkiyle aynı. v13 tam maçta 214 possession
-(canlı dakika başına 4.00; v10 3.79), 4 sn altı pay %13 (v10 %8).
+(canlı dakika başına 4.00; v10 3.79), 4 sn altı pay %13 (v10 %8). v14 tam maçta 216 possession (karışımın çözümü 211),
+118 ölü top bölümü, %49.6 ölü pay, ev sahibi payı 0.61; v13'ten karelerin %0.76'sı farklı. v14'ün public skoruna karar
+sürecinde bakılmadı; dosya resmî doğrulayıcıdan geçiyor.
 
 
 **27 Ekim, tur 13:** yerel çalışma GitHub'daki iki ortak commit ile birleştirildi; v10 MD5'si ve paylaşılan BiGRU
@@ -97,13 +106,21 @@ araştırması, dört teşhis ve iki yetenek denendi; sınırları yeniden konum
 Doğrulayıcı 3 v10 tohumu, 2 ölü top kanalı, 2 doğrulayıcı tohumu ve komşu eşiklerle ölçüldü; DFL'de BiGRU marjı
 kullanılmadığı için DFL geçerli bir dış test. Varsayılan v13 oldu. Ayrıntı: §4 Tur 15.
 
+**30 Ekim, tur 17 / 17b:** kullanıcı PFF'ye Drive kısayoluyla erişim verdi. Colab'da (T4, ~1 sa) paylaşılan BiGRU'nun
+tarifiyle DFL maç-dışı BiGRU eğitildi (7 maç × 3 tohum). %75 karışım + doğrulayıcı DFL-trk'de v13'ün gerisinde kaldı
+(❌). v13'ün doğrulayıcısı DFL'de de BAR-ATH'taki gibi BiGRU marjını görünce DFL'de 0.006–0.012 kaybediyor; tur 15'in
+DFL skoru marjsız bir v13'ü ölçmüş. Tur 13'ün önceden sabitlenmiş ızgarasında .5 + doğrulayıcı on bağlamın hepsinde bu
+v13'ün önünde; en kötü pişmanlık 0.0165 → 0.0039 (bootstrap P(fark ≥ 0.005) 0.94). Varsayılan **v14** oldu. Ayrıntı:
+§4 Tur 17.
+
 **Model zinciri** (ayrıntı §3'teki "Modeller" tablosunda):
 - v1–v4 (20 Ekim): kurallar + en kısa süreli Viterbi. v3'ün canlı/ölü kuralları bugün de kullanılıyor.
 - v5: DFL'de öğrenilmiş takım olasılıkları. v6: hakem düdüğü.
 - v7 (22 Ekim): `sim.V3` ile eğitim, C6 + own_half + c145 özellikleri, B2 decoder, ceza 12.
 - v8: Metrica maçları eğitime. v9: topsuz özellikler + ±1 sn yumuşatma.
 - v10 (23 Ekim): Metrica ağırlığı 2 (25–30 Ekim arası gönderim). v11 / v12: dokunuş seçenekleri, v10'a eşit (≈).
-- **v13 (30 Ekim): v10 + kısa possession doğrulayıcısı — varsayılan.**
+- v13 (30 Ekim): v10 + kısa possession doğrulayıcısı (tur 15–17 arası gönderim).
+- **v14 (30 Ekim): %50 v10 + %50 BiGRU karışımı + karışımın doğrulayıcısı — varsayılan.**
 
 **Neler işe yaradı** (dış setlerde; ayrıntılar §3–§4):
 - Simülatör hatasının bulunması: `sim.V2`'nin her kareye bağımsız gürültüsü hızları ikiye katlıyordu (adversarial
@@ -120,11 +137,14 @@ kullanılmadığı için DFL geçerli bir dış test. Varsayılan v13 oldu. Ayr�
 - **Kısa possession doğrulayıcısı (v13, tur 15):** v10'un kendi kısa kararlarını aday aralığındaki izleme kanıtı ve
   BiGRU marjıyla yeniden değerlendirmek: SC +0.010…+0.015, DFL-trk +0.005, Metrica ±0.001; en kötü pişmanlık
   0.019 → 0.004.
+- **BiGRU karışımı (v14, tur 17b):** %50 LightGBM + %50 paylaşılan BiGRU ve karışımın kendi adaylarında eğitilmiş
+  doğrulayıcı: BAR-ATH koşulundaki v13'e göre SC +0.010…+0.014, Metrica +0.005…+0.006, DFL +0.002…+0.008; en kötü
+  pişmanlık 0.0165 → 0.0039.
 
 **Neler işe yaramadı** (hepsi ≤ +0.003 ya da eksi):
 - Decoder hileleri: B1 / B4 / B5 / B6 / G1 / G2, el değişimi modeli, kısa possession doğrulama, yeniden başlama muafiyeti,
   gecikme düzeltmesi, konsensüs, varış yerine göre rampa, mücadele anına özel decoder.
-- Daha güçlü öğreniciler: BiGRU (−0.04…−0.10), zamansal yığınlama, büyük LightGBM, extra-trees, monoton kısıt, topluluklar.
+- Daha güçlü öğreniciler: tek başına BiGRU (−0.04…−0.10; karışımda işe yarıyor), zamansal yığınlama, büyük LightGBM, extra-trees, monoton kısıt, topluluklar.
 - Yeni özellikler: rol farkındalığı (DFL −0.013…−0.015), oyuncu düzeyinde kontrolcü (yalnız SkillCorner'da artı), mücadele
   sonucu özellikleri, dokunuş özellikleri (v11, ≈).
 - Eğitim / etiket varyantları: SkillCorner'ı eğitime katmak (Metrica her seferinde −0.006…−0.009), DFL trk etiketi, yumuşak
@@ -137,12 +157,16 @@ kullanılmadığı için DFL geçerli bir dış test. Varsayılan v13 oldu. Ayr�
   5.5, %87'si ev sahibi, zayıf) ve top yüksekliği (DFL'nin gerçek yüksekliğiyle bile −0.005…−0.010).
 - Tur 15: decoder'ın değişimlerini az yumuşatılmış kanıtın değişim noktasına taşımak (her yerde −0.001…−0.003) ve
   "oyunu başlatan takım topa son dokunmamıştır" kuralıyla duruş öncesi kısa spell aramak (isabet %4–19).
+- Tur 17: %75 BiGRU karışımı (DFL maç-dışı ölçülünce karışım DFL-trk'de −0.014…−0.020; doğrulayıcıyla bile pişmanlık
+  farkı < 0.005).
 
 **Dersler:**
 - Simülasyon içi CV simülasyon hatasını göremez; her yeni bozulma BAR-ATH'a karşı adversarial validation ile kontrol edilir.
 - Public pencere sürüm seçemez (v10'un aralığı 0.44–0.83). Kararlar dış setlerde en kötü durum pişmanlığıyla verilir; fark
   0.005'ten küçükse mevcut ya da basit olan kalır.
 - Her aday en az 3 tohumda ölçülür: v10'un kendisi tohumlar arasında DFL'de ±0.004 oynuyor.
+- Bir girdi bir sette eksik bırakılarak ölçülürse o set, modelin gönderimde çalıştığı koşulu ölçmez: v13'ün DFL
+  ölçümünde BiGRU marjı yoktu; marj görününce DFL'de −0.006…−0.012 (tur 17b).
 - Kare doğruluğu artıp spellF1 düşüyorsa çıktı genellikle zıplıyordur; reddetmeden önce yumuşatmayla denenir.
 - Kalan kayıp 4 sn'den kısa oyun içi top kaybı spell'lerinde (özellikle ikili mücadeleler) ve bunların aynası olan yanlış
   değişimlerde. Mücadele anlarında takip verisi v10'un kullandığından çok az fazla bilgi taşıyor; kusursuz konum bile
@@ -425,6 +449,11 @@ Public sütunu yalnız bilgi içindir (17 spell, aralık ~0.4); v7'den itibaren 
 | Literatür taraması (tur 15; 3 web ajanı, yalnız genel problem tanımı, veri yok) | PathCRF (KDD 2026; topsuz; fiziksel aktarım kısıtlı Viterbi / CRF ile olay F1 65 → 73 → 76), ELASTIC (olay–takip eşleme ±2 karede %88–96), Link & Hoernig kontrol tanımları, Wang 2025 (iskelet + sensörlü topla bile ayak düellosunda son dokunuş %65–75), Bauer & Anzer (karşı pres sinyalleri ilk 1–3 sn); segment uzunluğuna göre F1 veren bir TAS çalışması yok; öneriler MBR / yapısal kalibrasyon / semi-CRF eğitimi / kısa spell ağırlığı | bilgi; ayrıntı §4 Tur 15 |
 | Doğrulayıcı v2: literatürden yeni ipuçları (`src/exp_verify.py` build2 / trainpool2 / eval2, tur 16; v13 ile aynı adaylar, gönderim yapılandırması, 3 v10 tohumu) | eklenenler: aday başladıktan sonraki 1–2 sn'de iki takımın ileri hızı, topun gerisindeki rakipler, topa baskı ve kalabalık (Bauer & Anzer); top görünmüyorken son görüldüğü noktaya iki takımın uzaklığı, hareket eden topun 0.5 sn sonraki düşme noktasındaki takım ("ışınlanma yok", PathCRF); güçlü kanıtın en uzun süresi, en yüksek marj; spell'in duruşla başlayıp bitmesi, sonraki duruşa süre, spell içindeki dönüş yoğunluğu. AUC değişmedi (ekleme DFL 0.71–0.73 / Metrica 0.69–0.72 / SC 0.85). v13'e göre spellF1: DFL −0.001…−0.003, Metrica −0.000…−0.003, SC +0.000…+0.002; pişmanlık v13 0.0015, v2 0.0028, 0.7/0.3 eşikli v2 0.0019; BiGRU'suz v2 DFL'de −0.007 / −0.008. v13 aynı adaylarla birebir yeniden üretildi | ❌ (≈) v13 kalır |
 | Karışım + doğrulayıcı (`src/exp_verify.py` build3 / trainpool3 / eval3, tur 16; tur 13'ün %75 BiGRU olasılık karışımının çözümü üzerinde v13'ün doğrulayıcısı; Metrica ve SC, 6 bağlam, 3 tohum; DFL yok) | v10'a göre (öğr. / gerçek D): karışım Metrica +0.001 / +0.002, SC faz +0.022 / +0.020, SC pp +0.030 / +0.026; karışım + doğrulayıcı Metrica −0.000 / +0.000, SC faz +0.026 / +0.024, SC pp +0.035 / +0.033. v13'e göre karışım + doğrulayıcı Metrica +0.000 / +0.001, SC +0.014…+0.020 (aralıklar > 0). 6 bağlamda pişmanlık v10 0.035, v13 0.020, karışım 0.007, karışım + doğrulayıcı 0.001 | bilgi: en güçlü aday; BiGRU DFL'de doğrulanamadığı için terfi yok — DFL maç-dışı BiGRU eğitimi (PFF gerekli) sıradaki adım |
+| DFL maç-dışı BiGRU (`src/exp_bigru_lomo.py`, `colab/run_bigru_lomo.sh`; Colab T4, paylaşılan BiGRU'nun tarifi, 7 maç × 3 tohum, PFF kullanıcının Drive'ından; tur 17) | iş ~1 sa (21 katman × ~67 sn); dışarıda tutulan maçta native etiket kare doğruluğu 0.881–0.931 (ort. 0.908). DFL canlı karelerde BiGRU v10'dan zayıf: doğruluk 0.901–0.907 / log kaybı 0.217–0.233, v10 0.912–0.913 / 0.202; hizalama doğru (±2 kare içinde tepe); v10–BiGRU uyumu %94.3; tohum 0'da ağırlık .25 log kaybını 0.2030 → 0.2018 indiriyor, .75 0.2148'e çıkarıyor | bilgi |
+| %75 karışım + doğrulayıcı, 10 bağlam (`src/exp_verify.py` build4 / trainpool4 / eval4, tur 17; DFL'de maç-dışı BiGRU hem karışımda hem doğrulayıcı marjında; 3 v10 tohumu × 2 doğrulayıcı tohumu) | v13'e göre (öğr. / gerçek D; doğrulayıcı tohumu 0, 1): DFL-trk −0.009 / −0.013, −0.011 / −0.016 (aralıklar < 0, 0–2/7 maç), DFL-evctrl −0.001…−0.004, Metrica +0.003…+0.004, SC faz +0.011…+0.013, SC pp +0.014…+0.017; karışım tek başına DFL-trk −0.014…−0.020. En kötü pişmanlık v13 0.0164 / 0.0165, aday 0.0130 / 0.0162 | ❌ fark < 0.005; %75 DFL'de fazla |
+| v13'ü BAR-ATH'taki koşulda ölçmek (`src/exp_blend_weight.py` build13 / trainpool13, tur 17b; doğrulayıcı tur 15'teki gibi eğitiliyor, dışarıda tutulan DFL maçı maç-dışı BiGRU marjıyla puanlanıyor) | DFL kararlarının %47–51'inde olasılık > 0.05 oynuyor; v13 DFL-evctrl −0.006 / −0.007, DFL-trk −0.011 / −0.012 (aralıklar ≤ 0, 1–2/7 maç); Metrica / SC olasılıkları birebir yeniden üretildi | bilgi: tur 15'in DFL skoru marjsız bir v13'ü ölçüyordu |
+| Karışım ağırlığı ızgarası + doğrulayıcı, 10 bağlam (`src/exp_blend_weight.py`, tur 17b; tur 13'ün önceden sabitlenmiş .25 / .5 / .75 olasılık ızgarası, her ağırlık kendi adayları ve kendi birleşik maç-dışı doğrulayıcısıyla; 3 v10 tohumu × 2 doğrulayıcı tohumu; pişmanlık farkına eşli maç bootstrap'ı) | .5 + doğrulayıcı, BAR-ATH koşulundaki v13'e göre: DFL-evctrl +0.008 / +0.005, DFL-trk +0.006 / +0.002, Metrica +0.005 / +0.006, SC faz +0.012 / +0.010, SC pp +0.014 / +0.011 (SC aralıkları > 0). 7 aday içinde en kötü pişmanlık: v13 0.0165, .25 0.0220, .25 + d 0.0114, .5 0.0114, **.5 + d 0.0039**, .75 0.0124, .75 + d 0.0077; v13 − (.5 + d) = 0.0126, bootstrap %90 [+0.004, +0.015], P(≥ 0.005) 0.94; ikili 0.0140, P 0.99; doğrulayıcı tohumları ayrı ayrı 0.0039 / 0.0038. Tur 15 bakışıyla (marjsız v13): .5 + d yine en düşük (0.0099 vs 0.0165; ikili 0.0041), DFL-trk −0.006 / −0.010 | ✅ v14 varsayılan |
+| v14 gönderimi (`src/model_v14.py`, `models/short_verifier_{ins,del}_g_blend50.txt`) | MD5 5e7363fc…: iki çalıştırma, doğrulayıcının sıfırdan eğitimi (model dosyaları bayt bayt aynı) ve boş önbellekten temiz dışa aktarım (69 dosya, veri ve resmî repo yalnız bağlantıyla, ~66 sn) aynı; resmî doğrulayıcı "Valid"; v13 / v10 MD5'leri değişmedi; testler 59/59. BAR-ATH (etiketsiz): karışımın çözümü 211 → doğrulayıcıyla 216 possession (karelerin %0.17'si, 6 bölge); v13'ten karelerin %0.76'sı farklı | ✅ |
 
 ### Ekip arkadaşının GitHub kayıtları — 27 Ekim birleştirmesi
 
@@ -1774,6 +1803,64 @@ bütün DFL maçlarında eğitildiği için DFL'de ölçülemiyor ve kural eksik
 64 kanal, lr .001, dropout .15, 11 epoch; DFL native + PFF kontrollü) Colab'da DFL maç-dışı eğitim: 7 katman × 3 tohum.
 DFL açık verisi Colab'a indirilebilir; PFF (`external_data/gradient`, ~3.9 GB) yerelde yok, kullanıcıdan erişim gerekiyor.
 Çıktı: DFL'de karışımın ve karışım + doğrulayıcının (DFL'de de BiGRU marjıyla) v13'e farkı. Geçerse varsayılan olur.
+
+#### Tur 17 — 30 Ekim: maç-dışı BiGRU ile DFL doğrulaması, karışım ağırlığı ve v14 (kullanıcı: "modeli geliştirmeye devam et")
+
+**Altyapı.** PFF verisine kullanıcının Drive'ındaki kısayolla erişildi ("FIFA World Cup 2022/{Event Data, Metadata,
+Rosters, Tracking Data}"); anonim gdown Google kotasına takıldı. `colab drivemount` etkileşimli: onay ve Enter, bağlantı
+çıktıktan ~2 dk içinde verilmezse DriveFS kimliksiz başlıyor ("mount failed"); ikinci deneme izni yeniden kullandı. İlk
+çalıştırma `possession_metrics` eksikliğinden durdu (bench → evaluate.py resmî skorlayıcıyı ister); paket skorlayıcıyı
+(MIT kodu, GT yok) ve VM'de indirilen Metrica örnek maçlarını içerecek şekilde düzeltildi. İş ~1 saatte bitti: PFF
+kopyası, DFL özellikleri 4 dk, PFF özellikleri + dizi indeksi ~55 dk, 21 katman × ~67 sn (üç tohum aynı T4'te paralel).
+İzleme döngüm bir `colab exec` çağrısında takılıp bitişi kaçırdı; oturum ~3 saat boşta kaldı (~4 CU). Ders: her sorgu
+`timeout` ile sarılır. Oturum kapatıldı, bakiye 41.8 CU. Yerele inen tek dosya kullanıcı onayıyla 12 MB'lık DFL
+olasılıkları (+ 5 KB manifest); MD5'ler VM'dekilerle aynı. Yerel hat önce yer tutucu olasılıklarla duman testinden geçti.
+
+**Maç-dışı BiGRU.** Tarif paylaşılan BiGRU'nunki (`reports/sequence_pff/selection.json`: 64 kanal, dropout .15, lr .001,
+11 epoch; ölçekleyici tohumu 20261024; tohumlar 20261025/26/27; DFL / PFF yarı yarıya mini-batch); her DFL maçı için o
+maç dışarıda eğitim (`reports/bigru_lomo/manifest.json`). Dışarıda tutulan maçta native etiket kare doğruluğu
+0.881–0.931 (ort. 0.908). DFL canlı karelerde BiGRU v10'dan zayıf: doğruluk 0.901–0.907 vs 0.912–0.913, log kaybı
+0.217–0.233 vs 0.202. Hizalama doğru (±2 kare içinde tepe).
+
+**Tur 17: %75 karışım + doğrulayıcı.** DFL'de karışım tek başına v13'ün 0.014–0.020 gerisinde (DFL-trk); doğrulayıcı
+bunun bir kısmını geri alıyor. En kötü pişmanlık v13 0.0164 / 0.0165, aday 0.0130 / 0.0162 (doğrulayıcı tohumu 0 / 1);
+fark < 0.005 → terfi yok. Tur 13'ün %75'i DFL ölçülemeden seçilmişti; DFL'de fazla.
+
+**Adillik düzeltmesi: v13 BAR-ATH'taki koşulda ölçülmeli.** v13'ün doğrulayıcısı BAR-ATH'ta paylaşılan BiGRU'nun
+marjını görüyor. Tur 15'te ise DFL satırlarında marj yoktu (paylaşılan BiGRU bütün DFL maçlarını görmüştü) ve DFL marjsız
+puanlandı. Şimdi doğrulayıcı aynen tur 15'teki gibi eğitilip (DFL eğitim satırları marjsız), dışarıda tutulan DFL maçı
+maç-dışı BiGRU marjıyla puanlandı: DFL kararlarının yarısında olasılık > 0.05 oynuyor; v13 DFL-evctrl −0.006 / −0.007,
+DFL-trk −0.011 / −0.012. Tur 15'in "DFL geçerli bir dış test, çünkü orada marj yok" gerekçesi marjsız bir v13'ü ölçmüş;
+gönderilen v13'ü değil. Metrica / SC olasılıkları birebir yeniden üretildi (kontrol kodda).
+
+**Tur 17b: ağırlık ızgarası.** Tur 13'ün önceden sabitlenmiş .25 / .5 / .75 olasılık ızgarası, her ağırlık kendi
+adayları ve kendi birleşik maç-dışı doğrulayıcısıyla, 10 bağlamda (`src/exp_blend_weight.py`). Karşılaştırma kümesi:
+BAR-ATH koşulundaki v13 + 6 aday. .5 + doğrulayıcı on bağlamın hepsinde v13'ün önünde (nokta tahmini) ve en kötü
+pişmanlığı en düşük: 0.0039 (v13 0.0165). Pişmanlık farkının bootstrap'ı (her kaynakta maçlar yeniden örneklenir, aynı
+çekiliş o kaynağın bütün bağlamlarında): %90 [+0.004, +0.015], P(≥ 0.005) 0.94; yalnız ikisi karşılaştırılınca 0.0140,
+P 0.99; doğrulayıcı tohumları ayrı ayrı 0.0039 / 0.0038. Tur 15 bakışıyla (marjsız v13) bile .5 + doğrulayıcı en düşük
+pişmanlıkta (0.0099 vs 0.0165), ancak orada DFL-trk'de −0.006 / −0.010 ve ikili fark 0.0041. Kural, gönderilen modelin
+gerçek koşulunda ölçülen v13'e karşı sağlanıyor → **v14 varsayılan**.
+
+**v14.** `src/model_v14.py`: 0.5 × v10 ham olasılığı + 0.5 × paylaşılan BiGRU'nun eşit ortalaması, ±25 logit
+yumuşatma, v10'un ölü topu ve B2 decoder. Doğrulayıcı karışımın adaylarında eğitildi: v10 tohum 0, üç BiGRU'nun
+ortalaması (DFL'de maç-dışı), iki ölü top kanalı, deterministik LightGBM (`models/short_verifier_{ins,del}_g_blend50.txt`;
+yeniden eğitim `MTAH_RETRAIN_VERIFIER=1` ile, DFL maç-dışı olasılıklarını gerektirir). `exp_short.blend` ağırlık
+parametresi aldı; doğrulayıcı dosya adları ağırlığı taşıyor. Yeniden üretim: MD5 5e7363fc…; iki çalıştırma, doğrulayıcının
+sıfırdan eğitimi (dosyalar bayt bayt aynı) ve boş önbellekten temiz dışa aktarım aynı; resmî doğrulayıcı "Valid";
+v13 / v10 MD5'leri aynı; testler 59/59 (2 yeni). Dışa aktarım listesine `src/model_v14.py`, `src/exp_bigru_lomo.py` ve
+iki model dosyası eklendi. BAR-ATH (etiketsiz): karışımın çözümü 211 possession, doğrulayıcıyla 216 (karelerin %0.17'si,
+6 bölge: 207 kare H'ye, 123 kare A'ya); v13'ten karelerin %0.76'sı farklı. Public skora karar sürecinde bakılmadı.
+
+**Sınırlar.** Ağırlık aynı 10 bağlamda 6 aday arasından seçildi (ızgara önceden sabitti; fark eşiğin 2.5 katı ve
+bootstrap'ta 0.94 olasılıkla eşiğin üstünde). Metrica yalnız 3 maç; aralığı sıfırın üstünde olan tek set SC. Marjsız v13
+ölçümüne göre v14 DFL-trk'de geride; BAR-ATH'ın hangi koşula benzediği bilinmiyor.
+
+**Sıradaki adımlar.**
+1. BiGRU'yu DFL'de güçlendirmek (ör. evctrl etiketi, DFL ağırlığı) yeni bir Colab işi ister; maliyet ve indirme kullanıcıya
+   sorulur.
+2. Doğrulayıcı varyantları (ör. DFL marjsız satırları da eğitime katmak) yalnız pişmanlığı 0.005'ten fazla düşürürse.
+3. Push öncesi kullanıcı onayı.
 
 ## Ek A — İlk analiz, araştırma ve baseline'lar (20 Ekim)
 

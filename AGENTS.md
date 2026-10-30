@@ -36,6 +36,7 @@ User instructions carried forward from the 27 October 2026 continuation note.
 - Python command convention on Windows: `.venv/Scripts/python.exe -I src/<script>.py`.
   Scripts must add their own `src/` import path when using isolated mode.
 
-Current submission (30 October 2026, round 15): `model_v13` = `model_v10` without whistle + the short-possession
-verifier; expected CSV MD5 `ed8ad739207f367017bb8d8c8204c82a` (`submissions/candidate_v13.csv`). v10 stays
-reproducible with `--model model_v10` (MD5 `ca20c5b657a395d2f7c0e310cdaabd64`). Recheck this after integration changes.
+Current submission (30 October 2026, round 17b): `model_v14` = 0.5 v10 + 0.5 shared BiGRU probability blend + the
+short-possession verifier retrained on the blend; expected CSV MD5 `5e7363fc83c6f56a923033894a28d3a1`
+(`submissions/candidate_v14.csv`). v13 (`--model model_v13`, MD5 `ed8ad739207f367017bb8d8c8204c82a`) and v10
+(`--model model_v10`, MD5 `ca20c5b657a395d2f7c0e310cdaabd64`) stay reproducible. Recheck this after integration changes.

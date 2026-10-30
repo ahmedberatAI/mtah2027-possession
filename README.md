@@ -25,9 +25,11 @@ Fikirler, denemeler ve sonuçlar tek bir belgede: **[`docs/RAPOR.md`](docs/RAPOR
 
 ## Submission
 
-- **The file:** `submissions/candidate_v13.csv` (model_v13 = model_v10 + the short-possession verifier, no whistle),
-  MD5 `ed8ad739207f367017bb8d8c8204c82a`. `python src/make_submission.py` regenerates it; `--model model_v10
-  --out submissions/candidate_v10.csv` still writes v10 (MD5 `ca20c5b657a395d2f7c0e310cdaabd64`).
+- **The file:** `submissions/candidate_v14.csv` (model_v14 = an equal v10 / shared-BiGRU probability blend + the
+  short-possession verifier retrained on the blend, no whistle), MD5 `5e7363fc83c6f56a923033894a28d3a1`.
+  `python src/make_submission.py` regenerates it; `--model model_v13 --out submissions/candidate_v13.csv` still writes
+  v13 (MD5 `ed8ad739207f367017bb8d8c8204c82a`) and `--model model_v10 --out submissions/candidate_v10.csv` v10 (MD5
+  `ca20c5b657a395d2f7c0e310cdaabd64`).
 - **Model file:** the team classifier is trained on open data only and kept in `models/v10_team.txt`, so the default
   run needs only the provided data (about a minute). `MTAH_RETRAIN=1` retrains it from the open data (about 7 min)
   byte for byte.
@@ -69,17 +71,21 @@ uv pip install --python .venv/Scripts/python.exe numpy pandas scipy numba lightg
 git clone https://github.com/metrica-sports/more-than-a-hack-2027 external/more-than-a-hack-2027
 # unpack the match bundle into ./data (or set MTAH_DATA_DIR)
 .venv/Scripts/python.exe src/download_idsse.py            # open DFL data, CC BY 4.0, ~2.6 GB
-.venv/Scripts/python.exe src/make_submission.py           # the submission: model_v13 -> submissions/candidate_v13.csv
-python external/more-than-a-hack-2027/evaluation/validate_submission.py submissions/candidate_v13.csv
+.venv/Scripts/python.exe src/make_submission.py           # the submission: model_v14 -> submissions/candidate_v14.csv
+python external/more-than-a-hack-2027/evaluation/validate_submission.py submissions/candidate_v14.csv
 ```
 
-**The submission is `model_v13`: `model_v10` without the referee-whistle option plus the short-possession verifier**
-(`submissions/candidate_v13.csv`, MD5 `ed8ad739207f367017bb8d8c8204c82a`; round 15 in `docs/RAPOR.md`). The verifier
-(`src/short_verifier.py`) re-examines v10's short decisions, the flips the decoder suppressed and the decoded
-possessions under 4 s, with two LightGBM classifiers (`models/short_verifier_{ins,del}_g.txt`) trained on the external
-sets. Its evidence includes the shared BiGRU's margin, whose BAR-ATH probabilities `src/reproduce_shared_bigru.py`
-rebuilds on the CPU (needs torch). On the external protocol it lowers the worst-case regret from 0.019 to 0.004
-(SkillCorner +0.010…+0.015, DFL +0.001…+0.005, Metrica ±0.001). The model history below is kept for reference.
+**The submission is `model_v14`: an equal blend of `model_v10`'s team probability and the shared BiGRU's, plus the
+short-possession verifier retrained on the blend's own decisions** (`submissions/candidate_v14.csv`, MD5
+`5e7363fc83c6f56a923033894a28d3a1`; rounds 17 / 17b in `docs/RAPOR.md`). The BiGRU (`models/bigru_dfl_pff_v1`, open
+DFL + PFF data) runs on the CPU (`src/reproduce_shared_bigru.py`, needs torch). The verifier (`src/short_verifier.py`,
+`models/short_verifier_{ins,del}_g_blend50.txt`) re-examines the short decisions, the flips the decoder suppressed and
+the decoded possessions under 4 s. A leave-one-DFL-match-out copy of the BiGRU (trained on Colab,
+`src/exp_bigru_lomo.py`) let DFL judge the blend for the first time: the weight .5 is the minimax-regret point of the
+grid fixed in round 13 (`src/exp_blend_weight.py`), and on the ten external contexts the worst-case regret falls from
+0.0165 (v13, its verifier seeing a held-out BiGRU margin on DFL as on BAR-ATH) to 0.0039 (SkillCorner +0.010…+0.014,
+Metrica +0.005…+0.006, DFL +0.002…+0.008). `model_v13` (round 15: v10 + the verifier) and the model history below are
+kept for reference.
 
 `model_v5` = alive/dead evidence from rules + the aligned broadcast (v3) and H/A probabilities from a
 LightGBM team model trained on degraded open DFL data, decoded with a min-duration Viterbi per half.

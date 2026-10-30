@@ -66,8 +66,10 @@ def bigru_members(src):
     return bench._load(path)["members"]
 
 
-def blend(a, b):
-    return [(1 - W_BIGRU) * np.asarray(x, np.float64) + W_BIGRU * np.asarray(y, np.float64) for x, y in zip(a, b)]
+def blend(a, b, w=None):
+    """(1 - w) x a + w x b per half; w defaults to W_BIGRU (round 13's .75; model_v14 passes its own .5)."""
+    w = W_BIGRU if w is None else w
+    return [(1 - w) * np.asarray(x, np.float64) + w * np.asarray(y, np.float64) for x, y in zip(a, b)]
 
 
 def decode(dec, c, pds, phs):

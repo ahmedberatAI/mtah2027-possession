@@ -1,13 +1,15 @@
-"""v14 = the round-13 BiGRU blend + the short-possession verifier retrained on the blend's candidates (round 17).
+"""v14 = an equal v10 / BiGRU probability blend + the short-possession verifier retrained on the blend's candidates
+(rounds 17 / 17b, docs/RAPOR.md) -- the submission.
 
-Team probability: 0.25 x v10's raw P(home) + 0.75 x the shared BiGRU's equal mean (models/bigru_dfl_pff_v1, trained on
+Team probability: 0.5 x v10's raw P(home) + 0.5 x the shared BiGRU's equal mean (models/bigru_dfl_pff_v1, trained on
 open DFL + PFF data; BAR-ATH probabilities rebuilt by src/reproduce_shared_bigru.py when the cache is missing), then
 v10's +-25-frame logit smoothing, dead ball and B2 decoder. The verifier (src/short_verifier.py, base="blend") then
-re-judges the short decisions with v13's thresholds; its classifiers are trained on the blend's candidates on the open
-sets, DFL with the leave-one-match-out BiGRU (src/exp_bigru_lomo.py) so that its margins are held out as on BAR-ATH.
-Candidate until the DFL validation of round 17 (docs/RAPOR.md); v13 stays the default until then.
+re-judges the short decisions with v13's thresholds; its classifiers (models/short_verifier_*_g_blend50.txt) are trained
+on the blend's candidates on the open sets, DFL with the leave-one-match-out BiGRU (src/exp_bigru_lomo.py) so that its
+margins are held out as on BAR-ATH. The weight .5 is the minimax-regret point of round 13's pre-registered grid
+(.25 / .5 / .75) once DFL could be judged (src/exp_blend_weight.py).
 
-Team probabilities are cached in cache/v14/barath_probs.pkl (deterministic).
+Team probabilities are cached in cache/v14/barath_probs_w50.pkl (deterministic).
 """
 import os
 
@@ -23,9 +25,10 @@ import model_v13
 import short_verifier
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PROBS = os.path.join(ROOT, "cache", "v14", "barath_probs.pkl")
+W_BIGRU = 0.5
+PROBS = os.path.join(ROOT, "cache", "v14", "barath_probs_w%02d.pkl" % round(100 * W_BIGRU))
 DEFAULT = dict(model_v10.DEFAULT)
-VERIFIER = dict(model_v13.VERIFIER, base="blend")
+VERIFIER = dict(model_v13.VERIFIER, base="blend", w=W_BIGRU)
 
 
 def ensure_probs(refresh=False):
@@ -38,7 +41,7 @@ def ensure_probs(refresh=False):
     for b, f in zip(bench.blocks("barath"), bench.features(model_v7.VERSION, "barath")):
         h, a = bfree.bf_feats(b["P"], b["team"], b["gk"], b["pitch"])
         raw = bench.predict_team(model, dict(XF=f["XF"], XH=np.hstack([f["XH"], h]), XA=np.hstack([f["XA"], a])))
-        probs[b["a"]] = (None, model_v9.smooth(es.blend([raw], [gru[b["a"]][1]])[0]))
+        probs[b["a"]] = (None, model_v9.smooth(es.blend([raw], [gru[b["a"]][1]], W_BIGRU)[0]))
     os.makedirs(os.path.dirname(PROBS), exist_ok=True)
     bench._dump(probs, PROBS)
     return PROBS

@@ -1,11 +1,11 @@
 # Python 3.12 (tested with 3.12.13). Pinned versions of the packages the submission pipeline imports
-# (src/make_submission.py -> model_v13); the pipeline needs no GPU.
+# (src/make_submission.py -> model_v14); the pipeline needs no GPU.
 numpy==2.5.4
 pandas==3.0.6
 scipy==1.18.1
 numba==0.68.0
 llvmlite==0.50.0
 lightgbm==4.7.0
-# model_v13 also runs the shared BiGRU on the CPU (src/reproduce_shared_bigru.py); its reference CSV was reproduced
+# model_v14 (like v13) runs the shared BiGRU on the CPU (src/reproduce_shared_bigru.py); its reference CSV was reproduced
 # bit for bit with torch 2.11.0 on the CPU device.
 torch==2.11.0
