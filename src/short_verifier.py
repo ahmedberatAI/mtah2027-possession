@@ -47,7 +47,7 @@ def train(use_g, retrain=None, base="v10", w=None):
         retrain = os.environ.get("MTAH_RETRAIN_VERIFIER") == "1"
     paths = {typ: model_path(typ, use_g, base, w) for typ in ("ins", "del")}
     if not retrain and all(os.path.isfile(p) for p in paths.values()):
-        return {typ: lgb.Booster(model_file=p) for typ, p in paths.items()}
+        return {typ: bench.load_booster(p) for typ, p in paths.items()}
     rows = []
     for src, convs, dec, prim in ev.SOURCES:
         blocks = bench.blocks(src)

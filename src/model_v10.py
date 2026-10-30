@@ -31,7 +31,7 @@ def team_model(retrain=None):
     if retrain is None:
         retrain = os.environ.get("MTAH_RETRAIN") == "1"
     if os.path.isfile(MODEL) and not retrain:
-        return lgb.Booster(model_file=MODEL)
+        return bench.load_booster(MODEL)
     Xd, yd, _ = bench.team_rows(model_v9._aug("dfl@v3"), bench.labels("dfl", "native"))
     Xm, ym, _ = bench.team_rows(model_v9._aug("metrica@v3"), bench.labels("metrica@v3", "ctrl"))
     X = np.concatenate([Xd, Xm])

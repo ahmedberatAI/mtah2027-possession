@@ -31,6 +31,8 @@ MTAH_RETRAIN=1 .venv/Scripts/python.exe src/make_submission.py
 ```
 
 - On Linux / macOS, use `.venv/bin/python` instead of `.venv/Scripts/python.exe`.
+- `.gitattributes` keeps the LightGBM model files (`models/*.txt`) byte for byte: LightGBM 4.7 cannot read them with
+  the CRLF line endings a Windows checkout would otherwise write (the pipeline also reads them as text).
 - `models/v10_team.txt` is the team classifier and `models/short_verifier_{ins,del}_g_blend50.txt` the verifier, all
   trained only on open data, so the default run needs only the provided data. On its first run it rebuilds the BiGRU's BAR-ATH
   probabilities on the CPU (`src/reproduce_shared_bigru.py`, checked against `models/bigru_dfl_pff_v1/manifest.json`).

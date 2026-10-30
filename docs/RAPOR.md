@@ -454,6 +454,7 @@ Public sütunu yalnız bilgi içindir (17 spell, aralık ~0.4); v7'den itibaren 
 | v13'ü BAR-ATH'taki koşulda ölçmek (`src/exp_blend_weight.py` build13 / trainpool13, tur 17b; doğrulayıcı tur 15'teki gibi eğitiliyor, dışarıda tutulan DFL maçı maç-dışı BiGRU marjıyla puanlanıyor) | DFL kararlarının %47–51'inde olasılık > 0.05 oynuyor; v13 DFL-evctrl −0.006 / −0.007, DFL-trk −0.011 / −0.012 (aralıklar ≤ 0, 1–2/7 maç); Metrica / SC olasılıkları birebir yeniden üretildi | bilgi: tur 15'in DFL skoru marjsız bir v13'ü ölçüyordu |
 | Karışım ağırlığı ızgarası + doğrulayıcı, 10 bağlam (`src/exp_blend_weight.py`, tur 17b; tur 13'ün önceden sabitlenmiş .25 / .5 / .75 olasılık ızgarası, her ağırlık kendi adayları ve kendi birleşik maç-dışı doğrulayıcısıyla; 3 v10 tohumu × 2 doğrulayıcı tohumu; pişmanlık farkına eşli maç bootstrap'ı) | .5 + doğrulayıcı, BAR-ATH koşulundaki v13'e göre: DFL-evctrl +0.008 / +0.005, DFL-trk +0.006 / +0.002, Metrica +0.005 / +0.006, SC faz +0.012 / +0.010, SC pp +0.014 / +0.011 (SC aralıkları > 0). 7 aday içinde en kötü pişmanlık: v13 0.0165, .25 0.0220, .25 + d 0.0114, .5 0.0114, **.5 + d 0.0039**, .75 0.0124, .75 + d 0.0077; v13 − (.5 + d) = 0.0126, bootstrap %90 [+0.004, +0.015], P(≥ 0.005) 0.94; ikili 0.0140, P 0.99; doğrulayıcı tohumları ayrı ayrı 0.0039 / 0.0038. Tur 15 bakışıyla (marjsız v13): .5 + d yine en düşük (0.0099 vs 0.0165; ikili 0.0041), DFL-trk −0.006 / −0.010 | ✅ v14 varsayılan |
 | v14 gönderimi (`src/model_v14.py`, `models/short_verifier_{ins,del}_g_blend50.txt`) | MD5 5e7363fc…: iki çalıştırma, doğrulayıcının sıfırdan eğitimi (model dosyaları bayt bayt aynı) ve boş önbellekten temiz dışa aktarım (69 dosya, veri ve resmî repo yalnız bağlantıyla, ~66 sn) aynı; resmî doğrulayıcı "Valid"; v13 / v10 MD5'leri değişmedi; testler 59/59. BAR-ATH (etiketsiz): karışımın çözümü 211 → doğrulayıcıyla 216 possession (karelerin %0.17'si, 6 bölge); v13'ten karelerin %0.76'sı farklı | ✅ |
+| Windows klonunda model dosyaları (tur 17 yan bulgusu; `.gitattributes`, `src/bench.py` `load_booster`, `tests/test_model_files.py`) | Git for Windows'un varsayılanı `core.autocrlf=true` taze klonda `models/*.txt`'yi CRLF'ye çeviriyor (`v10_team.txt`'de 7947 satır); LightGBM 4.7 böyle bir dosyayı yolundan yüklerken süreci Python hatası vermeden kapatıyor → Windows'ta klonlanan repo gönderimi üretemezdi (25 Ekim'den beri; temiz dışa aktarım testleri dosyaları LF kopyaladığı için görmedi). Düzeltme: `models/*.txt -text` (dışa aktarıma da giriyor; depoda LightGBM'in Windows'ta yazdığı baytlar) + modeller metin olarak okunuyor; CRLF kopyalarla tahminler birebir aynı; v14 / v13 / v10 MD5'leri değişmedi; testler 61/61 | ✅ |
 
 ### Ekip arkadaşının GitHub kayıtları — 27 Ekim birleştirmesi
 
@@ -1851,6 +1852,13 @@ sıfırdan eğitimi (dosyalar bayt bayt aynı) ve boş önbellekten temiz dışa
 v13 / v10 MD5'leri aynı; testler 59/59 (2 yeni). Dışa aktarım listesine `src/model_v14.py`, `src/exp_bigru_lomo.py` ve
 iki model dosyası eklendi. BAR-ATH (etiketsiz): karışımın çözümü 211 possession, doğrulayıcıyla 216 (karelerin %0.17'si,
 6 bölge: 207 kare H'ye, 123 kare A'ya); v13'ten karelerin %0.76'sı farklı. Public skora karar sürecinde bakılmadı.
+
+**Yan bulgu: Windows klonu.** Taze bir yerel klonda (Git for Windows varsayılanı `core.autocrlf=true`) LightGBM model
+dosyaları CRLF'ye çevriliyor ve LightGBM 4.7 bunları yolundan yüklerken süreci Python hatası vermeden kapatıyor: herkese
+açık repo Windows'ta klonlansa gönderim üretilemezdi. Sorun 25 Ekim'den beri vardı; temiz dışa aktarım testleri dosyaları
+LF halleriyle kopyaladığı için görmedi. `.gitattributes` (`models/*.txt -text`, dışa aktarımda da) ve modelleri metin
+olarak okuyan `bench.load_booster` ile düzeltildi; yeni test CRLF kopyaların birebir aynı tahmin verdiğini ve git'in
+dosyaları dönüştürmediğini denetliyor. Üç gönderimin MD5'leri değişmedi.
 
 **Sınırlar.** Ağırlık aynı 10 bağlamda 6 aday arasından seçildi (ızgara önceden sabitti; fark eşiğin 2.5 katı ve
 bootstrap'ta 0.94 olasılıkla eşiğin üstünde). Metrica yalnız 3 maç; aralığı sıfırın üstünde olan tek set SC. Marjsız v13

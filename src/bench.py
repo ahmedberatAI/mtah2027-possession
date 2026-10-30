@@ -86,6 +86,13 @@ def _load(path):
         return pickle.load(fh)
 
 
+def load_booster(path):
+    """A shipped LightGBM model file, read as text: a Windows checkout with core.autocrlf=true writes CRLF line
+    endings, which LightGBM 4.7 cannot parse from a path (the process aborts); read this way they load the same model."""
+    with open(path, encoding="utf-8") as fh:
+        return lgb.Booster(model_str=fh.read())
+
+
 # -- degraded inputs ---------------------------------------------------------------------------------
 
 def _dfl_job(job):

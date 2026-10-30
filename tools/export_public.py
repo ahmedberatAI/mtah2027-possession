@@ -3,8 +3,9 @@
 
 What goes in: the source modules listed in tools/public/files.txt (the modules a from-scratch run of
 src/make_submission.py imports, plus the open-data download scripts), requirements.txt, the technical document,
-tools/public/README.md as README.md, and a .gitignore. What never goes in: data/, cache/, submissions/, external/,
-external_data/, the research log docs/RAPOR.md and reports/ (aggregate numbers of the match).
+tools/public/README.md as README.md, .gitattributes (no line-ending conversion of the model files) and a
+.gitignore. What never goes in: data/, cache/, submissions/, external/, external_data/, the research log
+docs/RAPOR.md and reports/ (aggregate numbers of the match).
 
     python tools/export_public.py <empty target folder>
 """
@@ -35,6 +36,7 @@ def main(dst):
     banned = ("data/", "cache/", "submissions/", "external/", "external_data/", "reports/", "docs/RAPOR.md")
     copies = [(f, f) for f in files] + [("requirements.txt", "requirements.txt"),
                                          ("docs/TECHNICAL_DOCUMENT.md", "docs/TECHNICAL_DOCUMENT.md"),
+                                         (".gitattributes", ".gitattributes"),
                                          ("tools/public/README.md", "README.md")]
     for src, out in copies:
         if src.startswith(banned):

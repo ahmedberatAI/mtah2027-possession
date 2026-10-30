@@ -308,6 +308,9 @@ MTAH_RETRAIN=1 python src/make_submission.py
 - **Determinism.** Simulation seeds are fixed, LightGBM runs in deterministic mode with a fixed seed and thread count,
   and no GPU is used. LightGBM's deterministic mode is guaranteed for a fixed platform and thread count; on another
   platform a retrain could differ in the last bits, which is one more reason the trained classifier is shipped.
+- **Line endings.** LightGBM 4.7 cannot read a model file with CRLF line endings, which a Windows checkout with Git's
+  default `core.autocrlf=true` writes for text files. `.gitattributes` keeps `models/*.txt` byte for byte, and the
+  pipeline reads the models as text (`src/bench.py`, `load_booster`), so a converted copy loads the same model.
 - All intermediate files go to `cache/` (gitignored).
 
 ## 11. Data, licences and policy
