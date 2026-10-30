@@ -390,10 +390,100 @@ def evaluate2(vseed):
     return er.summarize(cells, list(VARIANTS2), ref="v13")
 
 
+# -- round 16b: the verifier on top of the round-13 BiGRU blend (Metrica and SkillCorner only: the blend has no DFL
+#    validation). How much would a DFL-validated blend add on top of v13? ------------------------------------------
+
+def build3(only=None):
+    """Candidates of the blend's decode (0.25 v10 + 0.75 BiGRU probability, paired seeds, then +-25) for Metrica and
+    SkillCorner; DFL keeps v10's round-16 candidates (rows2) in the pooled training."""
+    for src, convs, dec, prim in SOURCES[1:]:
+        if only and only != src:
+            continue
+        blocks = bench.blocks(src)
+        labs = bench.labels(src, prim)
+        learned = bench.dead_ext("base", "v3", src)
+        true_d = [np.where(g == 2, 1 - es.EPS, es.EPS) for g in labs]
+        gru = gru_mean(src)
+        members = es.bigru_members(src)
+        raws = {seed: es.blend(es.v10_raw(seed, src), members[seed]) for seed in es.SEEDS}
+        smos = {seed: exp_smooth.smooth(raws[seed], 25) for seed in es.SEEDS}
+        bases = {(seed, dname): es.decode(dec, 48.0, pds, smos[seed])
+                 for seed in es.SEEDS for dname, pds in zip(DEADS, (learned, true_d))}
+        rows = {key: [] for key in bases}
+        for i, b in enumerate(blocks):
+            c = ea.frame_cues(b)
+            for (seed, dname), base in bases.items():
+                rows[(seed, dname)] += rows_for(src, [b], [c], [labs[i]], [base[i]], [smos[seed][i]], [raws[seed][i]],
+                                                [gru[i]], int(dec[1]), i0=i, v2=True)
+            del c
+        for (seed, dname), base in bases.items():
+            bench._dump(dict(base=base, rows=rows[(seed, dname)]), _path("rows3", src, seed, dname))
+        print("  blend candidates built for %s" % src, flush=True)
+
+
+def _rows3(src, seed, dname):
+    return bench._load(_path("rows2" if src.startswith("dfl") else "rows3", src, seed, dname))
+
+
+def train_pooled3(seed, vseed):
+    parts = {dname: [r for src, *_ in SOURCES for r in _rows3(src, seed, dname)["rows"]] for dname in DEADS}
+    rows = parts[DEADS[0]] + parts[DEADS[1]]
+    params = dict(PARAMS, seed=vseed, deterministic=True, force_row_wise=True,
+                  num_threads=int(os.environ.get("VERIFY_THREADS", "4")))
+    pp = predict_lomo(rows, FEATSETS["G1"], params)
+    n = len(parts[DEADS[0]])
+    for k, dname in enumerate(DEADS):
+        sl = slice(0, n) if k == 0 else slice(n, len(rows))
+        bench._dump({"G1": pp[sl]}, _path("probs3", seed, dname, "q%d" % vseed))
+    print("    seed %d blend-verifier probabilities written" % seed, flush=True)
+
+
+def evaluate3(vseed):
+    """v10, v13, the blend alone and the blend + verifier on the six Metrica / SkillCorner contexts."""
+    cells = {}
+    t_ins, t_del = 0.65, 0.35
+    for src, convs, dec, prim in SOURCES[1:]:
+        blocks = bench.blocks(src)
+        labs = {c: bench.labels(src, c) for c in convs}
+        for seed in es.SEEDS:
+            for dname in DEADS:
+                outs = {}
+                for tag, rows_kind, probs_kind in (("v13", "rows2", "probs2"), ("blend + verifier", "rows3", "probs3")):
+                    n0 = 0
+                    for s2, *_ in SOURCES:
+                        if s2 == src:
+                            break
+                        n0 += len(bench._load(_path("rows2" if s2.startswith("dfl") or rows_kind == "rows2" else
+                                                        rows_kind, s2, seed, dname))["rows"])
+                    d = bench._load(_path(rows_kind, src, seed, dname))
+                    pp = bench._load(_path(probs_kind, seed, dname, "q%d" % vseed))["G1"]
+                    by_half = {}
+                    for n, r in enumerate(d["rows"]):
+                        by_half.setdefault(r["i"], []).append(n)
+                    outs["v10" if tag == "v13" else "blend"] = d["base"]
+                    outs[tag] = [apply(pr, [d["rows"][n] for n in by_half.get(i, [])],
+                                       pp[[n0 + n for n in by_half.get(i, [])]], True, True, t_ins, t_del)
+                                 for i, pr in enumerate(d["base"])]
+                for c in convs:
+                    for name, preds in outs.items():
+                        cells.setdefault((src, c, dname, name), []).append(er.by_match(blocks, labs[c], preds))
+        bench._blocks.clear()
+        bench._labels.clear()
+    names = ["v10", "v13", "blend", "blend + verifier"]
+    er.summarize(cells, names)
+    return er.summarize(cells, names[1:], ref="v13")
+
+
 def main():
     sys.stdout.reconfigure(encoding="utf-8")
     warnings.filterwarnings("ignore")
     stage = sys.argv[1] if len(sys.argv) > 1 else "eval"
+    if stage == "build3":
+        return build3(sys.argv[2] if len(sys.argv) > 2 else None)
+    if stage == "trainpool3":
+        return train_pooled3(int(sys.argv[2]), int(sys.argv[3]))
+    if stage == "eval3":
+        return evaluate3(int(sys.argv[2]) if len(sys.argv) > 2 else 0)
     if stage == "build":
         build(sys.argv[2] if len(sys.argv) > 2 else None)
     elif stage == "build2":

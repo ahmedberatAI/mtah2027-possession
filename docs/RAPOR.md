@@ -424,6 +424,7 @@ Public sütunu yalnız bilgi içindir (17 spell, aralık ~0.4); v7'den itibaren 
 | **Kısa possession doğrulayıcısı → v13** (`src/exp_verify.py`, `src/short_verifier.py`, `src/model_v13.py`; 3 v10 tohumu × 2 ölü top kanalı × 2 doğrulayıcı tohumu, 30 maçta maç-dışı, 10 bağlam) | strict (ekle p ≥ 0.65, sil p < 0.35, BiGRU marjlı): DFL-trk +0.004…+0.0055, DFL-evctrl +0.000…+0.0015, Metrica −0.002…+0.004 (aralıklar sıfırı kapsıyor), SC faz +0.010…+0.011, SC pp +0.014…+0.017; en kötü pişmanlık v10 0.019–0.021 → 0.0037–0.0040; komşu eşikler 0.6/0.4 ve 0.7/0.3 benzer; BiGRU'suz strict 0.012; eşik 0.5/0.5 Metrica'da −0.002…−0.006; yalnız silme SC'de ≈ 0. Gönderim yapılandırması (iki ölü top kanalının adayları birleşik eğitim): 0.019 → 0.004. BAR-ATH (etiketsiz): 203 → 214 possession, karelerin %0.19'u, public pencerede değişen kare yok; MD5 ed8ad739…, iki çalıştırma ve boş önbellekten temiz dışa aktarım aynı; testler 57/57 | ✅ v13 varsayılan |
 | Literatür taraması (tur 15; 3 web ajanı, yalnız genel problem tanımı, veri yok) | PathCRF (KDD 2026; topsuz; fiziksel aktarım kısıtlı Viterbi / CRF ile olay F1 65 → 73 → 76), ELASTIC (olay–takip eşleme ±2 karede %88–96), Link & Hoernig kontrol tanımları, Wang 2025 (iskelet + sensörlü topla bile ayak düellosunda son dokunuş %65–75), Bauer & Anzer (karşı pres sinyalleri ilk 1–3 sn); segment uzunluğuna göre F1 veren bir TAS çalışması yok; öneriler MBR / yapısal kalibrasyon / semi-CRF eğitimi / kısa spell ağırlığı | bilgi; ayrıntı §4 Tur 15 |
 | Doğrulayıcı v2: literatürden yeni ipuçları (`src/exp_verify.py` build2 / trainpool2 / eval2, tur 16; v13 ile aynı adaylar, gönderim yapılandırması, 3 v10 tohumu) | eklenenler: aday başladıktan sonraki 1–2 sn'de iki takımın ileri hızı, topun gerisindeki rakipler, topa baskı ve kalabalık (Bauer & Anzer); top görünmüyorken son görüldüğü noktaya iki takımın uzaklığı, hareket eden topun 0.5 sn sonraki düşme noktasındaki takım ("ışınlanma yok", PathCRF); güçlü kanıtın en uzun süresi, en yüksek marj; spell'in duruşla başlayıp bitmesi, sonraki duruşa süre, spell içindeki dönüş yoğunluğu. AUC değişmedi (ekleme DFL 0.71–0.73 / Metrica 0.69–0.72 / SC 0.85). v13'e göre spellF1: DFL −0.001…−0.003, Metrica −0.000…−0.003, SC +0.000…+0.002; pişmanlık v13 0.0015, v2 0.0028, 0.7/0.3 eşikli v2 0.0019; BiGRU'suz v2 DFL'de −0.007 / −0.008. v13 aynı adaylarla birebir yeniden üretildi | ❌ (≈) v13 kalır |
+| Karışım + doğrulayıcı (`src/exp_verify.py` build3 / trainpool3 / eval3, tur 16; tur 13'ün %75 BiGRU olasılık karışımının çözümü üzerinde v13'ün doğrulayıcısı; Metrica ve SC, 6 bağlam, 3 tohum; DFL yok) | v10'a göre (öğr. / gerçek D): karışım Metrica +0.001 / +0.002, SC faz +0.022 / +0.020, SC pp +0.030 / +0.026; karışım + doğrulayıcı Metrica −0.000 / +0.000, SC faz +0.026 / +0.024, SC pp +0.035 / +0.033. v13'e göre karışım + doğrulayıcı Metrica +0.000 / +0.001, SC +0.014…+0.020 (aralıklar > 0). 6 bağlamda pişmanlık v10 0.035, v13 0.020, karışım 0.007, karışım + doğrulayıcı 0.001 | bilgi: en güçlü aday; BiGRU DFL'de doğrulanamadığı için terfi yok — DFL maç-dışı BiGRU eğitimi (PFF gerekli) sıradaki adım |
 
 ### Ekip arkadaşının GitHub kayıtları — 27 Ekim birleştirmesi
 
@@ -1762,6 +1763,17 @@ Adaylar ve etiketler v13'ünkilerle aynı; aynı satırlarda v13 de yeniden eği
 Literatür ipuçlarının bilgisi v13'ün mevcut gözlemlerinde (en yakın mesafe, top tutma, çekişme, v10 ve BiGRU marjları)
 zaten var. Kazanç ancak yeni bir kanıt kaynağından gelebilir: BiGRU ailesi (DFL doğrulaması için PFF ile maç-dışı
 yeniden eğitim) ya da bağımsız bir dizi modeli.
+
+**Karışım + doğrulayıcı (16b).** Tur 13'ün %75 BiGRU olasılık karışımı tek başına SC'de v13'ten ~0.01 iyi. Doğrulayıcı
+karışımın kendi çözümü üzerinde yeniden kuruldu (adaylar karışımdan; DFL satırları v10'dan; birleşik maç-dışı eğitim) ve
+Metrica / SC'nin 6 bağlamında ölçüldü. Karışım + doğrulayıcı v13'ü SC'de +0.014…+0.020 geçiyor (aralıklar > 0),
+Metrica'da eşit; 6 bağlamın en kötü pişmanlığı v13 0.020 → 0.001. Bu, projedeki en güçlü aday; ancak paylaşılan BiGRU
+bütün DFL maçlarında eğitildiği için DFL'de ölçülemiyor ve kural eksik doğrulanmış sonucu terfi ettirmiyor.
+
+**Sıradaki adım: DFL doğrulaması.** Paylaşılan BiGRU'nun tarifiyle (`src/exp_seed_balance.py`, `src/seq_pff.py`:
+64 kanal, lr .001, dropout .15, 11 epoch; DFL native + PFF kontrollü) Colab'da DFL maç-dışı eğitim: 7 katman × 3 tohum.
+DFL açık verisi Colab'a indirilebilir; PFF (`external_data/gradient`, ~3.9 GB) yerelde yok, kullanıcıdan erişim gerekiyor.
+Çıktı: DFL'de karışımın ve karışım + doğrulayıcının (DFL'de de BiGRU marjıyla) v13'e farkı. Geçerse varsayılan olur.
 
 ## Ek A — İlk analiz, araştırma ve baseline'lar (20 Ekim)
 
