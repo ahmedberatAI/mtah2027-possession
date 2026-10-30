@@ -1,0 +1,3 @@
+    seed 0 G1    AUC ins dfl 0.719 | ins metrica 0.705 | ins sc 0.832 | del dfl 0.818 | del metrica 0.870 | del sc 0.921
+    seed 0 G2    AUC ins dfl 0.711 | ins metrica 0.702 | ins sc 0.844 | del dfl 0.792 | del metrica 0.893 | del sc 0.922
+    seed 0 noG2  AUC ins dfl 0.690 | ins metrica 0.702 | ins sc 0.819 | del dfl 0.794 | del metrica 0.896 | del sc 0.905

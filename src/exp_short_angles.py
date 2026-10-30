@@ -93,7 +93,7 @@ def frame_cues(b):
             v[5:-5] = (c[10:] - c[:-10]) / (10 / FPS)
         cen[k] = v
     return dict(L=L, W=W, bxy=bxy, team=team, miss=miss, sp=sp, dk=dk, near_team=near_team, holder=holder,
-                touch_t=tt, touch_k=tk, plus=plus, cen=cen)
+                touch_t=tt, touch_k=tk, plus=plus, cen=cen, pxy=pxy, gk=gk)
 
 
 def longest_same(h):

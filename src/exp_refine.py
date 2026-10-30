@@ -104,8 +104,8 @@ def evaluate(variants, seeds=es.SEEDS, label=""):
     return summarize(cells, ["v10"] + list(variants))
 
 
-def summarize(cells, names):
-    """cells: (src, conv, dead, name) -> list of per-seed {match: spellF1}; prints deltas vs v10 and regrets."""
+def summarize(cells, names, ref="v10"):
+    """cells: (src, conv, dead, name) -> list of per-seed {match: spellF1}; prints deltas vs `ref` and regrets."""
     ctxs = sorted({k[:3] for k in cells}, key=lambda k: (k[0], k[1], k[2]))
     mean = {}
     for ctx in ctxs:
@@ -115,17 +115,17 @@ def summarize(cells, names):
     print("\n%-26s" % "context" + "".join("%30s" % n for n in names))
     regret = {n: 0.0 for n in names}
     for ctx in ctxs:
-        ref = mean[ctx + ("v10",)]
-        ms = sorted(ref)
+        base = mean[ctx + (ref,)]
+        ms = sorted(base)
         vals = {n: float(np.mean([mean[ctx + (n,)][m] for m in ms])) for n in names}
         best = max(vals.values())
         line = "%-26s" % ("%s %s %s" % (ctx[0].split("@")[0], ctx[1], ctx[2]))
         for n in names:
             regret[n] = max(regret[n], best - vals[n])
-            if n == "v10":
+            if n == ref:
                 line += "%30s" % ("%.4f" % vals[n])
             else:
-                dl = np.array([mean[ctx + (n,)][m] - ref[m] for m in ms])
+                dl = np.array([mean[ctx + (n,)][m] - base[m] for m in ms])
                 lo, hi = boot(dl)
                 line += "%30s" % ("%+.4f [%+.3f,%+.3f] %d/%d" % (dl.mean(), lo, hi, int((dl > 1e-12).sum()), len(dl)))
         print(line)

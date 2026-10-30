@@ -191,9 +191,8 @@ kullanılmadığı için DFL geçerli bir dış test. Varsayılan v13 oldu. Ayr�
 - Tur 9–12 çalışması `541b79e` ile korundu; Alperen’in `a3b3070` / `39fd4de` commit’leri `de5d862` ile birleştirildi. Çalışma dalı `codex/rounds9-13-integration`; henüz push yapılmadı.
 - **v13 ve herkese açık repo (tur 15):** v13 paylaşılan BiGRU ağırlıklarını (`models/bigru_dfl_pff_v1`) kullanıyor ve
   bunlar dışa aktarım listesinde. Ağırlıkların eğitiminde PFF / Gradient Dünya Kupası 2022 verisi var; kendi README'leri
-  erişimin sağlayıcının koşullarıyla alındığını söylüyor. Repo açılmadan önce bu koşulların türetilmiş ağırlıkların
-  yayımlanmasına izin verdiği Alperen'le teyit edilmeli; izin yoksa v10'a dönülür ya da BiGRU'suz doğrulayıcı
-  (pişmanlık 0.012) değerlendirilir. `requirements.txt` artık torch 2.11.0 istiyor.
+  erişimin sağlayıcının koşullarıyla alındığını söylüyor. ~~Yayım izni teyit edilmeli~~ → kullanıcı 30 Ekim'de PFF
+  izninin olduğunu teyit etti; ağırlıklar herkese açık repoda kalabilir. `requirements.txt` artık torch 2.11.0 istiyor.
 - **Tur 15'ten sonraki kaldıraçlar:** PathCRF (topsuz, fiziksel aktarım kısıtlı CRF; kod ve ağırlıklar açık ama ağırlıklar
   bütün DFL'de eğitilmiş, Colab'da maç-dışı yeniden eğitim gerekir) ikinci bağımsız kanıt olarak; ELASTIC ile kare
   hassas eşlenmiş DFL olaylarından kontrol etiketi (indirme boyutu sorulmalı); R-8 kısa spell'e tavanlı ağırlık
@@ -424,6 +423,7 @@ Public sütunu yalnız bilgi içindir (17 spell, aralık ~0.4); v7'den itibaren 
 | Sınırları yeniden konumlandırma (`src/exp_refine.py`; decoder spell'lerin varlığına karar verir, her takım→takım değişimi ±2 sn içinde az yumuşatılmış kanıtın değişim noktasına taşınır) | ham / ±6 / ±12, tümü / yalnız kısa: 6 varyantın hepsi 10 bağlamın hepsinde −0.001…−0.003 (pişmanlık 0.0026–0.0030); gecikme takım modelinin özellik pencerelerinden de geliyor | ❌ |
 | **Kısa possession doğrulayıcısı → v13** (`src/exp_verify.py`, `src/short_verifier.py`, `src/model_v13.py`; 3 v10 tohumu × 2 ölü top kanalı × 2 doğrulayıcı tohumu, 30 maçta maç-dışı, 10 bağlam) | strict (ekle p ≥ 0.65, sil p < 0.35, BiGRU marjlı): DFL-trk +0.004…+0.0055, DFL-evctrl +0.000…+0.0015, Metrica −0.002…+0.004 (aralıklar sıfırı kapsıyor), SC faz +0.010…+0.011, SC pp +0.014…+0.017; en kötü pişmanlık v10 0.019–0.021 → 0.0037–0.0040; komşu eşikler 0.6/0.4 ve 0.7/0.3 benzer; BiGRU'suz strict 0.012; eşik 0.5/0.5 Metrica'da −0.002…−0.006; yalnız silme SC'de ≈ 0. Gönderim yapılandırması (iki ölü top kanalının adayları birleşik eğitim): 0.019 → 0.004. BAR-ATH (etiketsiz): 203 → 214 possession, karelerin %0.19'u, public pencerede değişen kare yok; MD5 ed8ad739…, iki çalıştırma ve boş önbellekten temiz dışa aktarım aynı; testler 57/57 | ✅ v13 varsayılan |
 | Literatür taraması (tur 15; 3 web ajanı, yalnız genel problem tanımı, veri yok) | PathCRF (KDD 2026; topsuz; fiziksel aktarım kısıtlı Viterbi / CRF ile olay F1 65 → 73 → 76), ELASTIC (olay–takip eşleme ±2 karede %88–96), Link & Hoernig kontrol tanımları, Wang 2025 (iskelet + sensörlü topla bile ayak düellosunda son dokunuş %65–75), Bauer & Anzer (karşı pres sinyalleri ilk 1–3 sn); segment uzunluğuna göre F1 veren bir TAS çalışması yok; öneriler MBR / yapısal kalibrasyon / semi-CRF eğitimi / kısa spell ağırlığı | bilgi; ayrıntı §4 Tur 15 |
+| Doğrulayıcı v2: literatürden yeni ipuçları (`src/exp_verify.py` build2 / trainpool2 / eval2, tur 16; v13 ile aynı adaylar, gönderim yapılandırması, 3 v10 tohumu) | eklenenler: aday başladıktan sonraki 1–2 sn'de iki takımın ileri hızı, topun gerisindeki rakipler, topa baskı ve kalabalık (Bauer & Anzer); top görünmüyorken son görüldüğü noktaya iki takımın uzaklığı, hareket eden topun 0.5 sn sonraki düşme noktasındaki takım ("ışınlanma yok", PathCRF); güçlü kanıtın en uzun süresi, en yüksek marj; spell'in duruşla başlayıp bitmesi, sonraki duruşa süre, spell içindeki dönüş yoğunluğu. AUC değişmedi (ekleme DFL 0.71–0.73 / Metrica 0.69–0.72 / SC 0.85). v13'e göre spellF1: DFL −0.001…−0.003, Metrica −0.000…−0.003, SC +0.000…+0.002; pişmanlık v13 0.0015, v2 0.0028, 0.7/0.3 eşikli v2 0.0019; BiGRU'suz v2 DFL'de −0.007 / −0.008. v13 aynı adaylarla birebir yeniden üretildi | ❌ (≈) v13 kalır |
 
 ### Ekip arkadaşının GitHub kayıtları — 27 Ekim birleştirmesi
 
@@ -1740,11 +1740,28 @@ DFL geçerli bir dış test, çünkü orada BiGRU marjı yok. BAR-ATH'a en yakı
   README, herkese açık README, teknik doküman ve AGENTS.md güncellendi.
 
 **Açık konular.**
-1. PFF verisiyle eğitilmiş BiGRU ağırlıklarının herkese açık repoda yayımlanma koşulu Alperen'le teyit edilmeli.
+1. ~~PFF verisiyle eğitilmiş BiGRU ağırlıklarının yayımlanma koşulu~~ → kullanıcı 30 Ekim'de izni teyit etti.
 2. PathCRF'yi Colab'da DFL maç-dışı yeniden eğitip ikinci bağımsız kanıt yapmak; kodu ve ağırlıkların boyutu sorulmalı.
 3. ELASTIC-eşlenmiş DFL olaylarıyla kare hassas "kontrol" etiketi (indirme boyutu sorulmalı).
 4. R-8 kısa spell'e tavanlı ağırlık (CPU, denenmedi).
 5. "D-bölme" metriğe yönelik bir hile sayılabilir (canlı kareye D yazar); denemeden önce kullanıcı kararı.
+
+#### Tur 16 — 30 Ekim: doğrulayıcı v2, literatürden yeni ipuçları (kullanıcı: "modeli geliştirmeye devam et")
+
+Kullanıcı PFF izninin olduğunu teyit etti; BiGRU ağırlıkları herkese açık repoda kalabilir.
+
+**Deney.** v13'ün ekleme kararı DFL ve Metrica'da zayıf (AUC ~0.70–0.75). Tur 15 literatüründen gelen ama kullanılmamış
+üç kanıt türü doğrulayıcıya eklendi (`feats2`):
+- geçiş tepkisi: aday başladıktan sonraki 1–2 sn'de iki takımın ileri hızı, topun gerisindeki rakip sayısı, topa baskı;
+- "ışınlanma yok": top görünmüyorken son görüldüğü noktaya iki takımın en yakın oyuncusu, hareket eden topun düşme
+  noktasındaki takım;
+- kanıtın biçimi ve duruş bağlamı: güçlü kanıtın en uzun süresi, spell'in duruşla başlaması / bitmesi, dönüş yoğunluğu.
+Adaylar ve etiketler v13'ünkilerle aynı; aynı satırlarda v13 de yeniden eğitildi ve önceki sonuçlarını birebir verdi.
+
+**Sonuç.** Ayrım gücü değişmedi; spellF1'de v2 v13'ün gerisinde ya da eşit (en kötü pişmanlık 0.0028 / 0.0015).
+Literatür ipuçlarının bilgisi v13'ün mevcut gözlemlerinde (en yakın mesafe, top tutma, çekişme, v10 ve BiGRU marjları)
+zaten var. Kazanç ancak yeni bir kanıt kaynağından gelebilir: BiGRU ailesi (DFL doğrulaması için PFF ile maç-dışı
+yeniden eğitim) ya da bağımsız bir dizi modeli.
 
 ## Ek A — İlk analiz, araştırma ve baseline'lar (20 Ekim)
 

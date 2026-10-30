@@ -63,7 +63,73 @@ def gru_mean(src):
     return [np.mean([x[i] for x in m], axis=0) for i in range(len(m[0]))]
 
 
-def rows_for(src, blocks, cues, gt_primary, preds, smo, raw, gru, min_len):
+BASE2 = BASE + ["adv_k", "adv_o", "goalside_o", "goalside_k", "press_k", "crowd", "gap_in", "gap_out", "reach_k",
+                "reach_o", "land_k", "land_d", "strong_k", "m_max", "enc_start_dead", "enc_end_dead", "until_dead",
+                "flips_enc"]
+
+
+def feats2(c, ms, mr, pr, s, t, k, a, e):
+    """Round 16 cues from the round-15 literature: the transition reaction right after the candidate starts (Bauer &
+    Anzer: counter-press signals appear within 1-3 s), the reachability of a missing ball and the landing point of a
+    moving one ("no teleport", PathCRF), the shape of the evidence, and the stoppage context."""
+    n = len(pr)
+    o = 1 - k
+    pxy, team, gk, bxy, miss = c["pxy"], c["team"], c["gk"], c["bxy"], c["miss"]
+    sgn = 1.0 if c["plus"][k] else -1.0                 # team k attacks towards +x when sgn > 0
+    f = {}
+    w = slice(s, min(s + 50, n))
+    for key, tm, sg in (("adv_k", k, sgn), ("adv_o", o, -sgn)):
+        v = c["cen"][tm][w] * sg
+        f[key] = float(np.nanmean(v)) if np.isfinite(v).any() else np.nan
+    vis = np.flatnonzero(~miss[s:min(s + 25, n)]) + s
+    if len(vis):
+        rel = (pxy[vis, :, 0] - bxy[vis, None, 0]) * sgn            # + = nearer team o's goal than the ball
+        with np.errstate(invalid="ignore"):
+            f["goalside_o"] = float(np.mean(np.sum((rel > 0) & ((team == o) & ~gk)[None, :], 1)))
+            f["goalside_k"] = float(np.mean(np.sum((rel < 0) & ((team == k) & ~gk)[None, :], 1)))
+            d = np.linalg.norm(pxy[vis] - bxy[vis, None, :], axis=2)
+        d = np.where(np.isfinite(d), d, np.inf)
+        f["press_k"] = float(np.mean(np.sum((d <= 5) & (team == o)[None, :], 1)))
+        f["crowd"] = float(np.mean(np.sum(d <= 10, 1)))
+    else:
+        f["goalside_o"] = f["goalside_k"] = f["press_k"] = f["crowd"] = np.nan
+    lo = max(s - 100, 0)
+    back = np.flatnonzero(~miss[lo:s + 1])
+    lv = int(back[-1]) + lo if len(back) else -1
+    ahead = np.flatnonzero(~miss[s:min(s + 100, n)])
+    f["gap_in"] = (s - lv) / ea.FPS if lv >= 0 else 4.0
+    f["gap_out"] = int(ahead[0]) / ea.FPS if len(ahead) else 4.0
+    f["reach_k"] = f["reach_o"] = f["land_k"] = f["land_d"] = np.nan
+    if lv >= 0:
+        with np.errstate(invalid="ignore"):
+            d = np.linalg.norm(pxy[s] - bxy[lv], axis=1)
+        d = np.where(np.isfinite(d), d, np.inf)
+        f["reach_k"] = float(min(np.min(np.where(team == k, d, np.inf)), 40.0))
+        f["reach_o"] = float(min(np.min(np.where(team == o, d, np.inf)), 40.0))
+        if lv >= 4 and not miss[lv - 4]:
+            v = (bxy[lv] - bxy[lv - 4]) / (4 / ea.FPS)
+            if np.linalg.norm(v) > 8:
+                at = min(lv + 12, n - 1)
+                with np.errstate(invalid="ignore"):
+                    d = np.linalg.norm(pxy[at] - (bxy[lv] + v * ((at - lv) / ea.FPS)), axis=1)
+                d = np.where(np.isfinite(d), d, np.inf)
+                j = int(np.argmin(d))
+                if np.isfinite(d[j]):
+                    f["land_k"] = float(team[j] == k)
+                    f["land_d"] = float(min(np.min(np.where(team == k, d, np.inf)), 40.0))
+    sk = 1.0 if k == 0 else -1.0
+    f["strong_k"] = max((q - p for p, q in ea.runs(mr[s:t] * sk > 1.0)), default=0) / ea.FPS
+    f["m_max"] = float(np.max(ms[s:t] * sk))
+    f["enc_start_dead"] = float(a > 0 and pr[a - 1] == 2)
+    f["enc_end_dead"] = float(e < n and pr[e] == 2)
+    nd = np.flatnonzero(pr[t:] == 2)
+    f["until_dead"] = min(int(nd[0]) / ea.FPS, 60.0) if len(nd) else 60.0
+    other = (ms[a:e] > 0) != (pr[a] == 0)
+    f["flips_enc"] = sum(1 for p, q in ea.runs(other) if q - p >= 6) / max((e - a) / ea.FPS / 60, 1e-3)
+    return f
+
+
+def rows_for(src, blocks, cues, gt_primary, preds, smo, raw, gru, min_len, i0=0, v2=False):
     rows = []
     for i, (b, gt, pr) in enumerate(zip(blocks, gt_primary, preds)):
         c = cues[i]
@@ -93,8 +159,10 @@ def rows_for(src, blocks, cues, gt_primary, preds, smo, raw, gru, min_len):
                     (s - a) / ea.FPS, (e - t) / ea.FPS)
                 f["prev_dead"] = float(prev == 2) if typ == "del" else 0.0
                 f["next_dead"] = float(nxt == 2) if typ == "del" else 0.0
-                f.update(y=y, typ=typ, src=src, group=src + "/" + str(b["group"]), i=i, s=s, t=t, k=kk, a=a, e=e,
-                         min_len=min_len)
+                if v2:
+                    f.update(feats2(c, ms, mr, pr, s, t, kk, a, e))
+                f.update(y=y, typ=typ, src=src, group=src + "/" + str(b["group"]), i=i0 + i, s=s, t=t, k=kk, a=a,
+                         e=e, min_len=min_len)
                 rows.append(f)
     return rows
 
@@ -232,16 +300,112 @@ def evaluate(vseed, variants=None):
     return er.summarize(cells, ["v10"] + list(variants))
 
 
+# -- round 16: the verifier with the round-16 cues (feats2), judged against v13 on identical candidates ---------------
+
+FEATSETS = {"G1": BASE + ["m_gru"], "G2": BASE2 + ["m_gru"], "noG2": BASE2}
+VARIANTS2 = {"v13": ("G1", True, True, 0.65, 0.35), "v2 strict": ("G2", True, True, 0.65, 0.35),
+             "v2 0.6/0.4": ("G2", True, True, 0.6, 0.4), "v2 0.7/0.3": ("G2", True, True, 0.7, 0.3),
+             "v2 no G strict": ("noG2", True, True, 0.65, 0.35)}
+
+
+def build2(only=None):
+    """Stage 1 with the round-16 cues; one block's frame cues at a time (they now carry player positions)."""
+    for src, convs, dec, prim in SOURCES:
+        if only and only != src:
+            continue
+        blocks = bench.blocks(src)
+        labs = bench.labels(src, prim)
+        learned = bench.dead_probs(src, "base") if src == "dfl@v3" else bench.dead_ext("base", "v3", src)
+        true_d = [np.where(g == 2, 1 - es.EPS, es.EPS) for g in labs]
+        gru = gru_mean(src)
+        raws = {seed: es.v10_raw(seed, src) for seed in es.SEEDS}
+        smos = {seed: exp_smooth.smooth(raws[seed], 25) for seed in es.SEEDS}
+        bases = {(seed, dname): es.decode(dec, 48.0, pds, smos[seed])
+                 for seed in es.SEEDS for dname, pds in zip(DEADS, (learned, true_d))}
+        rows = {key: [] for key in bases}
+        for i, b in enumerate(blocks):
+            c = ea.frame_cues(b)
+            for (seed, dname), base in bases.items():
+                rows[(seed, dname)] += rows_for(src, [b], [c], [labs[i]], [base[i]], [smos[seed][i]], [raws[seed][i]],
+                                                [gru[i]] if gru is not None else None, int(dec[1]), i0=i, v2=True)
+            del c
+        os.makedirs(CACHE, exist_ok=True)
+        for (seed, dname), base in bases.items():
+            bench._dump(dict(base=base, rows=rows[(seed, dname)]), _path("rows2", src, seed, dname))
+        print("  round-16 candidates built for %s" % src, flush=True)
+
+
+def train_pooled2(seed, vseed):
+    """Stage 2, deployment-like (both dead channels pooled): leave-one-match-out probabilities per feature set."""
+    parts = {dname: [r for src, *_ in SOURCES for r in bench._load(_path("rows2", src, seed, dname))["rows"]]
+             for dname in DEADS}
+    rows = parts[DEADS[0]] + parts[DEADS[1]]
+    params = dict(PARAMS, seed=vseed, deterministic=True, force_row_wise=True,
+                  num_threads=int(os.environ.get("VERIFY_THREADS", "4")))
+    probs = {fs: predict_lomo(rows, keys, params) for fs, keys in FEATSETS.items()}
+    n = len(parts[DEADS[0]])
+    for k, dname in enumerate(DEADS):
+        sl = slice(0, n) if k == 0 else slice(n, len(rows))
+        bench._dump({fs: pp[sl] for fs, pp in probs.items()}, _path("probs2", seed, dname, "q%d" % vseed))
+    yy = np.array([r["y"] for r in rows])
+    for fs, pp in probs.items():
+        cells = []
+        for typ in ("ins", "del"):
+            for src, *_ in SOURCES:
+                sel = np.array([(r["typ"] == typ and r["src"] == src and r["y"] >= 0) for r in rows])
+                cells.append("%s %s %.3f" % (typ, src.split("@")[0], ea.auc(pp[sel & (yy == 1)], pp[sel & (yy == 0)])))
+        print("    seed %d %-5s AUC %s" % (seed, fs, " | ".join(cells)), flush=True)
+
+
+def evaluate2(vseed):
+    cells = {}
+    for src, convs, dec, prim in SOURCES:
+        blocks = bench.blocks(src)
+        labs = {c: bench.labels(src, c) for c in convs}
+        for seed in es.SEEDS:
+            for dname in DEADS:
+                probs = bench._load(_path("probs2", seed, dname, "q%d" % vseed))
+                n0 = 0
+                for s2, *_ in SOURCES:
+                    if s2 == src:
+                        break
+                    n0 += len(bench._load(_path("rows2", s2, seed, dname))["rows"])
+                d = bench._load(_path("rows2", src, seed, dname))
+                base, rows = d["base"], d["rows"]
+                by_half = {}
+                for n, r in enumerate(rows):
+                    by_half.setdefault(r["i"], []).append(n)
+                outs = {"v10": base}
+                for name, (fs, use_ins, use_del, t_ins, t_del) in VARIANTS2.items():
+                    pp = probs[fs]
+                    outs[name] = [apply(pr, [rows[n] for n in by_half.get(i, [])],
+                                        pp[[n0 + n for n in by_half.get(i, [])]], use_ins, use_del, t_ins, t_del)
+                                  for i, pr in enumerate(base)]
+                for c in convs:
+                    for name, preds in outs.items():
+                        cells.setdefault((src, c, dname, name), []).append(er.by_match(blocks, labs[c], preds))
+        bench._blocks.clear()
+        bench._labels.clear()
+    er.summarize(cells, ["v10"] + list(VARIANTS2))
+    return er.summarize(cells, list(VARIANTS2), ref="v13")
+
+
 def main():
     sys.stdout.reconfigure(encoding="utf-8")
     warnings.filterwarnings("ignore")
     stage = sys.argv[1] if len(sys.argv) > 1 else "eval"
     if stage == "build":
         build(sys.argv[2] if len(sys.argv) > 2 else None)
+    elif stage == "build2":
+        build2(sys.argv[2] if len(sys.argv) > 2 else None)
     elif stage == "train":
         train(int(sys.argv[2]), DEADS[int(sys.argv[3])], int(sys.argv[4]))
     elif stage == "trainpool":
         train_pooled(int(sys.argv[2]), int(sys.argv[3]))
+    elif stage == "trainpool2":
+        train_pooled2(int(sys.argv[2]), int(sys.argv[3]))
+    elif stage == "eval2":
+        evaluate2(int(sys.argv[2]) if len(sys.argv) > 2 else 0)
     else:
         tag = sys.argv[2] if len(sys.argv) > 2 else "0"
         evaluate(int(tag) if tag.isdigit() else tag)
