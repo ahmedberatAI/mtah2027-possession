@@ -1,18 +1,29 @@
 #!/bin/bash
 # Round 17 GPU job (launched in the background by colab/launch.py; log in logs/run_bigru_lomo.log): leave-one-DFL-
-# match-out training of the shared BiGRU recipe (src/exp_bigru_lomo.py). Open DFL data is fetched on the VM; the PFF
-# folder comes from the user's Drive, mounted at /content/drive by `colab drivemount` (the user authorises it). No
-# BAR-ATH data. Prints aggregates only.
+# match-out training of the shared BiGRU recipe (src/exp_bigru_lomo.py). Open DFL data is fetched on the VM. The PFF
+# World Cup data is copied from the provider's folder in the user's mounted Drive (a shortcut to it in My Drive,
+# `colab drivemount` authorised by the user; PFF_DIR overrides the search); anonymous downloads of it hit Google's
+# quota (colab/fetch_pff.py is the fallback). No BAR-ATH data. Prints aggregates only.
 set -e
 cd "$(dirname "$0")/.."
 export BENCH_THREADS=$(nproc) BENCH_PROCS=$(( $(nproc) > 1 ? $(nproc) - 1 : 1 )) PYTHONUNBUFFERED=1
 echo "start $(date -u) cpus $(nproc) gpu $(nvidia-smi --query-gpu=name --format=csv,noheader)"
-pip -q install orjson lightgbm==4.7.0 numba
-PFF_DIR=${PFF_DIR:-$(find /content/drive -maxdepth 7 -type d -name gradient 2>/dev/null | while read d; do
-    [ -d "$d/events" ] && [ -d "$d/tracking" ] && echo "$d" && break; done)}
-if [ -z "$PFF_DIR" ]; then echo "PFF folder (gradient/{events,metadata,rosters,tracking}) not found under /content/drive"; exit 1; fi
-echo "PFF: $(ls "$PFF_DIR/events" | wc -l) event files, $(ls "$PFF_DIR/tracking" | wc -l) tracking files"
-mkdir -p external_data && ln -sfn "$PFF_DIR" external_data/gradient
+pip -q install orjson lightgbm==4.7.0 numba gdown
+if [ -z "$PFF_DIR" ] && [ -d /content/drive ]; then
+    PFF_DIR=$(find -L /content/drive -maxdepth 4 -type d -name "Tracking Data" 2>/dev/null | while read d; do
+        p=$(dirname "$d"); [ -d "$p/Event Data" ] && [ -d "$p/Rosters" ] && echo "$p" && break; done)
+fi
+if [ -n "$PFF_DIR" ]; then
+    echo "PFF from the mounted Drive"
+    for pair in "events:Event Data" "metadata:Metadata" "rosters:Rosters" "tracking:Tracking Data"; do
+        kind=${pair%%:*}; name=${pair#*:}
+        mkdir -p external_data/gradient/$kind
+        find "$PFF_DIR/$name" -maxdepth 1 -type f -name '[0-9]*.json*' -exec cp -n {} external_data/gradient/$kind/ \;
+        echo "pff $kind $(ls external_data/gradient/$kind | wc -l) files"
+    done
+else
+    python colab/fetch_pff.py "$PWD"
+fi
 python src/download_idsse.py
 python src/exp_bigru_lomo.py prepare 4
 mkdir -p logs
