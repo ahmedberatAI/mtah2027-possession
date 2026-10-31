@@ -10,7 +10,10 @@ LightGBM seeds; then v14's blend (0.5 BiGRU) and its verifier are rebuilt on the
 contexts. AGGREGATE output only.
 
 Variants are named sb<cap> (spell-balanced team classifier), g<cap> (the spell-balanced BiGRU of
-src/exp_bigru_sb.py, trained on Colab) or both, e.g. sb2g2; v14 = neither.
+src/exp_bigru_sb.py, trained on Colab), d<10 x beta> (round 19, analyst idea 3: dominance-aware length prior -- a
+first decode gives each half's possession share s, then each team's soft-minimum-length cost is 48 x (s_team / 0.5)^beta
+with s clipped to [0.3, 0.7], so the team with less of the ball may end its possessions sooner; beta 0.5 / 1 fixed in
+advance) or combinations, e.g. sb2g2; v14 = none.
 
   SB_CAP=2 LGB_SEED=k python -I src/exp_sb.py probs       held-out team probabilities
   python -I src/exp_sb.py build VARIANT                     blend candidates (src/exp_verify.py build3 / build4)
@@ -37,6 +40,7 @@ CAPS = (2.0, 4.0)
 L0, LMIN = 100, 6
 _path = ev._path
 _v10_raw = es.v10_raw
+_decode = es.decode
 _bigru_members = es.bigru_members
 _lomo_bigru = ev.lomo_bigru
 
@@ -106,16 +110,40 @@ def probs(cap):
 
 
 def parse(variant):
-    """'sb2g4' -> (2.0, 4.0); 'v14' -> (None, None)."""
-    m = re.fullmatch(r"(?:sb(\d+))?(?:g(\d+))?", "" if variant == "v14" else variant)
-    return tuple(None if x is None else float(x) for x in m.groups())
+    """'sb2g4d10' -> (2.0, 4.0, 1.0); 'v14' -> (None, None, None)."""
+    m = re.fullmatch(r"(?:sb(\d+))?(?:g(\d+))?(?:d(\d+))?", "" if variant == "v14" else variant)
+    cap, gcap, d = m.groups()
+    return (None if cap is None else float(cap), None if gcap is None else float(gcap),
+            None if d is None else float(d) / 10)
+
+
+def dominance_decode(beta):
+    """exp_short.decode with team-specific soft-minimum-length costs from a first decode's possession share."""
+    import decode2
+    import exp_v7
+    import train_dfl as td
+
+    def decode(dec, c, pds, phs):
+        out = []
+        for pd_, ph, first in zip(pds, phs, _decode(dec, c, pds, phs)):
+            live = first < 2
+            share = min(max(float(np.mean(first[live] == 0)) if live.any() else 0.5, 0.3), 0.7)
+            macros = [dict(emis=k, out=k, L=175, min_exit=dec[1] - 1,
+                           exit_cost=exp_v7.ramp(175, c * ((share if k == 0 else 1 - share) / 0.5) ** beta))
+                      for k in (0, 1)] + [dict(emis=2, out=2, L=dec[2])]
+            pen = [[0, 12.0, dec[0]], [12.0, 0, dec[0]], [dec[0], dec[0], 0]]
+            out.append(decode2.Spec(macros, pen).decode(td.emissions(pd_, np.clip(ph, es.EPS, 1 - es.EPS), 1.0, 1.0))
+                       .astype(np.int8))
+        return out
+    return decode
 
 
 def use_variant(variant):
     """Point exp_short's v10 probabilities and BiGRU members (and exp_verify's held-out DFL BiGRU) at the variant,
     blend weight .5, and exp_verify's blend caches at w50 (v14) or w50<variant>."""
-    cap, gcap = parse(variant)
+    cap, gcap, beta = parse(variant)
     es.W_BIGRU = 0.5
+    es.decode = _decode if beta is None else dominance_decode(beta)
     tag = "w50" if variant == "v14" else "w50" + variant
     es.v10_raw = _v10_raw if cap is None else (lambda seed, src: bench._load(probs_path(seed, cap))[src])
     if gcap is None:

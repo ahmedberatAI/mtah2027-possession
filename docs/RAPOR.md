@@ -463,6 +463,11 @@ Public sütunu yalnız bilgi içindir (17 spell, aralık ~0.4); v7'den itibaren 
 | Duruş sonrası zamanlama kâhini (teşhis): duruştan sonraki ilk spell'in bitişi en yakın gerçek değişime taşınsa | ±1 sn +0.002…+0.007, ±2 sn +0.004…+0.014, ±4 sn +0.008…+0.024; bütün değişimler ±2 sn +0.009…+0.027 | bilgi: gerçek havuz |
 | Fiziksel kontrol anına oturtma (`src/exp_restart.py`; A6 / A5: ELASTIC, Vidal-Codina, Link & Hoernig): decoder'ın k → o değişimi [−75, +10] karede o'nun ilk "tutma" (görünür topa en yakın, ≤ 1.5 m, 6 kare) ya da dokunuş anına; duruş sonrası / bütün değişimler | v14'e göre her bağlamda eksi: duruş sonrası tutma −0.002…−0.006, dokunuş −0.002…−0.008, bütün değişimler −0.005…−0.013 | ❌ bozulmuş takipte ilk temas çoğu zaman kontrolden önceki düello |
 | Kalibrasyon (teşhis; A4): canlı karelerde log kaybını en aza indiren sıcaklık | DFL ve SC 1.0, Metrica 0.75 (log kaybı 0.122 → 0.114); v10, BiGRU ve karışım aynı | bilgi: kalibrasyonla açılacak pay yok |
+| Kenar eklemesi eşiği (`src/exp_edge.py`; tur 19, analist fikri 2: possession'ın başına / sonuna değen ekleme +1 spell, ortaya ekleme +2; F1 muhasebesiyle kenar eklemesine düşük eşik, 0.55 / 0.50 önceden sabit; v14'ün doğrulayıcı olasılıkları aynen) | v14'e göre −0.0015…+0.0017 (SC gerçek D'de +0.001…+0.002, DFL'de −0.000…−0.002); pişmanlık v14 0.0017, 0.55 0.0010, 0.50 0.0015 | ≈ eşik civarında olasılık kütlesi yok |
+| Baskınlığa göre süre önseli (`src/exp_sb.py` varyant d05 / d10; tur 19, fikir 3: ilk decode'dan yarının possession payı, takım başına erken bitirme maliyeti 48 × (pay / 0.5)^β, β 0.5 / 1 önceden sabit; doğrulayıcı yeniden kuruldu) | etiketlerde topu < %45 tutan takımın kısa spell payı DFL 0.27 vs 0.19, SC 0.34 vs 0.26; ama v14'e göre −0.002…+0.0015; pişmanlık v14 0.0015, d05 0.0018, d10 0.0021 | ≈ |
+| Kesme yarışı (`src/exp_race.py`; tur 19, fikir 1: Spearman tarzı zaman-kesme — hareketli topun 2 sn'lik yolunda önce varan oyuncu; tepki 0.7 sn, 5 m/s) | değişimden önceki 1 sn'de yeni takımı görme: yarış 0.67–0.75, "şu an en yakın takım" 0.88–0.92; kararlı anlarda alarm 0.23–0.37 vs 0.21–0.22; öngörülen an değişimden medyan +12 kare sonra. Gürültüsüz DFL'de (v3p0) de 0.70 vs 0.89, alarm 0.355 vs 0.218 | ❌ basit yarış yakınlığın ötesinde bilgi taşımıyor; sorun yalnız gürültü değil |
+| Taşıma sertifikası (teşhis; tur 19, fikir 5: top ile en yakın oyuncunun hız vektörleri aynı yönde, ikisi de ≥ 1.5 m/s) | v14 adaylarında doğrulayıcı AUC'si G1 → G1 + taşıma: ekleme DFL 0.715 → 0.722, Metrica 0.736 → 0.748, SC 0.816 → 0.821, silme DFL 0.830 → 0.843; tek başına AUC 0.48–0.52 | bilgi: tur 16'daki gibi küçük AUC artışı, spellF1'e taşınması beklenmez |
+| Kısa spell'leri daraltma (`src/exp_shrink.py`; tur 19: tur 15'in genişlik yanlılığına göre < 4 sn spell'ler her yandan 6 / 12 kare daraltıldı) | v14'e göre her bağlamda −0.008…−0.018 | ❌ v14'te eşleşen kısa spell'ler zaten hizalı; yanlılık v10 çözümüne aitti |
 
 ### Ekip arkadaşının GitHub kayıtları — 27 Ekim birleştirmesi
 
@@ -1878,6 +1883,37 @@ bootstrap'ta 0.94 olasılıkla eşiğin üstünde). Metrica yalnız 3 maç; aral
    sorulur.
 2. Doğrulayıcı varyantları (ör. DFL marjsız satırları da eğitime katmak) yalnız pişmanlığı 0.005'ten fazla düşürürse.
 3. Push öncesi kullanıcı onayı.
+
+#### Tur 18–19 — 31 Ekim: literatür taraması (6 Codex ajanı) ve analist fikirleri (kullanıcı: "literatür taraması yap, yetenek devşir, v15'i inşa et"; ardından "kıdemli bir futbol analisti gibi düşün")
+
+**Araştırma (tur 18).** 6 Codex alt ajanı yalnız web aramasıyla çalıştı (kabuk, tarayıcı, bilgisayar kullanımı ve
+eklentiler kapalı; salt-okunur; repo dışında boş klasör; istemde yalnız genel problem tanımı, açık verideki kendi
+sonuçlarımız ve denenmişler listesi; yarışma verisi yok). Konular: A1 metriğe göre çözümleme, A2 dizi modelleri ve
+eğitim amacı, A3 top çıkarımı, A4 sağlayıcılar arası genelleme ve kalibrasyon, A5 top kayıpları ve kısa possession'lar,
+A6 ölü top ve duruşlar. Kaynak listesi §3'teki satırda.
+
+**Denenenler (tur 18–19), hepsi v14'e karşı 10 bağlamda:** metrik-kazanç kararı ❌, kısa spell ağırlıklı takım modeli ≈,
+fiziksel kontrol anına oturtma ❌, kenar eklemesi eşiği ≈, baskınlığa göre süre önseli ≈, kesme yarışı ❌ (teşhiste
+yakınlıktan zayıf, gürültüsüz veride de), kısa spell'leri daraltma ❌; taşıma sertifikası teşhiste yalnız küçük AUC artışı.
+Ayrıntılar §3'te.
+
+**Teşhisler.**
+- Oyun içi kısa spell'lerin ~%70'inde karışım doğru takımı 0.5 sn bile göstermiyor (yumuşatmasız da %25–30 kapsam);
+  iki modelin birleşimi kapsamı %27–34'e çıkarıyor ama aday sayısı 2.7 katına çıkıyor.
+- Kâhinler: v14'ün adaylarında her düzenlemenin gerçek etkisini bilmek +0.04–0.06; duruş sonrası ilk spell'lerin
+  bitişini ±2 sn içinde doğru ana taşımak +0.004…+0.014 (±4 sn +0.008…+0.024).
+- Decoder sonsalı ve kalibrasyon yeni bilgi getirmiyor (sonsal AUC doğrulayıcıdan düşük; en iyi sıcaklık ~1).
+
+**Ders.** Karar katmanı (eşikler, metrik muhasebesi, süre önselleri) doymuş: değişiklikler ±0.002 içinde kalıyor.
+Bozulmuş takipten el yapımı fiziksel ipuçları (kesme yarışı, tutma / dokunuş anı, taşıma) modellerin zaten gördüğü
+yakınlık bilgisinin ötesine geçmiyor. Kısa possession havuzunu açacak olan yeni öğrenilmiş kanıt: BiGRU ailesinin
+eğitim amacı (kısa spell ağırlıklı kayıp, sınır başlığı, CRF eğitimi) ya da daha zengin girdili / daha çok veriyle
+eğitilmiş bir dizi modeli.
+
+**Bekleyen.** Kısa spell ağırlıklı BiGRU (`src/exp_bigru_sb.py`, `colab/run_bigru_sb.sh`; kullanıcı Colab'ı ve ~28 MB
+indirmeyi onayladı): ilk çalıştırma hazırlıkta "HTTP Error 403: Forbidden" ile durdu (hangi indirmenin reddedildiği
+görülemedi); kullanıcının isteğiyle oturum kapatıldı. Duruş türü dilbilgisi (fikir 4: duruş türü ve bölgesi →
+doğrulayıcı özellikleri / ilk spell süresi) denenmedi.
 
 ## Ek A — İlk analiz, araştırma ve baseline'lar (20 Ekim)
 
