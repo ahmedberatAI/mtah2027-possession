@@ -468,6 +468,10 @@ Public sütunu yalnız bilgi içindir (17 spell, aralık ~0.4); v7'den itibaren 
 | Kesme yarışı (`src/exp_race.py`; tur 19, fikir 1: Spearman tarzı zaman-kesme — hareketli topun 2 sn'lik yolunda önce varan oyuncu; tepki 0.7 sn, 5 m/s) | değişimden önceki 1 sn'de yeni takımı görme: yarış 0.67–0.75, "şu an en yakın takım" 0.88–0.92; kararlı anlarda alarm 0.23–0.37 vs 0.21–0.22; öngörülen an değişimden medyan +12 kare sonra. Gürültüsüz DFL'de (v3p0) de 0.70 vs 0.89, alarm 0.355 vs 0.218 | ❌ basit yarış yakınlığın ötesinde bilgi taşımıyor; sorun yalnız gürültü değil |
 | Taşıma sertifikası (teşhis; tur 19, fikir 5: top ile en yakın oyuncunun hız vektörleri aynı yönde, ikisi de ≥ 1.5 m/s) | v14 adaylarında doğrulayıcı AUC'si G1 → G1 + taşıma: ekleme DFL 0.715 → 0.722, Metrica 0.736 → 0.748, SC 0.816 → 0.821, silme DFL 0.830 → 0.843; tek başına AUC 0.48–0.52 | bilgi: tur 16'daki gibi küçük AUC artışı, spellF1'e taşınması beklenmez |
 | Kısa spell'leri daraltma (`src/exp_shrink.py`; tur 19: tur 15'in genişlik yanlılığına göre < 4 sn spell'ler her yandan 6 / 12 kare daraltıldı) | v14'e göre her bağlamda −0.008…−0.018 | ❌ v14'te eşleşen kısa spell'ler zaten hizalı; yanlılık v10 çözümüne aitti |
+| Yumuşatma ve süre önseli v14'ün karışımına göre (`src/exp_sb.py` varyantları s12 / s37 / c36 / c60; tur 20: v10 için seçilmiş ±25 kare ve 48 maliyet karışımda hiç yeniden ölçülmemişti; her varyant kendi adayları ve doğrulayıcısıyla) | ±37: DFL +0.002…+0.005, SC −0.002…−0.004; maliyet 60: DFL-evctrl +0.005 / +0.007, SC −0.002…−0.003; ±12 ve 36 kötü; pişmanlık v14 0.0067, s37 0.0045, c60 0.0034 | ≈ yine DFL ↔ SC takası |
+| Kısa spell dedektörü (`src/exp_ssd.py`; tur 20, yerel GPU: paylaşılan BiGRU mimarisi, hedef "bu kare kendi takımının < 4 sn'lik spell'inde", girdi v7 + maç-dışı GBM / BiGRU / ölü top; 30 maçta maç gruplu 5 kat, kat başına 83 sn) | kısa / uzun spell ayrımı AUC 0.85–0.90; ama doğrulayıcıya özellik olarak ekleme AUC'si değişmedi (DFL 0.70–0.73, Metrica 0.67–0.72, SC 0.80–0.82); spellF1 DFL-evctrl +0.004, diğerleri ≈ 0; pişmanlık farkı 0.0031 | ≈ |
+| Doğrulayıcı: üç v10 tohumunun adayları birlikte (`src/exp_vpool.py`; 3 kat satır, maç-dışı) ve doğrulayıcı tohumlarının ortalaması | birlikte: DFL-evctrl +0.003, diğerleri ±0.002; pişmanlık 0.0012 vs v14 0.0035 (fark 0.0026); ortalama ≈ | ≈ |
+| v14 hata bütçesi (teşhis, kâhinler) | sahte kısa dönüşleri silmek DFL +0.028…+0.037, Metrica +0.018…+0.020, SC +0.005…+0.012; kaçırılan oyun içi kısa spell'leri eklemek DFL +0.030…+0.039, Metrica +0.029, SC +0.074…+0.101; ikisi DFL +0.06–0.07, Metrica +0.05, SC +0.08–0.11; ölü top (öğrenilmiş → gerçek) DFL +0.024, Metrica +0.061, SC +0.16 | bilgi: havuzlar büyük, kanıt yok |
 
 ### Ekip arkadaşının GitHub kayıtları — 27 Ekim birleştirmesi
 
@@ -1909,6 +1913,13 @@ Bozulmuş takipten el yapımı fiziksel ipuçları (kesme yarışı, tutma / dok
 yakınlık bilgisinin ötesine geçmiyor. Kısa possession havuzunu açacak olan yeni öğrenilmiş kanıt: BiGRU ailesinin
 eğitim amacı (kısa spell ağırlıklı kayıp, sınır başlığı, CRF eğitimi) ya da daha zengin girdili / daha çok veriyle
 eğitilmiş bir dizi modeli.
+
+**Tur 20 (1 Kasım, kullanıcı: "dümeni sana veriyorum, yerelde çalışmana izin veriyorum").** v14'ün karışımına göre
+yumuşatma / süre önseli, yerel GPU'da kısa spell dedektörü ve doğrulayıcının veri / varyans iyileştirmeleri denendi:
+hepsi ≈ (pişmanlık farkları ≤ 0.0033). Hata bütçesi havuzların hâlâ büyük olduğunu gösteriyor (kısa spell kararları DFL
++0.06–0.07, Metrica +0.05, SC +0.08–0.11); yerel veriyle (DFL 7, Metrica 3, SC 20 maç) eğitilen her yeni bileşen aynı
+bilgiyi yeniden üretiyor. En büyük kullanılmamış kaynak PFF (64 maç) ve ancak Colab'da (Drive) ya da indirilerek
+kullanılabiliyor.
 
 **Bekleyen.** Kısa spell ağırlıklı BiGRU (`src/exp_bigru_sb.py`, `colab/run_bigru_sb.sh`; kullanıcı Colab'ı ve ~28 MB
 indirmeyi onayladı): ilk çalıştırma hazırlıkta "HTTP Error 403: Forbidden" ile durdu (hangi indirmenin reddedildiği

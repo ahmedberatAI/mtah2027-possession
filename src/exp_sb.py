@@ -13,7 +13,8 @@ Variants are named sb<cap> (spell-balanced team classifier), g<cap> (the spell-b
 src/exp_bigru_sb.py, trained on Colab), d<10 x beta> (round 19, analyst idea 3: dominance-aware length prior -- a
 first decode gives each half's possession share s, then each team's soft-minimum-length cost is 48 x (s_team / 0.5)^beta
 with s clipped to [0.3, 0.7], so the team with less of the ball may end its possessions sooner; beta 0.5 / 1 fixed in
-advance) or combinations, e.g. sb2g2; v14 = none.
+advance), s<w> (round 20: the team probability smoothed over +-w frames instead of v14's +-25), c<cost> (round 20:
+the soft-minimum-length cost instead of 48) or combinations, e.g. sb2g2; v14 = none.
 
   SB_CAP=2 LGB_SEED=k python -I src/exp_sb.py probs       held-out team probabilities
   python -I src/exp_sb.py build VARIANT                     blend candidates (src/exp_verify.py build3 / build4)
@@ -34,6 +35,7 @@ import exp_a2  # noqa: E402
 import exp_combo  # noqa: E402
 import exp_refine as er  # noqa: E402
 import exp_short as es  # noqa: E402
+import exp_smooth  # noqa: E402
 import exp_verify as ev  # noqa: E402
 
 CAPS = (2.0, 4.0)
@@ -41,6 +43,7 @@ L0, LMIN = 100, 6
 _path = ev._path
 _v10_raw = es.v10_raw
 _decode = es.decode
+_smooth = exp_smooth.smooth
 _bigru_members = es.bigru_members
 _lomo_bigru = ev.lomo_bigru
 
@@ -110,11 +113,11 @@ def probs(cap):
 
 
 def parse(variant):
-    """'sb2g4d10' -> (2.0, 4.0, 1.0); 'v14' -> (None, None, None)."""
-    m = re.fullmatch(r"(?:sb(\d+))?(?:g(\d+))?(?:d(\d+))?", "" if variant == "v14" else variant)
-    cap, gcap, d = m.groups()
+    """'sb2g4d10s12c36' -> (2.0, 4.0, 1.0, 12, 36.0); 'v14' -> five Nones."""
+    m = re.fullmatch(r"(?:sb(\d+))?(?:g(\d+))?(?:d(\d+))?(?:s(\d+))?(?:c(\d+))?", "" if variant == "v14" else variant)
+    cap, gcap, d, w, c = m.groups()
     return (None if cap is None else float(cap), None if gcap is None else float(gcap),
-            None if d is None else float(d) / 10)
+            None if d is None else float(d) / 10, None if w is None else int(w), None if c is None else float(c))
 
 
 def dominance_decode(beta):
@@ -141,9 +144,11 @@ def dominance_decode(beta):
 def use_variant(variant):
     """Point exp_short's v10 probabilities and BiGRU members (and exp_verify's held-out DFL BiGRU) at the variant,
     blend weight .5, and exp_verify's blend caches at w50 (v14) or w50<variant>."""
-    cap, gcap, beta = parse(variant)
+    cap, gcap, beta, width, cost = parse(variant)
     es.W_BIGRU = 0.5
-    es.decode = _decode if beta is None else dominance_decode(beta)
+    base = _decode if beta is None else dominance_decode(beta)
+    es.decode = base if cost is None else (lambda dec, c, pds, phs: base(dec, cost, pds, phs))
+    exp_smooth.smooth = _smooth if width is None else (lambda x, w: _smooth(x, width))
     tag = "w50" if variant == "v14" else "w50" + variant
     es.v10_raw = _v10_raw if cap is None else (lambda seed, src: bench._load(probs_path(seed, cap))[src])
     if gcap is None:
