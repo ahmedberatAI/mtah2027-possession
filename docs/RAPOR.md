@@ -472,6 +472,12 @@ Public sütunu yalnız bilgi içindir (17 spell, aralık ~0.4); v7'den itibaren 
 | Kısa spell dedektörü (`src/exp_ssd.py`; tur 20, yerel GPU: paylaşılan BiGRU mimarisi, hedef "bu kare kendi takımının < 4 sn'lik spell'inde", girdi v7 + maç-dışı GBM / BiGRU / ölü top; 30 maçta maç gruplu 5 kat, kat başına 83 sn) | kısa / uzun spell ayrımı AUC 0.85–0.90; ama doğrulayıcıya özellik olarak ekleme AUC'si değişmedi (DFL 0.70–0.73, Metrica 0.67–0.72, SC 0.80–0.82); spellF1 DFL-evctrl +0.004, diğerleri ≈ 0; pişmanlık farkı 0.0031 | ≈ |
 | Doğrulayıcı: üç v10 tohumunun adayları birlikte (`src/exp_vpool.py`; 3 kat satır, maç-dışı) ve doğrulayıcı tohumlarının ortalaması | birlikte: DFL-evctrl +0.003, diğerleri ±0.002; pişmanlık 0.0012 vs v14 0.0035 (fark 0.0026); ortalama ≈ | ≈ |
 | v14 hata bütçesi (teşhis, kâhinler) | sahte kısa dönüşleri silmek DFL +0.028…+0.037, Metrica +0.018…+0.020, SC +0.005…+0.012; kaçırılan oyun içi kısa spell'leri eklemek DFL +0.030…+0.039, Metrica +0.029, SC +0.074…+0.101; ikisi DFL +0.06–0.07, Metrica +0.05, SC +0.08–0.11; ölü top (öğrenilmiş → gerçek) DFL +0.024, Metrica +0.061, SC +0.16 | bilgi: havuzlar büyük, kanıt yok |
+| PFF yerelde ve yerel GPU (tur 21; kullanıcı onayı 1 Kasım: 64 maç × olay / metadata / kadro / izleme, ~3.9 GB, Drive klasörleri yerleşik tarayıcıdan zip olarak, `external_data/gradient/`) + yerel kontrol (`src/exp_bigru_m.py` plain, varyant gp: v14'ün BiGRU tarifi RTX 5090'da, 3 tohum, 7 DFL katı + tüm-veri) | hazırlık 23 dk, kat ~70 sn; maç-dışı DFL kare doğruluğu 0.9076 (Colab 0.9080); v14'e göre 10 bağlamda −0.0024…+0.0016, pişmanlık farkı −0.0009 [−0.003, +0.002] | ≈ altyapı: yerel eğitim tarifi üretiyor; yeniden eğitim gürültüsü ~±0.002 |
+| BiGRU eğitimine Metrica'nın üç oyunu (`src/exp_bigru_m.py`, varyant gm: `ctrl` etiketleri, sim.V3, minibatch'in DFL yarısında; her DFL maçı ve her Metrica oyunu kendisini görmemiş modelle, SC tüm-veri modeliyle; 3 tohum) | BiGRU kare doğruluğu DFL 0.904 → 0.907, Metrica 0.944 → 0.950, SC 0.917 → 0.921; spellF1 (karışım + doğrulayıcı) DFL-evctrl +0.004 / +0.006 (5/7), DFL-trk −0.004 / −0.003, Metrica −0.001 / −0.002, SC −0.001…−0.004; pişmanlık 0.0044 vs 0.0055, fark +0.0012 [−0.007, +0.009]; v14'ün BiGRU'suyla ortalaması (gmx) 0.0032 vs 0.0038 | ≈ kare doğruluğu spellF1'e taşınmıyor |
+| Kısa spell ağırlıklı BiGRU (`src/exp_bigru_sb.py`; tur 18'in Colab'da kalan işi yerelde; varyant g2 / g4, 3 tohum, DFL maç-dışı) | maç-dışı DFL kare doğruluğu 0.9049 / 0.9048 (kontrol 0.9076); spellF1 DFL −0.004…−0.008, Metrica −0.001…−0.003, SC −0.001…−0.005; pişmanlık 0.0097 / 0.0093, fark −0.0052 / −0.0076 (aralıklar sıfırın altında) | ❌ (LightGBM'deki gibi) |
+| Altı üyeli BiGRU (gpx: v14'ün üç Colab üyesi + yerel kontrolün üç üyesi, tohum tohum ortalama) | her bağlamda −0.0003…−0.0018; pişmanlık 0.0046 vs 0.0038 | ❌ tohum topluluğu kazanç getirmiyor |
+| PFF'i de sim.V3 ile bozmak (`src/exp_bigru_pv3.py`, varyant gv: paylaşılan tarif DFL'i BAR-ATH benzeri bozulmayla, PFF'i ham yayın koordinatlarıyla görüyordu; her PFF yarısı V3 ile bozulup v7 öznitelikleri yeniden hesaplandı, tarif aynı, 3 tohum) | kare doğruluğu kontrole göre DFL +0.0005, Metrica +0.0014, SC +0.0023; spellF1 v14'e göre −0.0033…+0.0010; pişmanlık 0.0033 vs 0.0010, fark −0.0023 [−0.005, −0.000] | ≈ / hafif ❌ |
+| Doğrulayıcının öğrenme eğrisi (`src/exp_vcurve.py`; teşhis: maç-dışı her model her kaynaktan diğer maçların %25 / 50 / 75'iyle, 3 çekiliş; %100 = v14'ün doğrulayıcısı) | AUC %25 → %100: ekleme DFL 0.69 → 0.71, Metrica 0.68 → 0.71, SC 0.76 → 0.80; silme 0.79 → 0.85, 0.78 → 0.81, 0.85 → 0.88. spellF1 %100'e göre: %25 −0.001…−0.007, %50 −0.001…−0.004, %75 DFL / SC ≈ 0, Metrica −0.001 / −0.0025 | bilgi: eğri düzleşiyor; aynı türden üç kat veri (PFF) Metrica'ya kabaca +0.003–0.006, DFL / SC ≈ 0 |
 
 ### Ekip arkadaşının GitHub kayıtları — 27 Ekim birleştirmesi
 
@@ -1921,10 +1927,27 @@ hepsi ≈ (pişmanlık farkları ≤ 0.0033). Hata bütçesi havuzların hâlâ 
 bilgiyi yeniden üretiyor. En büyük kullanılmamış kaynak PFF (64 maç) ve ancak Colab'da (Drive) ya da indirilerek
 kullanılabiliyor.
 
-**Bekleyen.** Kısa spell ağırlıklı BiGRU (`src/exp_bigru_sb.py`, `colab/run_bigru_sb.sh`; kullanıcı Colab'ı ve ~28 MB
-indirmeyi onayladı): ilk çalıştırma hazırlıkta "HTTP Error 403: Forbidden" ile durdu (hangi indirmenin reddedildiği
-görülemedi); kullanıcının isteğiyle oturum kapatıldı. Duruş türü dilbilgisi (fikir 4: duruş türü ve bölgesi →
-doğrulayıcı özellikleri / ilk spell süresi) denenmedi.
+**Tur 21 (1 Kasım, PFF yerelde, yerel GPU).** Kullanıcının onayıyla PFF'in 64 maçı yerele indirildi (gdown'ın anonim
+kotası dolunca Drive'ın klasör zip'leri yerleşik tarayıcıdan; izleme verisi iki parça) ve paylaşılan BiGRU tarifi yerel
+RTX 5090'da yeniden kuruldu. Yerel kopya (gp) Colab'ın maç-dışı doğruluğunu ve v14'ün spellF1'ini ±0.002 içinde veriyor;
+bu, sonraki karşılaştırmaların gürültü tabanı. Bu altyapıyla BiGRU tarafında beş değişiklik denendi: Metrica oyunlarını
+eğitime katmak (gm), tur 18'den kalan kısa spell ağırlıklı kayıp (g2 / g4), altı tohum (gpx), iki BiGRU'nun ortalaması
+(gmx), PFF'i de sim.V3 ile bozmak (gv). Hiçbiri v14'ü 0.005 eşiğinde geçmedi:
+- gm kare doğruluğunu her sette artırıyor (Metrica +0.006) ama spellF1'e taşımıyor; DFL-evctrl'de +0.004 / +0.006,
+  DFL-trk ve SC'de küçük kayıplar. Olası açıklama: karışımın kazancı iki modelin farklı hatalarından geliyor; BiGRU
+  Metrica'yı öğrendikçe v10'a benziyor.
+- Kısa spell ağırlığı LightGBM'deki gibi açıkça kötü (DFL ve SC'de aralıklar sıfırın altında).
+- Tohum topluluğu ve bozulmuş PFF kare doğruluğunu biraz artırıyor, spellF1'i değil.
+Doğrulayıcının öğrenme eğrisi AUC'de hâlâ yükseliyor ama spellF1'de %75'ten sonra DFL / SC için düz; PFF'i doğrulayıcıya
+katmanın beklenen getirisi (Metrica +0.003–0.006) eşiğin altında kalıyor.
+
+**Ders (tur 21).** BiGRU tarifinin veri / kayıp / topluluk düzeyindeki değişiklikleri ±0.005 içinde kalıyor ve
+çoğunlukla DFL-evctrl ile DFL-trk arasında takas yaratıyor. Kare doğruluğu artışı spellF1 için yeterli değil; kısa
+possession havuzu, mevcut tracking girdisinden öğrenilmiş kanıtla da açılmıyor.
+
+**Bekleyen.** Duruş türü dilbilgisi (fikir 4: duruş türü ve bölgesi → doğrulayıcı özellikleri / ilk spell süresi)
+denenmedi. PFF'li doğrulayıcı (PFF adayları yalnız eğitimde; v10 PFF'i hiç görmedi, BiGRU için PFF'te K-katlı eğitim
+gerekir) maliyetli ve beklenen getirisi eşik altında.
 
 ## Ek A — İlk analiz, araştırma ve baseline'lar (20 Ekim)
 

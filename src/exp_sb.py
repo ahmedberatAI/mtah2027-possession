@@ -10,7 +10,11 @@ LightGBM seeds; then v14's blend (0.5 BiGRU) and its verifier are rebuilt on the
 contexts. AGGREGATE output only.
 
 Variants are named sb<cap> (spell-balanced team classifier), g<cap> (the spell-balanced BiGRU of
-src/exp_bigru_sb.py, trained on Colab), d<10 x beta> (round 19, analyst idea 3: dominance-aware length prior -- a
+src/exp_bigru_sb.py, trained on Colab), gm or gm<cap> (round 21: the BiGRU of src/exp_bigru_m.py, the three Metrica
+games in its training, optionally spell-balanced), gp (round 21: the same script's plain mode, v14's BiGRU recipe
+retrained on this machine -- the control), gv (round 21: src/exp_bigru_pv3.py, the recipe with PFF degraded by
+sim.V3 like DFL), an x after the BiGRU token (round 21: its members averaged seed by seed with
+v14's, e.g. gpx = six members of v14's recipe, gmx = v14's and the Metrica-trained), d<10 x beta> (round 19, analyst idea 3: dominance-aware length prior -- a
 first decode gives each half's possession share s, then each team's soft-minimum-length cost is 48 x (s_team / 0.5)^beta
 with s clipped to [0.3, 0.7], so the team with less of the ball may end its possessions sooner; beta 0.5 / 1 fixed in
 advance), s<w> (round 20: the team probability smoothed over +-w frames instead of v14's +-25), c<cost> (round 20:
@@ -19,7 +23,7 @@ the soft-minimum-length cost instead of 48) or combinations, e.g. sb2g2; v14 = n
   SB_CAP=2 LGB_SEED=k python -I src/exp_sb.py probs       held-out team probabilities
   python -I src/exp_sb.py build VARIANT                     blend candidates (src/exp_verify.py build3 / build4)
   python -I src/exp_sb.py trainpool VARIANT SEED VSEED      pooled leave-one-match-out verifier
-  python -I src/exp_sb.py eval VSEED[,VSEED] VARIANT,...    v14 against the variants
+  python -I src/exp_sb.py eval VSEED[,VSEED] VARIANT,... [REF]   the variants against v14 (or against REF, e.g. gp)
 """
 import os
 import re
@@ -113,11 +117,15 @@ def probs(cap):
 
 
 def parse(variant):
-    """'sb2g4d10s12c36' -> (2.0, 4.0, 1.0, 12, 36.0); 'v14' -> five Nones."""
-    m = re.fullmatch(r"(?:sb(\d+))?(?:g(\d+))?(?:d(\d+))?(?:s(\d+))?(?:c(\d+))?", "" if variant == "v14" else variant)
-    cap, gcap, d, w, c = m.groups()
+    """'sb2g4d10s12c36' -> (2.0, 4.0, 1.0, 12, 36.0, None); 'gm2' -> (None, 2.0, ..., 'm'); 'gp' -> gcap None and
+    mode 'p' (src/exp_bigru_m.py with / without the Metrica games); 'v14' -> five Nones and mode None."""
+    m = re.fullmatch(r"(?:sb(\d+))?(?:g(\d+)|g([mpv])(\d*))?(x)?(?:d(\d+))?(?:s(\d+))?(?:c(\d+))?",
+                     "" if variant == "v14" else variant)
+    cap, g, mode, gm, mix, d, w, c = m.groups()
+    gcap = g or gm or None
     return (None if cap is None else float(cap), None if gcap is None else float(gcap),
-            None if d is None else float(d) / 10, None if w is None else int(w), None if c is None else float(c))
+            None if d is None else float(d) / 10, None if w is None else int(w), None if c is None else float(c), mode,
+            mix is not None)
 
 
 def dominance_decode(beta):
@@ -141,32 +149,48 @@ def dominance_decode(beta):
     return decode
 
 
+def _mix(a, b):
+    """Seed-by-seed equal average of two member lists (members x halves)."""
+    return [[0.5 * (np.asarray(x, np.float64) + np.asarray(y, np.float64)) for x, y in zip(ma, mb)] for ma, mb in zip(a, b)]
+
+
 def use_variant(variant):
     """Point exp_short's v10 probabilities and BiGRU members (and exp_verify's held-out DFL BiGRU) at the variant,
     blend weight .5, and exp_verify's blend caches at w50 (v14) or w50<variant>."""
-    cap, gcap, beta, width, cost = parse(variant)
+    cap, gcap, beta, width, cost, mode, mix = parse(variant)
     es.W_BIGRU = 0.5
     base = _decode if beta is None else dominance_decode(beta)
     es.decode = base if cost is None else (lambda dec, c, pds, phs: base(dec, cost, pds, phs))
     exp_smooth.smooth = _smooth if width is None else (lambda x, w: _smooth(x, width))
     tag = "w50" if variant == "v14" else "w50" + variant
     es.v10_raw = _v10_raw if cap is None else (lambda seed, src: bench._load(probs_path(seed, cap))[src])
-    if gcap is None:
+    if mode == "v":
+        import exp_bigru_pv3 as pv
+        es.bigru_members, ev.lomo_bigru = pv.members, lambda: pv.members("dfl@v3")
+    elif mode:
+        import exp_bigru_m as gm
+        es.bigru_members = lambda src: gm.members(src, gcap, mode == "m")
+        ev.lomo_bigru = lambda: gm.members("dfl@v3", gcap, mode == "m")
+    elif gcap is None:
         es.bigru_members, ev.lomo_bigru = _bigru_members, _lomo_bigru
     else:
         import exp_bigru_sb as gsb
         es.bigru_members = lambda src: gsb.members(src, gcap)
         ev.lomo_bigru = lambda: gsb.lomo_members(gcap)
+    if mix:
+        own_members, own_lomo = es.bigru_members, ev.lomo_bigru
+        es.bigru_members = lambda src: _mix(_bigru_members(src), own_members(src))
+        ev.lomo_bigru = lambda: _mix(_lomo_bigru(), own_lomo())
 
     def tagged(kind, *parts):
         return _path(kind + tag if kind in ("rows3", "rows4", "probs3", "probs4") else kind, *parts)
     ev._path = tagged
 
 
-def evaluate(vseeds, variants):
+def evaluate(vseeds, variants, ref="v14"):
     import exp_blend_weight as bw
     cells = {}
-    names = ["v14"] + list(variants)
+    names = [ref] + [v for v in ["v14"] + list(variants) if v != ref]
     for src, convs, dec, prim in ev.SOURCES:
         blocks = bench.blocks(src)
         labs = {c: bench.labels(src, c) for c in convs}
@@ -183,10 +207,10 @@ def evaluate(vseeds, variants):
                             cells.setdefault((src, c, dname, name), []).append(er.by_match(blocks, labs[c], preds))
         bench._blocks.clear()
         bench._labels.clear()
-    mean, regret = er.summarize(cells, names, ref="v14")
+    mean, regret = er.summarize(cells, names, ref=ref)
     for name in names[1:]:
-        bw.regret_boot(mean, names, "v14", name)
-        bw.regret_boot(mean, ["v14", name], "v14", name)
+        bw.regret_boot(mean, names, ref, name)
+        bw.regret_boot(mean, [ref, name], ref, name)
     return mean, regret
 
 
@@ -204,7 +228,8 @@ def main():
         use_variant(sys.argv[2])
         ev.train_pooled4(int(sys.argv[3]), int(sys.argv[4]))
     elif stage == "eval":
-        evaluate(tuple(int(x) for x in sys.argv[2].split(",")), sys.argv[3].split(","))
+        evaluate(tuple(int(x) for x in sys.argv[2].split(",")), sys.argv[3].split(","),
+                 sys.argv[4] if len(sys.argv) > 4 else "v14")
     else:
         raise SystemExit(__doc__)
 

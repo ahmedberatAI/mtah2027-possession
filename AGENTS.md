@@ -19,7 +19,9 @@ User instructions carried forward from the 27 October 2026 continuation note.
   `external/more-than-a-hack-2027/`; verify their current upstream revision.
 - Run GPU work only in Google Colab. Never interrupt another person's process
   or Colab session. Stop only sessions you created, when your work is finished.
-  The user handles OAuth and tokens.
+  The user handles OAuth and tokens. Update 1 November 2026: the user allows
+  local work too (CPU and the local GPU when nvidia-smi shows it free) and
+  approved downloading the PFF World Cup data (~3.9 GB) to external_data/gradient/.
 - The user's local connection is metered. Ask before downloading datasets,
   weights, or packages, and state the size. Use existing local Git objects and
   offline package caches when available. Large downloads belong on the Colab VM.
