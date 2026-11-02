@@ -37,6 +37,7 @@ import exp_verify as ev  # noqa: E402
 import short_specialist as ss  # noqa: E402
 
 KPU = ["kpu_c", "kpu_cmax", "kpu_gin", "kpu_gout", "kpu_ctx"]
+TOUCH = ["kpu_tin", "kpu_tmean", "kpu_tout"]            # round 24b, C1's touch head
 SRCS = [src for src, *_ in ev.SOURCES]
 
 
@@ -216,6 +217,108 @@ def use(name):
     ev._path = tagged
 
 
+def avg_outputs(variant, src):
+    """The three seeds' outputs averaged per half, under every seed key (round 24c, variant a)."""
+    outs = outputs(variant, src)
+    mean = [np.mean([np.asarray(outs[sd][i], np.float32) for sd in ss.SEEDS], axis=0) for i in range(len(outs[ss.SEEDS[0]]))]
+    return {sd: mean for sd in ss.SEEDS}
+
+
+def touch_features(rows, outs):
+    for r in rows:
+        o = np.asarray(outs[r["i"]], np.float32)
+        n, s, t, kk = len(o), r["s"], r["t"], r["k"]
+        r["kpu_tin"] = float(o[max(0, s - 6):min(n, s + 7), 7 + kk].max())
+        r["kpu_tmean"] = float(o[s:t, 7 + kk].mean())
+        r["kpu_tout"] = float(o[max(0, t - 6):min(n, t + 7), 8 - kk].max())
+    return rows
+
+
+def evctrl_y(rows):
+    """DFL rows labelled under the target convention (evctrl), with exp_verify.rows_for's y rule."""
+    import exp_short_cands as ec
+    evlabs = bench.labels("dfl@v3", "evctrl")
+    for r in rows:
+        gt = np.asarray(evlabs[r["i"]])
+        frac = float(np.mean(gt[r["s"]:r["t"]] == r["k"]))
+        iou = ec.best_iou(gt, r["s"], r["t"], r["k"])
+        r["y"] = 1 if (frac >= 0.5 and iou >= 0.3) else 0 if frac < 0.2 else -1
+    return rows
+
+
+def relabel(name):
+    """Rounds 24b / 24c from C1ab's rows: E = DFL rows labelled under the target convention (evctrl), T = also the
+    touch features of C1's touch head, a = the specialist's features from the mean of its three seeds."""
+    use("C1ab")
+    src_rows = {(src, k, d): bench._load(ev._path("rows4" if src.startswith("dfl") else "rows3", src, k, d))
+                for src in SRCS for k in es.SEEDS for d in ev.DEADS}
+    for (src, k, d), v in src_rows.items():
+        outs = (avg_outputs if name.endswith("a") else outputs)("C1", src)[ss.SEEDS[k]]
+        if src.startswith("dfl"):
+            evctrl_y(v["rows"])
+        if name.endswith("a"):
+            add_features(v["rows"], outs)
+        if "T" in name[4:]:
+            touch_features(v["rows"], outs)
+    use(name)
+    for (src, k, d), v in src_rows.items():
+        bench._dump(v, ev._path("rows4" if src.startswith("dfl") else "rows3", src, k, d))
+    print("  %s rows written" % name, flush=True)
+
+
+def build_m(name, w=0.25):
+    """Round 24c, C1abETm: C1's live-normalised control probability blended into v14's team probability (weight w)
+    before the +-25 smoothing and the decoder; decodes, candidates (v14's rule + C1's), features (G1 + specialist +
+    touch) and DFL evctrl labels rebuilt on that base."""
+    use("v14")
+    for src, convs, dec, prim in ev.SOURCES:
+        kind = "rows4" if src.startswith("dfl") else "rows3"
+        dfl = src.startswith("dfl")
+        outs = outputs("C1", src)
+        blocks = bench.blocks(src)
+        labs = bench.labels(src, prim)
+        learned = bench.dead_probs(src, "base") if dfl else bench.dead_ext("base", "v3", src)
+        true_d = [np.where(g == 2, 1 - es.EPS, es.EPS) for g in labs]
+        members = ev.lomo_bigru() if dfl else es.bigru_members(src)
+        gru = ev.gru_mean4(src) if dfl else ev.gru_mean(src)
+        raws = {k: [(1 - w) * r + w * pk(o, 0) for r, o in zip(es.blend(es.v10_raw(k, src), members[k]),
+                                                                outs[ss.SEEDS[k]])] for k in es.SEEDS}
+        smos = {k: exp_smooth.smooth(raws[k], 25) for k in es.SEEDS}
+        bases = {(k, d): es.decode(dec, 48.0, pds, smos[k]) for k in es.SEEDS for d, pds in zip(ev.DEADS, (learned, true_d))}
+        rows = {key: [] for key in bases}
+        for i, b in enumerate(blocks):
+            c = ea.frame_cues(b)
+            con = contest_mask(b)
+            for (k, d), base in bases.items():
+                pr = base[i]
+                fav = np.where(ea.logit(smos[k][i]) > 0, 0, 1)
+                ex = [(a + s0, a + t0, 1 - kk) for a, e, kk in segs_of(pr) for s0, t0 in ea.runs(fav[a:e] != kk)
+                      if kk < 2 and t0 - s0 >= ea.RUN]
+                extra = kpu_cands(np.asarray(outs[ss.SEEDS[k]][i], np.float32), pr, con, THETA["C1"], ex)
+                rows[(k, d)] += ev.rows_for(src, [b], [c], [labs[i]], [pr], [smos[k][i]], [raws[k][i]], [gru[i]],
+                                            int(dec[1]), i0=i, v2=True, extra=[extra])
+            del c
+        use(name)
+        for (k, d), base in bases.items():
+            rr = touch_features(add_features(rows[(k, d)], outs[ss.SEEDS[k]]), outs[ss.SEEDS[k]])
+            if dfl:
+                evctrl_y(rr)
+            bench._dump(dict(base=base, rows=rr), ev._path(kind, src, k, d))
+        use("v14")
+        print("  %s %s: rows %d (v10 seed 0, learned D)" % (name, src, len(rows[(0, ev.DEADS[0])])), flush=True)
+        bench._blocks.clear()
+        bench._labels.clear()
+
+
+def segs_of(pr):
+    st = np.flatnonzero(np.r_[True, pr[1:] != pr[:-1]])
+    return list(zip(st, np.r_[st[1:], len(pr)], pr[st]))
+
+
+def feats(name):
+    return ev.FEATSETS["G1"] + KPU + (TOUCH if "T" in name[4:] else [])
+
+
 def build(name):
     variant, uses = name[:2], name[2:]
     use("v14")
@@ -265,7 +368,7 @@ def trainpool(name, seed, vseed):
     rows = parts[ev.DEADS[0]] + parts[ev.DEADS[1]]
     params = dict(ev.PARAMS, seed=vseed, deterministic=True, force_row_wise=True,
                   num_threads=int(os.environ.get("VERIFY_THREADS", "4")))
-    pp = ev.predict_lomo(rows, ev.FEATSETS["G1"] + KPU, params)
+    pp = ev.predict_lomo(rows, feats(name), params)
     n = len(parts[ev.DEADS[0]])
     for j, d in enumerate(ev.DEADS):
         bench._dump({"G1": pp[:n] if j == 0 else pp[n:]}, ev._path("probs4", seed, d, "q%d" % vseed))
@@ -342,7 +445,12 @@ def main():
     warnings.filterwarnings("ignore")
     stage, variant = sys.argv[1], sys.argv[2]
     if stage == "build":
-        build(variant)
+        if variant in ("C1abE", "C1abET", "C1abETa"):
+            relabel(variant)
+        elif variant == "C1abETm":
+            build_m(variant)
+        else:
+            build(variant)
     elif stage == "trainpool":
         trainpool(variant, int(sys.argv[3]), int(sys.argv[4]))
     elif stage == "eval":

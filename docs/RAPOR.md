@@ -2085,6 +2085,13 @@ DFL evctrl +0.0011 / +0.0018, DFL-trk +0.0039 / +0.0036, Metrica +0.0020 / +0.00
 ≥ 0.5 ve IoU ≥ 0.3 → 1, < 0.2 → 0). C1abET: C1abE + uzmanın dokunuş başlığından 3 özellik (aday takımın başlangıç ±6
 karedeki en yüksek dokunuşu, aralık içindeki ortalama dokunuşu, rakibin bitiş ±6 karedeki en yüksek dokunuşu). Karar
 yeni kuralla (birincil ≥ 0.005, korumalar ≥ −0.01).
+*Tur 24b sonucu:* C1abE birincil +0.0021 (DFL evctrl +0.002, Metrica +0.000 / +0.001); C1abET birincil **+0.0043**
+(%90 [−0.0003, +0.0094], P(≥ 0.005) 0.37): DFL evctrl +0.0038 / +0.0043, Metrica +0.0015 / +0.0012, DFL-trk +0.0045,
+SC +0.0024…+0.0039 — 10 bağlamın hepsinde artı; eşiğin altında → v14 kalır. Dokunuş başlığı belirgin katkı yaptı.
+*Tur 24c ön kaydı (çalıştırmadan önce):* C1abETa = C1abET, uzman ve dokunuş özellikleri üç tohumun ortalamasından (her v10
+tohumu tek uzman tohumuyla eşleşiyordu). C1abETm = C1'in canlı-normalize kontrol olasılığı v14'ün takım olasılığına
+%25 ağırlıkla katılır (±25 yumuşatma ve decoder'dan önce); çözümler, adaylar, özellikler ve DFL evctrl etiketleri bu
+tabanda yeniden kurulur. Aynı karar kuralı; ikisi de geçerse birincil iyileşmesi büyük olan.
 
 **Bekleyen.** Duruş türü dilbilgisi (fikir 4: duruş türü ve bölgesi → doğrulayıcı özellikleri / ilk spell süresi)
 denenmedi. PFF'li doğrulayıcı (PFF adayları yalnız eğitimde; v10 PFF'i hiç görmedi, BiGRU için PFF'te K-katlı eğitim
