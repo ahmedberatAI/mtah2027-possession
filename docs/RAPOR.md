@@ -1966,6 +1966,36 @@ adayının yalnız 7'sinde olay var. Önceden konan ölçütün ikinci yarısı 
 → hazır modelle video yolu kapatıldı; SoccerNet verisine (Hugging Face, NDA) gerek kalmadı. Çekişme anlarına özel bir
 video modeli ancak etiketli yayın verisiyle eğitilip doğrulanabilir, 17 Kasım'a kadar güvenilir değil.
 
+**Tur 23 — kısa possession uzmanı (KPU): tasarım ve ön kayıt (2 Kasım, çalıştırmadan önce yazıldı).** Kullanıcı:
+"sadece kısa possession'larda devreye girsin, buraya özel bir yeteneği olsun, en iyi nasıl yapılır kurgula, sonra başla".
+Önceki denemelerde etiket (~670 kısa possession, düello etiketi yok), hedef (kare doğruluğu puana dönmedi) ya da rol
+(genel modeli değiştirmek uzun possession'ları bozuyordu) eksikti. PFF'in insan eliyle dokunuş düzeyinde işaretlenmiş
+olayları: 64 maçta 7,709 kısa (< 4 sn) possession (3,473'ü oyun içinde iki rakip spell arasında, 3,683'ü duruşa bitişik),
+~11,600 türü / sonucu işaretli düello, ~5,500 sekme / uzaklaştırma.
+- *Veri:* PFF 64 maç, 56 eğitim / 8 doğrulama (yalnız erken durdurma; sabit tohum); her yarının iki bozulmuş kopyası
+  (`sim.V3`, `sim.V4` = V3 + BAR-ATH'ın filtrelenmiş topuna benzer ön yumuşatma); etiket PFF controlled (`src/gradient.py`).
+  Uzman DFL / Metrica / SC / BAR-ATH'ı hiç görmez → değerlendirme temiz, katlama gerekmez.
+- *Girdi (kare başına, 25 fps, topa göreli, takımın hücum yönüne döndürülmüş):* top (hız, ivme, yön, görünürlük, son
+  görülmeden beri süre, sahadaki yeri), her takımdan topa en yakın 5 oyuncu (göreli konum, mesafe, hız, topa yaklaşma
+  hızı, eksiklik), bağlam (topa 3 / 6 m içindeki sayılar, takım merkezleri, kaleci mesafesi). S2: ek olarak v10'un ham ve
+  ±25 yumuşatılmış olasılığı (v10 PFF'i hiç görmedi).
+- *Model:* kare kodlayıcı (MLP) + çift yönlü GRU, ±3 sn pencere; başlıklar: kontrol durumu (H / A / D) ve takım başına
+  "kontrolü aldı" / "kontrolü kaybetti" ısı haritaları (σ 3 kare). Takım değiştirme + saha çevirme artırması, 3 tohum.
+- *Eğitim pencereleri:* her el değişiminin çevresi, çekişme anları (iki takım da topa ≤ 3 m), duruş kenarları, rastgele
+  canlı anlar; S2'de v10'un yanıldığı anlar 2× ağırlık.
+- *Kullanım (yalnız kısa possession anlarında):* (a) doğrulayıcıya yeni özellikler (aday aralığında aday takımın kontrol
+  olasılığı, başlangıç / bitişte değişim tepeleri); (b) çekişme pencerelerinde uzmanın emin olduğu kısa karşı takım
+  dönemleri yeni "ekle" adayı; (c) ayrı varyant: kabul edilen kısa spell'lerin sınırlarını değişim tepelerine oturtma.
+- *Kapı 1 (DFL / Metrica / SC, uzman görmedi):* doğrulayıcının maç-dışı AUC'si (G1 → G1 + uzman) 6 hücrede (ekle / sil ×
+  3 kaynak) ortalama ≥ +0.02 ve hiçbir hücre < −0.01; YA DA oyun içi kısa spell kapsamı aynı ya da daha az adayla v14'ün
+  ≥ 1.5 katı. İkisi de tutmazsa dur, kaydet.
+- *Kapı 2:* 10 bağlam, 3 v10 tohumu × 2 doğrulayıcı tohumu, eşli maç bootstrap; en kötü durum pişmanlığında ≥ 0.005
+  iyileşme → v15. Varyantlar sabit: S1 (fizik), S2 (fizik + v10 önseli); kullanım (a + b), ek olarak (c).
+- *Hesap:* Colab (PFF kullanıcının Drive kısayolundan; ayrıştırma, bozulma, girdiler, v10 önseli, eğitim); yerel CPU
+  (DFL / Metrica / SC / BAR-ATH çıkarımı, kapılar).
+- *Riskler:* takipteki bilgi tavanı (kusursuz konumla çekişme anı doğruluğu ~0.70), PFF yayın takibi ↔ taktik ATD,
+  PFF etiket kuralı ↔ Metrica (doğrulayıcı her kaynağın kendi etiketiyle eğitildiği için dengeler).
+
 **Bekleyen.** Duruş türü dilbilgisi (fikir 4: duruş türü ve bölgesi → doğrulayıcı özellikleri / ilk spell süresi)
 denenmedi. PFF'li doğrulayıcı (PFF adayları yalnız eğitimde; v10 PFF'i hiç görmedi, BiGRU için PFF'te K-katlı eğitim
 gerekir) maliyetli ve beklenen getirisi eşik altında.
