@@ -9,8 +9,17 @@ The specialist never saw DFL, Metrica or SkillCorner, so its outputs on them are
       where its live-normalised control probability of the other team exceeds 0.5), inside v14's decoded possessions.
       Pass: >= 1.5x v14's coverage with no more candidates per half (pooled over the three sources).
 
+Gate 2 (pre-registered): v14's decodes and candidates, (a) the specialist's features on every candidate and (b) its
+own insert candidates (kpu_cands, THETA), the pooled leave-one-match-out verifier on G1 + the five features (3 v10
+seeds x 2 verifier seeds), the ten contexts against v14 with the paired match bootstrap. Names: S1a / S1ab / S2a /
+S2ab (variant + uses); a trailing c also snaps the final short spells' ends to the specialist's change peaks.
+
   python -I src/exp_kpu.py infer VARIANT          the specialist on DFL / Metrica / SkillCorner (3 seeds, CPU)
   python -I src/exp_kpu.py gate1 VARIANT          (a) and (b)
+  python -I src/exp_kpu.py theta VARIANT          the label-free candidate threshold
+  python -I src/exp_kpu.py build NAME             candidate rows of S1a / S1ab / S2a / S2ab
+  python -I src/exp_kpu.py trainpool NAME SEED VSEED
+  python -I src/exp_kpu.py eval VSEED[,VSEED] NAME,...
 """
 import os
 import sys
@@ -191,11 +200,153 @@ def theta(variant):
     return chosen
 
 
+THETA = {"S1": 0.7, "S2": 0.8}                  # src/exp_kpu.py theta, recorded in docs/RAPOR.md before gate 2
+_path = ev._path
+
+
+def use(name):
+    """v14's blend settings with exp_verify's caches tagged w50 (v14) or w50kpu<name> (rows / probs)."""
+    exp_sb.use_variant("v14")
+    if name == "v14":
+        return
+    tag = "w50kpu" + name.rstrip("c")
+
+    def tagged(kind, *parts):
+        return _path(kind + tag if kind in ("rows3", "rows4", "probs3", "probs4") else kind, *parts)
+    ev._path = tagged
+
+
+def build(name):
+    variant, uses = name[:2], name[2:]
+    use("v14")
+    v14_path = ev._path
+    for src, convs, dec, prim in ev.SOURCES:
+        kind = "rows4" if src.startswith("dfl") else "rows3"
+        outs = outputs(variant, src)
+        old = {(k, d): bench._load(v14_path(kind, src, k, d)) for k in es.SEEDS for d in ev.DEADS}
+        if uses == "a":
+            new = {key: dict(base=v["base"], rows=add_features([dict(r) for r in v["rows"]], outs[ss.SEEDS[key[0]]]))
+                   for key, v in old.items()}
+        else:
+            blocks = bench.blocks(src)
+            labs = bench.labels(src, prim)
+            dfl = src.startswith("dfl")
+            members = ev.lomo_bigru() if dfl else es.bigru_members(src)
+            gru = ev.gru_mean4(src) if dfl else ev.gru_mean(src)
+            raws = {k: es.blend(es.v10_raw(k, src), members[k]) for k in es.SEEDS}
+            smos = {k: exp_smooth.smooth(raws[k], 25) for k in es.SEEDS}
+            rows = {key: [] for key in old}
+            for i, b in enumerate(blocks):
+                c = ea.frame_cues(b)
+                con = contest_mask(b)
+                for (k, d), v in old.items():
+                    pr = v["base"][i]
+                    ex = [(r["s"], r["t"], r["k"]) for r in v["rows"] if r["i"] == i and r["typ"] == "ins"]
+                    extra = kpu_cands(np.asarray(outs[ss.SEEDS[k]][i], np.float32), pr, con, THETA[variant], ex)
+                    rows[(k, d)] += ev.rows_for(src, [b], [c], [labs[i]], [pr], [smos[k][i]], [raws[k][i]], [gru[i]],
+                                                int(dec[1]), i0=i, v2=True, extra=[extra])
+                del c
+            new = {key: dict(base=old[key]["base"], rows=add_features(rows[key], outs[ss.SEEDS[key[0]]]))
+                   for key in old}
+        use(name)
+        for (k, d), v in new.items():
+            bench._dump(v, ev._path(kind, src, k, d))
+        use("v14")
+        r0 = new[(0, ev.DEADS[0])]["rows"]
+        print("  %s %s: rows %d (specialist candidates %d), v10 seed 0, learned D" % (
+            name, src, len(r0), int(sum(r.get("kpu_cand", 0) for r in r0))), flush=True)
+        bench._blocks.clear()
+        bench._labels.clear()
+
+
+def trainpool(name, seed, vseed):
+    use(name)
+    parts = {d: [r for src in SRCS for r in ev._rows4(src, seed, d)["rows"]] for d in ev.DEADS}
+    rows = parts[ev.DEADS[0]] + parts[ev.DEADS[1]]
+    params = dict(ev.PARAMS, seed=vseed, deterministic=True, force_row_wise=True,
+                  num_threads=int(os.environ.get("VERIFY_THREADS", "4")))
+    pp = ev.predict_lomo(rows, ev.FEATSETS["G1"] + KPU, params)
+    n = len(parts[ev.DEADS[0]])
+    for j, d in enumerate(ev.DEADS):
+        bench._dump({"G1": pp[:n] if j == 0 else pp[n:]}, ev._path("probs4", seed, d, "q%d" % vseed))
+    yy = np.array([r["y"] for r in rows])
+    cells = []
+    for typ in ("ins", "del"):
+        for src in SRCS:
+            sel = np.array([r["typ"] == typ and r["src"] == src and r["y"] >= 0 for r in rows])
+            cells.append("%s %s %.3f" % (typ, src.split("@")[0], ea.auc(pp[sel & (yy == 1)], pp[sel & (yy == 0)])))
+    print("    %s seed %d q%d verifier AUC %s" % (name, seed, vseed, " | ".join(cells)), flush=True)
+
+
+def snap(pred, o):
+    """(c) Each final possession shorter than 4 s gets its start moved to the peak of its team's "gains" head and its
+    end to the peak of its "loses" head within +-0.5 s, where the peak is >= 0.5 (the neighbours follow)."""
+    out = pred.copy()
+    n = len(out)
+    st = np.flatnonzero(np.r_[True, pred[1:] != pred[:-1]])
+    for a, e in zip(st, np.r_[st[1:], n]):
+        k = int(pred[a])
+        if k > 1 or e - a >= ea.SHORT or a == 0 or e == n:
+            continue
+        lo, hi = max(1, a - 12), min(e - 1, a + 13)
+        if hi > lo:
+            j = lo + int(np.argmax(o[lo:hi, 3 + k]))
+            if o[j, 3 + k] >= 0.5:
+                if j < a:
+                    out[j:a] = k
+                else:
+                    out[a:j] = pred[a - 1]
+        lo, hi = max(a + 1, e - 12), min(n - 1, e + 13)
+        if hi > lo:
+            j = lo + int(np.argmax(o[lo:hi, 5 + k]))
+            if o[j, 5 + k] >= 0.5:
+                if j > e:
+                    out[e:j] = k
+                else:
+                    out[j:e] = pred[e]
+    return out
+
+
+def evaluate(vseeds, names):
+    import exp_blend_weight as bw
+    import exp_refine as er
+    cells = {}
+    names = ["v14"] + [n for n in names if n != "v14"]
+    for src, convs, dec, prim in ev.SOURCES:
+        use("v14")
+        blocks = bench.blocks(src)
+        labs = {c: bench.labels(src, c) for c in convs}
+        for name in names:
+            use(name)
+            outs = outputs(name[:2], src) if name.endswith("c") else None
+            for seed in es.SEEDS:
+                for dname in ev.DEADS:
+                    for vseed in vseeds:
+                        _, preds = bw._verified(src, seed, dname, vseed, lambda s2: ev._rows4(s2, seed, dname), "probs4")
+                        if outs is not None:
+                            preds = [snap(p, np.asarray(o, np.float32)) for p, o in zip(preds, outs[ss.SEEDS[seed]])]
+                        for c in convs:
+                            cells.setdefault((src, c, dname, name), []).append(er.by_match(blocks, labs[c], preds))
+        bench._blocks.clear()
+        bench._labels.clear()
+    use("v14")
+    mean, regret = er.summarize(cells, names, ref="v14")
+    for name in names[1:]:
+        bw.regret_boot(mean, ["v14", name], "v14", name)
+    return mean, regret
+
+
 def main():
     sys.stdout.reconfigure(encoding="utf-8")
     warnings.filterwarnings("ignore")
     stage, variant = sys.argv[1], sys.argv[2]
-    if stage == "infer":
+    if stage == "build":
+        build(variant)
+    elif stage == "trainpool":
+        trainpool(variant, int(sys.argv[3]), int(sys.argv[4]))
+    elif stage == "eval":
+        evaluate(tuple(int(x) for x in sys.argv[2].split(",")), sys.argv[3].split(","))
+    elif stage == "infer":
         for src in SRCS:
             ss.infer(src, variant)
             bench._blocks.clear()

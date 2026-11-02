@@ -480,6 +480,7 @@ Public sütunu yalnız bilgi içindir (17 spell, aralık ~0.4); v7'den itibaren 
 | Doğrulayıcının öğrenme eğrisi (`src/exp_vcurve.py`; teşhis: maç-dışı her model her kaynaktan diğer maçların %25 / 50 / 75'iyle, 3 çekiliş; %100 = v14'ün doğrulayıcısı) | AUC %25 → %100: ekleme DFL 0.69 → 0.71, Metrica 0.68 → 0.71, SC 0.76 → 0.80; silme 0.79 → 0.85, 0.78 → 0.81, 0.85 → 0.88. spellF1 %100'e göre: %25 −0.001…−0.007, %50 −0.001…−0.004, %75 DFL / SC ≈ 0, Metrica −0.001 / −0.0025 | bilgi: eğri düzleşiyor; aynı türden üç kat veri (PFF) Metrica'ya kabaca +0.003–0.006, DFL / SC ≈ 0 |
 | Video fizibilitesi: "topa kim dokundu" modeli için (`src/exp_video_feas.py`; tur 22, BAR-ATH'ta yalnız toplu sayılar, etiket yok; v14'ün doğrulayıcı adayları ±0.5 sn; önceden konan eşik: adayların ≥ %60'ı yayında görünür ve top çapı ≥ ~10 px) | v14'ün tüm maçta 50 adayı var (35 ekleme, 15 silme; 16'sı 0.25 ≤ p < 0.75; 6'sını doğrulayıcı değiştiriyor). Yayın adayların %92'sinde canlı oyunu gösteriyor (homografi geçerli, top kadrajda; başlangıç anı %94). Top çapı yayında medyan 11.6 px (p25 10.4; görünürlerin %83'ünde ≥ 10 px), taktik videoda 5.8 px. Adayların %54'ünde başlangıçta iki takımdan da topa ≤ 3 m oyuncu var. Tüm canlı oyunda yayın %88 görünür, top 11.3 px (taktik 6.0 px), çekişme %15 | GO: görünürlük ve çözünürlük yeterli, ama yalnız yayında (taktik videoda top ~6 px). Açık: video pilot skorları yerelde yok; etiket / doğrulama kaynağı ve müdahale-blok anlarındaki isabet |
 | Hazır video modeli BAR-ATH yayınında (`colab/run_tdeed.sh`, `colab/tdeed_barath.py`, `src/exp_tdeed_barath.py`; tur 22 adım 1: SoccerNet 2025 Team-BAS temel modeli T-DEED, takım başlıklı, açık checkpoint; Colab T4 ~45 dk, ~1.2 birim; etiket yok, v14'le karşılaştırma) | canlı yayında 10,570 olay; ≥ 0.2 güvende canlı dakikada pas 6.9 (gerçek maçta ~16 → yakalama ~%40), top sürme 3.9, müdahale 0.24, blok 0.41. "Sol / sağ" görüntünün tarafı, devrede değişiyor (1. devre sol = H 73 / 73, 2. devre sol = A 61 / 62). Takım olayları v14'le: ≥ 0.5'te 199 olay, uzun possession içinde %99.5, v14 değişimine 2 sn yakın %80 (15 olay); ≥ 0.2'de 679 olay, %93.6 / %66.7 (66 olay). Videonun ima ettiği top kayıpları tüm maçta 10 (v14 ~148 değişim); v14'ün 50 adayından yalnız 7'sinde takım olayı var | ❌ kısa possession havuzu için kör: emin anlarda v14'le aynı şeyi söylüyor, çekişme anlarında neredeyse olay üretmiyor; video yolu ancak çekişme anlarına özel eğitilmiş bir modelle açılır (etiket ve doğrulama yok) |
+| Kısa possession uzmanı (KPU; `src/short_specialist.py`, `src/exp_kpu.py`, `colab/run_kpu.sh`; tur 23, ön kayıtlı: yalnız PFF'in insan etiketli dokunuşlarıyla eğitilmiş, topun çevresinin 25 fps fiziği + kontrol / el değiştirme başlıkları; S1 fizik, S2 + v10 önseli; 3 tohum; Colab ~3.9 birim) | Kapı 1 geçti: doğrulayıcının maç-dışı AUC'si 6 hücrede ortalama +0.024 (S1) / +0.022 (S2), ekle Metrica 0.706 → 0.755 (S1). Kapı 2 (10 bağlam, 3 × 2 tohum): en kötü durum pişmanlığı v14 0.0043 → S1ab 0.0022 (fark +0.0019, %90 [−0.001, +0.006]), S2ab 0.0028; SC +0.003…+0.004 (aralıklar > 0), DFL-trk +0.003, Metrica −0.001…−0.003 (her varyantta); sınır oturtma (c) kötü (S1abc 0.0053, S2abc 0.0063) | ≈ eşik altında (0.005), v14 kalır; uzman gerçek bilgi taşıyor ama spellF1'e dönüşü küçük ve Metrica'da hafif negatif |
 
 ### Ekip arkadaşının GitHub kayıtları — 27 Ekim birleştirmesi
 
@@ -2010,6 +2011,25 @@ koşular, v14'ün çözülmüş possession'ı içinde, en az bir karesinde iki t
 ekleme adaylarıyla (aynı takım, IoU ≥ 0.3) örtüşmeyenler; θ ∈ {0.6, 0.7, 0.8, 0.9} içinden yarı başına ≤ 25 aday veren
 en küçüğü (etiketsiz; v10 tohum 0, öğrenilmiş D, üç kaynak birlikte): S1 θ 0.7 (24.1), S2 θ 0.8 (24.6). Karar (a + b)
 üzerinden; (a) tek başına bilgi için raporlanır.
+*Kapı 2 sonucu (`src/exp_kpu.py build / trainpool / eval`):* uzman adayları yarı başına S1 ~21–26 (DFL 289, Metrica
+471, SC 977 aday; v10 tohum 0, öğrenilmiş D). Doğrulayıcının ekleme AUC'si adaylarla birlikte DFL 0.766, Metrica 0.863,
+SC 0.851 (S1ab, tohum 0). spellF1, v14'e göre (3 v10 tohumu × 2 doğrulayıcı tohumu):
+| bağlam | S1a | S1ab | S2ab |
+|---|---|---|---|
+| DFL evctrl öğr. / gerçek D | −0.000 / +0.001 | +0.000 / +0.001 | −0.001 / −0.001 |
+| DFL trk öğr. / gerçek D | +0.002 / +0.002 | +0.003 / +0.003 | +0.003 / +0.003 |
+| Metrica öğr. / gerçek D | −0.003 / −0.003 | −0.001 / −0.002 | −0.002 / −0.003 |
+| SC faz öğr. / gerçek D | +0.002 / +0.002 | +0.003 / +0.003 | +0.002 / +0.002 |
+| SC pp öğr. / gerçek D | +0.003 / +0.004 | +0.004 / +0.004 | +0.003 / +0.004 |
+| en kötü durum pişmanlığı (v14 0.0043) | 0.0031 | **0.0022** | 0.0028 |
+Fark +0.0019 (%90 [−0.0011, +0.0055], P(≥ 0.005) 0.08) → ön kayıtlı eşik (0.005) geçilmedi, v14 kalır. Sınır oturtma
+(c) her iki varyantta kötü (değişim tepeleri sınırları taşımak için yeterince keskin değil). Metrica her varyantta
+hafif negatif: havuzlanmış doğrulayıcının eğitimine SC (20 maç) baskın; uzmanın PFF'ten öğrendiği "kontrol" kavramı
+Metrica'nın kuralıyla tam örtüşmüyor olabilir.
+
+**Ders (tur 23).** Kısa possession'lar için ilk kez gerçek yeni bilgi bulundu: PFF'in insan etiketli dokunuşlarıyla
+eğitilmiş, topun çevresine bakan bir uzman, doğrulayıcının ayırt etme gücünü dışarıdaki her sette artırıyor (Kapı 1).
+Ama karar katmanından spellF1'e dönüşü küçük (+0.002) ve BAR-ATH'a en yakın Metrica'da hafif negatif.
 
 **Bekleyen.** Duruş türü dilbilgisi (fikir 4: duruş türü ve bölgesi → doğrulayıcı özellikleri / ilk spell süresi)
 denenmedi. PFF'li doğrulayıcı (PFF adayları yalnız eğitimde; v10 PFF'i hiç görmedi, BiGRU için PFF'te K-katlı eğitim
