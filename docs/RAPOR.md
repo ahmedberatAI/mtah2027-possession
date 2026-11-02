@@ -478,6 +478,7 @@ Public sütunu yalnız bilgi içindir (17 spell, aralık ~0.4); v7'den itibaren 
 | Altı üyeli BiGRU (gpx: v14'ün üç Colab üyesi + yerel kontrolün üç üyesi, tohum tohum ortalama) | her bağlamda −0.0003…−0.0018; pişmanlık 0.0046 vs 0.0038 | ❌ tohum topluluğu kazanç getirmiyor |
 | PFF'i de sim.V3 ile bozmak (`src/exp_bigru_pv3.py`, varyant gv: paylaşılan tarif DFL'i BAR-ATH benzeri bozulmayla, PFF'i ham yayın koordinatlarıyla görüyordu; her PFF yarısı V3 ile bozulup v7 öznitelikleri yeniden hesaplandı, tarif aynı, 3 tohum) | kare doğruluğu kontrole göre DFL +0.0005, Metrica +0.0014, SC +0.0023; spellF1 v14'e göre −0.0033…+0.0010; pişmanlık 0.0033 vs 0.0010, fark −0.0023 [−0.005, −0.000] | ≈ / hafif ❌ |
 | Doğrulayıcının öğrenme eğrisi (`src/exp_vcurve.py`; teşhis: maç-dışı her model her kaynaktan diğer maçların %25 / 50 / 75'iyle, 3 çekiliş; %100 = v14'ün doğrulayıcısı) | AUC %25 → %100: ekleme DFL 0.69 → 0.71, Metrica 0.68 → 0.71, SC 0.76 → 0.80; silme 0.79 → 0.85, 0.78 → 0.81, 0.85 → 0.88. spellF1 %100'e göre: %25 −0.001…−0.007, %50 −0.001…−0.004, %75 DFL / SC ≈ 0, Metrica −0.001 / −0.0025 | bilgi: eğri düzleşiyor; aynı türden üç kat veri (PFF) Metrica'ya kabaca +0.003–0.006, DFL / SC ≈ 0 |
+| Video fizibilitesi: "topa kim dokundu" modeli için (`src/exp_video_feas.py`; tur 22, BAR-ATH'ta yalnız toplu sayılar, etiket yok; v14'ün doğrulayıcı adayları ±0.5 sn; önceden konan eşik: adayların ≥ %60'ı yayında görünür ve top çapı ≥ ~10 px) | v14'ün tüm maçta 50 adayı var (35 ekleme, 15 silme; 16'sı 0.25 ≤ p < 0.75; 6'sını doğrulayıcı değiştiriyor). Yayın adayların %92'sinde canlı oyunu gösteriyor (homografi geçerli, top kadrajda; başlangıç anı %94). Top çapı yayında medyan 11.6 px (p25 10.4; görünürlerin %83'ünde ≥ 10 px), taktik videoda 5.8 px. Adayların %54'ünde başlangıçta iki takımdan da topa ≤ 3 m oyuncu var. Tüm canlı oyunda yayın %88 görünür, top 11.3 px (taktik 6.0 px), çekişme %15 | GO: görünürlük ve çözünürlük yeterli, ama yalnız yayında (taktik videoda top ~6 px). Açık: video pilot skorları yerelde yok; etiket / doğrulama kaynağı ve müdahale-blok anlarındaki isabet |
 
 ### Ekip arkadaşının GitHub kayıtları — 27 Ekim birleştirmesi
 
@@ -1944,6 +1945,17 @@ katmanın beklenen getirisi (Metrica +0.003–0.006) eşiğin altında kalıyor.
 **Ders (tur 21).** BiGRU tarifinin veri / kayıp / topluluk düzeyindeki değişiklikleri ±0.005 içinde kalıyor ve
 çoğunlukla DFL-evctrl ile DFL-trk arasında takas yaratıyor. Kare doğruluğu artışı spellF1 için yeterli değil; kısa
 possession havuzu, mevcut tracking girdisinden öğrenilmiş kanıtla da açılmıyor.
+
+**Tur 22 (2 Kasım, kullanıcı: "bu tarz pozisyonlara özel topa kimin dokunduğunu tahmin eden bir model işe yarar
+mı?").** Takipten "kim dokundu" modeli beş biçimde denenmişti (tur 7 kontrolcü, tur 10 çekişme uzmanı, tur 11–12
+dokunuş olayları, tur 19 yarış, tur 20 kısa spell dedektörü); kusursuz konum testi çekişmeli kısa spell'lerde kare
+doğruluğunu yalnız 0.63–0.65 → 0.69–0.70 taşıyor. Sınır bilgide, o yüzden yeni bir takip modeli denenmedi. Video
+tek yeni bilgi kaynağı; fizibilite ölçüldü (`src/exp_video_feas.py`, §3): yayın v14'ün karar verdiği anların %92'sini
+canlı gösteriyor ve top ~12 px, yani önceden konan eşik geçildi (GO). İki uyarı: (1) BAR-ATH'ta doğrulayıcının yalnız
+50 adayı var; asıl havuz, karışımda hiç kanıtı olmayan kısa possession'lar (~%70), bu yüzden video modeli yalnız
+doğrulamamalı, değişiklik de önermeli; (2) eğitim ve doğrulama için videolu, takımlı olay etiketli bir dış set gerekiyor
+(SoccerNet Team-BAS yayın, SoccerTrack v2 panoramik); hazır modeller müdahale / blokta zayıf. Round 7'nin video pilot
+skorları (`cache/video/bas_raw_fold*.npz`) yerelde yok.
 
 **Bekleyen.** Duruş türü dilbilgisi (fikir 4: duruş türü ve bölgesi → doğrulayıcı özellikleri / ilk spell süresi)
 denenmedi. PFF'li doğrulayıcı (PFF adayları yalnız eğitimde; v10 PFF'i hiç görmedi, BiGRU için PFF'te K-katlı eğitim
