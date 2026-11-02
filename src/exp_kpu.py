@@ -19,7 +19,7 @@ S2ab (variant + uses); a trailing c also snaps the final short spells' ends to t
   python -I src/exp_kpu.py theta VARIANT          the label-free candidate threshold
   python -I src/exp_kpu.py build NAME             candidate rows of S1a / S1ab / S2a / S2ab
   python -I src/exp_kpu.py trainpool NAME SEED VSEED
-  python -I src/exp_kpu.py eval VSEED[,VSEED] NAME,...
+  python -I src/exp_kpu.py eval VSEED[,VSEED] NAME,... [REF]   (KPU_INFO=evctrl: SC evctrl, information only)
 """
 import os
 import sys
@@ -234,10 +234,10 @@ def touch_features(rows, outs):
     return rows
 
 
-def evctrl_y(rows):
-    """DFL rows labelled under the target convention (evctrl), with exp_verify.rows_for's y rule."""
+def evctrl_y(rows, src="dfl@v3"):
+    """DFL (or, round 25, SC) rows labelled under the target convention (evctrl), with exp_verify.rows_for's y rule."""
     import exp_short_cands as ec
-    evlabs = bench.labels("dfl@v3", "evctrl")
+    evlabs = bench.labels(src, "evctrl")
     for r in rows:
         gt = np.asarray(evlabs[r["i"]])
         frac = float(np.mean(gt[r["s"]:r["t"]] == r["k"]))
@@ -247,8 +247,9 @@ def evctrl_y(rows):
 
 
 def relabel(name):
-    """Rounds 24b / 24c from C1ab's rows: E = DFL rows labelled under the target convention (evctrl), T = also the
-    touch features of C1's touch head, a = the specialist's features from the mean of its three seeds."""
+    """Rounds 24b / 24c / 25 from C1ab's rows: E = DFL rows labelled under the target convention (evctrl), T = also the
+    touch features of C1's touch head, a = the specialist's features from the mean of its three seeds, S = SC rows
+    labelled under the target convention too (SC evctrl)."""
     use("C1ab")
     src_rows = {(src, k, d): bench._load(ev._path("rows4" if src.startswith("dfl") else "rows3", src, k, d))
                 for src in SRCS for k in es.SEEDS for d in ev.DEADS}
@@ -256,6 +257,8 @@ def relabel(name):
         outs = (avg_outputs if name.endswith("a") else outputs)("C1", src)[ss.SEEDS[k]]
         if src.startswith("dfl"):
             evctrl_y(v["rows"])
+        if src.startswith("sc") and "S" in name[4:]:
+            evctrl_y(v["rows"], "sc@v3")
         if name.endswith("a"):
             add_features(v["rows"], outs)
         if "T" in name[4:]:
@@ -264,6 +267,20 @@ def relabel(name):
     for (src, k, d), v in src_rows.items():
         bench._dump(v, ev._path("rows4" if src.startswith("dfl") else "rows3", src, k, d))
     print("  %s rows written" % name, flush=True)
+
+
+def relabel_sc(base, name):
+    """Round 25: base's rows with the SC rows labelled under the target convention (SC evctrl); nothing else changes."""
+    use(base)
+    src_rows = {(src, k, d): bench._load(ev._path("rows4" if src.startswith("dfl") else "rows3", src, k, d))
+                for src in SRCS for k in es.SEEDS for d in ev.DEADS}
+    for (src, k, d), v in src_rows.items():
+        if src.startswith("sc"):
+            evctrl_y(v["rows"], "sc@v3")
+    use(name)
+    for (src, k, d), v in src_rows.items():
+        bench._dump(v, ev._path("rows4" if src.startswith("dfl") else "rows3", src, k, d))
+    print("  %s rows written (from %s)" % (name, base), flush=True)
 
 
 def build_m(name, w=0.25):
@@ -410,15 +427,18 @@ def snap(pred, o):
     return out
 
 
-def evaluate(vseeds, names):
+def evaluate(vseeds, names, ref="v14"):
+    """Every name against v14 and, when ref is another name (round 25: the adopted C1abETm), also against ref."""
     import exp_blend_weight as bw
     import exp_refine as er
-    cells = {}
+    cells, info = {}, {}
+    info_convs = tuple(c for c in os.environ.get("KPU_INFO", "").split(",") if c)  # round 25: SC contexts, info only
     names = ["v14"] + [n for n in names if n != "v14"]
     for src, convs, dec, prim in ev.SOURCES:
         use("v14")
         blocks = bench.blocks(src)
-        labs = {c: bench.labels(src, c) for c in convs}
+        extra = info_convs if src.startswith("sc") else ()
+        labs = {c: bench.labels(src, c) for c in convs + extra}
         for name in names:
             use(name)
             outs = outputs(name[:2], src) if name.endswith("c") else None
@@ -428,8 +448,9 @@ def evaluate(vseeds, names):
                         _, preds = bw._verified(src, seed, dname, vseed, lambda s2: ev._rows4(s2, seed, dname), "probs4")
                         if outs is not None:
                             preds = [snap(p, np.asarray(o, np.float32)) for p, o in zip(preds, outs[ss.SEEDS[seed]])]
-                        for c in convs:
-                            cells.setdefault((src, c, dname, name), []).append(er.by_match(blocks, labs[c], preds))
+                        for c in convs + extra:
+                            (info if c in extra else cells).setdefault((src, c, dname, name), []).append(
+                                er.by_match(blocks, labs[c], preds))
         bench._blocks.clear()
         bench._labels.clear()
     use("v14")
@@ -437,6 +458,14 @@ def evaluate(vseeds, names):
     for name in names[1:]:
         bw.regret_boot(mean, ["v14", name], "v14", name)
         bw.decide({k: v for k, v in mean.items() if k[3] in ("v14", name)}, "v14", name)
+    for name in names[1:]:
+        if ref != "v14" and name != ref:
+            print("against %s:" % ref, flush=True)
+            bw.regret_boot(mean, [ref, name], ref, name)
+            bw.decide({k: v for k, v in mean.items() if k[3] in (ref, name)}, ref, name)
+    if info:
+        print("\ninformation only, not in the decision rule:", flush=True)
+        er.summarize(info, names, ref="v14")
     return mean, regret
 
 
@@ -445,16 +474,19 @@ def main():
     warnings.filterwarnings("ignore")
     stage, variant = sys.argv[1], sys.argv[2]
     if stage == "build":
-        if variant in ("C1abE", "C1abET", "C1abETa"):
+        if variant in ("C1abE", "C1abET", "C1abETa", "C1abETS", "C1abETSa"):
             relabel(variant)
         elif variant == "C1abETm":
             build_m(variant)
+        elif variant == "C1abETmS":
+            relabel_sc("C1abETm", variant)
         else:
             build(variant)
     elif stage == "trainpool":
         trainpool(variant, int(sys.argv[3]), int(sys.argv[4]))
     elif stage == "eval":
-        evaluate(tuple(int(x) for x in sys.argv[2].split(",")), sys.argv[3].split(","))
+        evaluate(tuple(int(x) for x in sys.argv[2].split(",")), sys.argv[3].split(","),
+                 sys.argv[4] if len(sys.argv) > 4 else "v14")
     elif stage == "infer":
         for src in SRCS:
             ss.infer(src, variant)

@@ -139,6 +139,34 @@ def parse(match, refresh=False):
     return result
 
 
+def evctrl_labels(match, keep_s=.5):
+    """[h1, h2] player-possession labels under the challenge's controlled-possession reading (round 25): the rule of
+    gradient.controlled_reading (Metrica 'ctrl', DFL 'evctrl', PFF), with every player possession's start and end as the
+    team's on-ball events; a successful pass is a completed pass, a shot a shot. keep_s .5 as for PFF, not tuned:
+    231 possessions per match, 24% < 4 s, 15 in play between two opponent possessions (phase 255 / 29% / 26, pp 276 /
+    33% / 37; Metrica ctrl 231 / 20% / 12, DFL evctrl 229 / 18% / 13)."""
+    import gradient
+    d = parse(match)
+    home = json.load(open(os.path.join(DATA, match, "%s_match.json" % match), encoding="utf-8"))["home_team"]["id"]
+    ev = pd.read_csv(os.path.join(DATA, match, "%s_dynamic_events.csv" % match), low_memory=False,
+                     usecols=["event_type", "period", "frame_start", "frame_end", "team_id", "end_type", "pass_outcome"])
+    out = []
+    for per in (1, 2):
+        lab = d["h%d_labels_pp" % per]
+        f0 = int(d["h%d_f0" % per][0])
+        evs = []
+        for r in ev[(ev["event_type"] == "player_possession") & (ev["period"] == per)].itertuples():
+            k = H if r.team_id == home else A
+            for fr, kind, oc in ((r.frame_start, "start", None),
+                                 (r.frame_end, {"pass": "PA", "shot": "SH"}.get(r.end_type, r.end_type),
+                                  "C" if r.pass_outcome == "successful" else None)):
+                f = int(round((fr - f0) * FPS / FPS_IN))
+                if 0 <= f < len(lab):
+                    evs.append((f, k, kind, oc))
+        out.append(gradient.controlled_reading(lab, evs, keep_s))
+    return out
+
+
 def _parse_job(m):
     d = parse(m)
     out = []

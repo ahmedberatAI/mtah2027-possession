@@ -301,6 +301,8 @@ def labels(src, conv):
             _labels[key] = [b["lab"] for b in blocks("sc@v3")]
         elif conv == "pp":                           # team from the dynamic events' player possessions
             _labels[key] = [scr.parse(m)["h%d_labels_pp" % h] for m in scr.matches() for h in (1, 2)]
+        elif conv == "evctrl":                       # round 25: pp under the controlled reading of the dynamic events
+            _labels[key] = [lab for m in scr.matches() for lab in scr.evctrl_labels(m)]
         elif conv == "ctrl":                         # pp put into the controlled convention with trk_ctrl's rule
             out = []
             for m in scr.matches():
