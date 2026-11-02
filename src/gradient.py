@@ -167,6 +167,63 @@ def labels_from_events(rows, per, grid, offset=0.):
     return n,c,dict(stats)
 
 
+def team_events(rows, per, grid, shift):
+    """(grid index, team, possessionEventType, outcome) of every on-the-ball event of one period."""
+    out = []
+    for rs in groups_for(rows, per):
+        g = rs[0]['gameEvents']
+        if not isinstance(g.get('homeTeam'), bool):
+            continue
+        team = H if g['homeTeam'] else A
+        for r in rs:
+            p = r.get('possessionEvents') or {}
+            kind = p.get('possessionEventType')
+            if not kind or p.get('nonEvent'):
+                continue
+            oc = p.get('passOutcomeType') or p.get('crossOutcomeType') or p.get('shotOutcomeType')
+            f = int(round((float(r['eventTime'])+shift-grid[0])*FPS))
+            if 0 <= f < len(grid):
+                out.append((f, team, kind, oc))
+    return out
+
+
+def controlled_reading(lab, evs, keep_s=.5):
+    """The challenge's controlled-possession reading (src/metrica_sample.py merge_uncontrolled, the rule behind the
+    Metrica 'ctrl' and DFL 'evctrl' labels) on PFF's labels: a spell that directly follows the other team's spell (no
+    dead ball between) is a change of possession only if the new team shows control inside it -- a completed pass or
+    cross, a shot, or any of its events >= keep_s after the spell starts; otherwise it goes back to the team that had
+    the ball. keep_s .5 matches the reference statistics (round 24: 217 possessions per match, 21% < 4 s, 10 in play
+    between two opponent possessions; Metrica ctrl 231 / 20% / 12, DFL evctrl 229 / 18% / 13)."""
+    out = np.asarray(lab).copy()
+    st = np.flatnonzero(np.r_[True, out[1:] != out[:-1]])
+    sp = list(zip(st, np.r_[st[1:], len(out)], out[st]))
+    keep = int(keep_s*FPS)
+    for i in range(1, len(sp)):
+        a, b, k = sp[i]
+        pa = sp[i-1][0]
+        if sp[i-1][1] != a or k > 1 or out[pa] not in (H, A) or out[pa] == k:
+            continue
+        inside = [(f, kind, oc) for f, t, kind, oc in evs if a <= f < b and t == k]
+        if not (any((kind in ('PA', 'CR') and oc == 'C') or kind == 'SH' for f, kind, oc in inside)
+                or any(f >= a+keep for f, kind, oc in inside)):
+            out[a:b] = out[pa]
+    return out
+
+
+def ctrl_labels(match, keep_s=.5):
+    """{period: controlled-reading labels} on parse()'s grid (the cached npz and its alignment report)."""
+    path, info = parse(match)
+    shifts = {p['period']: p['applied_shift'] for p in info['periods']}
+    rows = read_json(DATA/'events'/f'{match}.json')
+    out = {}
+    with np.load(path) as d:
+        for per in d['periods']:
+            lab = d[f'h{per}_labels']
+            out[int(per)] = controlled_reading(lab, team_events(rows, int(per), d[f'h{per}_time'], shifts[int(per)]),
+                                               keep_s)
+    return out
+
+
 def resample(t, values, grid, max_gap=MAX_GAP):
     """Linear interpolation only within short observed intervals, never through cuts."""
     j = np.clip(np.searchsorted(t,grid,side='right')-1,0,len(t)-2)

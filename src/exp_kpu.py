@@ -200,7 +200,7 @@ def theta(variant):
     return chosen
 
 
-THETA = {"S1": 0.7, "S2": 0.8}                  # src/exp_kpu.py theta, recorded in docs/RAPOR.md before gate 2
+THETA = {"S1": 0.7, "S2": 0.8, "C1": 0.7}                  # src/exp_kpu.py theta, recorded in docs/RAPOR.md before gate 2
 _path = ev._path
 
 
@@ -333,6 +333,7 @@ def evaluate(vseeds, names):
     mean, regret = er.summarize(cells, names, ref="v14")
     for name in names[1:]:
         bw.regret_boot(mean, ["v14", name], "v14", name)
+        bw.decide({k: v for k, v in mean.items() if k[3] in ("v14", name)}, "v14", name)
     return mean, regret
 
 

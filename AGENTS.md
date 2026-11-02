@@ -31,7 +31,12 @@ User instructions carried forward from the 27 October 2026 continuation note.
   over independent matches. Average Metrica noise draws within a game first.
   Use worst-case regret across external contexts; differences below 0.005 keep
   the current/simpler model. Never evaluate shared BiGRU on DFL as held out:
-  its checkpoints trained on all seven DFL matches.
+  its checkpoints trained on all seven DFL matches. Update 2 November 2026
+  (user decision): the primary contexts are the target convention's, the
+  official "controlled possession" reading (Metrica ctrl and DFL evctrl, each
+  with learned and true dead ball); a candidate must lower their worst-case
+  regret by >= 0.005. SkillCorner phase / pp and DFL trk count 2-3x more short
+  possessions per match and are guards only: none may lose more than 0.01.
 - Add each experiment at the end of the main table in `docs/RAPOR.md` section 3;
   put longer notes under a new round in section 4. Update section 1 when the
   default or established scores change. Do not promote an incomplete result.

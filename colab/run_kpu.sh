@@ -31,11 +31,11 @@ if [ ! -f $SCORER ]; then
     mkdir -p $(dirname $SCORER)
     curl -sfL -o $SCORER https://raw.githubusercontent.com/metrica-sports/more-than-a-hack-2027/f8f2629ff1e0985f81d7e59d8413678514ee1530/evaluation/possession_metrics.py
 fi
-D=/content/kpu_data
-python -I src/short_specialist.py prep-pff $D $(nproc)
+D=${KPU_DATA:-/content/kpu_data}
+python -I src/short_specialist.py prep-pff $D $(nproc) ${KPU_CONV:-pff}
 echo "prepared $(date -u) ($(du -sh $D | cut -f1))"
 mkdir -p logs /content/mtah/out/kpu
-for v in S1 S2; do
+for v in ${KPU_VARIANTS:-S1 S2}; do
     for s in 20261102 20261103 20261104; do
         python -I src/short_specialist.py train $D $v $s /content/mtah/out/kpu > logs/kpu_${v}_$s.log 2>&1 &
     done

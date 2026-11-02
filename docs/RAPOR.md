@@ -225,6 +225,12 @@ v13'ün önünde; en kötü pişmanlık 0.0165 → 0.0039 (bootstrap P(fark ≥ 
 
 ## 2. Kalıcı kurallar ve tuzaklar
 
+- **Karar kuralı (2 Kasım, kullanıcı kararı, tur 24):** birincil bağlamlar hedef kuralınkiler, yani resmi "kontrollü
+  possession" okuması: Metrica ctrl ve DFL evctrl (her biri öğrenilmiş ve gerçek ölü topla). Yeni bir model bunların en
+  kötü durum pişmanlığını ≥ 0.005 düşürmeli. SC faz / pp ve DFL-trk maç başına 2–3 kat fazla kısa possession sayıyor;
+  yalnız koruma: hiçbiri 0.01'den fazla kaybetmemeli. Gerekçe: maç başına oyun içi kısa possession Metrica ctrl 12, DFL
+  evctrl 13, DFL-trk 16, SC faz 26, SC pp 37, PFF (eski kural) 54, DFL native 135; eşit ağırlıklı pişmanlık hedef
+  kurala hizalanan modelleri SC yüzünden cezalandırıyordu.
 - **Veri hiçbir bulut LLM'e gösterilmez** (T&C). Scriptler sadece toplu istatistik basar; video karesi, ham satır,
   ses, ham veri grafiği yok. Analiz raporları Artifact olarak yayınlanmaz.
 - **Public pencerede parametre ayarlamayın.** Resmi örnek: smooth125 public'te kazanıyor, tam maçta kaybediyor.
@@ -2030,6 +2036,55 @@ Metrica'nın kuralıyla tam örtüşmüyor olabilir.
 **Ders (tur 23).** Kısa possession'lar için ilk kez gerçek yeni bilgi bulundu: PFF'in insan etiketli dokunuşlarıyla
 eğitilmiş, topun çevresine bakan bir uzman, doğrulayıcının ayırt etme gücünü dışarıdaki her sette artırıyor (Kapı 1).
 Ama karar katmanından spellF1'e dönüşü küçük (+0.002) ve BAR-ATH'a en yakın Metrica'da hafif negatif.
+
+**Tur 24 — kontrolü öğrenen uzman (KPU-C): bulgu, araştırma ve ön kayıt (2 Kasım, çalıştırmadan önce).** Kullanıcı:
+"yeni fikirler üretmemiz lazım, kısa possession'ları net biçimde nasıl çözeceğiz, uzun süre düşün, araştır; Codex ile 4
+paralel ajan". Teşhis (`src/exp_kpu.py` satırları, toplu sayılar): tur 23 uzmanının kendi adaylarının yalnız %10 (DFL),
+%3 (Metrica), %12'si (SC) gerçek; doğru eklemelerin IoU ≥ 0.7 payı %40–49; ekleme isabeti 0.52–0.77, duyarlılık ~%30.
+Kök neden **etiket kuralı**: maç başına possession / < 4 sn payı / oyun içi kısa — Metrica ctrl 231 / %20 / 12, DFL evctrl
+229 / %18 / 13, DFL-trk 240 / %22 / 16, SC faz 255 / %29 / 26, SC pp 276 / %33 / 37, PFF (gradient.py) 305 / %40 / 54,
+DFL native 437 / %53 / 135. Resmi tanım (CHALLENGE.md) kontrollü possession; Metrica ctrl ve DFL evctrl bu tanımı olaylara
+uygulayan kurallar (`merge_uncontrolled`). Uzman dokunuşu kontrol sanan bir kuralla eğitilmişti. Hedef kuralda v14'ün
+kısa possession kayıpları (Metrica, gerçek D): oyun içi 11.7 / maç, yakalama 0.32, kâhin +0.030; duruştan önce 8.7,
+0.37, +0.015; duruşlar arası 14.7, 0.82, +0.006; duruştan sonra 12.3, 0.77, +0.001.
+*Codex ajanları* (gpt-6.1-sol, en yüksek akıl yürütme; CLI 0.166.0'a güncellendi, ~500 MB; yalnız web, dosya / kabuk
+yok, genel brif; 368 arama; `scratchpad lit24/A1..A4`): A1 karar / sınır (bir ekleme iki tahmin ekler, ancak iki eşleşme
+kazandırırsa puana döner; tepeye oturtma yerine denetimli sınır regresyonu), A2 kurala özgü kontrol başlıkları ("dokundu",
+"düelloyu kazandı", "kontrolü aldı" ayrı), A3 video (kırpılmış oyuncu görüntüsü; NDA'lı veri ve elle etiket gerektiriyor),
+A4 sağlayıcı tanımları (Opta: araya girme ancak ardından kontrollü aksiyon gelirse possession başlatır), duruşa bitişik
+kısa spell dilbilgisi.
+*PFF'in kontrollü okuması* (`gradient.controlled_reading`, keep 0.5 sn): 217 possession / maç, %21 kısa, 10.0 oyun içi kısa
+(keep 1.0 sn: 212 / %19 / 7.9) → hedefle örtüşüyor.
+*C1:* S1'in girdisi ve mimarisi; hedefler hizalanmış etiketlerden (kontrol H / A / D, kazanma / kaybetme) ve ayrı bir
+takım başına dokunuş başlığı (PFF'in topla ilgili her olayı, σ 2 kare); v10 önseli yok; 3 tohum, 12,000 adım; PFF 64
+maç, V3 + V4 kopyaları.
+*Kapı 1 (DFL / Metrica / SC, uzman görmedi):* (a) doğrulayıcının maç-dışı AUC'si G1 → G1 + C1'in 5 özelliği: 6 hücrede
+ortalama ≥ +0.02, hiçbir hücre < −0.01; YA DA (b) uzmanın kendi adaylarında (aynı etiketsiz θ kuralı, ≤ 25 aday / yarı)
+Metrica'da gerçek oranı ≥ %10 (S1: %3). İkisi de tutmazsa dur.
+*Kapı 2 (yeni karar kuralı, §2):* C1ab (özellikler + kendi adayları); birincil 4 bağlamın (Metrica ctrl, DFL evctrl ×
+öğrenilmiş / gerçek D) en kötü durum pişmanlığında ≥ 0.005 iyileşme; koruma: SC faz / pp ve DFL-trk'nin hiçbiri −0.01'den
+kötü değil.
+*Paralel (CPU):* denetimli sınır regresyonu (A1) ayrı ön kayıtla.
+
+*Sınır regresyonu (`src/exp_boundary.py`; ön kayıt: maç-dışı gerçek kısa adaylarda IoU ≥ 0.7 payı ≥ +5 puan, sonra
+spellF1):* iki LightGBM (başlangıç / bitiş farkı, ±50 kare) sınırların ±36 karesindeki karışım / BiGRU / v10 logit
+profillerinden, gerçek kısa adaylarla, 30 maçta maç-dışı. İç kapı geçti: ekleme adaylarında IoU ≥ 0.7 DFL 0.36–0.40 →
+0.55–0.58, Metrica 0.35–0.37 → 0.59–0.70, SC 0.30–0.32 → 0.47–0.48; silme adaylarında ≈ 0. Ama uygulanan (eklenen +
+korunan) adaylarda spellF1 düştü: DFL −0.004, Metrica −0.0015, SC −0.002…+0.0003 → ❌. Teşhis: zarar tamamen korunan
+kısa spell'lerden (DFL −0.004…−0.005); yalnız eklemelere uygulamak +0.0001…+0.0006 — doğrulayıcı yarı başına ~2 ekleme
+yapıyor, toplam etki küçük. Darboğaz eklemelerin sayısı / isabeti.
+*C1 sonuçları (Colab ~0.8 birim; PFF doğrulama kaybı 0.924):* Kapı 1 (a) GEÇTİ: AUC ekle DFL 0.705 → 0.753, Metrica 0.706
+→ 0.771, SC 0.810 → 0.840; sil DFL 0.846 → 0.845, Metrica 0.815 → 0.874, SC 0.901 → 0.916; ortalama +0.036 (S1 +0.024).
+(b) geçmedi: uzmanın kendi adaylarında (θ 0.7) gerçek oranı Metrica %3.9, DFL %7.4, SC %10.8. Kapı 2 (C1ab, 3 × 2 tohum):
+DFL evctrl +0.0011 / +0.0018, DFL-trk +0.0039 / +0.0036, Metrica +0.0020 / +0.0022 (2/3), SC faz +0.0039 / +0.0045, SC pp
++0.0061 / +0.0063 — 10 bağlamın hepsinde artı (ilk kez). Birincil bağlamlarda pişmanlık farkı +0.0022 (%90 [−0.0007,
++0.0057], P(≥ 0.005) 0.08) → yeni kurala göre eşik altında, v14 kalır (eski kuralla 10 bağlamda +0.0063, %90 [+0.0037,
++0.0086] — kural sonuçtan önce değiştirildi, geriye dönülmedi).
+*Tur 24b ön kaydı (çalıştırmadan önce):* doğrulayıcının eğitim etiketleri hâlâ eski kurallardan (DFL trk, SC faz); C1 en
+çok bunlarda kazandırıyor. C1abE: C1ab, DFL satırlarının y'si hedef kuraldan (evctrl; aynı y tanımı: aday takımın payı
+≥ 0.5 ve IoU ≥ 0.3 → 1, < 0.2 → 0). C1abET: C1abE + uzmanın dokunuş başlığından 3 özellik (aday takımın başlangıç ±6
+karedeki en yüksek dokunuşu, aralık içindeki ortalama dokunuşu, rakibin bitiş ±6 karedeki en yüksek dokunuşu). Karar
+yeni kuralla (birincil ≥ 0.005, korumalar ≥ −0.01).
 
 **Bekleyen.** Duruş türü dilbilgisi (fikir 4: duruş türü ve bölgesi → doğrulayıcı özellikleri / ilk spell süresi)
 denenmedi. PFF'li doğrulayıcı (PFF adayları yalnız eğitimde; v10 PFF'i hiç görmedi, BiGRU için PFF'te K-katlı eğitim

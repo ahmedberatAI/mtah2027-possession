@@ -12,8 +12,12 @@ centroids, goalkeeper distances, players present). Variant S2 adds v10's raw and
 Model: a shared frame encoder and one bidirectional GRU run on both sides' views (symmetric by construction), +-2 s of
 context around 2 s cores; per side a control, a "gains control" and a "loses control" logit, and a dead-ball logit.
 Outputs per frame (7): P(H), P(A), P(D), gain H, gain A, lose H, lose A.
+Variant C1 (round 24) learns the target convention instead: PFF's labels under the challenge's controlled-possession
+reading (gradient.controlled_reading, the rule behind Metrica ctrl / DFL evctrl), plus a separate per-team touch head
+from PFF's on-the-ball events, so that touching the ball and gaining control are learnt apart (9 outputs).
 
-  python -I src/short_specialist.py prep-pff OUT [WORKERS]           Colab: degraded PFF halves -> features + targets
+  python -I src/short_specialist.py prep-pff OUT [WORKERS] [CONV]    Colab: degraded PFF halves -> features + targets
+                                                                     (CONV pff for S1 / S2, ctrl for C1)
   python -I src/short_specialist.py train DATA VARIANT SEED OUT      GPU: one model (VARIANT S1 / S2)
   python -I src/short_specialist.py infer SRC VARIANT                local: outputs on bench halves, 3 seeds
 """
@@ -164,6 +168,17 @@ def targets(lab):
     return ctrl, ev
 
 
+def touch_targets(evs, n, sigma=2.0):
+    """(T, 2) float32: Gaussian bumps (sigma 2 frames) at every on-the-ball event of the home / away team
+    (gradient.team_events) -- who touches the ball, kept apart from who controls it (round 24, variant C1)."""
+    out = np.zeros((n, 2), np.float32)
+    t = np.arange(n)
+    for f, team, kind, oc in evs:
+        lo, hi = max(0, f - 8), min(n, f + 9)
+        out[lo:hi, team] = np.maximum(out[lo:hi, team], np.exp(-0.5 * ((t[lo:hi] - f) / sigma) ** 2))
+    return out
+
+
 def centres(lab, x):
     """Training window centres per kind (MIX): team changes, contests (both teams within 3 m), live/dead edges, live."""
     lab = np.asarray(lab)
@@ -178,13 +193,18 @@ def centres(lab, x):
 # -- PFF preparation (Colab) ------------------------------------------------------------------------------------------
 
 def _prep_one(job):
-    mi, match, out, with_prior = job
+    """One PFF match -> per half and degradation copy: features, targets, window centres. conv "pff": PFF's controlled
+    labels (variants S1 / S2); "ctrl": their controlled-possession reading (gradient.controlled_reading) plus touch
+    targets (variant C1)."""
+    mi, match, out, with_prior, conv = job
     import gradient
     import sim
     warnings.filterwarnings("ignore")
     t0 = time.time()
     done = []
-    path, _ = gradient.parse(match)                       # cached npz (src/gradient.py), parsed here when missing
+    path, info = gradient.parse(match)                    # cached npz (src/gradient.py), parsed here when missing
+    shifts = {p["period"]: p["applied_shift"] for p in info["periods"]}
+    rows = gradient.read_json(gradient.DATA / "events" / (match + ".json")) if conv == "ctrl" else None
     with np.load(path) as d:
         pitch = tuple(float(v) for v in d["pitch"])
         for per in d["periods"]:
@@ -192,6 +212,11 @@ def _prep_one(job):
             lab = d[tag + "_labels"]
             if not ((lab == 0) | (lab == 1)).any():
                 continue
+            touch = None
+            if conv == "ctrl":
+                evs = gradient.team_events(rows, int(per), d[tag + "_time"], shifts[int(per)])
+                touch = touch_targets(evs, len(lab))
+                lab = gradient.controlled_reading(lab, evs)
             for var, params, base in (("v3", sim.V3, 30000), ("v4", sim.V4, 40000)):
                 key = "%s_%s_%s" % (match, tag, var)
                 if os.path.isfile(os.path.join(out, key + "_x.npy")):
@@ -204,6 +229,8 @@ def _prep_one(job):
                     if with_prior else None
                 x = features(P, B, d["team"], d["gk"], pitch, prior)
                 ctrl, ev = targets(lab)
+                if touch is not None:
+                    ev = np.concatenate([ev, touch], 1)
                 np.save(os.path.join(out, key + "_x.npy"), x.astype(np.float16))
                 np.save(os.path.join(out, key + "_ctrl.npy"), ctrl)
                 np.save(os.path.join(out, key + "_ev.npy"), ev.astype(np.float16))
@@ -233,11 +260,11 @@ def _v10_prior(P, B, team, gk, pitch, tmp):
                                                            XA=np.hstack([f["XA"], a])))
 
 
-def prep_pff(out, workers):
+def prep_pff(out, workers, conv="pff"):
     from concurrent.futures import ProcessPoolExecutor
     import gradient
     os.makedirs(out, exist_ok=True)
-    jobs = [(mi, m, out, True) for mi, m in enumerate(gradient.matches())]
+    jobs = [(mi, m, out, conv == "pff", conv) for mi, m in enumerate(gradient.matches())]
     keys = []
     with ProcessPoolExecutor(max_workers=workers) as pool:
         for part in pool.map(_prep_one, jobs):
@@ -252,7 +279,8 @@ def prep_pff(out, workers):
 
 # -- model ------------------------------------------------------------------------------------------------------------
 
-def net(d_in, emb=128, hid=96):
+def net(d_in, emb=128, hid=96, heads=4):
+    """heads 4: own control, own gains, own loses, dead; 5 (variant C1) adds own touch before dead."""
     import torch
     from torch import nn
 
@@ -261,15 +289,15 @@ def net(d_in, emb=128, hid=96):
             super().__init__()
             self.enc = nn.Sequential(nn.Linear(d_in, emb), nn.GELU(), nn.Linear(emb, emb), nn.GELU())
             self.gru = nn.GRU(2 * emb, hid, batch_first=True, bidirectional=True)
-            self.head = nn.Linear(2 * hid, 4)                    # own control, own gains, own loses, dead
+            self.head = nn.Linear(2 * hid, heads)
 
         def forward(self, x):                                    # x: (B, T, 2, d)
             e = self.enc(x)
             h0, _ = self.gru(torch.cat([e[:, :, 0], e[:, :, 1]], -1))
             h1, _ = self.gru(torch.cat([e[:, :, 1], e[:, :, 0]], -1))
             o0, o1 = self.head(h0), self.head(h1)
-            ctrl = torch.stack([o0[..., 0], o1[..., 0], 0.5 * (o0[..., 3] + o1[..., 3])], -1)
-            ev = torch.stack([o0[..., 1], o1[..., 1], o0[..., 2], o1[..., 2]], -1)
+            ctrl = torch.stack([o0[..., 0], o1[..., 0], 0.5 * (o0[..., -1] + o1[..., -1])], -1)
+            ev = torch.stack([o[..., j] for j in range(1, heads - 1) for o in (o0, o1)], -1)
             return ctrl, ev
     return Net()
 
@@ -293,7 +321,7 @@ class Data:
         a = c - WIN // 2
         x = np.zeros((WIN, 2, self.d), np.float32)
         y = np.full(WIN, -1, np.int64)
-        e = np.zeros((WIN, 4), np.float32)
+        e = np.zeros((WIN, self.ev[i].shape[1]), np.float32)
         w = np.ones(WIN, np.float32)
         lo, hi = max(0, a), min(n, a + WIN)
         x[lo - a:hi - a] = self.x[i][lo:hi]
@@ -345,7 +373,8 @@ def train(folder, variant, seed, out, steps=12000, batch=64, lr=1e-3):
     va = [k for k in idx["keys"] if k.split("_")[0] in val_m and k.endswith("_v3")]
     dt, dv = Data(folder, tr, variant), Data(folder, va, variant)
     dev = "cuda" if torch.cuda.is_available() else "cpu"
-    model = net(dt.d).to(dev)
+    heads = 2 + dt.ev[0].shape[1] // 2
+    model = net(dt.d, heads=heads).to(dev)
     opt = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-4)
     sched = torch.optim.lr_scheduler.OneCycleLR(opt, max_lr=lr, total_steps=steps, pct_start=0.1)
     vrng = np.random.default_rng(7)
@@ -377,7 +406,8 @@ def train(folder, variant, seed, out, steps=12000, batch=64, lr=1e-3):
                 variant, seed, step, vl[0], vl[1], vl[2], time.time() - t0), flush=True)
             if vl[0] < best:
                 best = vl[0]
-                torch.save(dict(state=model.state_dict(), d=dt.d, variant=variant, seed=seed, step=step), path)
+                torch.save(dict(state=model.state_dict(), d=dt.d, heads=heads, variant=variant, seed=seed, step=step),
+                           path)
     with open(os.path.join(out, "kpu_%s_s%d.json" % (variant, seed)), "w") as fh:
         json.dump(dict(history=hist, best=best, train_halves=len(tr), val_halves=len(va)), fh)
 
@@ -387,16 +417,17 @@ def train(folder, variant, seed, out, steps=12000, batch=64, lr=1e-3):
 def load(path):
     import torch
     ck = torch.load(path, map_location="cpu", weights_only=False)
-    model = net(ck["d"])
+    model = net(ck["d"], heads=ck.get("heads", 4))
     model.load_state_dict(ck["state"])
     return model.eval()
 
 
 def predict(model, x, batch=64):
-    """(T, 7) float32: P(H), P(A), P(D), gain H, gain A, lose H, lose A, from +-2 s context around 2 s cores."""
+    """(T, 3 + events) float32: P(H), P(A), P(D), gain H, gain A, lose H, lose A (+ touch H, touch A for C1), from
+    +-2 s context around 2 s cores."""
     import torch
     n = len(x)
-    out = np.zeros((n, 7), np.float32)
+    out = None
     starts = list(range(-HALO, n, CORE))
     with torch.no_grad():
         for b0 in range(0, len(starts), batch):
@@ -407,6 +438,8 @@ def predict(model, x, batch=64):
             ctrl, ev = model(torch.from_numpy(xs))
             pc = torch.softmax(ctrl, -1).numpy()
             pe = torch.sigmoid(ev).numpy()
+            if out is None:
+                out = np.zeros((n, 3 + pe.shape[-1]), np.float32)
             for j, a in enumerate(starts[b0:b0 + batch]):
                 lo, hi = max(0, a + HALO), min(n, a + HALO + CORE)
                 if hi > lo:
@@ -438,7 +471,7 @@ def main():
     sys.stdout.reconfigure(encoding="utf-8")
     stage = sys.argv[1]
     if stage == "prep-pff":
-        prep_pff(sys.argv[2], int(sys.argv[3]) if len(sys.argv) > 3 else 6)
+        prep_pff(sys.argv[2], int(sys.argv[3]) if len(sys.argv) > 3 else 6, sys.argv[4] if len(sys.argv) > 4 else "pff")
     elif stage == "train":
         train(sys.argv[2], sys.argv[3], int(sys.argv[4]), sys.argv[5])
     elif stage == "infer":

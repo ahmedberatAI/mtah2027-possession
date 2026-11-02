@@ -177,6 +177,26 @@ def regret_boot(mean, names, cur, cand, n=10000, seed=0):
     print("regret %s - %s within %d names: %+.4f, 90%% [%+.4f, %+.4f], P(>= 0.005) %.2f, P(> 0) %.2f" % (
         cur, cand, len(names), point[cur] - point[cand], lo, hi, float(np.mean(d >= 0.005)), float(np.mean(d > 0))),
         flush=True)
+    return point[cur] - point[cand], lo, hi
+
+
+PRIMARY = {("dfl@v3", "evctrl"), ("metrica@v3", "ctrl")}
+GUARDS = {("dfl@v3", "trk"), ("sc@v3", "phase"), ("sc@v3", "pp")}
+
+
+def decide(mean, cur, cand):
+    """The round-24 decision rule (docs/RAPOR.md section 2): worst-case regret over the target convention's contexts
+    (Metrica ctrl and DFL evctrl, learned and true dead ball) must fall by >= 0.005; no guard context (DFL trk,
+    SkillCorner phase / pp) may lose more than 0.01."""
+    prim = {k: v for k, v in mean.items() if k[:2] in PRIMARY}
+    print("primary (target convention): ", end="")
+    gain, lo, hi = regret_boot(prim, [cur, cand], cur, cand)
+    worst = min(np.mean(list(mean[c + (cand,)].values())) - np.mean(list(mean[c + (cur,)].values()))
+                for c in {k[:3] for k in mean if k[:2] in GUARDS})
+    ok = gain >= 0.005 and worst >= -0.01
+    print("guards (DFL trk, SkillCorner phase / pp): worst change %+.4f | decision %s vs %s: %s" % (
+        worst, cand, cur, "ADOPT" if ok else "keep %s" % cur), flush=True)
+    return ok
 
 
 def main():
