@@ -1954,7 +1954,7 @@ tek yeni bilgi kaynağı; fizibilite ölçüldü (`src/exp_video_feas.py`, §3):
 canlı gösteriyor ve top ~12 px, yani önceden konan eşik geçildi (GO). İki uyarı: (1) BAR-ATH'ta doğrulayıcının yalnız
 50 adayı var; asıl havuz, karışımda hiç kanıtı olmayan kısa possession'lar (~%70), bu yüzden video modeli yalnız
 doğrulamamalı, değişiklik de önermeli; (2) eğitim ve doğrulama için videolu, takımlı olay etiketli bir dış set gerekiyor
-(SoccerNet Team-BAS yayın, SoccerTrack v2 panoramik); hazır modeller müdahale / blokta zayıf. Round 7'nin video pilot
+(SoccerNet Team-BAS yayın, SoccerTrack v2 panoramik); hazır modeller müdahale / blokta zayıf. Tur 7'nin video pilot
 skorları (`cache/video/bas_raw_fold*.npz`) yerelde yok.
 
 **Bekleyen.** Duruş türü dilbilgisi (fikir 4: duruş türü ve bölgesi → doğrulayıcı özellikleri / ilk spell süresi)
