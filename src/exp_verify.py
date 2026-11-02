@@ -129,7 +129,9 @@ def feats2(c, ms, mr, pr, s, t, k, a, e):
     return f
 
 
-def rows_for(src, blocks, cues, gt_primary, preds, smo, raw, gru, min_len, i0=0, v2=False):
+def rows_for(src, blocks, cues, gt_primary, preds, smo, raw, gru, min_len, i0=0, v2=False, extra=None):
+    """extra (round 23): per block, (s, t, k) insert candidates of src/short_specialist.py added to those of the
+    +-25 probability; their rows carry kpu_cand = 1."""
     rows = []
     for i, (b, gt, pr) in enumerate(zip(blocks, gt_primary, preds)):
         c = cues[i]
@@ -144,6 +146,8 @@ def rows_for(src, blocks, cues, gt_primary, preds, smo, raw, gru, min_len, i0=0,
             prev_len = (a - segs[j - 1][0]) / ea.FPS if j > 0 and segs[j - 1][1] == a else 0.0
             next_len = (segs[j + 1][1] - e) / ea.FPS if j + 1 < len(segs) and segs[j + 1][0] == e else 0.0
             cands = [(a + s, a + t, 1 - k, "ins") for s, t in ea.runs(fav[a:e] != k) if t - s >= ea.RUN]
+            if extra is not None:
+                cands += [(s, t, kk, "kins") for s, t, kk in extra[i] if a <= s and t <= e and kk == 1 - k]
             if e - a < ea.SHORT:
                 cands.append((a, e, k, "del"))
             for s, t, kk, typ in cands:
@@ -161,8 +165,8 @@ def rows_for(src, blocks, cues, gt_primary, preds, smo, raw, gru, min_len, i0=0,
                 f["next_dead"] = float(nxt == 2) if typ == "del" else 0.0
                 if v2:
                     f.update(feats2(c, ms, mr, pr, s, t, kk, a, e))
-                f.update(y=y, typ=typ, src=src, group=src + "/" + str(b["group"]), i=i0 + i, s=s, t=t, k=kk, a=a,
-                         e=e, min_len=min_len)
+                f.update(y=y, typ="ins" if typ == "kins" else typ, src=src, group=src + "/" + str(b["group"]), i=i0 + i,
+                         s=s, t=t, k=kk, a=a, e=e, min_len=min_len, kpu_cand=float(typ == "kins"))
                 rows.append(f)
     return rows
 

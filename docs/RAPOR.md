@@ -1996,6 +1996,21 @@ olayları: 64 maçta 7,709 kısa (< 4 sn) possession (3,473'ü oyun içinde iki 
 - *Riskler:* takipteki bilgi tavanı (kusursuz konumla çekişme anı doğruluğu ~0.70), PFF yayın takibi ↔ taktik ATD,
   PFF etiket kuralı ↔ Metrica (doğrulayıcı her kaynağın kendi etiketiyle eğitildiği için dengeler).
 
+*Eğitim (Colab T4, ~1 sa 50 dk, ~3.9 birim):* 64 maç → 268 yarı × bozulma kopyası (7.0 GB), 236 eğitim / 16 doğrulama;
+12,000 adım. PFF doğrulama kaybı S1 0.871–0.877, S2 0.875–0.883 (kontrol ~0.39–0.40, olay ~0.48–0.49).
+*Kapı 1 (`src/exp_kpu.py gate1`):* doğrulayıcının maç-dışı AUC'si G1 → G1 + uzman (5 özellik):
+| hücre | S1 | S2 |
+|---|---|---|
+| ekle DFL / Metrica / SC | 0.705 → 0.741 / 0.706 → 0.755 / 0.810 → 0.836 | 0.752 / 0.729 / 0.829 |
+| sil DFL / Metrica / SC | 0.846 → 0.842 / 0.815 → 0.839 / 0.901 → 0.911 | 0.863 / 0.825 / 0.913 |
+| ortalama artış (en kötü hücre) | +0.0237 (−0.0036) | +0.0215 (+0.0105) |
+İkisi de (a) ile GEÇTİ. (b) geçmedi: θ 0.5'te kapsam 0.220 → 0.384 / 0.379 (×1.7) ama yarı başına 127 / 147 aday (v14 23).
+*Kapı 2'nin aday kuralı (Kapı 2'den önce yazıldı):* uzmanın karşı takım kontrol olasılığı > θ olan ≥ 6 karelik
+koşular, v14'ün çözülmüş possession'ı içinde, en az bir karesinde iki takımdan da topa ≤ 3 m oyuncu olan ve v14'ün
+ekleme adaylarıyla (aynı takım, IoU ≥ 0.3) örtüşmeyenler; θ ∈ {0.6, 0.7, 0.8, 0.9} içinden yarı başına ≤ 25 aday veren
+en küçüğü (etiketsiz; v10 tohum 0, öğrenilmiş D, üç kaynak birlikte): S1 θ 0.7 (24.1), S2 θ 0.8 (24.6). Karar (a + b)
+üzerinden; (a) tek başına bilgi için raporlanır.
+
 **Bekleyen.** Duruş türü dilbilgisi (fikir 4: duruş türü ve bölgesi → doğrulayıcı özellikleri / ilk spell süresi)
 denenmedi. PFF'li doğrulayıcı (PFF adayları yalnız eğitimde; v10 PFF'i hiç görmedi, BiGRU için PFF'te K-katlı eğitim
 gerekir) maliyetli ve beklenen getirisi eşik altında.
