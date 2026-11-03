@@ -3,7 +3,7 @@
 v15's labels keep their dead stretches (v3's rules + the aligned broadcast, then the verifier); each stop and restart
 moves onto the nearest boundary of the same kind in the learned dead model's own decode (v15's team probability,
 BAR-ATH's decoder), within +-2 s and never across another boundary (src/dead_timing.py). Judged with BAR-ATH-like dead
-ball on the open sets (src/exp_dtime.py, before the verifier): DFL evctrl +0.016, Metrica ctrl +0.006, SkillCorner
+ball on the open sets (src/exp_dtime.py, before the verifier): DFL evctrl +0.016, Metrica ctrl +0.005, SkillCorner
 phase / player possession +0.003 / +0.003, SoccerTrack v2 +0.005 / +0.003 (not used to design the round). Here it is
 the last step.
 

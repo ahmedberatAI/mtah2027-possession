@@ -79,7 +79,7 @@ def evaluate():
         outs = exp_kpu.outputs("C1", src)
         n_add, lens, alive = 0, [], 0.0
         for k in es.SEEDS:
-            raws = [0.75 * r + 0.25 * ss.pk(o, 0) for r, o in zip(es.blend(es.v10_raw(k, src), members[k]),
+            raws = [0.75 * r + 0.25 * ss.pk(o, 0) for r, o in zip(es.blend(es.v10_raw(k, src), members[k], 0.5),
                                                                   outs[ss.SEEDS[k]])]
             smos = exp_smooth.smooth(raws, 25)
             rule = sd.decode_scores(a_rule, smos)

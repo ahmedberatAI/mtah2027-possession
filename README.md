@@ -83,7 +83,7 @@ python external/more-than-a-hack-2027/evaluation/validate_submission.py submissi
 stretches (v3's rules + the aligned broadcast) stay; each stop and restart moves onto the nearest boundary of the same
 kind in the learned dead model's own decode, within ±2 s and never across another boundary (`src/dead_timing.py`; the
 all-DFL dead-ball classifier is kept in `models/dead_base_v3.txt`). With BAR-ATH-like dead ball on the open sets the
-rules' boundaries are coarse (median error ~1 s) and the learned model's sharp: DFL evctrl +0.016, Metrica ctrl +0.006,
+rules' boundaries are coarse (median error ~1 s) and the learned model's sharp: DFL evctrl +0.016, Metrica ctrl +0.005,
 SkillCorner +0.003, and SoccerTrack v2, which was not used to design the step, +0.005. On BAR-ATH it moves 110 of 233
 boundaries (1.07% of the frames).
 

@@ -328,12 +328,12 @@ step:
 
 | Context (rules' dead ball) | v15 | v16 | Difference |
 |---|---|---|---|
-| DFL, event-derived controlled | 0.650 | 0.666 | +0.016 [+0.011, +0.021], 7/7 matches |
-| Metrica (3 games) | 0.740 | 0.746 | +0.006 [+0.004, +0.007], 3/3 |
-| DFL, tracking-derived controlled | 0.635 | 0.650 | +0.015 [+0.010, +0.021], 7/7 |
-| SkillCorner, phases | 0.606 | 0.609 | +0.004 [+0.002, +0.005], 17/20 |
-| SkillCorner, player possessions | 0.603 | 0.606 | +0.003 [+0.002, +0.005], 17/20 |
-| SkillCorner, controlled (information) | 0.642 | 0.645 | +0.004 [+0.002, +0.005], 16/20 |
+| DFL, event-derived controlled | 0.647 | 0.663 | +0.016 [+0.011, +0.021], 7/7 matches |
+| Metrica (3 games) | 0.740 | 0.746 | +0.005 [+0.003, +0.008], 3/3 |
+| DFL, tracking-derived controlled | 0.632 | 0.648 | +0.016 [+0.011, +0.021], 7/7 |
+| SkillCorner, phases | 0.601 | 0.605 | +0.003 [+0.001, +0.005], 16/20 |
+| SkillCorner, player possessions | 0.595 | 0.598 | +0.003 [+0.001, +0.005], 16/20 |
+| SkillCorner, controlled (information) | 0.642 | 0.645 | +0.003 [+0.001, +0.005], 15/20 |
 | SoccerTrack v2, controlled (independent) | 0.212 | 0.216 | +0.005 [+0.002, +0.007], 7/8 |
 
 On v15 itself, SoccerTrack v2 also gives an independent check of the specialist: with the learned / true dead ball
