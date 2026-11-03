@@ -560,6 +560,8 @@ Public sütunu yalnız bilgi içindir (17 spell, aralık ~0.4); v7'den itibaren 
 | Denetimli sınır regresyonu (tur 31, ön kayıtlı; `src/exp_bound.py`; v15'in her oyun içi değişimi için kayma + eş varlığı, iki LightGBM, ±2 sn penceresi, üç kaynak birlikte maç-dışı) | Kare düzeyinde işe yarıyor: değişimlerin %77'sinin gerçek eşi var, mutlak kayma medyanı 12 → 9 kare, değişimlerin %70'i taşındı, bunların %63'ü yaklaştı. SpellF1 (tohum 0, doğrulayıcı tohum 0): DFL evctrl −0.0001 / +0.0005 (öğr. / gerçek D), Metrica +0.0024 / +0.0009, DFL-trk −0.0007 / −0.0005, SC faz +0.0025 / +0.0017, SC pp +0.0008 / +0.0005 → eleme DFL +0.0002, Metrica +0.0016 (eşik +0.003) | ❌ elemede durdu; kare hatası düşse de IoU eşiklerini geçen spell sayısı pek değişmiyor (tavan küçük, teşhisle tutarlı) |
 | Bütünlük denetimi (tur 30, B6 #4; etiketsiz, toplu) | `candidate_v16.csv` 199,319 satır, frame sütunu 0..n−1; puanlanan iki yarının dışındaki 40,462 kare tamamen X. 1. yarı 53.0 dk, 100 possession, 57 ölü bölüm, ev sahibinin possession payı 0.636, ölü pay 0.485; 2. yarı 52.9 dk, 107 / 61, 0.585, 0.505 (takım eşlemesi yarı arasında ters dönmemiş; ters olsaydı pay ~0.4'e düşerdi); v15 → v16 değişen kare 908 / 1,216 | ✅ yapısal sorun yok |
 | Uzmanı, okumanın geri verdiği kareleri maskeleyerek yeniden eğitmek: C2 (tur 32, ön kayıtlı; `short_specialist.py prep-pff … ctrlmask`, CPU'da 3 tohum × 12,000 adım; C2abETmS = v15'in tarifi, C1 yerine C2; 3 v10 tohumu × doğrulayıcı tohumu 0 / 1) | v15'e (C1abETmS) göre: DFL evctrl −0.0012 / −0.0010 (öğr. / gerçek D), Metrica −0.0011 / −0.0008, DFL-trk −0.0035 / −0.0042, SC faz −0.0008 / +0.0010, SC pp +0.0010 / +0.0027; birincil −0.0012 (%90 [−0.0042, +0.0007], P(> 0) 0.11), en kötü koruma −0.0042. Bilgi: SC evctrl −0.0016 / 0.0000; SoccerTrack evctrl −0.0031 / −0.0026 (1/8, 2/8 maçta önde), sağlayıcı durumu −0.0001 / +0.0007 | ❌ v16 kalır |
+| Bilgi tavanı: algılama mı, anlam mı? (tur 33 teşhisi; açık DFL 7 maç, evctrl, gerçek D; `scratchpad c25/ceiling*.py`, toplu; sıkışık = iki rakip possession arasındaki oyun içi possession, yakalama / isabet IoU ≥ 0.5) | Sağlayıcının kare bayrağı (dokunuş düzeyi) olduğu gibi 0.608: sıkışık < 2 / < 4 sn yakalama 1.00 / 0.99 ama isabet 0.05 / 0.13 (3,061 spell, gerçek 1,604). Bayrak + trk kontrol kuralı **0.861** (yakalama 0.23 / 0.51, isabet 0.17 / 0.42); bayrak + öğrenilmiş tut / geri ver kararı (LOMO LightGBM, top kinematiği) 0.854 (0.27 / 0.48, 0.11 / 0.29). Temiz top + en yakın oyuncu (1.5 m) + kural 0.730, bozuk topla 0.644. v15 0.820 (yakalama 0.05 / 0.30, isabet 0.19 / 0.43; Metrica 0.895: 0.04 / 0.36, 0.27 / 0.55) | bilgi: kusursuz dokunuş bilgisi ~+0.04 tavan; sıkışık kısa possession'ların yarısı kusursuz dokunuşla bile kontrol kararında kayboluyor; temiz topla basit kural modelin gerisinde |
+| Darboğaz filosu (tur 33; 6 Codex ajanı, tur 30'un düzeni; brifte yalnız açık veri sonuçlarımız, tur 30–32'nin başarısızlıkları ve +0.02 hedefi; 344 arama, ~14,000 kelime; `scratchpad lit33/K1..K6`) | Altısı tek yolda birleşti: tüm oyuncuları kimliksiz gören, 25 Hz'de dokunuş ile kontrolü ayrı öğrenen (PFF aktörleri / olayları), kısa rakip possession'ı uçlarıyla birlikte aralık olarak öneren ve v16'nın ardından doğrudan (eski ≥ 0.5 sn aday kapısı ve yumuşatma olmadan) ekleyen model, hedef kurala katlı ince ayar. +0.02 için maç başına ~6 doğru sınırlı ekleme, ≥ %85 isabet. K6'nın tahmini: geliştirmede %25, gizli maçta ~%15. Video (K3) birincil bağlamlarda doğrulanamıyor; yayınlanmış tackle / block tespiti çok zayıf (AP 0.04–0.07). Yeni kaynaklar: ELASTIC (3 DFL maçında düzeltilmiş olay / alış zamanları, CC BY 4.0), EIGD. Doğrulanmamış uyarı: Metrica örnek maçlarının topu olaylardan kurulmuş olabilir (Bischofberger vd. 2024) | bilgi; 2 günlük eleme pilotu tur 34 |
 
 ### Ekip arkadaşının GitHub kayıtları — 27 Ekim birleştirmesi
 
@@ -2416,6 +2418,25 @@ tur 28'in v15 sayılarını birebir verdi. C2: evctrl −0.0031 / −0.0026 (1/8
 −0.0001 / +0.0007. Olası açıklama: maske eksik kısa possession'ları üretmiyor, yalnız o karelerdeki öğrenme sinyalini
 kaldırıyor. Teşhisteki açık (maç başına 1–2 sıkışık kısa possession) PFF etiketlerinin kaynağında. Uzmanın
 etiketlerini düzeltme yolu kapandı; C1 ve v16 değişmez.
+
+**Tur 33 — darboğaz filosu ve bilgi tavanı (3 Kasım; kullanıcı: "en büyük darboğazı çözmek için bir Codex grubu daha; modeli ciddi bir eşik atlatalım").** Darboğaz: oyun içi kısa possession'lar (v15 sıkışık < 4 sn yakalama DFL
+0.30, Metrica 0.36; < 2 sn 0.04–0.05). 6 ajan (K1 tüm oyuncularla takipten kontrol çıkarımı, K2 kare yerine aralık
+öğrenen modeller, K3 video + ses, K4 eğitim sinyali, K5 bilgi tavanı ve karar ağacı, K6 kırmızı takım ve 13 günlük
+plan); brif tur 30'unkinin güncellemesi, hedef +0.02, BAR-ATH'tan hiçbir sayı yok.
+*Bilgi tavanı (yerel, açık DFL; ajanlar çalışırken):* DFL'in kendi kare bayrağı dokunuş düzeyinde: gerçek sıkışık kısa
+possession'ların hepsi onda var (yakalama 0.99), ama her dokunuşta takım değiştirdiği için isabet 0.13. Kontrol kararı
+eklenince (trk kuralı ya da öğrenilmiş karar) spellF1 0.85–0.86, yani v15'in 0.820'sinden ~+0.04 yukarıda; ama sıkışık
+kısa possession'ların ancak yarısı kalıyor (isabet ~0.4). Temiz topla "en yakın oyuncu" kuralı 0.730'da kalıyor
+(bayrağın dokunuşları top + mesafe kuralından çok daha iyi). Sonuç: algılama kusursuz olsa tavan ~+0.04; kısa possession
+sorununun yarısı algılama, yarısı kontrol anlamı.
+*Filo:* tek yol önerildi (K1, K2, K4, K5, K6 aynı; K3 aynısının video sürümü). Gerekçe: aranan bilgi tek bir karede değil,
+kazanma → kısa kontrol → kaybetme dizisinde ve ilgili oyuncunun hareketinde; karışım, yumuşatma ve aday kapısı onu
+siliyor. İstenen işletim noktası: maç başına ~6 doğru, IoU ≥ 0.7 sınırlı ekleme, en fazla 1 zararlı (iki uç birlikte
+ölçülmeli: 1 sn'lik spell'in iki ucu 4'er kare içeride IoU 0.68). Kanıt dolaylı: PathCRF (DFL, 25 Hz olay F1 0.77, ±1 sn
+tolerans), çok kipli possessor çalışması (takip 0.84 → kırpıntı ekleyince 0.88), SoccerTrack'te topsuz tackle AP 0.046.
+Video yolu ertelendi (birincil bağlamlarda videosuz, nadir temas sınıfları zayıf, indirme büyük). Öldürülenler: oyunculara
+koşullu top yeniden kurulumu ve fiziksel açıklama karşılaştırması (tur 30'un 2–3. yolları). Sıradaki: 2 günlük eleme
+pilotu (tur 34), önce v15'in kendi aday kataloğunun kâhini (mükemmel seçim, uçlar korunmuş, zorunlu 0 / 1 / 2 yanlış).
 
 ## Ek A — İlk analiz, araştırma ve baseline'lar (20 Ekim)
 
