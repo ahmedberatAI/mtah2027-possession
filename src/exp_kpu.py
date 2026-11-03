@@ -226,15 +226,16 @@ def relabel_sc(base, name):
     print("  %s rows written (from %s)" % (name, base), flush=True)
 
 
-def build_m(name, w=0.25):
+def build_m(name, w=0.25, avg=False):
     """Round 24c, C1abETm: C1's live-normalised control probability blended into v14's team probability (weight w)
     before the +-25 smoothing and the decoder; decodes, candidates (v14's rule + C1's), features (G1 + specialist +
-    touch) and DFL evctrl labels rebuilt on that base."""
+    touch) and DFL evctrl labels rebuilt on that base. Round 27: w 0.5 (C1abETm50), or every C1 output from the mean of
+    its three seeds (avg, C1abETma)."""
     use("v14")
     for src, convs, dec, prim in ev.SOURCES:
         kind = "rows4" if src.startswith("dfl") else "rows3"
         dfl = src.startswith("dfl")
-        outs = outputs("C1", src)
+        outs = (avg_outputs if avg else outputs)("C1", src)
         blocks = bench.blocks(src)
         labs = bench.labels(src, prim)
         learned = bench.dead_probs(src, "base") if dfl else bench.dead_ext("base", "v3", src)
@@ -421,8 +422,10 @@ def main():
             relabel(variant)
         elif variant == "C1abETm":
             build_m(variant)
-        elif variant == "C1abETmS":
-            relabel_sc("C1abETm", variant)
+        elif variant in ("C1abETm50", "C1abETma"):
+            build_m(variant, w=0.5 if variant == "C1abETm50" else 0.25, avg=variant == "C1abETma")
+        elif variant in ("C1abETmS", "C1abETm50S", "C1abETmaS"):
+            relabel_sc(variant[:-1], variant)
         else:
             build(variant)
     elif stage == "trainpool":
