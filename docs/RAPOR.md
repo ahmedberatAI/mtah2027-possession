@@ -2350,6 +2350,20 @@ tahmin (B4; CPU, 2 gün; v16'ya göre kalan duruş tavanı ≥ +0.010 ise); (4) 
 sınırları, zaman tabanı, takım eşlemesi). Büyük bahis: topsuz gönderen–alıcı çıkarımı (B1; GPU, 4 gün; eleme: adaysız
 kaçırılan kısa possession'larda ≥ 10 puan daha fazla kapsam ve uç noktaları korunmuş ekleme kâhini ≥ +0.010).
 
+**Tur 31 — denetimli sınır regresyonu (3 Kasım; ön kayıt, çalıştırmadan önce).** Tur 30'un B3 #1 önerisi; bilgisayar
+kapandıktan sonra kullanıcı "işlere devam et" dedi, önerilen sırayla ilk ucuz test bu. v15'in son etiketlerindeki her
+oyun içi takım değişimi için iki LightGBM: biri gerçek eşine (aynı yönde, ±2 sn içinde, birebir, en yakın önce) işaretli
+kaymayı (Huber, δ 12 kare), diğeri böyle bir eşin varlığını tahmin eder. Özellikler ±2 sn penceresinden, gelen / giden
+takıma göre çevrilmiş: v15'in ham ve yumuşatılmış takım logiti, C1'in kontrol / kazanır / kaybeder / dokunuş başlıkları
+(11 ofsette ve pencere içindeki tepe yerleri), topun hızı ve eksikliği, iki takımın topa en yakın oyuncu mesafesi,
+takipten dokunuşlar ve en yakın tutucu, logitin sıfırı kesme anları, komşu spell süreleri. Değişim, P(eş) ≥ 0.5 ve
+|kayma| ≥ 2 kare ise yuvarlanmış kayma kadar taşınır; komşu sınırı aşmaz, iki spell'i de 8 kareden kısaltmaz, ters yöne
+itilmez. Eğitim: üç kaynak (etiketler hedef kuralda: DFL evctrl, Metrica ctrl, SC evctrl) ve iki ölü top kanalı birlikte,
+maç-dışı (30 maç). Tepeye kaydırmadan farkı: kayma doğrudan gerçeğe göre denetimli öğreniliyor, tepe yalnız özellik.
+*Ucuz eleme:* v10 tohum 0, doğrulayıcı tohum 0; DFL evctrl ve Metrica ctrl'de (iki ölü top kanalının ortalaması) ayrı
+ayrı ≥ +0.003 değilse dur. *Karar (geçerse):* her turdaki gibi v15 (C1abETmS) → v15 + SR, 3 v10 tohumu × doğrulayıcı
+tohumu 0 / 1, birincil ≥ 0.005, korumalar ≥ −0.01; bilgi SC evctrl. `src/exp_bound.py`, `tests/test_bound.py`.
+
 ## Ek A — İlk analiz, araştırma ve baseline'lar (20 Ekim)
 
 *Tarihsel rapor; özgün başlığı: More than a Hack 2027 — Faz 1 (Top Sahipliği) · Analiz, Araştırma ve Baseline Raporu. Güncel durum için §1.*
