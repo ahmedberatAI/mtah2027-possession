@@ -556,6 +556,7 @@ Public sütunu yalnız bilgi içindir (17 spell, aralık ~0.4); v7'den itibaren 
 | Değişim zamanlaması ve sınır tavanı (teşhis; tur 28 sonrası) | v15'in tahmini değişimi medyanda +4…+8 kare geç, ±5 karede %23–26; C1 tepesine kaydırmak değişimlerin ~%50'sini yaklaştırıp ~%45'ini uzaklaştırıyor. Kâhin: değişimleri gerçeğe taşımak birincilde +0.009…+0.019; duruş / yeniden başlamalar (öğr. D) +0.010…+0.040 | ❌ kaydırma turu açılmadı (tur 23 (c) ve eski DFL denemesinin tekrarı; tavan küçük) |
 | Ölü top sınırlarını öğrenilmiş modelle zamanlama (tur 29, ön kayıtlı; `src/exp_dtime.py`; BAR-ATH benzeri ölü top: DFL / Metrica'da v3 kuralları, SC'de kurallar + görüntü işaretleri; v15 takım olasılığı, 3 tohum, doğrulayıcı öncesi; DT = duruş + yeniden başlama, DTr = yalnız yeniden başlama, ±2 sn) | DT: DFL evctrl +0.0160 [+0.011, +0.021] 7/7, DFL-trk +0.0154, Metrica +0.0056 3/3, SC faz +0.0035 17/20, SC pp +0.0034; birincil pişmanlık +0.0160 (%90 [+0.0119, +0.0203]), en kötü koruma +0.0034. DTr: +0.0103 / +0.0104 / +0.0066 / +0.0049 / +0.0050; birincil +0.0103. Bilgi: SC evctrl DT +0.0036, DTr +0.0050. SoccerTrack (bağımsız; kuralların ölü topu zayıf, 0.21): DT +0.0046 7/8, DTr +0.0036 | ✅ ikisi de geçti; ön kayıtlı seçim birincilde büyük olan → DT, v16 |
 | v16 gönderimi (`src/model_v16.py`, `src/dead_timing.py`, `models/dead_base_v3.txt` = değerlendirmenin Metrica / SC / ST'de kullandığı tüm-DFL ölü top modeli) | MD5 c89208a3…: iki çalıştırma, `cache/v16` silinip yeniden hesaplama ve boş önbellekten temiz dışa aktarım (81 dosya, ~107 sn) aynı; resmî doğrulayıcı "Valid"; v15 / v14 / v13 / v10 MD5'leri değişmedi; testler 82/82. Ölü top modelinin bugün yeniden eğitimi bayt bayt aynı değil → ayrı bayrak (`MTAH_RETRAIN_DEAD`), `MTAH_RETRAIN` ona dokunmuyor. BAR-ATH (etiketsiz): v15'ten karelerin %1.07'si farklı (110 bölge); duruşların %87'si geç yöne (medyan +18 kare), yeniden başlamalar dengeli (+3); possession 207, ölü bölüm 118 aynı, ölü pay 0.398 → 0.394 | ✅ varsayılan |
+| Fikir taraması (tur 30; 6 Codex ajanı, gpt-6.1-sol en yüksek akıl yürütme, yalnız web; dosya / kabuk / tarayıcı kapalı, boş klasör; brifte yalnız herkese açık görev tanımı, açık verideki sonuçlarımız ve denenmişler, BAR-ATH'tan hiçbir sayı yok; 374 arama; `scratchpad lit29/B1..B6`) | B1 topsuz gönderen–alıcı çıkarımı (PathCRF kenar denetimi), oyunculara koşullu top yeniden kurulumu, top boşluğunda fiziksel açıklama karşılaştırması; B2 SoccerTrack videosuyla kırpıntı tabanlı kontrol dedektörü (pilot 3 yarı 10.5 GB), top + poz zamanlama dalı; B3 denetimli sınır kayması regresyonu (LightGBM Huber / kuantil), ortak uç düzeltme zinciri, metriğe göre MBR, bağlama göre süre dağılımı; B4 çizgiyi geçiş anı (son gerçek top gözlemlerinden), oyuncu tepkisi gecikme modeli, yeniden başlama videosu, öğrenilmiş düdük; B5 kontrol çapaları + bilinmeyen aralıklar (PFF etiket dönüşümü denetimi), hedef kural başlığı + sağlayıcı başlıkları, ELASTIC zaman düzeltmesi; B6 bütünlük denetimi, sensör kalitesine göre ölü top / doğrulayıcı kapıları | bilgi; ucuz eleme testleri tur 31+ |
 
 ### Ekip arkadaşının GitHub kayıtları — 27 Ekim birleştirmesi
 
@@ -2327,6 +2328,27 @@ sınırdan 110'u taşınıyor; 117 duruştan 47'si, %87'si geç yöne (medyan +1
 +3); karelerin %1.07'si. Duruşların geç yöne kayması SC'deki deseni andırıyor (orada öğrenilmiş duruşlar medyan +40
 kare geç, DTr DT'den 0.0015 iyi); SC'de bile DT kurallardan +0.0035 iyi olduğu için ön kayıtlı seçim korundu. DTr
 (yalnız yeniden başlamalar) daha temkinli seçenek olarak kayıtlı.
+
+**Tur 30 — fikir taraması (3 Kasım; kullanıcı: "fikir devşirmek için paralel gpt-6.1-sol ajan filosu; şu anki konum
+için gerçekten çözecek yaklaşımlar").** 6 Codex ajanı (tur 24'ün düzeni: gpt-6.1-sol, en yüksek akıl yürütme, yalnız
+web; dosya / kabuk / tarayıcı / eklenti kapalı, her biri boş klasörde). Brif v16'ya göre güncellendi; tur 24 brifindeki
+BAR-ATH'tan türetilmiş oranlar (top görünürlüğü, piksel boyu) bu kez çıkarıldı. Odaklar: B1 takipten kısa possession
+duyarlılığı, B2 SoccerTrack videosuyla dokunuş / kontrol dedektörü, B3 sınır regresyonu ve metriğe göre karar, B4 duruş
+zamanlaması, B5 etiket kuralı ve eğitim verisi, B6 riskler ve güvenli seçim. 374 arama, 6 rapor (~19,000 kelime).
+*Ortak hesap (B1–B3):* 231 / 231 spell ve F1 0.80'de, bir possession'ın içine doğru eklenen ve üç parçası da eşleşen
+kısa bir rakip possession'ı ΔF1 ≈ (2·ΔTP − F1·ΔP) / (N + P + ΔP) = (4 − 1.6) / 464 ≈ +0.005 getirir; yani maç başına
+net ~1 doğru ekleme eşiği geçirir, yanlış eklemeler komşu eşleşmeleri de bozar. IoU 0.7 için 1 sn'lik spell'de sınır
+hatası ≤ 4 kare, 0.5 sn'likte ≤ 2 kare olmalı. Değişim zamanlamasının +0.009 tavanından +0.005 almak için %56'sını
+kurtarmak gerekir.
+*Elenenler / zayıflar:* video yolları (B2, B4 #3–4) birincil bağlamlarda (DFL / Metrica videosuz) karar kuralıyla
+doğrulanamaz, yalnız SoccerTrack'te ve simülasyonla; düdük her duruşta yok; top yeniden kurulumunun tavanı eski kâhinle
+sınırlı (mükemmel top < +0.02); oyuncu tepkisi modeli büyük olasılıkla öğrenilmiş ölü top modelini tekrar eder.
+*Sıralı öneri (ucuz elemeyle):* (1) denetimli sınır kayması regresyonu (B3; CPU, 2–3 gün; eleme: tek tohumda iki birincil
+bağlamda ≥ +0.003); (2) PFF kontrol etiketi dönüşümünün DFL / Metrica'da denetimi (B5; CPU, 1 gün; dönüşüm < 2 sn
+kontrollerin ≥ %20'sini kaçırıyorsa C1'i kısmi denetimle yeniden eğit); (3) duruş anını çizgiyi geçiş geometrisinden
+tahmin (B4; CPU, 2 gün; v16'ya göre kalan duruş tavanı ≥ +0.010 ise); (4) bütünlük denetimi (B6; yarım gün; devre
+sınırları, zaman tabanı, takım eşlemesi). Büyük bahis: topsuz gönderen–alıcı çıkarımı (B1; GPU, 4 gün; eleme: adaysız
+kaçırılan kısa possession'larda ≥ 10 puan daha fazla kapsam ve uç noktaları korunmuş ekleme kâhini ≥ +0.010).
 
 ## Ek A — İlk analiz, araştırma ve baseline'lar (20 Ekim)
 
