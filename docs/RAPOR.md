@@ -544,6 +544,7 @@ Public sütunu yalnız bilgi içindir (17 spell, aralık ~0.4); v7'den itibaren 
 | Uzmanın dozu ve tohum ortalaması (tur 27, ön kayıtlı; C1abETm50S: ağırlık 0.5; C1abETmaS: C1'in bütün çıktıları üç tohumun ortalamasından) | v15'e göre birincil: 0.5 −0.0027 (DFL evctrl +0.008 / +0.012, Metrica +0.007 / +0.006, SC pp −0.005); ortalama −0.0002 (DFL-trk +0.018, Metrica +0.007 / +0.005, SC evctrl bilgi +0.014 / +0.021) | ≈ v15 kalır (0.25 iyi nokta; tohum ortalaması gürültü düzeyinde) |
 | SoccerTrack v2 ölçümü (tur 28; `src/soccertrack.py`, `src/exp_st.py measure`; 10 üniversite maçı, yerel 2.62 GB: olaylar, top, sağlayıcının ham takip / olay dışa aktarımları) | Sağlayıcı her kare için top durumu veriyor (HOME / AWAY / NEUTRAL / BALLOUT); M9 ve M10'da yalnız "INPLAY" → etiketli 8 maç. Hedef kuralda (evctrl) 223 possession / maç, %13.5 < 4 sn, 9.1 oyun içi kısa (Metrica ctrl 231 / %20 / 12, DFL evctrl 229 / %18 / 13); durum olduğu gibi (native) 268 / %24.8 / 32. Olayın takımı = o karedeki durum %90.5. Top olaylara çapalı (aktöre medyan 1.25 m; dönüşlerin %82'si olay karelerinde, başka yerde %20). Oyuncular 1.05 × 0.68 m ızgarada, canlı karelerin %98.9'unda 22 oyuncu. Video: uzak çizgi 15–18 px/m, yakın çizginin orta üçte biri 68 px/m (BAR-ATH taktik ~25–37) | bilgi: bağımsız test seti olabilir (top iyimser, kısa possession az); eğitimde top sızdırır; video yalnız sahanın yakın yarısında BAR-ATH çözünürlüğünde |
 | SoccerTrack'te bağımsız test (tur 28, ön kayıtlı; `src/exp_st.py eval`; v14 / v15'in açık veri bileşenleri, 3 tohum, 8 etiketli maç, hiçbir bileşen görmedi) | v15 − v14: evctrl öğr. D +0.0234 [+0.012, +0.033] 7/8 (v14 0.6995), gerçek D +0.0276 [+0.018, +0.036] 8/8 (0.8153); native +0.0324 [+0.022, +0.042] 8/8 (0.6376) / +0.0347 [+0.025, +0.043] 8/8 (0.7361) | bilgi: v15'in kazancı bağımsız sette de var, araştırma setlerindekinden büyük (top olaylardan kurulduğu için iyimser; C1 topa bakan bir model) |
+| Değişim zamanlaması ve sınır tavanı (teşhis; tur 28 sonrası) | v15'in tahmini değişimi medyanda +4…+8 kare geç, ±5 karede %23–26; C1 tepesine kaydırmak değişimlerin ~%50'sini yaklaştırıp ~%45'ini uzaklaştırıyor. Kâhin: değişimleri gerçeğe taşımak birincilde +0.009…+0.019; duruş / yeniden başlamalar (öğr. D) +0.010…+0.040 | ❌ kaydırma turu açılmadı (tur 23 (c) ve eski DFL denemesinin tekrarı; tavan küçük) |
 
 ### Ekip arkadaşının GitHub kayıtları — 27 Ekim birleştirmesi
 
@@ -2267,6 +2268,43 @@ SoccerTrack'in kurala girmesi (birincil ya da koruma) kullanıcının kararı.
 0.7361 → 0.7708 (+0.0347, 8/8). Kazanç araştırma setlerindekinden (birincil +0.0126) büyük; top olay anlarına çapalı
 olduğu için topa bakan C1'in payı burada büyümüş olabilir, yön ise açık. Mutlak düzey hedef kuralda DFL evctrl'e yakın
 (v14 DFL 0.785 / 0.809). Çıkarımlar CPU'da (yerel GPU başka bir işle doluydu).
+
+**Teşhis — değişim gecikmesi ve kaydırma (3 Kasım, tur 28 sonrası; toplu, karar yok).** v15 (3 tohum, doğrulayıcı tohum 0,
+hedef kural). Gerçek oyun içi değişimlerin %72–82'sinin ±2 sn içinde aynı yönde tahmini var; tahmin edilen değişim
+medyanda +4 (DFL, SC) / +8 (Metrica) kare geç, mutlak kayma medyanı 11–13 kare; ±5 karede %23–26, ±12'de %48–54, ±25'te
+%79–86. Değişimi ±1 sn içinde C1'in yeni takım "kontrolü alır" başlığının tepesine kaydırmak: ±5 karede %39–50, ±12'de
+%55–64, ama ±25'te %73–76 (uzak hatalar artıyor); kaydırma değişimlerin yalnız ~%50'sini yaklaştırıyor, ~%45'ini
+uzaklaştırıyor (dokunuş başlığı benzer). Bu, tur 23'teki "(c) sınır oturtma" (S1 / S2 tepeleri, kötü) ve DFL'deki eski
+sınır yakalama (±0.003) sonucunu tekrarlıyor → kaydırma turu açılmadı. IoU 0.3'te eşleşip 0.7'de eşleşmeyen ve geç
+biten spell'lerde aradaki parça: gerçek D'de %62–65 geç değişim (medyan taşma 29–34 kare), %35–36 kaçırılmış rakip
+spell'i; öğrenilmiş D'de duruşun geç bulunması da büyük (SC %59, medyan 83 kare; Metrica %40, 42 kare; DFL %20).
+*Sınır tavanı (kâhin):* v15'in her spell'i kalır, yalnız sınırları gerçeğe taşınır. (A) oyun içi değişimler ±2 sn
+içindeki gerçek eşine: DFL evctrl +0.0185 / +0.0148 (öğr. / gerçek D), Metrica +0.0131 / +0.0093, SC evctrl +0.0255 /
++0.0164, DFL-trk +0.0146 / +0.0114, SC faz / pp +0.011…+0.024. (B) duruş / yeniden başlamalar ±4 sn içindeki eşine
+(yalnız öğrenilmiş D): DFL +0.0104, Metrica +0.0178, SC +0.038…+0.040. Yorum: birincil bağlamlarda değişim zamanlamasının
+tavanı +0.009…+0.019; tepeye kaydırma yazı-tura olduğundan gerçekçi bir düzeltici bunun küçük bir kısmını alır →
+eşiğin (0.005) altında kalması beklenir, tur açılmadı. Duruş zamanlamasının tavanı büyük ama BAR-ATH öğrenilmiş ölü top
+modelini kullanmıyor (v3 kuralları + yayın).
+*BAR-ATH benzeri ölü topta sınır zamanlaması* (tur 26'nın düzeni: DFL / Metrica'da v3 kuralları, SC'de kurallar + görüntü
+işaretleri; v15 takım olasılığı, doğrulayıcı öncesi, 3 tohum). Gerçek duruş / yeniden başlamanın ±4 sn içindeki eşi,
+mutlak kayma medyanı ve ±12 karede pay — kurallar: DFL duruş 27 kare (%31), yeniden başlama 25 (%29); Metrica 24 (%34), 16
+(%45); SC 30 (%23), 24 (%29). Öğrenilmiş model: DFL 3 (%78), 0 (%83); Metrica 9 (%53), 0 (%80); SC duruşta kötü (yalnız
+%59'u bulunuyor, medyan +40 kare geç, %15) ama yeniden başlamada iyi (8, %59). Kuralların sınırlarını gerçeğe taşımanın
+tavanı DFL +0.0317, Metrica +0.0201, SC +0.0360; öğrenilmiş modelin ±2 sn içindeki eşine taşımak (gerçek kullanılmadan)
+DFL +0.0160, Metrica +0.0056, SC evctrl +0.0036.
+
+**Tur 29 — ölü top sınırlarını öğrenilmiş modelle zamanlama (3 Kasım; ön kayıt, çalıştırmadan önce).** Yukarıdaki teşhis:
+BAR-ATH'ın kuralları ölü bölümlerin varlığında iyi (tur 26) ama sınırlarında kaba; öğrenilmiş model sınırlarda,
+özellikle yeniden başlamalarda keskin. Kural: BAR-ATH'ın ölü top hattı (v3 kuralları + yayın) ölü bölümlerini korur;
+bir sınır, öğrenilmiş ölü top modelinin kendi çözümündeki aynı türden (duruş / yeniden başlama) en yakın sınırına
+taşınır, ±2 sn (50 kare) içinde ve arada başka sınır yoksa. Yeni eşik yok. Varyantlar: DT (duruş + yeniden başlama),
+DTr (yalnız yeniden başlama; SC'de öğrenilmiş modelin duruşları kötü olduğu için). Değerlendirme tur 26 gibi (BAR-ATH
+benzeri ölü top, v15 takım olasılığı, 3 tohum, doğrulayıcı öncesi; üretimde son adım). Karar: kurallar → varyant,
+birincil (DFL evctrl, Metrica ctrl) en kötü durum pişmanlığı ≥ 0.005 iyileşme, korumalar (DFL-trk, SC faz / pp) ≥ −0.01;
+ikisi de geçerse birincil iyileşmesi büyük olan. Bilgi: SC evctrl, BAR-ATH'ta taşınan sınır sayısı (etiketsiz). Uyarı:
+tur aynı setlerde yapılan teşhisten doğdu (DT'nin DFL / Metrica / SC evctrl sonucu zaten görüldü). Bu yüzden ek koşul:
+varsayılan değişikliği yalnız tasarımda kullanılmayan SoccerTrack v2 (8 maç; v3 kuralları takipten, sağlayıcı
+etiketleri) da aynı yönde (≥ 0) çıkarsa önerilir. `src/exp_dtime.py`.
 
 ## Ek A — İlk analiz, araştırma ve baseline'lar (20 Ekim)
 
