@@ -35,6 +35,7 @@ import atd  # noqa: E402
 import dfl  # noqa: E402
 import metrica_sample as ms  # noqa: E402
 import skillcorner as scr  # noqa: E402
+import soccertrack as stk  # noqa: E402
 import mlfeat  # noqa: E402
 import sim  # noqa: E402
 import train_dfl as td  # noqa: E402
@@ -163,6 +164,31 @@ def build_sc_inputs(var="v3", procs=None):
         pool.map(_sc_job, [(mi, m, var) for mi, m in enumerate(scr.matches())])
 
 
+def _st_job(job):
+    """SoccerTrack v2 (src/soccertrack.py): held out from every model; its ball is rebuilt from the events."""
+    mi, m, var = job
+    out = os.path.join(INP, "%s_%s.pkl" % (src_name("st", var), m))
+    if os.path.isfile(out):
+        return out
+    warnings.filterwarnings("ignore", category=RuntimeWarning)
+    blocks = []
+    for h, d in enumerate(stk.halves(m), 1):
+        Pn, Bn = sim.degrade(d["players"], d["ball"], d["labels"], d["pitch"],
+                             seed=30000 + 10 * mi + h + VARIANTS[var].get("seed_offset", 0), params=VARIANTS[var])
+        blocks.append({"key": "%s/%s/h%d" % (src_name("st", var), m, h), "group": m,
+                       "P": Pn[:, :, :2].astype(np.float32), "B": Bn[:, :2].astype(np.float32),
+                       "team": d["team"], "gk": d["gk"], "pitch": d["pitch"], "lab": d["labels"]})
+    _dump(blocks, out)
+    return out
+
+
+def build_st_inputs(var="v3", procs=None):
+    from multiprocessing import Pool
+    os.makedirs(INP, exist_ok=True)
+    with Pool(procs or PROCS) as pool:
+        pool.map(_st_job, [(mi, m, var) for mi, m in enumerate(stk.matches())])
+
+
 def _barath_inputs():
     out = os.path.join(INP, "barath.pkl")
     if os.path.isfile(out):
@@ -213,6 +239,11 @@ def blocks(src):
             ms_ = scr.matches()
             if not os.path.isfile(os.path.join(INP, "%s_%s.pkl" % (name, ms_[-1]))):
                 build_sc_inputs(var)
+            _blocks[src] = [b for m in ms_ for b in _load(os.path.join(INP, "%s_%s.pkl" % (name, m)))]
+        elif base == "st":
+            ms_ = stk.matches()
+            if not os.path.isfile(os.path.join(INP, "%s_%s.pkl" % (name, ms_[-1]))):
+                build_st_inputs(var)
             _blocks[src] = [b for m in ms_ for b in _load(os.path.join(INP, "%s_%s.pkl" % (name, m)))]
         elif base == "barath":
             _blocks[src] = _load(os.path.join(INP, "barath.pkl"))
@@ -314,6 +345,8 @@ def labels(src, conv):
             _labels[key] = out
         else:
             raise ValueError(conv)
+    elif src == "st":                                # SoccerTrack v2: provider status ('native') or its controlled reading
+        _labels[key] = [lab for m in stk.matches() for lab in stk.labels(m, conv)]
     else:
         raise ValueError(src)
     return _labels[key]

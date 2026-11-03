@@ -11,10 +11,12 @@ mot 3.6 GB, gsr 56 GB, videos 83 GB (panoramic halves).
 import hashlib
 import os
 import sys
+import time
 from pathlib import Path
 
 import requests
 
+TRIES = 10
 REPO = "atomscott/soccertrack-v2"
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "external_data" / "soccertrack_v2"
@@ -41,15 +43,8 @@ def listing(session, sha, folder):
     return files
 
 
-def fetch(session, sha, f):
-    dest = OUT / f["path"]
-    size = f["lfs"]["size"] if f.get("lfs") else f["size"]
-    want = f["lfs"].get("oid") if f.get("lfs") else None
-    if dest.is_file() and dest.stat().st_size == size:
-        return size, False
-    dest.parent.mkdir(parents=True, exist_ok=True)
-    part = dest.with_name(dest.name + ".part")
-    have = part.stat().st_size if part.is_file() else 0
+def _get(session, sha, f, part, have):
+    """Appends the rest of one file to its .part file (Range from byte have)."""
     headers = {"Range": "bytes=%d-" % have} if have else {}
     with session.get("https://huggingface.co/datasets/%s/resolve/%s/%s" % (REPO, sha, f["path"]), headers=headers,
                      stream=True, timeout=120) as r:
@@ -61,6 +56,27 @@ def fetch(session, sha, f):
         with open(part, mode) as fh:
             for chunk in r.iter_content(1 << 20):
                 fh.write(chunk)
+
+
+def fetch(session, sha, f):
+    dest = OUT / f["path"]
+    size = f["lfs"]["size"] if f.get("lfs") else f["size"]
+    want = f["lfs"].get("oid") if f.get("lfs") else None
+    if dest.is_file() and dest.stat().st_size == size:
+        return size, False
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    part = dest.with_name(dest.name + ".part")
+    for attempt in range(TRIES):
+        have = part.stat().st_size if part.is_file() else 0
+        if have >= size:
+            break
+        try:
+            _get(session, sha, f, part, have)
+        except (requests.ConnectionError, requests.Timeout, requests.exceptions.ChunkedEncodingError) as e:
+            if attempt == TRIES - 1:
+                raise
+            print("  retry %d for %s (%s)" % (attempt + 1, f["path"], type(e).__name__), flush=True)
+            time.sleep(min(60, 5 * 2 ** attempt))
     if part.stat().st_size != size:
         sys.exit("size mismatch for %s" % f["path"])
     if want:

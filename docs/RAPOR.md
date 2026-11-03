@@ -538,6 +538,7 @@ Public sütunu yalnız bilgi içindir (17 spell, aralık ~0.4); v7'den itibaren 
 | v14 ↔ v15 süre dökümü (teşhis; hedef kural, 3 × 2 tohum, resmî eşleştirme) | < 4 sn, öğrenilmiş D: tahmin isabeti DFL 0.56 → 0.62, Metrica 0.59 → 0.62, SC evctrl 0.36 → 0.40; gerçek kısa possession'ların yakalanması DFL 0.51 → 0.49, Metrica 0.45 → 0.46, SC 0.28 → 0.28; < 2 sn yakalama 0.10–0.27; maç başına tahmin edilen spell DFL 237.6 → 226.2 (gerçek 229.1) | bilgi: kazanç yanlış kısa / orta spell'lerin azalmasından; kaçırılan kısa possession'lar yerinde |
 | Ölü top bölme, D-split (`src/exp_dsplit.py`; tur 26, ön kayıtlı: kuralların ölü bölümü içinde, kenarlardan ≥ 25 kare içeride öğrenilmiş ölü top modelinin kendi çözümündeki tam possession'lar eklenir; BAR-ATH benzeri ölü top: DFL / Metrica'da v3 kuralları, SC'de kurallar + görüntü işaretleri; v15 takım olasılığı, 3 tohum, doğrulayıcı öncesi) | DFL evctrl +0.0276 (7/7), DFL-trk +0.0253 (7/7), Metrica +0.0130 (3/3); SC faz −0.0125 (1/20), SC pp −0.0113, SC evctrl −0.0131 (2/20); birincil +0.0276, en kötü koruma −0.0125. Eklenen possession / canlı dakika: DFL 0.26, Metrica 0.23, SC 0.51; BAR-ATH'ta (etiketsiz) 39 possession, 0.74 / canlı dakika, karelerin %3'ü | ❌ koruma aşıldı; görüntü / yayın işareti olan sette (SC, BAR-ATH'a en yakın) öğrenilmiş modelin ölü bölüm içindeki possession'ları çoğunlukla yanlış |
 | Uzmanın dozu ve tohum ortalaması (tur 27, ön kayıtlı; C1abETm50S: ağırlık 0.5; C1abETmaS: C1'in bütün çıktıları üç tohumun ortalamasından) | v15'e göre birincil: 0.5 −0.0027 (DFL evctrl +0.008 / +0.012, Metrica +0.007 / +0.006, SC pp −0.005); ortalama −0.0002 (DFL-trk +0.018, Metrica +0.007 / +0.005, SC evctrl bilgi +0.014 / +0.021) | ≈ v15 kalır (0.25 iyi nokta; tohum ortalaması gürültü düzeyinde) |
+| SoccerTrack v2 ölçümü (tur 28; `src/soccertrack.py`, `src/exp_st.py measure`; 10 üniversite maçı, yerel 2.62 GB: olaylar, top, sağlayıcının ham takip / olay dışa aktarımları) | Sağlayıcı her kare için top durumu veriyor (HOME / AWAY / NEUTRAL / BALLOUT); M9 ve M10'da yalnız "INPLAY" → etiketli 8 maç. Hedef kuralda (evctrl) 223 possession / maç, %13.5 < 4 sn, 9.1 oyun içi kısa (Metrica ctrl 231 / %20 / 12, DFL evctrl 229 / %18 / 13); durum olduğu gibi (native) 268 / %24.8 / 32. Olayın takımı = o karedeki durum %90.5. Top olaylara çapalı (aktöre medyan 1.25 m; dönüşlerin %82'si olay karelerinde, başka yerde %20). Oyuncular 1.05 × 0.68 m ızgarada, canlı karelerin %98.9'unda 22 oyuncu. Video: uzak çizgi 15–18 px/m, yakın çizginin orta üçte biri 68 px/m (BAR-ATH taktik ~25–37) | bilgi: bağımsız test seti olabilir (top iyimser, kısa possession az); eğitimde top sızdırır; video yalnız sahanın yakın yarısında BAR-ATH çözünürlüğünde |
 
 ### Ekip arkadaşının GitHub kayıtları — 27 Ekim birleştirmesi
 
@@ -2214,6 +2215,48 @@ kuralda): C1abETm50S = ağırlık 0.5; C1abETmaS = ağırlık 0.25, ama C1'in b�
 üç tohumun ortalamasından (üretimde üç ağırlık dosyası). Karar v15'e (C1abETmS) karşı aynı kuralla (birincil ≥ 0.005,
 korumalar ≥ −0.01); ikisi de geçerse birincil iyileşmesi büyük olan. Bilgi: SC evctrl.
 *Tur 27 sonucu:* ikisi de v15'i geçmedi. Ağırlık 0.5 v15'e göre birincil −0.0027 (%90 [−0.0074, +0.0041]), korumalar −0.0043; tohum ortalaması birincil −0.0002 (%90 [−0.0027, +0.0023]), 10 bağlamda +0.0021 (DFL-trk ve SC'de hafif önde, Metrica'da −0.001…−0.002) → v15 kalır.
+
+**Teşhis — sınır kesinliği (3 Kasım, tur 27 sonrası; toplu çıktı, karar yok).** v15'in resmi metrikteki IoU eşiklerine
+göre spell F1'i (3 v10 tohumu, doğrulayıcı tohum 0, hedef kural; IoU 0.3 → 0.7, ortalama): DFL evctrl öğr. D 0.874 →
+0.686 (0.795), gerçek D 0.886 → 0.734 (0.820); Metrica ctrl öğr. D 0.899 → 0.755 (0.838), gerçek D 0.929 → 0.842 (0.896);
+SC evctrl öğr. D 0.792 → 0.514 (0.669), gerçek D 0.895 → 0.755 (0.837). Gerçek spell'lerin %8.5–28'i IoU 0.3'te eşleşip
+0.7'de eşleşmiyor (sınırı yetmeyen spell'ler: DFL %18.7 / %15.1, Metrica %14.2 / %8.5, SC %28.1 / %13.6). Bunlarda
+başlangıç kayması medyanı ~0; bitiş Metrica'da +21…+23 kare geç (%61–70'i geç), SC öğrenilmiş D'de +38 (%71), DFL ve SC
+gerçek D'de ~0. Yorum: 0.3 ile 0.7 arasındaki 0.09–0.28'lik fark sınır kesinliğinden; geç bitişin nedeni (değişimin geç
+yakalanması mı, aradaki kaçırılmış kısa possession'ın iki spell'i birleştirmesi mi) ayrıştırılmadı. Global gecikme
+düzeltmesi (B6) yalnız simülasyonda denenmişti (≤ +0.001); tekrar denenecekse kayma miktarı ön kayıtlı ya da kat dışından
+gelmeli.
+
+**Tur 28 — SoccerTrack v2: ölçüm ve bağımsız test (3 Kasım; ön kayıt, değerlendirmeden önce).** Kullanıcı: "SoccerTrack v2
+verisini mutlaka edin ve ne yapabileceğimizi ölç, ardından modeli geliştirmeye devam et." Kullanıcının Hugging Face
+onayıyla yerel indirme (`src/download_soccertrack.py`, kaldığı yerden, yeniden denemeli): README, bas, ball, raw; 2.62 GB,
+revizyon 325bd4c57e (v1.2). Video (83 GB) ve gsr (56 GB) indirilmedi. Ham dışa aktarımlar: `tracker_box_data.xml` her
+kare için oyuncu konumları (0.01 saha ızgarası = 1.05 × 0.68 m), top ve sağlayıcının top durumu; `player_nodes.csv` pas
+sonucu, alıcı, kesme, müdahale vb. içeren olay akışı. `src/soccertrack.py`: "native" = sağlayıcı durumu (NEUTRAL topu
+son tutan takımda kalır, BALLOUT = D), "evctrl" = onun `gradient.controlled_reading` ile kontrollü okuması (keep 0.5 sn,
+PFF ve SC'deki gibi; tamamlanmış pas / orta = passSucceeded / crossSucceeded, şut = shot; oyuncu değişikliği, faul,
+ofsayt, duraklama olay sayılmaz). M9 ve M10 hiç durum taşımıyor (her kare "INPLAY") → etiketli 8 maç.
+
+*Ölçüm (`src/exp_st.py measure`, toplu):* durum payları HOME 0.359, AWAY 0.278, BALLOUT 0.302, NEUTRAL 0.061; canlı süre
+65.5 dk / maç. evctrl 223 possession / maç, %13.5 < 4 sn, 9.1 oyun içi kısa / maç, 3.40 / canlı dk; native 268 / %24.8 /
+32.0 / 4.09. Olayın takımı o karedeki durumla %90.5 aynı (17,312 olay). Top olay karesinde aktöre medyan 1.25 m (%68
+< 1.5 m, %94 < 3 m); 0.2 sn pencerede > 30° dönüşlerin oranı olay karelerinde 0.82, olaylardan uzakta 0.20 (ızgara
+nedeniyle dönüşlerin yalnız %24'ü olay çevresinde). Canlı karelerin %98.9'unda 22 oyuncu; bir oyuncunun konumu ardışık
+karelerin yalnız %11.5'inde değişiyor. Video ölçeği (10 kalibrasyon, el ile işaretli noktalar): uzak çizgi 15–18 px/m,
+yakın çizgi köşede 11, orta üçte birde 68 px/m; BAR-ATH taktik kamerası ~25–37 px/m.
+*Yorum:* (1) Hedef kuralda possession sayısı tutuyor ama kısa possession az (%13.5; diğer setlerde %18–24): sağlayıcının
+durumu kısa el değişimlerini yumuşatıyor olabilir; kısa possession için zorlayıcı bir test değil. (2) Top olaylardan
+kurulduğu için topa dayalı özellikler sınırları kolaylaştırır: mutlak skorlar iyimser, yalnız eşli fark yorumlanır.
+(3) Eğitimde kullanmak önerilmez (top sızıntısı; bağımsız test değerini de bitirir). (4) Video: 10 maç takımlı, oyuncu
+kimlikli olay etiketi var; ama panoramik ve sahanın uzak yarısında BAR-ATH'ın yarı çözünürlüğü, 83 GB (yalnız Colab) ve
+BAR-ATH'a aktarım etiketsiz doğrulanamaz.
+
+*Ön kayıt (bağımsız test, `src/exp_st.py eval`):* v14 ve v15'in açık veri bileşenleri SoccerTrack'in 8 etiketli maçında,
+sim.V3 bozulmasıyla: v10'un tam veri sınıflandırıcısı (tohum k = 0, 1, 2; DFL native + Metrica ctrl), BiGRU'nun üç üyesi
+eşit ortalama, C1 tohum k (v15), ±25 yumuşatma, B2 çözücü (30, 8, 50), öğrenilmiş (base, v3) ya da gerçek D, gönderilen
+doğrulayıcılar ve eşikleri. Hiçbir bileşen bu maçları görmedi. Bağlamlar: st evctrl (hedef kural) ve st native, öğrenilmiş
+/ gerçek D; v15 − v14 maç bazında eşli, bootstrap. Bilgi bağlamı: karar kuralı ve varsayılan model bu sonuçla değişmez;
+SoccerTrack'in kurala girmesi (birincil ya da koruma) kullanıcının kararı.
 
 ## Ek A — İlk analiz, araştırma ve baseline'lar (20 Ekim)
 
