@@ -25,8 +25,8 @@ uv venv --python 3.12 .venv
 uv pip install --python .venv/Scripts/python.exe -r requirements.txt
 git clone https://github.com/metrica-sports/more-than-a-hack-2027 external/more-than-a-hack-2027
 # unpack the match bundle into ./data/{tactical,broadcast}  (or set MTAH_DATA_DIR)
-.venv/Scripts/python.exe src/make_submission.py           # -> submissions/candidate_v15.csv (a few minutes)
-python external/more-than-a-hack-2027/evaluation/validate_submission.py submissions/candidate_v15.csv
+.venv/Scripts/python.exe src/make_submission.py           # -> submissions/candidate_v16.csv (a few minutes)
+python external/more-than-a-hack-2027/evaluation/validate_submission.py submissions/candidate_v16.csv
 
 # optional: retrain the team classifier from the open data (rewrites models/v10_team.txt, about 7 min on 24 cores)
 .venv/Scripts/python.exe src/download_idsse.py            # open DFL / IDSSE data, CC BY 4.0, ~2.6 GB
@@ -37,28 +37,33 @@ MTAH_RETRAIN=1 .venv/Scripts/python.exe src/make_submission.py
 - On Linux / macOS, use `.venv/bin/python` instead of `.venv/Scripts/python.exe`.
 - `.gitattributes` keeps the LightGBM model files (`models/*.txt`) byte for byte: LightGBM 4.7 cannot read them with
   the CRLF line endings a Windows checkout would otherwise write (the pipeline also reads them as text).
-- `models/v10_team.txt` is the team classifier, `models/kpu_c1/kpu_C1_s20261102.pt` the specialist and
-  `models/short_verifier_{ins,del}_c1m25s.txt` the verifier, all trained only on open data, so the default run needs
+- `models/v10_team.txt` is the team classifier, `models/kpu_c1/kpu_C1_s20261102.pt` the specialist,
+  `models/short_verifier_{ins,del}_c1m25s.txt` the verifier and `models/dead_base_v3.txt` the dead-ball classifier
+  whose own decode times the dead-ball boundaries, all trained only on open data, so the default run needs
   only the provided data. On its first run it rebuilds the BiGRU's BAR-ATH probabilities on the CPU
   (`src/reproduce_shared_bigru.py`, checked against `models/bigru_dfl_pff_v1/manifest.json`) and runs the specialist on
   the CPU.
 - The run is deterministic: fixed simulation seeds, LightGBM deterministic mode with a fixed seed and thread count,
   and no GPU. Both the default run and a retrain of the team classifier from an empty `cache/` write the submitted
-  file, MD5 `6081216bcf484049d8e6e84b27fc85dd`. `--model model_v14 --out submissions/candidate_v14.csv` writes the
-  previous submission (MD5 `5e7363fc83c6f56a923033894a28d3a1`) and `--model model_v13 --out
-  submissions/candidate_v13.csv` the one before (MD5 `ed8ad739207f367017bb8d8c8204c82a`).
+  file, MD5 `c89208a3a034ee73bb41f3fb28390f87`. `--model model_v15 --out submissions/candidate_v15.csv` writes the
+  previous submission (MD5 `6081216bcf484049d8e6e84b27fc85dd`), `--model model_v14 --out
+  submissions/candidate_v14.csv` the one before (MD5 `5e7363fc83c6f56a923033894a28d3a1`) and `--model model_v13
+  --out submissions/candidate_v13.csv` v13 (MD5 `ed8ad739207f367017bb8d8c8204c82a`).
 
 ## Layout
 
 ```
-src/make_submission.py   end to end: provided data -> submissions/candidate_v15.csv
-src/model_v15.py         the submitted model: v14's blend mixed with the specialist C1 + the verifier on that base
+src/make_submission.py   end to end: provided data -> submissions/candidate_v16.csv
+src/model_v16.py         the submitted model: model_v15 with its dead-ball boundaries timed by the learned dead model
+src/dead_timing.py       that timing step: stops / restarts onto the dead model's own decode within +-2 s
+src/model_v15.py         its base: v14's blend mixed with the specialist C1 + the verifier on that base
 src/short_specialist.py  the specialist C1: inputs, network, inference, its candidates and verifier features
 src/model_v14.py         the previous submission: 0.5 v10 + 0.5 BiGRU blend + the short-possession verifier
 src/model_v13.py         model_v10 + the verifier (src/short_verifier.py)
 src/model_v10.py         team classifier training + prediction, decoder settings
 models/v10_team.txt      the team classifier (LightGBM, trained on the open data only)
 models/short_verifier_*  the verifier's classifiers (LightGBM, open data only; *_c1m25s = v15's, *_blend50 = v14's)
+models/dead_base_v3.txt  the dead-ball classifier (LightGBM, open DFL data only) used for v16's boundary timing
 models/bigru_dfl_pff_v1/ the shared BiGRU checkpoints; src/reproduce_shared_bigru.py and src/seq_pff.py run them
 models/kpu_c1/           the specialist C1's checkpoint (open PFF data only) and its validation history
 src/model_v2/3/5/7/9.py  dead-ball evidence, emission scores, the B2 soft-minimum decoder (decode2.py)

@@ -43,9 +43,11 @@ User instructions carried forward from the 27 October 2026 continuation note.
 - Python command convention on Windows: `.venv/Scripts/python.exe -I src/<script>.py`.
   Scripts must add their own `src/` import path when using isolated mode.
 
-Current submission (2 November 2026, round 25): `model_v15` = v14's blend (0.5 v10 + 0.5 shared BiGRU) mixed
-0.75 / 0.25 with the short-possession specialist C1 (open PFF data only, `models/kpu_c1/`) + the verifier retrained on
-that base with target-convention labels; expected CSV MD5 `6081216bcf484049d8e6e84b27fc85dd`
-(`submissions/candidate_v15.csv`). v14 (`--model model_v14`, MD5 `5e7363fc83c6f56a923033894a28d3a1`), v13
-(`--model model_v13`, MD5 `ed8ad739207f367017bb8d8c8204c82a`) and v10 (`--model model_v10`, MD5
-`ca20c5b657a395d2f7c0e310cdaabd64`) stay reproducible. Recheck this after integration changes.
+Current submission (3 November 2026, round 29): `model_v16` = `model_v15` with its dead-ball boundaries (stops and
+restarts) moved onto the learned all-DFL dead model's own decode within +-2 s (`src/dead_timing.py`,
+`models/dead_base_v3.txt`); `model_v15` = v14's blend (0.5 v10 + 0.5 shared BiGRU) mixed 0.75 / 0.25 with the
+short-possession specialist C1 (open PFF data only, `models/kpu_c1/`) + the verifier retrained on that base with
+target-convention labels. Expected CSV MD5 `c89208a3a034ee73bb41f3fb28390f87` (`submissions/candidate_v16.csv`).
+v15 (`--model model_v15`, MD5 `6081216bcf484049d8e6e84b27fc85dd`), v14 (`--model model_v14`, MD5
+`5e7363fc83c6f56a923033894a28d3a1`), v13 (`--model model_v13`, MD5 `ed8ad739207f367017bb8d8c8204c82a`) and v10
+(`--model model_v10`, MD5 `ca20c5b657a395d2f7c0e310cdaabd64`) stay reproducible. Recheck this after integration changes.

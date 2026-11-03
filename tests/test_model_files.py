@@ -14,7 +14,7 @@ import bench  # noqa: E402
 
 MODELS = ["models/v10_team.txt", "models/short_verifier_ins_g.txt", "models/short_verifier_del_g.txt",
           "models/short_verifier_ins_g_blend50.txt", "models/short_verifier_del_g_blend50.txt",
-          "models/short_verifier_ins_c1m25s.txt", "models/short_verifier_del_c1m25s.txt"]
+          "models/short_verifier_ins_c1m25s.txt", "models/short_verifier_del_c1m25s.txt", "models/dead_base_v3.txt"]
 
 
 class ModelFileTests(unittest.TestCase):

@@ -22,12 +22,14 @@ etiketleri üzerinde spellF1 ile yapılıyor (possession spell'leri, IoU 0.3–0
 2026: CSV + dosyayı birebir yeniden üreten herkese açık repo (verisiz) + kısa teknik doküman. Teslimden önce geri bildirim
 yok; elimizdeki göstergeler public 5 dakika (17 spell) ve dış veri setleri.
 
-**Şu anki model: v15 = v14'ün karışımı (%50 v10 + %50 paylaşılan BiGRU) ile kısa possession uzmanı C1'in
-kontrol olasılığı (%75 / %25) + bu tabanda, hedef kurallı etiketlerle eğitilmiş kısa possession doğrulayıcısı**
-(`src/model_v15.py`, tur 23–25, 2 Kasım). **Gönderim: `submissions/candidate_v15.csv`** (MD5 6081216b…),
-`src/make_submission.py`'nin varsayılanı; iki çalıştırmada, doğrulayıcı sıfırdan eğitilince (dosyalar bayt bayt aynı),
-uzmanın BAR-ATH çıktıları silinip yeniden hesaplanınca ve boş önbellekten temiz dışa aktarımda (77 dosya) birebir aynı;
-resmî doğrulayıcı "Valid". v14 `--model model_v14` (MD5 5e7363fc…), v13 `--model model_v13` (MD5 ed8ad739…) ve v10
+**Şu anki model: v16 = v15 + ölü top sınırlarının öğrenilmiş ölü top modeliyle zamanlanması** (`src/model_v16.py`,
+`src/dead_timing.py`, `models/dead_base_v3.txt`; tur 29, 3 Kasım). **Gönderim: `submissions/candidate_v16.csv`**
+(MD5 c89208a3…), `src/make_submission.py`'nin varsayılanı; iki çalıştırmada, `cache/v16` silinip yeniden
+hesaplanınca ve boş önbellekten temiz dışa aktarımda (81 dosya, ~107 sn) birebir aynı; resmî doğrulayıcı "Valid".
+v15 = v14'ün karışımı (%50 v10 + %50 paylaşılan BiGRU) ile kısa possession uzmanı C1'in kontrol olasılığı
+(%75 / %25) + bu tabanda, hedef kurallı etiketlerle eğitilmiş kısa possession doğrulayıcısı (`src/model_v15.py`, tur
+23–25); `--model model_v15` (MD5 6081216b…), v14 `--model model_v14` (MD5 5e7363fc…), v13 `--model model_v13` (MD5
+ed8ad739…) ve v10
 `--model model_v10` (MD5 ca20c5b6…) ile aynen üretiliyor. Düdüklü sürüm (`candidate_v10w.csv`, `--params '{"wh_bonus": 30}'`) önerilmiyor:
 tek dayanağı public pencereydi.
 1. **Ölü top mu, canlı mı:** v3 kuralları. Oyuncu temposu (±1 ve ±3 sn; hakeme tepki gecikmesi için 1.5 sn ileriye
@@ -64,6 +66,13 @@ tek dayanağı public pencereydi.
    (`skillcorner.evctrl_labels`). BAR-ATH'ta tek uzman tohumu (20261102): gönderim, değerlendirilen yapılandırmalardan
    biri birebir. BAR-ATH'ta (etiketsiz) uzman v14'ün takım kararıyla %94.3 uyumlu (dış setlerde %91.4–95.5); v15 v14'ten
    karelerin %0.92'sinde farklı (158 bölge, medyan 0.1 sn), 216 → 207 possession, < 4 sn 19 → 13.
+7. **Ölü top sınırlarının zamanlaması (v16; tur 29):** madde 1'in kuralları hangi bölümlerin ölü olduğuna karar
+   veriyor; her duruş ve yeniden başlama, öğrenilmiş ölü top modelinin (yalnız açık DFL; kendi top durumu, `sim.V3`,
+   takip özellikleri) kendi çözümündeki aynı türden en yakın sınıra taşınıyor, ±2 sn içinde ve arada başka sınır
+   yoksa (son adım). BAR-ATH benzeri ölü topla dış setlerde: DFL evctrl +0.016, Metrica +0.006, SC +0.003…+0.004,
+   SoccerTrack (tasarımda kullanılmadı) +0.005. BAR-ATH'ta 233 sınırdan 110'u taşınıyor (duruşların %87'si geç yöne,
+   medyan +18 kare; yeniden başlamalar dengeli, medyan +3), karelerin %1.07'si; possession (207) ve ölü bölüm (118)
+   sayısı aynı.
 
 Kapalı seçenekler: v11 (dokunuş özellikleri), v12 (dokunuşa göre geçiş kolaylığı), `po_lam` (yalnız oyunculara dayalı
 ölü top), `clean_ball` (ATD'nin tahminle doldurduğu top karelerini atmak).
@@ -545,6 +554,8 @@ Public sütunu yalnız bilgi içindir (17 spell, aralık ~0.4); v7'den itibaren 
 | SoccerTrack v2 ölçümü (tur 28; `src/soccertrack.py`, `src/exp_st.py measure`; 10 üniversite maçı, yerel 2.62 GB: olaylar, top, sağlayıcının ham takip / olay dışa aktarımları) | Sağlayıcı her kare için top durumu veriyor (HOME / AWAY / NEUTRAL / BALLOUT); M9 ve M10'da yalnız "INPLAY" → etiketli 8 maç. Hedef kuralda (evctrl) 223 possession / maç, %13.5 < 4 sn, 9.1 oyun içi kısa (Metrica ctrl 231 / %20 / 12, DFL evctrl 229 / %18 / 13); durum olduğu gibi (native) 268 / %24.8 / 32. Olayın takımı = o karedeki durum %90.5. Top olaylara çapalı (aktöre medyan 1.25 m; dönüşlerin %82'si olay karelerinde, başka yerde %20). Oyuncular 1.05 × 0.68 m ızgarada, canlı karelerin %98.9'unda 22 oyuncu. Video: uzak çizgi 15–18 px/m, yakın çizginin orta üçte biri 68 px/m (BAR-ATH taktik ~25–37) | bilgi: bağımsız test seti olabilir (top iyimser, kısa possession az); eğitimde top sızdırır; video yalnız sahanın yakın yarısında BAR-ATH çözünürlüğünde |
 | SoccerTrack'te bağımsız test (tur 28, ön kayıtlı; `src/exp_st.py eval`; v14 / v15'in açık veri bileşenleri, 3 tohum, 8 etiketli maç, hiçbir bileşen görmedi) | v15 − v14: evctrl öğr. D +0.0234 [+0.012, +0.033] 7/8 (v14 0.6995), gerçek D +0.0276 [+0.018, +0.036] 8/8 (0.8153); native +0.0324 [+0.022, +0.042] 8/8 (0.6376) / +0.0347 [+0.025, +0.043] 8/8 (0.7361) | bilgi: v15'in kazancı bağımsız sette de var, araştırma setlerindekinden büyük (top olaylardan kurulduğu için iyimser; C1 topa bakan bir model) |
 | Değişim zamanlaması ve sınır tavanı (teşhis; tur 28 sonrası) | v15'in tahmini değişimi medyanda +4…+8 kare geç, ±5 karede %23–26; C1 tepesine kaydırmak değişimlerin ~%50'sini yaklaştırıp ~%45'ini uzaklaştırıyor. Kâhin: değişimleri gerçeğe taşımak birincilde +0.009…+0.019; duruş / yeniden başlamalar (öğr. D) +0.010…+0.040 | ❌ kaydırma turu açılmadı (tur 23 (c) ve eski DFL denemesinin tekrarı; tavan küçük) |
+| Ölü top sınırlarını öğrenilmiş modelle zamanlama (tur 29, ön kayıtlı; `src/exp_dtime.py`; BAR-ATH benzeri ölü top: DFL / Metrica'da v3 kuralları, SC'de kurallar + görüntü işaretleri; v15 takım olasılığı, 3 tohum, doğrulayıcı öncesi; DT = duruş + yeniden başlama, DTr = yalnız yeniden başlama, ±2 sn) | DT: DFL evctrl +0.0160 [+0.011, +0.021] 7/7, DFL-trk +0.0154, Metrica +0.0056 3/3, SC faz +0.0035 17/20, SC pp +0.0034; birincil pişmanlık +0.0160 (%90 [+0.0119, +0.0203]), en kötü koruma +0.0034. DTr: +0.0103 / +0.0104 / +0.0066 / +0.0049 / +0.0050; birincil +0.0103. Bilgi: SC evctrl DT +0.0036, DTr +0.0050. SoccerTrack (bağımsız; kuralların ölü topu zayıf, 0.21): DT +0.0046 7/8, DTr +0.0036 | ✅ ikisi de geçti; ön kayıtlı seçim birincilde büyük olan → DT, v16 |
+| v16 gönderimi (`src/model_v16.py`, `src/dead_timing.py`, `models/dead_base_v3.txt` = değerlendirmenin Metrica / SC / ST'de kullandığı tüm-DFL ölü top modeli) | MD5 c89208a3…: iki çalıştırma, `cache/v16` silinip yeniden hesaplama ve boş önbellekten temiz dışa aktarım (81 dosya, ~107 sn) aynı; resmî doğrulayıcı "Valid"; v15 / v14 / v13 / v10 MD5'leri değişmedi; testler 82/82. Ölü top modelinin bugün yeniden eğitimi bayt bayt aynı değil → ayrı bayrak (`MTAH_RETRAIN_DEAD`), `MTAH_RETRAIN` ona dokunmuyor. BAR-ATH (etiketsiz): v15'ten karelerin %1.07'si farklı (110 bölge); duruşların %87'si geç yöne (medyan +18 kare), yeniden başlamalar dengeli (+3); possession 207, ölü bölüm 118 aynı, ölü pay 0.398 → 0.394 | ✅ varsayılan |
 
 ### Ekip arkadaşının GitHub kayıtları — 27 Ekim birleştirmesi
 
@@ -2305,6 +2316,17 @@ ikisi de geçerse birincil iyileşmesi büyük olan. Bilgi: SC evctrl, BAR-ATH't
 tur aynı setlerde yapılan teşhisten doğdu (DT'nin DFL / Metrica / SC evctrl sonucu zaten görüldü). Bu yüzden ek koşul:
 varsayılan değişikliği yalnız tasarımda kullanılmayan SoccerTrack v2 (8 maç; v3 kuralları takipten, sağlayıcı
 etiketleri) da aynı yönde (≥ 0) çıkarsa önerilir. `src/exp_dtime.py`.
+*Tur 29 sonucu:* ikisi de geçti. DT: DFL evctrl +0.0160 (%95 [+0.011, +0.021], 7/7), DFL-trk +0.0154 (7/7), Metrica
++0.0056 (3/3), SC faz +0.0035 (17/20), SC pp +0.0034 (17/20); birincil pişmanlık iyileşmesi +0.0160 (%90 [+0.0119,
++0.0203]), en kötü koruma +0.0034. DTr: +0.0103 / +0.0104 / +0.0066 / +0.0049 / +0.0050, birincil +0.0103. Bilgi:
+SC evctrl DT +0.0036 (16/20), DTr +0.0050 (18/20). Ek koşul (SoccerTrack, tasarımda kullanılmadı): DT evctrl +0.0046
+(%95 [+0.002, +0.007], 7/8), native +0.0035; DTr +0.0036 / +0.0034 → sağlandı. Uyarı: SoccerTrack'te kuralların ölü
+topu çok zayıf (0.21; top olaylardan kurulduğu için kural özellikleri çalışmıyor), kontrol bu yüzden zayıf.
+Ön kayıtlı seçim → **DT, v16** (`src/model_v16.py`, son adım; `src/dead_timing.py`). BAR-ATH (etiketsiz): 233
+sınırdan 110'u taşınıyor; 117 duruştan 47'si, %87'si geç yöne (medyan +18 kare), 116 yeniden başlamadan 63'ü (medyan
++3); karelerin %1.07'si. Duruşların geç yöne kayması SC'deki deseni andırıyor (orada öğrenilmiş duruşlar medyan +40
+kare geç, DTr DT'den 0.0015 iyi); SC'de bile DT kurallardan +0.0035 iyi olduğu için ön kayıtlı seçim korundu. DTr
+(yalnız yeniden başlamalar) daha temkinli seçenek olarak kayıtlı.
 
 ## Ek A — İlk analiz, araştırma ve baseline'lar (20 Ekim)
 

@@ -28,41 +28,9 @@ import model_v2  # noqa: E402
 import model_v3  # noqa: E402
 import short_specialist as ss  # noqa: E402
 
-WIN = 50
+from dead_timing import RESTART, STOP, dbounds, retime  # noqa: E402
+
 NAMES = ("rules", "rules + DT", "rules + DTr")
-STOP, RESTART = 1, -1
-
-
-def dbounds(lab):
-    """(frame, STOP / RESTART) of every alive <-> dead boundary."""
-    d = (np.asarray(lab) == 2).astype(np.int8)
-    f = np.flatnonzero(d[1:] != d[:-1]) + 1
-    return f, np.where(d[f] == 1, STOP, RESTART)
-
-
-def retime(rule, learned, kinds=(STOP, RESTART), win=WIN):
-    """rule's stops / restarts of the given kinds moved onto learned's nearest boundary of the same kind within win
-    frames, never across another boundary of rule; the moved stretch takes the label it is pulled into."""
-    rule = np.asarray(rule)
-    out = rule.copy()
-    allb = np.flatnonzero(rule[1:] != rule[:-1]) + 1
-    lf, lk = dbounds(learned)
-    for f, k in zip(*dbounds(rule)):
-        if k not in kinds:
-            continue
-        c = lf[(lk == k) & (np.abs(lf - f) <= win)]
-        if not len(c):
-            continue
-        g = int(c[np.argmin(np.abs(c - f))])
-        i = int(np.searchsorted(allb, f))
-        lo = allb[i - 1] if i > 0 else 0
-        hi = allb[i + 1] if i + 1 < len(allb) else len(out)
-        if lo < g < hi and g != f:
-            if g < f:
-                out[g:f] = rule[f]
-            else:
-                out[f:g] = rule[f - 1]
-    return out
 
 
 def variants(rule, learned):

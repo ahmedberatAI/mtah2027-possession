@@ -1,16 +1,18 @@
 # Files of the public repository (tools/export_public.py). Source modules: the import closure of
-# src/make_submission.py with model_v15 = the v10 / shared BiGRU blend mixed with the short-possession specialist C1 +
-# the short-possession verifier (incl. lazily imported option modules, the feature plugins named in model_v7.VERSION,
-# src/reproduce_shared_bigru.py, which rebuilds the shared BiGRU's BAR-ATH probabilities, and src/exp_bigru_lomo.py,
-# whose held-out DFL probabilities the blend verifiers were trained with), the open-data download script, the team
-# classifier, the verifier classifiers (v13's, v14's and v15's) trained on open data, the shared BiGRU checkpoints (open
-# DFL + PFF data) and the specialist C1's checkpoint (open PFF data only).
+# src/make_submission.py with model_v16 = the v10 / shared BiGRU blend mixed with the short-possession specialist C1 +
+# the short-possession verifier + the dead-ball boundary timing of the learned dead model (incl. lazily imported option
+# modules, the feature plugins named in model_v7.VERSION, src/reproduce_shared_bigru.py, which rebuilds the shared
+# BiGRU's BAR-ATH probabilities, and src/exp_bigru_lomo.py, whose held-out DFL probabilities the blend verifiers were
+# trained with), the open-data download script, the team classifier, the verifier classifiers (v13's, v14's and v15's)
+# and the dead-ball classifier trained on open data, the shared BiGRU checkpoints (open DFL + PFF data) and the
+# specialist C1's checkpoint (open PFF data only).
 src/atd.py
 src/ballclean.py
 src/bench.py
 src/bfree.py
 src/broadcast.py
 src/ctrl_model.py
+src/dead_timing.py
 src/decode.py
 src/decode2.py
 src/dfl.py
@@ -40,6 +42,7 @@ src/model_v10.py
 src/model_v13.py
 src/model_v14.py
 src/model_v15.py
+src/model_v16.py
 src/model_v2.py
 src/model_v3.py
 src/model_v5.py
@@ -56,6 +59,7 @@ src/short_verifier.py
 src/sim.py
 src/skillcorner.py
 src/snap.py
+src/soccertrack.py
 src/touch.py
 src/train_dfl.py
 src/whistle.py
@@ -76,4 +80,5 @@ models/short_verifier_del_c1m25s.txt
 models/short_verifier_ins_g.txt
 models/short_verifier_ins_g_blend50.txt
 models/short_verifier_ins_c1m25s.txt
+models/dead_base_v3.txt
 models/v10_team.txt
