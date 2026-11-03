@@ -557,6 +557,7 @@ Public sütunu yalnız bilgi içindir (17 spell, aralık ~0.4); v7'den itibaren 
 | Ölü top sınırlarını öğrenilmiş modelle zamanlama (tur 29, ön kayıtlı; `src/exp_dtime.py`; BAR-ATH benzeri ölü top: DFL / Metrica'da v3 kuralları, SC'de kurallar + görüntü işaretleri; v15 takım olasılığı, 3 tohum, doğrulayıcı öncesi; DT = duruş + yeniden başlama, DTr = yalnız yeniden başlama, ±2 sn) | DT: DFL evctrl +0.0160 [+0.011, +0.021] 7/7, DFL-trk +0.0160, Metrica +0.0051 3/3, SC faz +0.0032 16/20, SC pp +0.0029; birincil pişmanlık +0.0160 (%90 [+0.0119, +0.0203]), en kötü koruma +0.0029. DTr: +0.0103 / +0.0105 / +0.0059 / +0.0046 / +0.0046; birincil +0.0103. Bilgi: SC evctrl DT +0.0032, DTr +0.0047 (3 Kasım düzeltmesi: BiGRU ağırlığı 0.5, v15'teki gibi; ilk çalıştırma 0.75 ile: Metrica +0.0056, SC +0.0034…+0.0035, aynı karar). SoccerTrack (bağımsız; kuralların ölü topu zayıf, 0.21): DT +0.0046 7/8, DTr +0.0036 | ✅ ikisi de geçti; ön kayıtlı seçim birincilde büyük olan → DT, v16 |
 | v16 gönderimi (`src/model_v16.py`, `src/dead_timing.py`, `models/dead_base_v3.txt` = değerlendirmenin Metrica / SC / ST'de kullandığı tüm-DFL ölü top modeli) | MD5 c89208a3…: iki çalıştırma, `cache/v16` silinip yeniden hesaplama ve boş önbellekten temiz dışa aktarım (81 dosya, ~107 sn) aynı; resmî doğrulayıcı "Valid"; v15 / v14 / v13 / v10 MD5'leri değişmedi; testler 82/82. Ölü top modelinin bugün yeniden eğitimi bayt bayt aynı değil → ayrı bayrak (`MTAH_RETRAIN_DEAD`), `MTAH_RETRAIN` ona dokunmuyor. BAR-ATH (etiketsiz): v15'ten karelerin %1.07'si farklı (110 bölge); duruşların %87'si geç yöne (medyan +18 kare), yeniden başlamalar dengeli (+3); possession 207, ölü bölüm 118 aynı, ölü pay 0.398 → 0.394 | ✅ varsayılan |
 | Fikir taraması (tur 30; 6 Codex ajanı, gpt-6.1-sol en yüksek akıl yürütme, yalnız web; dosya / kabuk / tarayıcı kapalı, boş klasör; brifte yalnız herkese açık görev tanımı, açık verideki sonuçlarımız ve denenmişler, BAR-ATH'tan hiçbir sayı yok; 374 arama; `scratchpad lit29/B1..B6`) | B1 topsuz gönderen–alıcı çıkarımı (PathCRF kenar denetimi), oyunculara koşullu top yeniden kurulumu, top boşluğunda fiziksel açıklama karşılaştırması; B2 SoccerTrack videosuyla kırpıntı tabanlı kontrol dedektörü (pilot 3 yarı 10.5 GB), top + poz zamanlama dalı; B3 denetimli sınır kayması regresyonu (LightGBM Huber / kuantil), ortak uç düzeltme zinciri, metriğe göre MBR, bağlama göre süre dağılımı; B4 çizgiyi geçiş anı (son gerçek top gözlemlerinden), oyuncu tepkisi gecikme modeli, yeniden başlama videosu, öğrenilmiş düdük; B5 kontrol çapaları + bilinmeyen aralıklar (PFF etiket dönüşümü denetimi), hedef kural başlığı + sağlayıcı başlıkları, ELASTIC zaman düzeltmesi; B6 bütünlük denetimi, sensör kalitesine göre ölü top / doğrulayıcı kapıları | bilgi; ucuz eleme testleri tur 31+ |
+| Denetimli sınır regresyonu (tur 31, ön kayıtlı; `src/exp_bound.py`; v15'in her oyun içi değişimi için kayma + eş varlığı, iki LightGBM, ±2 sn penceresi, üç kaynak birlikte maç-dışı) | Kare düzeyinde işe yarıyor: değişimlerin %77'sinin gerçek eşi var, mutlak kayma medyanı 12 → 9 kare, değişimlerin %70'i taşındı, bunların %63'ü yaklaştı. SpellF1 (tohum 0, doğrulayıcı tohum 0): DFL evctrl −0.0001 / +0.0005 (öğr. / gerçek D), Metrica +0.0024 / +0.0009, DFL-trk −0.0007 / −0.0005, SC faz +0.0025 / +0.0017, SC pp +0.0008 / +0.0005 → eleme DFL +0.0002, Metrica +0.0016 (eşik +0.003) | ❌ elemede durdu; kare hatası düşse de IoU eşiklerini geçen spell sayısı pek değişmiyor (tavan küçük, teşhisle tutarlı) |
 
 ### Ekip arkadaşının GitHub kayıtları — 27 Ekim birleştirmesi
 
@@ -2370,6 +2371,20 @@ maç-dışı (30 maç). Tepeye kaydırmadan farkı: kayma doğrudan gerçeğe g�
 *Ucuz eleme:* v10 tohum 0, doğrulayıcı tohum 0; DFL evctrl ve Metrica ctrl'de (iki ölü top kanalının ortalaması) ayrı
 ayrı ≥ +0.003 değilse dur. *Karar (geçerse):* her turdaki gibi v15 (C1abETmS) → v15 + SR, 3 v10 tohumu × doğrulayıcı
 tohumu 0 / 1, birincil ≥ 0.005, korumalar ≥ −0.01; bilgi SC evctrl. `src/exp_bound.py`, `tests/test_bound.py`.
+*Tur 31 sonucu:* eleme geçilmedi → **❌, v16 kalır**. Değişimlerin %77'sinin ±2 sn içinde gerçek eşi var; model
+mutlak kayma medyanını 12'den 9 kareye indiriyor ve değişimlerin %70'ini taşıyor, taşınanların %63'ü yaklaşıyor. Ama
+spellF1 hemen hiç değişmiyor: DFL evctrl +0.0002, Metrica +0.0016 (ikisi de iki ölü top kanalının ortalaması; eşik
++0.003); SC faz +0.002, korumalarda kayıp yok. Yorum: değişim zamanlamasının tavanı küçük (+0.009…+0.019) ve kare
+hatasındaki ortalama düşüş, eşleşmeyi IoU 0.5–0.7 eşiğinin bir yanından öbürüne geçiren az sayıda spell'de
+yoğunlaşmıyor; tepeye kaydırmanın üç başarısızlığıyla birlikte sınır düzeltme yolu kapandı.
+
+**Teşhis — C1'in eğitim etiketleri (tur 30, B5 #1'in ucuz denetimi; 3 Kasım, toplu).** PFF'in kontrollü okuması (C1'in
+etiketleri, 64 maç) ile hedef kural: possession / maç 217 / 231 / 229 (PFF / Metrica ctrl / DFL evctrl); < 2 sn payı
+%5.9 / %6.1 / %4.6, < 4 sn %20.5 / %20.5 / %18.5 (genel dağılım tutuyor). Ama iki rakip possession arasında oyun
+içi çok kısa possession'lar PFF'te seyrek: < 1 sn maç başına 0.1 / 0.7 / 0.7, < 2 sn 1.4 / 2.0 / 3.1, < 4 sn 10.0 / 11.7 /
+12.6. Yani C1 tam da aranan sıkışık kısa possession'ları az görmüş (maç başına 1–2 eksik; < 1 sn neredeyse hiç).
+Düzeltmesi C1'in yeniden eğitimi + doğrulayıcı zincirinin yeniden kurulumu (GPU ile ~1 gün); beklenen etki belirsiz
+(C1'in kazancı duyarlılıktan değil isabetten geldi).
 
 ## Ek A — İlk analiz, araştırma ve baseline'lar (20 Ekim)
 
