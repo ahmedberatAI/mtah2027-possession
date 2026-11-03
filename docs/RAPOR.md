@@ -2170,6 +2170,34 @@ v2 (10 üniversite maçı, sabit panoramik video, 21,428 takımlı top aksiyonu,
 izi olaylardan doğrusal ara değerlemeyle kurulmuş, yani topa dayalı modellerimiz için etiket sızdırır; ancak takımlı
 olaylı tam saha videosu olarak NDA'sız tek kaynak (video ile dokunuş modeli için aday).
 
+**Tur 26 — ölü top bölme (D-split): teşhis ve ön kayıt (3 Kasım, çalıştırmadan önce).** Kullanıcı: "SoccerTrack v2'yi
+edin ve ölç, ardından modeli geliştirmeye devam et" (SoccerTrack erişimi kullanıcının Hugging Face onayını bekliyor).
+*Teşhis 1, kısa possession yakalaması (v15, hedef kural; `scratchpad` diag_recall / diag_cover, toplu sayılar):* gerçek
+kısa possession'ların öğrenilmiş D'de %41 (DFL) / %45 (Metrica) / %61'i (SC) için hiç aday yok; doğrulayıcının eşiğe
+yakın reddettikleri (p 0.45–0.65) yalnız %2–3. Daha gevşek aday kuralları (C1 θ 0.5–0.7 çekişmeli / çekişmesiz, ham
+olasılık θ 0.5–0.7; yarı başına 2–95 ek aday) adaysız kalanların en çok %10'unu kapsıyor → bu anlarda takip tabanlı
+sinyallerin hiçbiri karşı takıma dönmüyor; bilgi takipte yok (video gerekir).
+*Teşhis 2, BAR-ATH (etiketsiz, toplu):* canlı dakika başına v15 BAR-ATH'ta 0.24 kısa possession, dış setlerde 0.46–0.66;
+dönüş, aday ve uzman olay oranları dış aralıkta (en çok Metrica'ya yakın). Fark duruşlarda: iki duruş arası kısa
+possession BAR-ATH'ta 0.000 (dış setlerde öğrenilmiş D ile 0.13–0.14; gerçekte 0.16–0.28), duruştan sonra 0.057 (dış
+0.16–0.26).
+*Teşhis 3, BAR-ATH'ın ölü top kuralları dış setlerde (v15 takım olasılığı, BAR-ATH decoder ayarları, doğrulayıcı
+öncesi, hedef kural):* v3 kuralları (takipten) DFL 0.648 / Metrica 0.737 / SC (kurallar + görüntü işaretleri, N21)
+0.642; öğrenilmiş ölü top 0.793 / 0.830 / 0.668; kurallar + 0.5 × öğrenilmiş 0.773 / 0.826 / 0.706; gerçek D 0.820 /
+0.888 / 0.832. İki duruş arası kısa possession'ları kurallar %4–11, öğrenilmiş model %16–71 buluyor. BAR-ATH'ta kurallara
+yayın ipuçları da giriyor (dış setlerde yok); geçmişte iki ölü top füzyonu (yalnız oyunculara dayalı model, N21) dış
+setlerde kazandırıp BAR-ATH'ın public penceresine bakılarak reddedilmişti (kurallar o zamandan beri buna izin vermiyor);
+mekanik gerekçe: kurallar + yayın sınırlarda keskin, öğrenilmiş model bulanık. Bu yüzden ölü top kanıtı karıştırılmıyor.
+*Ön kayıt (D-split):* BAR-ATH'ın ölü top hattı ve sınırları olduğu gibi kalır; yalnız kuralların bir ölü bölümünün
+içinde, öğrenilmiş ölü top modelinin aynı takım olasılığı ve aynı decoder'la yaptığı kendi çözümünde bölümün iki
+kenarından da en az 25 kare içeride tam bir possession varsa, o possession (takımı ve sınırlarıyla) eklenir; yeni eşik
+yok. Değerlendirme BAR-ATH benzeri ölü topla: DFL / Metrica'da v3 kuralları (takipten), SC'de kurallar + görüntü
+işaretleri; v15'in takım olasılığı (3 v10 tohumu, her biri bir C1 tohumuyla), BAR-ATH decoder ayarları, doğrulayıcı
+öncesi (doğrulayıcı possession'ların içinde, D-split ölü bölümlerin içinde çalışır; üretimde son adım). Karar: kurallar →
+kurallar + D-split, birincil DFL evctrl ve Metrica ctrl'de en kötü durum pişmanlığı ≥ 0.005 iyileşme, korumalar (DFL-trk,
+SC faz / pp) ≥ −0.01; bilgi: SC evctrl ve BAR-ATH'ta eklenen possession sayısı (etiketsiz). Geçerse v16 = v15 + D-split
+(öğrenilmiş ölü top modeli yeniden üretilebilir biçimde hatta girer). `src/exp_dsplit.py`.
+
 ## Ek A — İlk analiz, araştırma ve baseline'lar (20 Ekim)
 
 *Tarihsel rapor; özgün başlığı: More than a Hack 2027 — Faz 1 (Top Sahipliği) · Analiz, Araştırma ve Baseline Raporu. Güncel durum için §1.*
