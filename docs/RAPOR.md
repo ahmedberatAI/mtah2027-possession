@@ -559,6 +559,7 @@ Public sütunu yalnız bilgi içindir (17 spell, aralık ~0.4); v7'den itibaren 
 | Fikir taraması (tur 30; 6 Codex ajanı, gpt-6.1-sol en yüksek akıl yürütme, yalnız web; dosya / kabuk / tarayıcı kapalı, boş klasör; brifte yalnız herkese açık görev tanımı, açık verideki sonuçlarımız ve denenmişler, BAR-ATH'tan hiçbir sayı yok; 374 arama; `scratchpad lit29/B1..B6`) | B1 topsuz gönderen–alıcı çıkarımı (PathCRF kenar denetimi), oyunculara koşullu top yeniden kurulumu, top boşluğunda fiziksel açıklama karşılaştırması; B2 SoccerTrack videosuyla kırpıntı tabanlı kontrol dedektörü (pilot 3 yarı 10.5 GB), top + poz zamanlama dalı; B3 denetimli sınır kayması regresyonu (LightGBM Huber / kuantil), ortak uç düzeltme zinciri, metriğe göre MBR, bağlama göre süre dağılımı; B4 çizgiyi geçiş anı (son gerçek top gözlemlerinden), oyuncu tepkisi gecikme modeli, yeniden başlama videosu, öğrenilmiş düdük; B5 kontrol çapaları + bilinmeyen aralıklar (PFF etiket dönüşümü denetimi), hedef kural başlığı + sağlayıcı başlıkları, ELASTIC zaman düzeltmesi; B6 bütünlük denetimi, sensör kalitesine göre ölü top / doğrulayıcı kapıları | bilgi; ucuz eleme testleri tur 31+ |
 | Denetimli sınır regresyonu (tur 31, ön kayıtlı; `src/exp_bound.py`; v15'in her oyun içi değişimi için kayma + eş varlığı, iki LightGBM, ±2 sn penceresi, üç kaynak birlikte maç-dışı) | Kare düzeyinde işe yarıyor: değişimlerin %77'sinin gerçek eşi var, mutlak kayma medyanı 12 → 9 kare, değişimlerin %70'i taşındı, bunların %63'ü yaklaştı. SpellF1 (tohum 0, doğrulayıcı tohum 0): DFL evctrl −0.0001 / +0.0005 (öğr. / gerçek D), Metrica +0.0024 / +0.0009, DFL-trk −0.0007 / −0.0005, SC faz +0.0025 / +0.0017, SC pp +0.0008 / +0.0005 → eleme DFL +0.0002, Metrica +0.0016 (eşik +0.003) | ❌ elemede durdu; kare hatası düşse de IoU eşiklerini geçen spell sayısı pek değişmiyor (tavan küçük, teşhisle tutarlı) |
 | Bütünlük denetimi (tur 30, B6 #4; etiketsiz, toplu) | `candidate_v16.csv` 199,319 satır, frame sütunu 0..n−1; puanlanan iki yarının dışındaki 40,462 kare tamamen X. 1. yarı 53.0 dk, 100 possession, 57 ölü bölüm, ev sahibinin possession payı 0.636, ölü pay 0.485; 2. yarı 52.9 dk, 107 / 61, 0.585, 0.505 (takım eşlemesi yarı arasında ters dönmemiş; ters olsaydı pay ~0.4'e düşerdi); v15 → v16 değişen kare 908 / 1,216 | ✅ yapısal sorun yok |
+| Uzmanı, okumanın geri verdiği kareleri maskeleyerek yeniden eğitmek: C2 (tur 32, ön kayıtlı; `short_specialist.py prep-pff … ctrlmask`, CPU'da 3 tohum × 12,000 adım; C2abETmS = v15'in tarifi, C1 yerine C2; 3 v10 tohumu × doğrulayıcı tohumu 0 / 1) | v15'e (C1abETmS) göre: DFL evctrl −0.0012 / −0.0010 (öğr. / gerçek D), Metrica −0.0011 / −0.0008, DFL-trk −0.0035 / −0.0042, SC faz −0.0008 / +0.0010, SC pp +0.0010 / +0.0027; birincil −0.0012 (%90 [−0.0042, +0.0007], P(> 0) 0.11), en kötü koruma −0.0042. Bilgi: SC evctrl −0.0016 / 0.0000; SoccerTrack evctrl −0.0031 / −0.0026 (1/8, 2/8 maçta önde), sağlayıcı durumu −0.0001 / +0.0007 | ❌ v16 kalır |
 
 ### Ekip arkadaşının GitHub kayıtları — 27 Ekim birleştirmesi
 
@@ -2405,6 +2406,16 @@ birincil ≥ 0.005, korumalar ≥ −0.01; bilgi: SC evctrl, SoccerTrack. Geçer
 kaybeder hedefi maskeli %2.3). Eğitim başladığında yerel GPU başka bir projenin LoRA eğitimiyle doldu (%98, ~21 GB);
 ona dokunulmadı, kendi eğitimimiz durdurulup CPU'ya alındı (`CUDA_VISIBLE_DEVICES=-1`, 16 iş parçacığı; 1000 adım ~6
 dk, tohum başına ~75 dk). C1 Colab GPU'sunda eğitilmişti; cihaz farkı tarifin parçası değil.
+*Tur 32 sonucu (3 Kasım):* C2 v15'i geçmedi. v14'e göre C2abETmS de kuralı geçiyor (birincil +0.0116, %90 [+0.0019,
++0.0230]), ama C1abETmS'nin (+0.0126; bu çalıştırmada tur 25'in sayıları birebir yeniden çıktı) gerisinde. Birincil
+dört bağlamın hepsinde −0.0008…−0.0012, DFL-trk'te −0.004; yalnız SC pp ile SC faz gerçek D'de +0.001…+0.003. v15'e
+göre birincil −0.0012 (%90 [−0.0042, +0.0007]). Doğrulayıcı AUC'leri C1'inkiyle aynı bantta (ekle DFL 0.81–0.83, Metrica
+0.86–0.90, SC 0.86–0.87; sil 0.81–0.94). Bilgi: SC evctrl −0.0016 / 0.0000. SoccerTrack'te C2'nin doğrulayıcısı v15'inki
+gibi C2abETmS satırlarının tohum 0'ından, yalnız bellekte eğitildi (`models/` dokunulmadı, MD5'ler aynı); C1 sütunu
+tur 28'in v15 sayılarını birebir verdi. C2: evctrl −0.0031 / −0.0026 (1/8, 2/8 maçta önde), sağlayıcı durumu
+−0.0001 / +0.0007. Olası açıklama: maske eksik kısa possession'ları üretmiyor, yalnız o karelerdeki öğrenme sinyalini
+kaldırıyor. Teşhisteki açık (maç başına 1–2 sıkışık kısa possession) PFF etiketlerinin kaynağında. Uzmanın
+etiketlerini düzeltme yolu kapandı; C1 ve v16 değişmez.
 
 ## Ek A — İlk analiz, araştırma ve baseline'lar (20 Ekim)
 
