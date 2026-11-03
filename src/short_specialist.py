@@ -15,12 +15,16 @@ Outputs per frame (7): P(H), P(A), P(D), gain H, gain A, lose H, lose A.
 Variant C1 (round 24) learns the target convention instead: PFF's labels under the challenge's controlled-possession
 reading (gradient.controlled_reading, the rule behind Metrica ctrl / DFL evctrl), plus a separate per-team touch head
 from PFF's on-the-ball events, so that touching the ball and gaining control are learnt apart (9 outputs).
+Round 34: variant C3 = C1 with every player of each team (K 11 instead of 5); variants F1 / F3 = C1 / C3 fine-tuned on
+the ten target-convention games (DFL evctrl, Metrica ctrl), leave one match out (finetune).
 
-  python -I src/short_specialist.py prep-pff OUT [WORKERS] [CONV]    degraded PFF halves -> features + targets
-                                                                     (CONV pff for S1 / S2, ctrl for C1,
-                                                                     ctrlmask for C2: round 32)
-  python -I src/short_specialist.py train DATA VARIANT SEED OUT      GPU: one model (VARIANT S1 / S2)
+  python -I src/short_specialist.py prep-pff OUT [WORKERS] [CONV] [K]  degraded PFF halves -> features + targets
+                                                                     (CONV pff for S1 / S2, ctrl for C1 / C3,
+                                                                     ctrlmask for C2: round 32; K 11 for C3)
+  python -I src/short_specialist.py train DATA VARIANT SEED OUT      GPU: one model (VARIANT S1 / S2 / C1 / C3)
   python -I src/short_specialist.py infer SRC VARIANT                local: outputs on bench halves, 3 seeds
+  python -I src/short_specialist.py finetune BASE NEW SEED_INDEX PFF  GPU: BASE's model of that seed fine-tuned per
+                                                                     held-out target-convention match + on all ten
 """
 import json
 import os
@@ -41,10 +45,24 @@ SIGMA = 3.0
 MASK_PAD = 6                    # round 32 (C2): frames around a masked spell without gain / lose target
 SEEDS = (20261102, 20261103, 20261104)
 MIX = (("change", 0.4), ("contest", 0.3), ("edge", 0.1), ("live", 0.2))      # training window centres
-N_BASE = 8 + 2 * 7 * K + 12
-Y_COLS = [1, 3] + [8 + 7 * j + c for j in range(2 * K) for c in (1, 4)] + [8 + 14 * K + c for c in (5, 7)]
+KS = {"C3": 11, "F3": 11}       # round 34: players per team in a variant's representation (default K)
 ROOT = os.path.dirname(HERE)
 OUT = os.path.join(ROOT, "cache", "kpu")
+TARGET = (("dfl@v3", "evctrl"), ("metrica@v3", "ctrl"))       # round 34: the target-convention games (fine-tuning)
+FT_STEPS, FT_LR = 2000, 3e-4
+
+
+def n_base(k):
+    return 8 + 2 * 7 * k + 12
+
+
+def y_cols(k):
+    """Columns that change sign when the pitch is mirrored in y."""
+    return [1, 3] + [8 + 7 * j + c for j in range(2 * k) for c in (1, 4)] + [8 + 14 * k + c for c in (5, 7)]
+
+
+N_BASE = n_base(K)
+Y_COLS = y_cols(K)
 
 
 # -- representation -------------------------------------------------------------------------------------------------
@@ -81,8 +99,9 @@ def _ball(B, pitch):
     return pos, vel, acc, seen, since
 
 
-def features(P, B, team, gk, pitch, prior=None):
-    """(T, 2, N_BASE [+ 2]) float32: side s's view of every frame. prior: v10's P(home) per frame (S2)."""
+def features(P, B, team, gk, pitch, prior=None, k=K):
+    """(T, 2, n_base(k) [+ 2]) float32: side s's view of every frame, the k players of each team nearest to the ball.
+    prior: v10's P(home) per frame (S2)."""
     warnings.filterwarnings("ignore", category=RuntimeWarning)
     L, W = pitch
     n = len(P)
@@ -101,7 +120,8 @@ def features(P, B, team, gk, pitch, prior=None):
     closing = np.sum(Pv * unit, axis=2)
     dist_inf = np.where(present, dist, np.inf)
     signs = _signs(P, team, gk)
-    out = np.zeros((n, 2, N_BASE + (2 if prior is not None else 0)), np.float32)
+    nb = n_base(k)
+    out = np.zeros((n, 2, nb + (2 if prior is not None else 0)), np.float32)
     if prior is not None:
         import exp_smooth
         lg = np.log(np.clip(prior, 1e-4, 1 - 1e-4) / np.clip(1 - prior, 1e-4, 1))
@@ -121,7 +141,7 @@ def features(P, B, team, gk, pitch, prior=None):
         c = 8
         for t in (s, 1 - s):
             m = np.flatnonzero(team == t)
-            order = np.argsort(dist_inf[:, m], axis=1)[:, :K]
+            order = np.argsort(dist_inf[:, m], axis=1)[:, :k]
             sl = m[order]
             rows = np.arange(n)[:, None]
             ok = np.isfinite(dist_inf[rows, sl])
@@ -135,7 +155,7 @@ def features(P, B, team, gk, pitch, prior=None):
             blk[:, :, 6] = 1.0
             blk[~ok] = 0.0
             f[:, c:c + 7 * sl.shape[1]] = blk.reshape(n, -1)
-            c += 7 * K
+            c += 7 * k
         for j, t in enumerate((s, 1 - s)):
             m = team == t
             d = np.where(present[:, m], dist[:, m], np.inf)
@@ -149,8 +169,8 @@ def features(P, B, team, gk, pitch, prior=None):
             f[:, c + 8 + j] = np.where(np.isfinite(dg), dg, 100.0) / 50.0
             f[:, c + 10 + j] = present[:, m].sum(axis=1) / 11.0
         if prior is not None:
-            f[:, N_BASE] = (lg if s == 0 else -lg) / 5.0
-            f[:, N_BASE + 1] = (lgs if s == 0 else -lgs) / 5.0
+            f[:, nb] = (lg if s == 0 else -lg) / 5.0
+            f[:, nb + 1] = (lgs if s == 0 else -lgs) / 5.0
     return np.clip(np.nan_to_num(out), -5.0, 5.0)
 
 
@@ -181,13 +201,13 @@ def touch_targets(evs, n, sigma=2.0):
     return out
 
 
-def centres(lab, x):
+def centres(lab, x, k=K):
     """Training window centres per kind (MIX): team changes, contests (both teams within 3 m), live/dead edges, live."""
     lab = np.asarray(lab)
     live = lab < 2
     change = np.flatnonzero((lab[1:] < 2) & (lab[:-1] < 2) & (lab[1:] != lab[:-1])) + 1
     edge = np.flatnonzero((lab[1:] <= 2) & (lab[:-1] <= 2) & ((lab[1:] == 2) != (lab[:-1] == 2))) + 1
-    c = 8 + 14 * K
+    c = 8 + 14 * k
     contest = np.flatnonzero(live & (x[:, 0, c] > 0) & (x[:, 0, c + 1] > 0))[::5]
     return {"change": change, "contest": contest, "edge": edge, "live": np.flatnonzero(live)[::25]}
 
@@ -197,8 +217,8 @@ def centres(lab, x):
 def _prep_one(job):
     """One PFF match -> per half and degradation copy: features, targets, window centres. conv "pff": PFF's controlled
     labels (variants S1 / S2); "ctrl": their controlled-possession reading (gradient.controlled_reading) plus touch
-    targets (variant C1)."""
-    mi, match, out, with_prior, conv = job
+    targets (variant C1). k: players per team in the representation (11 for C3, round 34)."""
+    mi, match, out, with_prior, conv, k = job
     import gradient
     import sim
     warnings.filterwarnings("ignore")
@@ -233,7 +253,7 @@ def _prep_one(job):
                 P, B = Pn[:, :, :2].astype(np.float32), Bn[:, :2].astype(np.float32)
                 prior = _v10_prior(P, B, d["team"], d["gk"], pitch, os.path.join(out, key + "_v7.pkl")) \
                     if with_prior else None
-                x = features(P, B, d["team"], d["gk"], pitch, prior)
+                x = features(P, B, d["team"], d["gk"], pitch, prior, k=k)
                 ctrl, ev = targets(lab)
                 if unknown is not None and unknown.any():
                     ctrl[unknown] = -1
@@ -249,7 +269,7 @@ def _prep_one(job):
                     wrong = live & (np.where(lab == 0, prior, 1 - prior) < 0.5)
                     np.save(os.path.join(out, key + "_hard.npy"), wrong)
                 with open(os.path.join(out, key + "_centres.json"), "w") as fh:
-                    json.dump({k: v.tolist() for k, v in centres(lab, x).items()}, fh)
+                    json.dump({kind: v.tolist() for kind, v in centres(lab, x, k).items()}, fh)
                 done.append(key)
     print("prepared %s: %d halves x copies, %.0f s" % (match, len(done), time.time() - t0), flush=True)
     return done
@@ -270,11 +290,11 @@ def _v10_prior(P, B, team, gk, pitch, tmp):
                                                            XA=np.hstack([f["XA"], a])))
 
 
-def prep_pff(out, workers, conv="pff"):
+def prep_pff(out, workers, conv="pff", k=K):
     from concurrent.futures import ProcessPoolExecutor
     import gradient
     os.makedirs(out, exist_ok=True)
-    jobs = [(mi, m, out, conv == "pff", conv) for mi, m in enumerate(gradient.matches())]
+    jobs = [(mi, m, out, conv == "pff", conv, k) for mi, m in enumerate(gradient.matches())]
     keys = []
     with ProcessPoolExecutor(max_workers=workers) as pool:
         for part in pool.map(_prep_one, jobs):
@@ -312,12 +332,21 @@ def net(d_in, emb=128, hid=96, heads=4):
     return Net()
 
 
+def _width_k(w):
+    """Players per team of a stored representation of width w (n_base(k), or n_base(k) + 2 with S2's prior)."""
+    return (w - 20) // 14 if (w - 20) % 14 == 0 else (w - 22) // 14
+
+
 class Data:
-    def __init__(self, folder, keys, variant):
+    def __init__(self, folder, keys, variant, arrays=None):
+        """PFF halves prepared in folder, or (round 34) in-memory halves: arrays = (xs, ctrls, evs, centres)."""
         self.x, self.ctrl, self.ev, self.hard, self.cen = [], [], [], [], []
+        if arrays is not None:
+            self.x, self.ctrl, self.ev, self.cen = (list(a) for a in arrays)
+            self.hard = [None] * len(self.x)
         for k in keys:
             x = np.load(os.path.join(folder, k + "_x.npy"), mmap_mode="r")
-            self.x.append(x if variant == "S2" else x[:, :, :N_BASE])
+            self.x.append(x if variant == "S2" else x[:, :, :n_base(_width_k(x.shape[-1]))])
             self.ctrl.append(np.load(os.path.join(folder, k + "_ctrl.npy")))
             self.ev.append(np.load(os.path.join(folder, k + "_ev.npy")))
             hp = os.path.join(folder, k + "_hard.npy")
@@ -325,6 +354,7 @@ class Data:
             with open(os.path.join(folder, k + "_centres.json")) as fh:
                 self.cen.append({kk: np.asarray(v, np.int64) for kk, v in json.load(fh).items()})
         self.d = self.x[0].shape[-1]
+        self.k = _width_k(self.d)
 
     def window(self, i, c, flip):
         n = len(self.ctrl[i])
@@ -340,7 +370,7 @@ class Data:
         if self.hard[i] is not None:
             w[lo - a:hi - a] += self.hard[i][lo:hi]
         if flip:
-            x[:, :, Y_COLS] *= -1
+            x[:, :, y_cols(self.k)] *= -1
         y[:HALO] = -1
         y[HALO + CORE:] = -1
         return x, y, e, w
@@ -536,22 +566,102 @@ def infer(src, variant):
     for k, seed in enumerate(SEEDS):
         model = load(os.path.join(OUT, "models", "kpu_%s_s%d.pt" % (variant, seed)))
         priors = es.v10_raw(k, src) if variant == "S2" else [None] * len(blocks)
-        res[seed] = [predict(model, features(b["P"], b["B"], b["team"], b["gk"], b["pitch"], pr)).astype(np.float16)
+        res[seed] = [predict(model, features(b["P"], b["B"], b["team"], b["gk"], b["pitch"], pr,
+                                             k=KS.get(variant, K))).astype(np.float16)
                      for b, pr in zip(blocks, priors)]
         print("  %s %s seed %d: %d halves" % (variant, src, seed, len(blocks)), flush=True)
     bench._dump(res, dest)
     return res
 
 
+# -- round 34: fine-tuning on the target-convention games ---------------------------------------------------------------
+
+def _target_halves(k):
+    """The target-convention halves (bench's degraded blocks) as fine-tuning data: per half its source, index, match,
+    features, control / event targets (no touch target there: NaN, outside the loss) and window centres."""
+    import bench
+    out = []
+    for src, conv in TARGET:
+        for i, (b, lab) in enumerate(zip(bench.blocks(src), bench.labels(src, conv))):
+            x = features(b["P"], b["B"], b["team"], b["gk"], b["pitch"], k=k).astype(np.float16)
+            ctrl, ev = targets(lab)
+            ev = np.concatenate([ev, np.full((len(ev), 2), np.nan, np.float32)], 1).astype(np.float16)
+            out.append(dict(src=src, i=i, match="%s/%s" % (src, b["group"]), x=x, ctrl=ctrl, ev=ev,
+                            cen={kind: np.asarray(v, np.int64) for kind, v in centres(lab, x, k).items()}))
+    return out
+
+
+def finetune(base, new, k_seed, pff_folder):
+    """BASE's model of seed SEEDS[k_seed] fine-tuned on the target-convention games: once per held-out match (that
+    match's halves are predicted by its fold's model) and once on all ten (cache/kpu/models/kpu_<new>_s<seed>.pt, used
+    for SkillCorner, SoccerTrack and BAR-ATH through infer). Every batch is half target-convention windows, half the
+    base's own PFF training windows (pff_folder). Outputs merge into cache/kpu/<new>_<src>.pkl {seed: [per half]}."""
+    import torch
+    import bench
+    seed = SEEDS[k_seed]
+    k = KS.get(base, K)
+    halves = _target_halves(k)
+    with open(os.path.join(pff_folder, "index.json")) as fh:
+        idx = json.load(fh)
+    dp = Data(pff_folder, [key for key in idx["keys"] if key.split("_")[0] not in set(idx["val_matches"])], base)
+    assert dp.k == k and dp.d == halves[0]["x"].shape[-1], (dp.k, k)
+    dev = "cuda" if torch.cuda.is_available() else "cpu"
+    ck = torch.load(os.path.join(OUT, "models", "kpu_%s_s%d.pt" % (base, seed)), map_location="cpu", weights_only=False)
+    folds = sorted(set(h["match"] for h in halves))
+    outs = {src: [None] * sum(h["src"] == src for h in halves) for src, _ in TARGET}
+    for j, fold in enumerate(folds + [None]):
+        sel = [h for h in halves if h["match"] != fold]
+        dt = Data(None, [], base, arrays=([h["x"] for h in sel], [h["ctrl"] for h in sel], [h["ev"] for h in sel],
+                                          [h["cen"] for h in sel]))
+        torch.manual_seed(seed + j)
+        rng = np.random.default_rng(seed + j)
+        model = net(ck["d"], heads=ck["heads"])
+        model.load_state_dict(ck["state"])
+        model = model.to(dev)
+        opt = torch.optim.AdamW(model.parameters(), lr=FT_LR, weight_decay=1e-4)
+        sched = torch.optim.lr_scheduler.OneCycleLR(opt, max_lr=FT_LR, total_steps=FT_STEPS, pct_start=0.1)
+        t0 = time.time()
+        for step in range(FT_STEPS):
+            model.train()
+            parts = (dt.batch(rng, 32), dp.batch(rng, 32))
+            x, y, e, w = (torch.from_numpy(np.concatenate(z)).to(dev) for z in zip(*parts))
+            ctrl, ev = model(x)
+            loss, _, _ = loss_fn(ctrl, ev, y, e, w)
+            opt.zero_grad()
+            loss.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+            opt.step()
+            sched.step()
+        model = model.cpu().eval()
+        if fold is None:
+            torch.save(dict(state=model.state_dict(), d=ck["d"], heads=ck["heads"], variant=new, seed=seed,
+                            step=FT_STEPS, base=base), os.path.join(OUT, "models", "kpu_%s_s%d.pt" % (new, seed)))
+        else:
+            for h in halves:
+                if h["match"] == fold:
+                    outs[h["src"]][h["i"]] = predict(model, h["x"]).astype(np.float16)
+        print("  %s seed %d fold %s: %d halves, %.0f s" % (new, seed, fold or "all ten", len(sel), time.time() - t0),
+              flush=True)
+    for src, lst in outs.items():
+        assert all(o is not None for o in lst), src
+        dest = os.path.join(OUT, "%s_%s.pkl" % (new, src.replace("@", "-")))
+        res = bench._load(dest) if os.path.isfile(dest) else {}
+        res[seed] = lst
+        bench._dump(res, dest)
+
+
 def main():
     sys.stdout.reconfigure(encoding="utf-8")
     stage = sys.argv[1]
     if stage == "prep-pff":
-        prep_pff(sys.argv[2], int(sys.argv[3]) if len(sys.argv) > 3 else 6, sys.argv[4] if len(sys.argv) > 4 else "pff")
+        prep_pff(sys.argv[2], int(sys.argv[3]) if len(sys.argv) > 3 else 6, sys.argv[4] if len(sys.argv) > 4 else "pff",
+                 int(sys.argv[5]) if len(sys.argv) > 5 else K)
     elif stage == "train":
         train(sys.argv[2], sys.argv[3], int(sys.argv[4]), sys.argv[5])
     elif stage == "infer":
         infer(sys.argv[2], sys.argv[3])
+    elif stage == "finetune":
+        finetune(sys.argv[2], sys.argv[3], int(sys.argv[4]), sys.argv[5])
     else:
         raise SystemExit(__doc__)
 

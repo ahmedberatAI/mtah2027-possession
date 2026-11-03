@@ -100,6 +100,20 @@ class SpecialistUseTests(unittest.TestCase):
         for k, v in want.items():
             self.assertAlmostEqual(r[0][k], v, places=5, msg=k)
 
+    def test_players_per_team(self):
+        """Round 34: k players per team (C3: 11); the default layout is C1's, and the width tells k back."""
+        rng = np.random.default_rng(1)
+        team = np.array([0] * 11 + [1] * 11)
+        gk = np.zeros(22, bool)
+        gk[[0, 11]] = True
+        P, B = rng.uniform(size=(60, 22, 2)).astype(np.float32), rng.uniform(size=(60, 2)).astype(np.float32)
+        x5, x11 = ss.features(P, B, team, gk, (105.0, 68.0)), ss.features(P, B, team, gk, (105.0, 68.0), k=11)
+        self.assertEqual((x5.shape[-1], x11.shape[-1]), (ss.N_BASE, ss.n_base(11)))
+        self.assertEqual((ss._width_k(ss.N_BASE), ss._width_k(ss.N_BASE + 2), ss._width_k(ss.n_base(11))), (5, 5, 11))
+        self.assertEqual(ss.y_cols(ss.K), ss.Y_COLS)
+        self.assertTrue(np.array_equal(x5[:, :, :8 + 7 * 5], x11[:, :, :8 + 7 * 5]))       # ball + own nearest five
+        self.assertTrue(np.array_equal(x5[:, :, -12:], x11[:, :, -12:]))                   # context block
+
 
 class V15Tests(unittest.TestCase):
     def test_verifier_files_match_the_keys(self):
