@@ -154,7 +154,8 @@ def theta(variant):
     return chosen
 
 
-THETA = {"S1": 0.7, "S2": 0.8, "C1": 0.7}                  # src/exp_kpu.py theta, recorded in docs/RAPOR.md before gate 2
+THETA = {"S1": 0.7, "S2": 0.8, "C1": 0.7, "C2": 0.7}       # src/exp_kpu.py theta, recorded in docs/RAPOR.md before gate 2
+                                                           # (C2, round 32: C1's value, not re-chosen)
 _path = ev._path
 
 
@@ -226,16 +227,17 @@ def relabel_sc(base, name):
     print("  %s rows written (from %s)" % (name, base), flush=True)
 
 
-def build_m(name, w=0.25, avg=False):
+def build_m(name, w=0.25, avg=False, variant="C1"):
     """Round 24c, C1abETm: C1's live-normalised control probability blended into v14's team probability (weight w)
     before the +-25 smoothing and the decoder; decodes, candidates (v14's rule + C1's), features (G1 + specialist +
     touch) and DFL evctrl labels rebuilt on that base. Round 27: w 0.5 (C1abETm50), or every C1 output from the mean of
-    its three seeds (avg, C1abETma)."""
+    its three seeds (avg, C1abETma). Round 32: variant C2 (the specialist trained with the reading's handed-back
+    possessions masked) in C1's place, C2abETm."""
     use("v14")
     for src, convs, dec, prim in ev.SOURCES:
         kind = "rows4" if src.startswith("dfl") else "rows3"
         dfl = src.startswith("dfl")
-        outs = (avg_outputs if avg else outputs)("C1", src)
+        outs = (avg_outputs if avg else outputs)(variant, src)
         blocks = bench.blocks(src)
         labs = bench.labels(src, prim)
         learned = bench.dead_probs(src, "base") if dfl else bench.dead_ext("base", "v3", src)
@@ -255,7 +257,7 @@ def build_m(name, w=0.25, avg=False):
                 fav = np.where(ea.logit(smos[k][i]) > 0, 0, 1)
                 ex = [(a + s0, a + t0, 1 - kk) for a, e, kk in segs_of(pr) for s0, t0 in ea.runs(fav[a:e] != kk)
                       if kk < 2 and t0 - s0 >= ea.RUN]
-                extra = kpu_cands(np.asarray(outs[ss.SEEDS[k]][i], np.float32), pr, con, THETA["C1"], ex)
+                extra = kpu_cands(np.asarray(outs[ss.SEEDS[k]][i], np.float32), pr, con, THETA[variant], ex)
                 rows[(k, d)] += ev.rows_for(src, [b], [c], [labs[i]], [pr], [smos[k][i]], [raws[k][i]], [gru[i]],
                                             int(dec[1]), i0=i, v2=True, extra=[extra])
             del c
@@ -424,7 +426,9 @@ def main():
             build_m(variant)
         elif variant in ("C1abETm50", "C1abETma"):
             build_m(variant, w=0.5 if variant == "C1abETm50" else 0.25, avg=variant == "C1abETma")
-        elif variant in ("C1abETmS", "C1abETm50S", "C1abETmaS"):
+        elif variant == "C2abETm":
+            build_m(variant, variant="C2")
+        elif variant in ("C1abETmS", "C1abETm50S", "C1abETmaS", "C2abETmS"):
             relabel_sc(variant[:-1], variant)
         else:
             build(variant)

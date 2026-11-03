@@ -16,8 +16,9 @@ Variant C1 (round 24) learns the target convention instead: PFF's labels under t
 reading (gradient.controlled_reading, the rule behind Metrica ctrl / DFL evctrl), plus a separate per-team touch head
 from PFF's on-the-ball events, so that touching the ball and gaining control are learnt apart (9 outputs).
 
-  python -I src/short_specialist.py prep-pff OUT [WORKERS] [CONV]    Colab: degraded PFF halves -> features + targets
-                                                                     (CONV pff for S1 / S2, ctrl for C1)
+  python -I src/short_specialist.py prep-pff OUT [WORKERS] [CONV]    degraded PFF halves -> features + targets
+                                                                     (CONV pff for S1 / S2, ctrl for C1,
+                                                                     ctrlmask for C2: round 32)
   python -I src/short_specialist.py train DATA VARIANT SEED OUT      GPU: one model (VARIANT S1 / S2)
   python -I src/short_specialist.py infer SRC VARIANT                local: outputs on bench halves, 3 seeds
 """
@@ -37,6 +38,7 @@ K = 5
 CORE, HALO = 50, 50
 WIN = CORE + 2 * HALO
 SIGMA = 3.0
+MASK_PAD = 6                    # round 32 (C2): frames around a masked spell without gain / lose target
 SEEDS = (20261102, 20261103, 20261104)
 MIX = (("change", 0.4), ("contest", 0.3), ("edge", 0.1), ("live", 0.2))      # training window centres
 N_BASE = 8 + 2 * 7 * K + 12
@@ -204,7 +206,7 @@ def _prep_one(job):
     done = []
     path, info = gradient.parse(match)                    # cached npz (src/gradient.py), parsed here when missing
     shifts = {p["period"]: p["applied_shift"] for p in info["periods"]}
-    rows = gradient.read_json(gradient.DATA / "events" / (match + ".json")) if conv == "ctrl" else None
+    rows = gradient.read_json(gradient.DATA / "events" / (match + ".json")) if conv in ("ctrl", "ctrlmask") else None
     with np.load(path) as d:
         pitch = tuple(float(v) for v in d["pitch"])
         for per in d["periods"]:
@@ -213,10 +215,14 @@ def _prep_one(job):
             if not ((lab == 0) | (lab == 1)).any():
                 continue
             touch = None
-            if conv == "ctrl":
+            unknown = None
+            if conv in ("ctrl", "ctrlmask"):
                 evs = gradient.team_events(rows, int(per), d[tag + "_time"], shifts[int(per)])
                 touch = touch_targets(evs, len(lab))
-                lab = gradient.controlled_reading(lab, evs)
+                lab_r = gradient.controlled_reading(lab, evs)
+                if conv == "ctrlmask":                 # round 32: PFF possessions the reading hands back are unknown
+                    unknown = (lab_r != lab) & (lab < 2)
+                lab = lab_r
             for var, params, base in (("v3", sim.V3, 30000), ("v4", sim.V4, 40000)):
                 key = "%s_%s_%s" % (match, tag, var)
                 if os.path.isfile(os.path.join(out, key + "_x.npy")):
@@ -229,6 +235,10 @@ def _prep_one(job):
                     if with_prior else None
                 x = features(P, B, d["team"], d["gk"], pitch, prior)
                 ctrl, ev = targets(lab)
+                if unknown is not None and unknown.any():
+                    ctrl[unknown] = -1
+                    near = np.convolve(unknown.astype(np.int8), np.ones(2 * MASK_PAD + 1, np.int8), "same") > 0
+                    ev[near] = np.nan                  # no gain / lose target around them (touch targets stay)
                 if touch is not None:
                     ev = np.concatenate([ev, touch], 1)
                 np.save(os.path.join(out, key + "_x.npy"), x.astype(np.float16))
@@ -358,7 +368,9 @@ def loss_fn(ctrl, ev, y, e, w):
     ok = y >= 0
     ce = F.cross_entropy(ctrl[ok], y[ok], reduction="none")
     lc = (ce * w[ok]).sum() / w[ok].sum().clamp(min=1)
-    le = (F.binary_cross_entropy_with_logits(ev, e, reduction="none") * (1 + 9 * e)).mean()
+    known = torch.isfinite(e)                          # round 32 (C2): NaN = no event target there
+    e = torch.nan_to_num(e)
+    le = ((F.binary_cross_entropy_with_logits(ev, e, reduction="none") * (1 + 9 * e))[known]).sum() / known.sum().clamp(min=1)
     return lc + le, lc, le
 
 

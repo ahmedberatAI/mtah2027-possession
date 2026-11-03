@@ -2385,6 +2385,21 @@ içi çok kısa possession'lar PFF'te seyrek: < 1 sn maç başına 0.1 / 0.7 / 0
 12.6. Yani C1 tam da aranan sıkışık kısa possession'ları az görmüş (maç başına 1–2 eksik; < 1 sn neredeyse hiç).
 Düzeltmesi C1'in yeniden eğitimi + doğrulayıcı zincirinin yeniden kurulumu (GPU ile ~1 gün); beklenen etki belirsiz
 (C1'in kazancı duyarlılıktan değil isabetten geldi).
+*Öbür ucuz testler (3 Kasım):* "keep" eşiği tek başına çözmüyor (PFF okuması keep 0.25: oyun içi < 1 / < 2 / < 4 sn
+0.2 / 1.7 / 10.6; keep 0: 2.0 / 11.2 / 30.0, 261 possession — patlıyor). v16'dan sonra kalan duruş / yeniden başlama
+tavanı (BAR-ATH benzeri ölü top, v15 karışımı, doğrulayıcı öncesi): DFL duruş +0.0067, yeniden başlama +0.0101, ikisi
++0.0165; Metrica +0.0073 / +0.0071 / +0.0138; SC +0.0187 / +0.0136 / +0.0307 → B4 #1'in (çizgiyi geçiş anı) ön şartı
+(birincilde duruş tavanı ≥ +0.010) tutmuyor, açılmadı.
+
+**Tur 32 — C1'i belirsiz kısa spell'leri maskeleyerek yeniden eğitmek: C2 (3 Kasım; ön kayıt, çalıştırmadan önce).**
+Teşhis yukarıda: C1'in etiketlerinde rakipler arasına sıkışmış çok kısa possession'lar hedef kurala göre seyrek, çünkü
+kontrollü okuma PFF'in kontrol kanıtı göstermeyen possession'larını önceki takıma geri veriyor ve C1 o anlarda
+bastırmayı öğreniyor. C2 = C1'in tarifi birebir (girdiler, mimari, PFF 64 maç V3 + V4 kopyası, 3 tohum, 12,000 adım,
+aynı doğrulama maçları); tek fark: okumanın geri verdiği kareler etiketsiz — kontrol kaybına girmez, o karelerin ±6
+karesinde kazanır / kaybeder hedefi yok; dokunuş hedefleri aynı (`short_specialist.py prep-pff … ctrlmask`). Eğitim
+yerel GPU'da (RTX 5090 boş). Sonra v15'in tarifi C2 ile: C2abETmS (ağırlık 0.25, θ 0.7 C1'inki, G1 + uzman + dokunuş
+özellikleri, DFL / SC satırları hedef kuralda), 3 v10 tohumu × doğrulayıcı tohumu 0 / 1. Karar v15'e (C1abETmS) karşı:
+birincil ≥ 0.005, korumalar ≥ −0.01; bilgi: SC evctrl, SoccerTrack. Geçerse v17 = v16'da C1 yerine C2.
 
 ## Ek A — İlk analiz, araştırma ve baseline'lar (20 Ekim)
 
