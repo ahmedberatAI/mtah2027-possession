@@ -1,9 +1,10 @@
 # Files of the public repository (tools/export_public.py). Source modules: the import closure of
-# src/make_submission.py with model_v14 = the v10 / shared BiGRU blend + the short-possession verifier (incl. lazily
-# imported option modules, the feature plugins named in model_v7.VERSION, src/reproduce_shared_bigru.py, which
-# rebuilds the shared BiGRU's BAR-ATH probabilities, and src/exp_bigru_lomo.py, whose held-out DFL probabilities the
-# blend verifier was trained with), the open-data download script, the team classifier, the verifier classifiers
-# (v13's and v14's) trained on open data, and the shared BiGRU checkpoints (open DFL + PFF data).
+# src/make_submission.py with model_v15 = the v10 / shared BiGRU blend mixed with the short-possession specialist C1 +
+# the short-possession verifier (incl. lazily imported option modules, the feature plugins named in model_v7.VERSION,
+# src/reproduce_shared_bigru.py, which rebuilds the shared BiGRU's BAR-ATH probabilities, and src/exp_bigru_lomo.py,
+# whose held-out DFL probabilities the blend verifiers were trained with), the open-data download script, the team
+# classifier, the verifier classifiers (v13's, v14's and v15's) trained on open data, the shared BiGRU checkpoints (open
+# DFL + PFF data) and the specialist C1's checkpoint (open PFF data only).
 src/atd.py
 src/ballclean.py
 src/bench.py
@@ -38,6 +39,7 @@ src/mlfeat.py
 src/model_v10.py
 src/model_v13.py
 src/model_v14.py
+src/model_v15.py
 src/model_v2.py
 src/model_v3.py
 src/model_v5.py
@@ -49,6 +51,7 @@ src/podead_barath.py
 src/proxy.py
 src/reproduce_shared_bigru.py
 src/seq_pff.py
+src/short_specialist.py
 src/short_verifier.py
 src/sim.py
 src/skillcorner.py
@@ -64,8 +67,13 @@ models/bigru_dfl_pff_v1/bigru_s20261025.pt
 models/bigru_dfl_pff_v1/bigru_s20261026.pt
 models/bigru_dfl_pff_v1/bigru_s20261027.pt
 models/bigru_dfl_pff_v1/manifest.json
+models/kpu_c1/README.md
+models/kpu_c1/kpu_C1_s20261102.json
+models/kpu_c1/kpu_C1_s20261102.pt
 models/short_verifier_del_g.txt
 models/short_verifier_del_g_blend50.txt
+models/short_verifier_del_c1m25s.txt
 models/short_verifier_ins_g.txt
 models/short_verifier_ins_g_blend50.txt
+models/short_verifier_ins_c1m25s.txt
 models/v10_team.txt

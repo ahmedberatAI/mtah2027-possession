@@ -35,6 +35,7 @@ import exp_short_angles as ea  # noqa: E402
 import exp_smooth  # noqa: E402
 import exp_verify as ev  # noqa: E402
 import short_specialist as ss  # noqa: E402
+from short_specialist import add_features, contest_mask, kpu_cands, pk, runs, touch_features  # noqa: E402,F401
 
 KPU = ["kpu_c", "kpu_cmax", "kpu_gin", "kpu_gout", "kpu_ctx"]
 TOUCH = ["kpu_tin", "kpu_tmean", "kpu_tout"]            # round 24b, C1's touch head
@@ -43,26 +44,6 @@ SRCS = [src for src, *_ in ev.SOURCES]
 
 def outputs(variant, src):
     return bench._load(os.path.join(ss.OUT, "%s_%s.pkl" % (variant, src.replace("@", "-"))))
-
-
-def pk(o, k):
-    """Live-normalised probability that team k controls the ball, per frame."""
-    o = np.asarray(o, np.float32)
-    return o[:, k] / np.maximum(o[:, 0] + o[:, 1], 1e-6)
-
-
-def add_features(rows, outs):
-    for r in rows:
-        o = np.asarray(outs[r["i"]], np.float32)
-        n, s, t, k = len(o), r["s"], r["t"], r["k"]
-        p = pk(o, k)
-        r["kpu_c"] = float(p[s:t].mean())
-        r["kpu_cmax"] = float(p[s:t].max())
-        r["kpu_gin"] = float(o[max(0, s - 12):min(n, s + 13), 3 + k].max())
-        r["kpu_gout"] = float(o[max(0, t - 12):min(n, t + 13), 5 + k].max())
-        ctx = np.r_[p[max(0, s - 50):s], p[t:min(n, t + 50)]]
-        r["kpu_ctx"] = float(ctx.mean()) if len(ctx) else 0.5
-    return rows
 
 
 def gate_a(variant):
@@ -93,12 +74,6 @@ def gate_a(variant):
     ok = np.mean(gains) >= 0.02 and min(gains) >= -0.01
     print("(a) mean gain %+.4f, worst cell %+.4f -> %s" % (np.mean(gains), min(gains), "PASS" if ok else "fail"))
     return ok
-
-
-def runs(mask, min_len):
-    st = np.flatnonzero(np.r_[mask[0], mask[1:] & ~mask[:-1]])
-    en = np.flatnonzero(np.r_[mask[:-1] & ~mask[1:], mask[-1]]) + 1
-    return [(a, b) for a, b in zip(st, en) if b - a >= min_len]
 
 
 def gate_b(variant):
@@ -156,28 +131,6 @@ THETAS = (0.6, 0.7, 0.8, 0.9)
 BUDGET = 25.0                                   # candidates per half, about v14's own (23)
 
 
-def contest_mask(b):
-    """Frames where both teams have a player within 3 m of the ball (the specialist's own representation)."""
-    x = ss.features(b["P"], b["B"], b["team"], b["gk"], b["pitch"])
-    c = 8 + 14 * ss.K
-    return (x[:, 0, c] > 0) & (x[:, 0, c + 1] > 0)
-
-
-def kpu_cands(o, pr, contest, theta, existing):
-    """Insert candidates of the specialist: runs >= 6 frames inside a decoded possession of team k where its live-
-    normalised control probability of the other team exceeds theta, touching a contested frame, not overlapping one of
-    v14's own insert candidates of that team (IoU >= 0.3)."""
-    out = []
-    for kk in (0, 1):
-        for s, t in runs((pr == kk) & (pk(o, 1 - kk) > theta), 6):
-            if not contest[s:t].any():
-                continue
-            if any(c == 1 - kk and min(t, e) - max(s, a) >= 0.3 * (max(t, e) - min(s, a)) for a, e, c in existing):
-                continue
-            out.append((s, t, 1 - kk))
-    return out
-
-
 def theta(variant):
     """Label-free choice (pre-registered): the smallest theta with <= BUDGET specialist candidates per half, v10 seed
     0, learned dead ball, the three sources together."""
@@ -222,16 +175,6 @@ def avg_outputs(variant, src):
     outs = outputs(variant, src)
     mean = [np.mean([np.asarray(outs[sd][i], np.float32) for sd in ss.SEEDS], axis=0) for i in range(len(outs[ss.SEEDS[0]]))]
     return {sd: mean for sd in ss.SEEDS}
-
-
-def touch_features(rows, outs):
-    for r in rows:
-        o = np.asarray(outs[r["i"]], np.float32)
-        n, s, t, kk = len(o), r["s"], r["t"], r["k"]
-        r["kpu_tin"] = float(o[max(0, s - 6):min(n, s + 7), 7 + kk].max())
-        r["kpu_tmean"] = float(o[s:t, 7 + kk].mean())
-        r["kpu_tout"] = float(o[max(0, t - 6):min(n, t + 7), 8 - kk].max())
-    return rows
 
 
 def evctrl_y(rows, src="dfl@v3"):

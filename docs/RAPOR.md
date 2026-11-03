@@ -15,18 +15,20 @@ Veri politikası: yalnız toplu istatistik. Ham satır, kare bazlı çıktı, vi
 İçindekiler: 1. Özet · 2. Kalıcı kurallar ve tuzaklar · 3. Deneme günlüğü · 4. Fikir havuzu ve tur kayıtları ·
 Ek A İlk analiz ve baseline'lar · Ek B Metrica kalibrasyonu · Ek C Simülatörde top kaybı · Ek D Hakem düdüğü
 
-## 1. Özet — şu anki durum (30 Ekim 2026)
+## 1. Özet — şu anki durum (2 Kasım 2026)
 
 **Görev.** BAR-ATH maçının 199,319 karesinin her birine H / A / D etiketi (X: cevap yok). Sıralama, tam maçın gizli
 etiketleri üzerinde spellF1 ile yapılıyor (possession spell'leri, IoU 0.3–0.7); eşitlikte macroF1. Son teslim 17 Kasım
 2026: CSV + dosyayı birebir yeniden üreten herkese açık repo (verisiz) + kısa teknik doküman. Teslimden önce geri bildirim
 yok; elimizdeki göstergeler public 5 dakika (17 spell) ve dış veri setleri.
 
-**Şu anki model: v14 = %50 v10 + %50 paylaşılan BiGRU olasılık karışımı + karışımın adaylarında eğitilmiş kısa
-possession doğrulayıcısı** (`src/model_v14.py`, tur 17 / 17b, 30 Ekim). **Gönderim: `submissions/candidate_v14.csv`**
-(MD5 5e7363fc…), `src/make_submission.py`'nin varsayılanı; iki çalıştırmada, doğrulayıcı sıfırdan eğitilince ve boş
-önbellekten temiz dışa aktarımda birebir aynı. v13 `--model model_v13` (MD5 ed8ad739…) ve v10 `--model model_v10`
-(MD5 ca20c5b6…) ile aynen üretiliyor. Düdüklü sürüm (`candidate_v10w.csv`, `--params '{"wh_bonus": 30}'`) önerilmiyor:
+**Şu anki model: v15 = v14'ün karışımı (%50 v10 + %50 paylaşılan BiGRU) ile kısa possession uzmanı C1'in
+kontrol olasılığı (%75 / %25) + bu tabanda, hedef kurallı etiketlerle eğitilmiş kısa possession doğrulayıcısı**
+(`src/model_v15.py`, tur 23–25, 2 Kasım). **Gönderim: `submissions/candidate_v15.csv`** (MD5 6081216b…),
+`src/make_submission.py`'nin varsayılanı; iki çalıştırmada, doğrulayıcı sıfırdan eğitilince (dosyalar bayt bayt aynı),
+uzmanın BAR-ATH çıktıları silinip yeniden hesaplanınca ve boş önbellekten temiz dışa aktarımda (77 dosya) birebir aynı;
+resmî doğrulayıcı "Valid". v14 `--model model_v14` (MD5 5e7363fc…), v13 `--model model_v13` (MD5 ed8ad739…) ve v10
+`--model model_v10` (MD5 ca20c5b6…) ile aynen üretiliyor. Düdüklü sürüm (`candidate_v10w.csv`, `--params '{"wh_bonus": 30}'`) önerilmiyor:
 tek dayanağı public pencereydi.
 1. **Ölü top mu, canlı mı:** v3 kuralları. Oyuncu temposu (±1 ve ±3 sn; hakeme tepki gecikmesi için 1.5 sn ileriye
    bakılıyor); top çizgi dışında mı, 1 sn'den uzun görünmüyor mu, duruyor mu, hızlı mı; hizalanmış yayın görüntüsünden
@@ -36,7 +38,8 @@ tek dayanağı public pencereydi.
    takibine benzetiliyor. Özellikler: topa yakınlık, baskı altında kontrol (C6), kendi yarı saha, duran top dizilimi /
    takım şekli / hareketi (c145), topsuz takım etkileşimleri (`src/bfree.py`). Oyuncu kimliği yok, hepsi takım düzeyinde.
    v14'te bu olasılık paylaşılan BiGRU'nun (Alperen; açık DFL + PFF, `models/bigru_dfl_pff_v1`, üç tohumun ortalaması)
-   olasılığıyla eşit ağırlıkta karıştırılıyor (tur 17b). Olasılıklar ±1 sn (±25 kare) logit ortalamasıyla yumuşatılıyor.
+   olasılığıyla eşit ağırlıkta karıştırılıyor (tur 17b). v15'te bu karışım %75, kısa possession uzmanı C1'in kontrol
+   olasılığı %25 ağırlıkla birleşiyor (madde 6). Olasılıklar ±1 sn (±25 kare) logit ortalamasıyla yumuşatılıyor.
 3. **Decoder:** her devre için ayrı Viterbi. Takım değişimi cezası 12, ölü top cezası 30; en az 8 kare possession, 50 kare
    ölü top; 7 sn'den kısa bir possession'ı bitirmeye süre kısaldıkça artan ek maliyet (B2: 175 kare, 48).
 4. **Düdük (yalnız v10w):** taktik videonun sesinde, iki santra düdüğünden yapılan şablonla hakem düdüğü aranıyor. Model
@@ -49,25 +52,42 @@ tek dayanağı public pencereydi.
    farklı oyuncular ve en uzun tutma, çekişme, derinlik, takım merkezlerinin tepkisi, son duruştan beri süre, komşu
    possession süreleri, takım olasılığının (v14'te karışımın) marjları ve paylaşılan BiGRU'nun marjı. Ekleme p ≥ 0.65; silme p < 0.35 (kareler komşu
    possession'ı tutan takıma geçer, iki duruş arasında hiç). v14'te BAR-ATH'ta karelerin %0.17'si, 6 bölge
-   değişiyor (karışımın çözümü 211 → 216 possession; v13'te %0.19, 203 → 214).
+   değişiyor (karışımın çözümü 211 → 216 possession; v13'te %0.19, 203 → 214). v15'te uzman da adaylara ve
+   özelliklere katılıyor (madde 6), DFL ve SC satırları hedef kuralla etiketli (`models/short_verifier_*_c1m25s.txt`).
+6. **Kısa possession uzmanı C1 (v15; tur 23–25, `src/short_specialist.py`, `models/kpu_c1/`):** topun çevresine bakan
+   takip modeli (top durumu + her takımdan topa en yakın 5 oyuncu, 25 fps; ortak MLP + çift yönlü GRU), yalnız açık
+   PFF'in 64 maçında, PFF'in insan etiketli olaylarının resmî "kontrollü possession" okumasıyla
+   (`gradient.controlled_reading`) eğitildi; DFL / Metrica / SC / BAR-ATH'ı hiç görmedi. Çıktıları takım başına kontrol,
+   kontrolü alma / kaybetme ve ayrı bir dokunuş başlığı. Kullanım: (a) canlı-normalize kontrol olasılığı takım
+   olasılığına %25 (yumuşatma ve decoder'dan önce); (b) doğrulayıcıya 8 özellik; (c) çekişmeli anlarda kendi ekleme
+   adayları (θ 0.7). Doğrulayıcının eğitim etiketleri her kaynakta hedef kuralda: Metrica ctrl, DFL evctrl, SC evctrl
+   (`skillcorner.evctrl_labels`). BAR-ATH'ta tek uzman tohumu (20261102): gönderim, değerlendirilen yapılandırmalardan
+   biri birebir. BAR-ATH'ta (etiketsiz) uzman v14'ün takım kararıyla %94.3 uyumlu (dış setlerde %91.4–95.5); v15 v14'ten
+   karelerin %0.92'sinde farklı (158 bölge, medyan 0.1 sn), 216 → 207 possession, < 4 sn 19 → 13.
 
 Kapalı seçenekler: v11 (dokunuş özellikleri), v12 (dokunuşa göre geçiş kolaylığı), `po_lam` (yalnız oyunculara dayalı
 ölü top), `clean_ball` (ATD'nin tahminle doldurduğu top karelerini atmak).
 
 **Skorlar — dış setler** (spellF1, öğrenilmiş D / gerçek D; her maç eğitimden dışarıda; v10 = 3 LightGBM tohumunun
-ortalaması; v13 / v14 = aynı üç tohum, her maçı görmemiş doğrulayıcı (tur 17'de 2 doğrulayıcı tohumu); v14'ün BiGRU'su
-DFL'de maç-dışı; `cache/bench/vers_table.log`, `reports/short15/`, tur 17; sürümlerin tamamı §4'te "Sürümlerin mutlak
-skorları"). "v13, BAR-ATH koşulu": doğrulayıcısı DFL'de de, BAR-ATH'taki gibi, maçı görmemiş bir BiGRU'nun marjını
-görüyor (tur 17b). v13 ve 6 karışım varyantı içinde 10 bağlamda en kötü durum pişmanlığı v13 0.0165 → **v14 0.0039**
-(tur 15'te v10 0.019 → v13 0.004):
+ortalaması; v13 / v14 / v15 = aynı üç tohum × 2 doğrulayıcı tohumu, her maçı görmemiş doğrulayıcı; BiGRU DFL'de
+maç-dışı; v15'te her v10 tohumu bir uzman tohumuyla eşli; tur 17 ve 25, `src/exp_kpu.py eval`). 2 Kasım'dan beri karar
+kuralı (§2, kullanıcı kararı): hedef kuralın bağlamlarında (Metrica ctrl, DFL evctrl; öğrenilmiş / gerçek D) en kötü
+durum pişmanlığı ≥ 0.005 düşmeli, korumalar (DFL-trk, SC faz / pp) −0.01'den kötü olmamalı. v15 birincil bağlamlarda
+pişmanlığı v14'e göre **0.0126** düşürüyor (%90 [+0.0048, +0.0238], P(≥ 0.005) 0.95); en kötü koruma SC pp −0.001.
+(Eski kuralla, 10 bağlamda: v13 0.0165 → v14 0.0039.)
 
-| Set | v10 | v13 (tur 15 ölçümü) | v13 (BAR-ATH koşulu) | **v14** | v14 − v13 (BAR-ATH koşulu) |
+| Set | v10 | v13 (BAR-ATH koşulu) | v14 | **v15** | v15 − v14 |
 |---|---|---|---|---|---|
-| DFL-trk (7 maç) | 0.769 / 0.798 | 0.774 / 0.803 | 0.764 / 0.792 | 0.770 / 0.794 | +0.006 / +0.002 |
-| DFL-evctrl (7 maç, tur 12) | 0.782 / 0.808 | 0.783 / 0.810 | 0.777 / 0.803 | 0.785 / 0.809 | +0.008 / +0.005 |
-| Metrica-ctrl (3 maç) | 0.823 / 0.882 | 0.823 / 0.882 | 0.823 / 0.882 | **0.828 / 0.888** | +0.005 / +0.006 |
-| SkillCorner faz (20 maç) | 0.597 / 0.759 | 0.608 / 0.769 | 0.608 / 0.770 | **0.620 / 0.780** | +0.012 / +0.010 |
-| SkillCorner oyuncu possession | 0.592 / 0.748 | 0.606 / 0.762 | 0.606 / 0.763 | **0.620 / 0.773** | +0.014 / +0.011 |
+| DFL-evctrl (7 maç, hedef kural) | 0.782 / 0.808 | 0.777 / 0.803 | 0.785 / 0.809 | **0.796 / 0.821** | +0.011 / +0.013 |
+| Metrica-ctrl (3 maç, hedef kural) | 0.823 / 0.882 | 0.823 / 0.882 | 0.828 / 0.888 | **0.836 / 0.894** | +0.009 / +0.006 |
+| DFL-trk (7 maç) | 0.769 / 0.798 | 0.764 / 0.792 | 0.770 / 0.794 | **0.784 / 0.809** | +0.015 / +0.015 |
+| SkillCorner faz (20 maç) | 0.597 / 0.759 | 0.608 / 0.770 | 0.620 / 0.780 | **0.625 / 0.785** | +0.005 / +0.006 |
+| SkillCorner oyuncu possession | 0.592 / 0.748 | 0.606 / 0.763 | 0.620 / 0.773 | 0.619 / 0.773 | −0.001 / −0.001 |
+| SkillCorner evctrl (bilgi; hedef kural, tur 25) | — | — | 0.657 / 0.823 | **0.670 / 0.838** | +0.013 / +0.016 |
+
+Süreye göre (tur 25 dökümü; hedef kural, öğrenilmiş D): v15'in kazancı yanlış kısa ve orta spell'lerin azalmasından.
+Tahmin edilen < 4 sn spell'lerin isabeti DFL 0.56 → 0.62, Metrica 0.59 → 0.62, SC 0.36 → 0.40; gerçek kısa
+possession'ların yakalanması değişmedi (0.51 → 0.49, 0.45 → 0.46, 0.28 → 0.28); < 2 sn olanların ~%75'i kaçıyor.
 
 Öğrenilmiş D: ölü topu model kendisi buluyor (dış setlerde yayın yok, öğrenilmiş ölü top modeli kullanılıyor). Gerçek D:
 ölü top doğru veriliyor, yalnız takım kararı ölçülüyor. BAR-ATH'a en yakın set Metrica: aynı sağlayıcı, aynı possession mantığı.
@@ -88,7 +108,8 @@ kısa top kayıpları). Tam maçta 203 possession, 118 ölü top bölümü, %49 
 v13 public penceredeki hiçbir kareyi değiştirmiyor; hat kontrolü v10'unkiyle aynı. v13 tam maçta 214 possession
 (canlı dakika başına 4.00; v10 3.79), 4 sn altı pay %13 (v10 %8). v14 tam maçta 216 possession (karışımın çözümü 211),
 118 ölü top bölümü, %49.6 ölü pay, ev sahibi payı 0.61; v13'ten karelerin %0.76'sı farklı. v14'ün public skoruna karar
-sürecinde bakılmadı; dosya resmî doğrulayıcıdan geçiyor.
+sürecinde bakılmadı; dosya resmî doğrulayıcıdan geçiyor. v15 tam maçta 207 possession (< 4 sn 13; v14 19), 118 ölü top
+bölümü, %49.9 ölü pay, ev sahibi payı 0.61; v14'ten karelerin %0.92'si farklı. v15'in public skoruna bakılmadı.
 
 
 **27 Ekim, tur 13:** yerel çalışma GitHub'daki iki ortak commit ile birleştirildi; v10 MD5'si ve paylaşılan BiGRU
@@ -113,6 +134,15 @@ DFL skoru marjsız bir v13'ü ölçmüş. Tur 13'ün önceden sabitlenmiş ızga
 v13'ün önünde; en kötü pişmanlık 0.0165 → 0.0039 (bootstrap P(fark ≥ 0.005) 0.94). Varsayılan **v14** oldu. Ayrıntı:
 §4 Tur 17.
 
+**2 Kasım, tur 22–25:** kullanıcı kısa possession'lara özel, yalnız orada devreye giren bir yetenek istedi. Hazır video
+modeli (T-DEED) BAR-ATH yayınında müdahale / bloğu görmedi (❌, tur 22). PFF'in insan etiketli dokunuşlarıyla eğitilmiş,
+topun çevresine bakan uzman (tur 23) doğrulayıcının AUC'sini her sette artırdı ama spellF1'e az döndü. Kök neden etiket
+kuralıydı: kaynaklar maç başına 12–135 oyun içi kısa possession sayıyor, resmî tanım kontrollü possession (Metrica ctrl,
+DFL evctrl). PFF ve SC etiketleri aynı okumaya çekildi, uzman bu kuralla yeniden eğitildi (C1, tur 24), karar kuralı
+kullanıcıyla hedef kurala göre sonuçlardan önce yeniden yazıldı. C1'in kontrol olasılığı takım olasılığına %25 katılınca
+(24c) ve SC satırları da hedef kurala çekilince (25) birincil pişmanlık 0.0126 düştü → varsayılan **v15**. Ayrıntı: §4
+Tur 22–25.
+
 **Model zinciri** (ayrıntı §3'teki "Modeller" tablosunda):
 - v1–v4 (20 Ekim): kurallar + en kısa süreli Viterbi. v3'ün canlı/ölü kuralları bugün de kullanılıyor.
 - v5: DFL'de öğrenilmiş takım olasılıkları. v6: hakem düdüğü.
@@ -120,7 +150,9 @@ v13'ün önünde; en kötü pişmanlık 0.0165 → 0.0039 (bootstrap P(fark ≥ 
 - v8: Metrica maçları eğitime. v9: topsuz özellikler + ±1 sn yumuşatma.
 - v10 (23 Ekim): Metrica ağırlığı 2 (25–30 Ekim arası gönderim). v11 / v12: dokunuş seçenekleri, v10'a eşit (≈).
 - v13 (30 Ekim): v10 + kısa possession doğrulayıcısı (tur 15–17 arası gönderim).
-- **v14 (30 Ekim): %50 v10 + %50 BiGRU karışımı + karışımın doğrulayıcısı — varsayılan.**
+- v14 (30 Ekim): %50 v10 + %50 BiGRU karışımı + karışımın doğrulayıcısı (30 Ekim–2 Kasım arası gönderim).
+- **v15 (2 Kasım): v14 + kısa possession uzmanı C1 (%25 karışım, doğrulayıcıya özellik ve aday) + hedef kurallı
+  doğrulayıcı etiketleri — varsayılan.**
 
 **Neler işe yaradı** (dış setlerde; ayrıntılar §3–§4):
 - Simülatör hatasının bulunması: `sim.V2`'nin her kareye bağımsız gürültüsü hızları ikiye katlıyordu (adversarial
@@ -140,6 +172,11 @@ v13'ün önünde; en kötü pişmanlık 0.0165 → 0.0039 (bootstrap P(fark ≥ 
 - **BiGRU karışımı (v14, tur 17b):** %50 LightGBM + %50 paylaşılan BiGRU ve karışımın kendi adaylarında eğitilmiş
   doğrulayıcı: BAR-ATH koşulundaki v13'e göre SC +0.010…+0.014, Metrica +0.005…+0.006, DFL +0.002…+0.008; en kötü
   pişmanlık 0.0165 → 0.0039.
+- **Etiket kuralını hizalamak (tur 24–25):** resmî tanımın (kontrollü possession) olay okumasını PFF'e ve SC'ye
+  uygulamak, doğrulayıcının DFL / SC satırlarını bu kuralla etiketlemek. SC hizalaması tek başına Metrica'yı +0.002 →
+  +0.009 taşıdı (3/3 oyun).
+- **Kısa possession uzmanı C1 (v15, tur 24c–25):** PFF'te hedef kuralla eğitilmiş top çevresi modelinin kontrol
+  olasılığını %25 karışıma katmak (DFL evctrl +0.004 → +0.011); v15 toplamda birincil pişmanlık −0.0126.
 
 **Neler işe yaramadı** (hepsi ≤ +0.003 ya da eksi):
 - Decoder hileleri: B1 / B4 / B5 / B6 / G1 / G2, el değişimi modeli, kısa possession doğrulama, yeniden başlama muafiyeti,
@@ -159,6 +196,9 @@ v13'ün önünde; en kötü pişmanlık 0.0165 → 0.0039 (bootstrap P(fark ≥ 
   "oyunu başlatan takım topa son dokunmamıştır" kuralıyla duruş öncesi kısa spell aramak (isabet %4–19).
 - Tur 17: %75 BiGRU karışımı (DFL maç-dışı ölçülünce karışım DFL-trk'de −0.014…−0.020; doğrulayıcıyla bile pişmanlık
   farkı < 0.005).
+- Tur 22–24: hazır video modeli (T-DEED, Team-BAS) müdahale / bloğu görmüyor; PFF'in kendi kuralıyla eğitilmiş S1 / S2
+  uzmanları ≈ +0.002; uzmanın değişim tepelerine sınır oturtma ve denetimli sınır regresyonu (korunan kısa spell'leri
+  bozuyor).
 
 **Dersler:**
 - Simülasyon içi CV simülasyon hatasını göremez; her yeni bozulma BAR-ATH'a karşı adversarial validation ile kontrol edilir.
@@ -179,6 +219,8 @@ v13'ün önünde; en kötü pişmanlık 0.0165 → 0.0039 (bootstrap P(fark ≥ 
 - Yeni bir ipucunun modelin emin olduğu karelerdeki uyumu, değerinin ölçüsü değildir (kamera kadrajı: AUC 0.95, ama
   birleştirme kaybettirdi). Değer, modelin belirsiz olduğu anlarda ve gerçek etiketle ölçülür; BAR-ATH'a özgü bir gözlem
   ancak aynı türden gözlemi taşıyan bir dış sette doğrulanabiliyorsa benimsenir.
+- Kaynakların possession kuralı en çok kısa possession'larda ayrışıyor (maç başına oyun içi kısa 12–135). Hedefle aynı
+  kuralda etiketlenmemiş veri kısa possession'larda yanlış şeyi öğretiyor: önce kural hizalanır, sonra model (tur 24–25).
 
 **BAR-ATH'ın kullanımı (24 Ekim denetimi):**
 - Takım modeli, eğitim verisi, özellikler, yumuşatma ve decoder dış setlerde seçildi.
@@ -212,7 +254,7 @@ v13'ün önünde; en kötü pişmanlık 0.0165 → 0.0039 (bootstrap P(fark ≥ 
 - Teslim için herkese açık repo gerekiyor (şu an özel; veri, cache ve submissions gitignore'lu). Repo açılmadan önce bu
   belge BAR-ATH sayıları açısından gözden geçirilmeli. Teknik dokümanda kaynaklar: Metrica Sports sample data,
   IDSSE / open DFL (CC BY 4.0), SkillCorner open data (MIT).
-- Tur 9–12 çalışması `541b79e` ile korundu; Alperen’in `a3b3070` / `39fd4de` commit’leri `de5d862` ile birleştirildi. Çalışma dalı `codex/rounds9-13-integration`; henüz push yapılmadı.
+- Tur 9–12 çalışması `541b79e` ile korundu; Alperen’in `a3b3070` / `39fd4de` commit’leri `de5d862` ile birleştirildi. Çalışma dalı `codex/rounds9-13-integration`; özel repoya push'lar kullanıcı onayıyla (son: 2 Kasım, v15).
 - **v13 ve herkese açık repo (tur 15):** v13 paylaşılan BiGRU ağırlıklarını (`models/bigru_dfl_pff_v1`) kullanıyor ve
   bunlar dışa aktarım listesinde. Ağırlıkların eğitiminde PFF / Gradient Dünya Kupası 2022 verisi var; kendi README'leri
   erişimin sağlayıcının koşullarıyla alındığını söylüyor. ~~Yayım izni teyit edilmeli~~ → kullanıcı 30 Ekim'de PFF
@@ -490,7 +532,10 @@ Public sütunu yalnız bilgi içindir (17 spell, aralık ~0.4); v7'den itibaren 
 | Denetimli sınır regresyonu (`src/exp_boundary.py`; tur 24, A1; ön kayıt: maç-dışı gerçek kısa adaylarda IoU ≥ 0.7 payı ≥ +5 puan, sonra spellF1; iki LightGBM, sınırların ±36 karesindeki logit profillerinden) | iç kapı geçti (ekleme adaylarında IoU ≥ 0.7: DFL 0.36–0.40 → 0.55–0.58, Metrica 0.35–0.37 → 0.59–0.70, SC 0.30–0.32 → 0.47–0.48); uygulanan adaylarda spellF1 DFL −0.004, Metrica −0.0015, SC −0.002…+0.0003; zarar korunan kısa spell'lerden, yalnız eklemelere uygulamak +0.0001…+0.0006 | ❌ darboğaz eklemelerin sayısı / isabeti |
 | Kontrolü öğrenen uzman C1 (`src/gradient.py` controlled_reading, `src/short_specialist.py` conv ctrl, `src/exp_kpu.py`; tur 24: PFF etiketleri hedef kurala hizalandı, 217 possession / %21 kısa / 10.0 oyun içi kısa; ayrı dokunuş başlığı; 3 tohum, Colab ~0.8 birim) | Kapı 1 (a) geçti: AUC 6 hücrede ortalama +0.036 (ekle Metrica 0.706 → 0.771); C1ab (özellikler + kendi adayları) 10 bağlamın hepsinde artı (DFL evctrl +0.001 / +0.002, Metrica +0.002 / +0.002, SC pp +0.006); birincil pişmanlık farkı +0.0022 (%90 [−0.0007, +0.0057]) | ≈ yeni kuralla eşik altında |
 | Doğrulayıcı etiketleri hedef kurala + dokunuş özellikleri (tur 24b; C1abE: DFL satırlarının y'si evctrl'den; C1abET: + C1'in dokunuş başlığından 3 özellik) | C1abE birincil +0.0021; C1abET birincil +0.0043 (%90 [−0.0003, +0.0094]), 10 bağlamın hepsinde artı (DFL evctrl +0.004, DFL-trk +0.005, Metrica +0.001…+0.002, SC +0.002…+0.004) | ≈ eşik altında; dokunuş başlığı belirgin katkı |
-| Tur 24c (ön kayıtlı): C1abETa (uzman / dokunuş özellikleri üç tohumun ortalamasından) ve C1abETm (C1'in canlı-normalize kontrol olasılığı v14'ün takım olasılığına %25 ağırlıkla, ±25 yumuşatma ve decoder'dan önce; çözümler, adaylar, özellikler ve DFL evctrl etiketleri bu tabanda yeniden) | C1abETa birincil +0.0051 (%90 [−0.0017, +0.0100]); **C1abETm birincil +0.0116** (%90 [−0.0011, +0.0220], P(≥ 0.005) 0.79): DFL evctrl +0.0105 / +0.0116 (5/7), DFL-trk +0.0091 / +0.0095 (gerçek D'de 7/7), Metrica +0.0022 / +0.0015 (yalnız 1/3 oyun artı; %90 [−0.006, +0.017] / [−0.009, +0.015]), SC faz +0.0091 / +0.0105, SC pp +0.0048 / +0.0050; korumaların en kötüsü +0.0048 | ✅ ikisi de kuralı geçti; ön kayıt gereği büyük olan C1abETm → v15 (kuruluyor; tamamlanana kadar gönderim v14) |
+| Tur 24c (ön kayıtlı): C1abETa (uzman / dokunuş özellikleri üç tohumun ortalamasından) ve C1abETm (C1'in canlı-normalize kontrol olasılığı v14'ün takım olasılığına %25 ağırlıkla, ±25 yumuşatma ve decoder'dan önce; çözümler, adaylar, özellikler ve DFL evctrl etiketleri bu tabanda yeniden) | C1abETa birincil +0.0051 (%90 [−0.0017, +0.0100]); **C1abETm birincil +0.0116** (%90 [−0.0011, +0.0220], P(≥ 0.005) 0.79): DFL evctrl +0.0105 / +0.0116 (5/7), DFL-trk +0.0091 / +0.0095 (gerçek D'de 7/7), Metrica +0.0022 / +0.0015 (yalnız 1/3 oyun artı; %90 [−0.006, +0.017] / [−0.009, +0.015]), SC faz +0.0091 / +0.0105, SC pp +0.0048 / +0.0050; korumaların en kötüsü +0.0048 | ✅ ikisi de kuralı geçti; ön kayıt gereği büyük olan C1abETm (tur 25'te SC hizalamasıyla v15'in tabanı) |
+| SC'yi hedef kurala hizalamak (tur 25, ön kayıtlı; `skillcorner.evctrl_labels` = `gradient.controlled_reading` SC'nin dinamik olaylarında, keep 0.5 sn, ayarlanmadı: 231 / %23.6 / 14.6; C1abETmS = C1abETm, yalnız SC satırlarının y'si SC evctrl'den) | C1abETm'e göre: Metrica +0.0065 / +0.0049 (öğr. D'de 3/3), DFL evctrl +0.0005 / +0.0010, DFL-trk +0.0056 / +0.0057, SC faz −0.0045 / −0.0049, SC pp −0.0058 / −0.0057; birincil +0.0065 (%90 [+0.0039, +0.0076]). v14'e göre birincil **+0.0126** (%90 [+0.0048, +0.0238], P(≥ 0.005) 0.95), en kötü koruma −0.0010; bilgi: SC evctrl +0.0132 / +0.0157 (19/20, 17/20) | ✅ → v15 |
+| v15 gönderimi (`src/model_v15.py`; karar anı yardımcıları `src/short_specialist.py`'de, `src/exp_kpu.py` aynılarını kullanıyor; `models/kpu_c1/`, `models/short_verifier_{ins,del}_c1m25s.txt`; v10 tohum 0, C1 tohum 20261102, doğrulayıcı tohum 0, tüm satırlarla) | MD5 6081216b…: iki çalıştırma, doğrulayıcının sıfırdan eğitimi (dosyalar bayt bayt aynı), `cache/v15` silinip yeniden hesaplama ve boş önbellekten temiz dışa aktarım (77 dosya, veri ve resmî repo yalnız bağlantıyla, ~1.5 dk) aynı; resmî doğrulayıcı "Valid"; v14 / v13 / v10 MD5'leri değişmedi; testler 74/74 (`tests/test_short_specialist.py` yeni). BAR-ATH (etiketsiz): 216 → 207 possession (< 4 sn 19 → 13), karelerin %0.92'si farklı (158 bölge, medyan 0.1 sn); uzman v14'le %94.3 uyumlu (dış setler %91.4–95.5) | ✅ varsayılan |
+| v14 ↔ v15 süre dökümü (teşhis; hedef kural, 3 × 2 tohum, resmî eşleştirme) | < 4 sn, öğrenilmiş D: tahmin isabeti DFL 0.56 → 0.62, Metrica 0.59 → 0.62, SC evctrl 0.36 → 0.40; gerçek kısa possession'ların yakalanması DFL 0.51 → 0.49, Metrica 0.45 → 0.46, SC 0.28 → 0.28; < 2 sn yakalama 0.10–0.27; maç başına tahmin edilen spell DFL 237.6 → 226.2 (gerçek 229.1) | bilgi: kazanç yanlış kısa / orta spell'lerin azalmasından; kaçırılan kısa possession'lar yerinde |
 
 ### Ekip arkadaşının GitHub kayıtları — 27 Ekim birleştirmesi
 
@@ -2096,13 +2141,34 @@ SC +0.0024…+0.0039 — 10 bağlamın hepsinde artı; eşiğin altında → v14
 tohumu tek uzman tohumuyla eşleşiyordu). C1abETm = C1'in canlı-normalize kontrol olasılığı v14'ün takım olasılığına
 %25 ağırlıkla katılır (±25 yumuşatma ve decoder'dan önce); çözümler, adaylar, özellikler ve DFL evctrl etiketleri bu
 tabanda yeniden kurulur. Aynı karar kuralı; ikisi de geçerse birincil iyileşmesi büyük olan.
-*Tur 24c sonucu (3 v10 tohumu × 2 doğrulayıcı tohumu, her v10 tohumu bir C1 tohumuyla):* C1abETa birincil +0.0051 (%90 [−0.0017, +0.0100], P(≥ 0.005) 0.42) → kuralı kıl payı geçiyor. **C1abETm birincil +0.0116** (%90 [−0.0011, +0.0220], P(≥ 0.005) 0.79): DFL evctrl +0.0105 / +0.0116, DFL-trk +0.0091 / +0.0095, SC faz +0.0091 / +0.0105, SC pp +0.0048 / +0.0050, Metrica +0.0022 / +0.0015; korumaların en kötüsü +0.0048. Ön kayıt gereği büyük olan seçildi: **C1abETm → v15**. C1abET ile farkı (+0.007) yalnız karışımdan: uzmanın kontrol olasılığı artık decoder'a giriyor, kısa el değişimlerinin bir kısmını decoder kendisi çözüyor (doğrulayıcının AUC'si bu tabanda Metrica eklemede 0.775; adaylar değiştiği için önceki turlarla doğrudan karşılaştırılamaz). Uyarı: Metrica'da 3 oyunun yalnız biri artı (ortalama artı, aralık geniş); BAR-ATH'a en yakın set olduğu için kayıtta tutuluyor. v15 değerlendirilen yapılandırmalardan biri birebir olacak: v10 tohum 0, C1 tohum 20261102, doğrulayıcı tohum 0 (tüm satırlarla eğitilmiş, v14 gibi).
+*Tur 24c sonucu (3 v10 tohumu × 2 doğrulayıcı tohumu, her v10 tohumu bir C1 tohumuyla):* C1abETa birincil +0.0051 (%90 [−0.0017, +0.0100], P(≥ 0.005) 0.42) → kuralı kıl payı geçiyor. **C1abETm birincil +0.0116** (%90 [−0.0011, +0.0220], P(≥ 0.005) 0.79): DFL evctrl +0.0105 / +0.0116, DFL-trk +0.0091 / +0.0095, SC faz +0.0091 / +0.0105, SC pp +0.0048 / +0.0050, Metrica +0.0022 / +0.0015; korumaların en kötüsü +0.0048. Ön kayıt gereği büyük olan seçildi: **C1abETm** (tur 25'te SC hizalamasıyla v15'in tabanı). C1abET ile farkı (+0.007) yalnız karışımdan: uzmanın kontrol olasılığı artık decoder'a giriyor, kısa el değişimlerinin bir kısmını decoder kendisi çözüyor (doğrulayıcının AUC'si bu tabanda Metrica eklemede 0.775; adaylar değiştiği için önceki turlarla doğrudan karşılaştırılamaz). Uyarı: Metrica'da 3 oyunun yalnız biri artı (ortalama artı, aralık geniş); BAR-ATH'a en yakın set olduğu için kayıtta tutuluyor. v15 değerlendirilen yapılandırmalardan biri birebir olacak: v10 tohum 0, C1 tohum 20261102, doğrulayıcı tohum 0 (tüm satırlarla eğitilmiş, v14 gibi).
 
 **Tur 25 — SkillCorner'ı da hedef kurala hizalamak (2 Kasım; ön kayıt, çalıştırmadan önce).** Doğrulayıcının eğitim satırlarının çoğu SC'den (20 / 30 maç) ve hâlâ faz kuralıyla etiketli: maç başına 26 oyun içi kısa possession (hedef 12–13). SC'nin açık dinamik olayları (oyuncu possession'larının başı / sonu, pas sonucu, şut) aynı kontrollü okumaya izin veriyor: `skillcorner.evctrl_labels` = `gradient.controlled_reading` (keep 0.5 sn, PFF'teki gibi, ayarlanmadı; başarılı pas = tamamlanmış pas) → maç başına 231 possession, %23.6 < 4 sn, 14.6 oyun içi kısa (takipten `trk_ctrl` ile SC ctrl 207 / %19.5 / 7.4, fazla katı; faz 255 / %29 / 26; pp 276 / %33 / 37). C1abETmS = C1abETm, yalnız SC satırlarının y'si SC evctrl'den (aynı y kuralı); başka hiçbir şey değişmez. Karar C1abETm'e karşı (yeni varsayılan aday), aynı kuralla (birincil ≥ 0.005, korumalar ≥ −0.01). Bilgi için, kararda değil: SC evctrl bağlamı (20 maç, öğrenilmiş / gerçek D; `KPU_INFO=evctrl`).
 
-**Bekleyen.** Duruş türü dilbilgisi (fikir 4: duruş türü ve bölgesi → doğrulayıcı özellikleri / ilk spell süresi)
-denenmedi. PFF'li doğrulayıcı (PFF adayları yalnız eğitimde; v10 PFF'i hiç görmedi, BiGRU için PFF'te K-katlı eğitim
-gerekir) maliyetli ve beklenen getirisi eşik altında.
+*Tur 25 sonucu:* C1abETmS, C1abETm'e karşı ön kayıtlı kuralı geçti: birincil +0.0065 (%90 [+0.0039, +0.0076],
+P(≥ 0.005) 0.84; Metrica +0.0065 / +0.0049, öğrenilmiş D'de 3/3 oyun), en kötü koruma SC pp −0.0058 (SC faz / pp hedeften
+2–2.5 kat çok kısa possession sayıyor; SC'nin hedef kurallı okumasında +0.0034 / +0.0047). v14'e göre: DFL evctrl
++0.0110 / +0.0126, Metrica +0.0087 / +0.0064, DFL-trk +0.0147 / +0.0152, SC faz +0.0046 / +0.0056, SC pp −0.0010 /
+−0.0007; birincil **+0.0126** (%90 [+0.0048, +0.0238], P(≥ 0.005) 0.95) → **v15 = C1abETmS**.
+*v15 (üretim):* `src/model_v15.py`. Uzmanın karar anı yardımcıları (`pk`, `runs`, `contest_mask`, `kpu_cands`,
+`add_features`, `touch_features`) `src/short_specialist.py`'ye taşındı, `src/exp_kpu.py` onları oradan alıyor (araştırma
+ve üretim aynı kod). BAR-ATH'ta tek uzman tohumu (20261102), doğrulayıcının satırları da o tohumla kurulmuş; v10 üretim
+modeli ve BiGRU'nun üç tohum ortalaması v14'teki gibi. Doğrulayıcı tüm satırlarla (v10 tohum 0, iki ölü top kanalı)
+deterministik LightGBM. Yeniden üretim ve BAR-ATH sayıları §3'te. Yeni testler `tests/test_short_specialist.py`:
+kontrollü okuma, SC olay eşlemesi, aday ve özellik kuralları, doğrulayıcı dosyalarının anahtar sayısı, uzman ağırlığı.
+*Süre dökümü (teşhis):* v15'in kazancı yanlış kısa ve orta spell'lerin azalmasından (öğrenilmiş D'de < 4 sn tahminlerin
+isabeti +0.03…+0.06; maç başına tahmin edilen spell DFL 237.6 → 226.2, gerçek 229.1); uzun spell'ler daha az bölünüyor.
+Gerçek kısa possession'ların yakalanması değişmedi (DFL 0.51 → 0.49, Metrica 0.45 → 0.46, SC 0.28 → 0.28); < 2 sn
+olanların ~%75'i kaçıyor. BAR-ATH'ta v15 yalnız 13 kısa possession üretiyor, dış setlerde maç başına 26–34; gerçekte
+42–55 var (etiketsiz gözlem: model BAR-ATH'ta daha tutucu olabilir).
+
+**Bekleyen (tur 26+).** (1) Kaçırılan kısa possession'lar: isabet yükseldiği için daha cesur ekleme (önceden kayıtlı eşik
+ızgarası) ya da kaçırılanlara özel aday üretimi. (2) BAR-ATH'ın neden daha az kısa possession ürettiği: takım
+olasılığının dönme sıklığı ve aday sayıları, bozulmuş dış setlerle etiketsiz karşılaştırma. (3) Duruş türü dilbilgisi
+(fikir 4) denenmedi. (4) PFF'li doğrulayıcı (BiGRU ve C1 için PFF'te K-katlı eğitim gerekir) maliyetli. (5) SoccerTrack
+v2 (10 üniversite maçı, sabit panoramik video, 21,428 takımlı top aksiyonu, CC BY 4.0, Hugging Face onaylı, 145 GB): top
+izi olaylardan doğrusal ara değerlemeyle kurulmuş, yani topa dayalı modellerimiz için etiket sızdırır; ancak takımlı
+olaylı tam saha videosu olarak NDA'sız tek kaynak (video ile dokunuş modeli için aday).
 
 ## Ek A — İlk analiz, araştırma ve baseline'lar (20 Ekim)
 

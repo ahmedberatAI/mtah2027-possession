@@ -25,11 +25,12 @@ Fikirler, denemeler ve sonuçlar tek bir belgede: **[`docs/RAPOR.md`](docs/RAPOR
 
 ## Submission
 
-- **The file:** `submissions/candidate_v14.csv` (model_v14 = an equal v10 / shared-BiGRU probability blend + the
-  short-possession verifier retrained on the blend, no whistle), MD5 `5e7363fc83c6f56a923033894a28d3a1`.
-  `python src/make_submission.py` regenerates it; `--model model_v13 --out submissions/candidate_v13.csv` still writes
-  v13 (MD5 `ed8ad739207f367017bb8d8c8204c82a`) and `--model model_v10 --out submissions/candidate_v10.csv` v10 (MD5
-  `ca20c5b657a395d2f7c0e310cdaabd64`).
+- **The file:** `submissions/candidate_v15.csv` (model_v15 = v14's v10 / shared-BiGRU blend mixed with the
+  short-possession specialist C1 + the short-possession verifier retrained on that base, no whistle), MD5
+  `6081216bcf484049d8e6e84b27fc85dd`. `python src/make_submission.py` regenerates it; `--model model_v14 --out
+  submissions/candidate_v14.csv` still writes v14 (MD5 `5e7363fc83c6f56a923033894a28d3a1`), `--model model_v13 --out
+  submissions/candidate_v13.csv` v13 (MD5 `ed8ad739207f367017bb8d8c8204c82a`) and `--model model_v10 --out
+  submissions/candidate_v10.csv` v10 (MD5 `ca20c5b657a395d2f7c0e310cdaabd64`).
 - **Model file:** the team classifier is trained on open data only and kept in `models/v10_team.txt`, so the default
   run needs only the provided data (about a minute). `MTAH_RETRAIN=1` retrains it from the open data (about 7 min)
   byte for byte.
@@ -71,12 +72,21 @@ uv pip install --python .venv/Scripts/python.exe numpy pandas scipy numba lightg
 git clone https://github.com/metrica-sports/more-than-a-hack-2027 external/more-than-a-hack-2027
 # unpack the match bundle into ./data (or set MTAH_DATA_DIR)
 .venv/Scripts/python.exe src/download_idsse.py            # open DFL data, CC BY 4.0, ~2.6 GB
-.venv/Scripts/python.exe src/make_submission.py           # the submission: model_v14 -> submissions/candidate_v14.csv
-python external/more-than-a-hack-2027/evaluation/validate_submission.py submissions/candidate_v14.csv
+.venv/Scripts/python.exe src/make_submission.py           # the submission: model_v15 -> submissions/candidate_v15.csv
+python external/more-than-a-hack-2027/evaluation/validate_submission.py submissions/candidate_v15.csv
 ```
 
-**The submission is `model_v14`: an equal blend of `model_v10`'s team probability and the shared BiGRU's, plus the
-short-possession verifier retrained on the blend's own decisions** (`submissions/candidate_v14.csv`, MD5
+**The submission is `model_v15`: v14's blend mixed with the short-possession specialist C1, plus the verifier
+retrained on that base** (`submissions/candidate_v15.csv`, MD5 `6081216bcf484049d8e6e84b27fc85dd`; rounds 23–25 in
+`docs/RAPOR.md`). C1 (`src/short_specialist.py`, `models/kpu_c1`) is a ball-centred tracking model trained only on open
+PFF data, with PFF's possessions in the challenge's controlled-possession reading; 0.25 of its control probability
+enters the team probability before smoothing and decoding, and its candidate / touch features and own insert candidates
+feed the verifier (`models/short_verifier_{ins,del}_c1m25s.txt`), whose DFL and SkillCorner rows are labelled in the same
+reading. On the target-convention contexts (Metrica ctrl, DFL evctrl) the worst-case regret falls by 0.0126 against v14
+(90% [+0.0048, +0.0238]); no guard context loses more than 0.001.
+
+The previous submission, **`model_v14`: an equal blend of `model_v10`'s team probability and the shared BiGRU's, plus
+the short-possession verifier retrained on the blend's own decisions** (`submissions/candidate_v14.csv`, MD5
 `5e7363fc83c6f56a923033894a28d3a1`; rounds 17 / 17b in `docs/RAPOR.md`). The BiGRU (`models/bigru_dfl_pff_v1`, open
 DFL + PFF data) runs on the CPU (`src/reproduce_shared_bigru.py`, needs torch). The verifier (`src/short_verifier.py`,
 `models/short_verifier_{ins,del}_g_blend50.txt`) re-examines the short decisions, the flips the decoder suppressed and

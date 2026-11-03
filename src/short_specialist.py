@@ -448,6 +448,70 @@ def predict(model, x, batch=64):
     return out
 
 
+# -- use at decision time (rounds 23-24c, src/exp_kpu.py; src/model_v15.py) -------------------------------------------
+
+def pk(o, k):
+    """Live-normalised probability that team k controls the ball, per frame."""
+    o = np.asarray(o, np.float32)
+    return o[:, k] / np.maximum(o[:, 0] + o[:, 1], 1e-6)
+
+
+def runs(mask, min_len):
+    st = np.flatnonzero(np.r_[mask[0], mask[1:] & ~mask[:-1]])
+    en = np.flatnonzero(np.r_[mask[:-1] & ~mask[1:], mask[-1]]) + 1
+    return [(a, b) for a, b in zip(st, en) if b - a >= min_len]
+
+
+def contest_mask(b):
+    """Frames where both teams have a player within 3 m of the ball (the specialist's own representation)."""
+    x = features(b["P"], b["B"], b["team"], b["gk"], b["pitch"])
+    c = 8 + 14 * K
+    return (x[:, 0, c] > 0) & (x[:, 0, c + 1] > 0)
+
+
+def kpu_cands(o, pr, contest, theta, existing):
+    """Insert candidates of the specialist: runs >= 6 frames inside a decoded possession of team k where its live-
+    normalised control probability of the other team exceeds theta, touching a contested frame, not overlapping one of
+    the blend's own insert candidates of that team (IoU >= 0.3)."""
+    out = []
+    for kk in (0, 1):
+        for s, t in runs((pr == kk) & (pk(o, 1 - kk) > theta), 6):
+            if not contest[s:t].any():
+                continue
+            if any(c == 1 - kk and min(t, e) - max(s, a) >= 0.3 * (max(t, e) - min(s, a)) for a, e, c in existing):
+                continue
+            out.append((s, t, 1 - kk))
+    return out
+
+
+def add_features(rows, outs):
+    """The specialist's five candidate features (round 23): mean / max control of the candidate team inside, its gain
+    peak at the start, its loss peak at the end, and its control in the +-2 s around."""
+    for r in rows:
+        o = np.asarray(outs[r["i"]], np.float32)
+        n, s, t, k = len(o), r["s"], r["t"], r["k"]
+        p = pk(o, k)
+        r["kpu_c"] = float(p[s:t].mean())
+        r["kpu_cmax"] = float(p[s:t].max())
+        r["kpu_gin"] = float(o[max(0, s - 12):min(n, s + 13), 3 + k].max())
+        r["kpu_gout"] = float(o[max(0, t - 12):min(n, t + 13), 5 + k].max())
+        ctx = np.r_[p[max(0, s - 50):s], p[t:min(n, t + 50)]]
+        r["kpu_ctx"] = float(ctx.mean()) if len(ctx) else 0.5
+    return rows
+
+
+def touch_features(rows, outs):
+    """C1's touch head (round 24b): the candidate team's peak touch at the start, its mean touch inside, the other
+    team's peak touch at the end."""
+    for r in rows:
+        o = np.asarray(outs[r["i"]], np.float32)
+        n, s, t, kk = len(o), r["s"], r["t"], r["k"]
+        r["kpu_tin"] = float(o[max(0, s - 6):min(n, s + 7), 7 + kk].max())
+        r["kpu_tmean"] = float(o[s:t, 7 + kk].mean())
+        r["kpu_tout"] = float(o[max(0, t - 6):min(n, t + 7), 8 - kk].max())
+    return rows
+
+
 def infer(src, variant):
     """Outputs of the three seeds' models on bench halves -> cache/kpu/<variant>_<src>.pkl {seed: [ (T, 7) per half ]}.
     S2's prior is v10's held-out probability of the paired v10 seed (es.v10_raw), BAR-ATH: v10's shipped model."""

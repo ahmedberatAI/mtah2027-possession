@@ -153,18 +153,24 @@ def evctrl_labels(match, keep_s=.5):
     out = []
     for per in (1, 2):
         lab = d["h%d_labels_pp" % per]
-        f0 = int(d["h%d_f0" % per][0])
-        evs = []
-        for r in ev[(ev["event_type"] == "player_possession") & (ev["period"] == per)].itertuples():
-            k = H if r.team_id == home else A
-            for fr, kind, oc in ((r.frame_start, "start", None),
-                                 (r.frame_end, {"pass": "PA", "shot": "SH"}.get(r.end_type, r.end_type),
-                                  "C" if r.pass_outcome == "successful" else None)):
-                f = int(round((fr - f0) * FPS / FPS_IN))
-                if 0 <= f < len(lab):
-                    evs.append((f, k, kind, oc))
-        out.append(gradient.controlled_reading(lab, evs, keep_s))
+        pp = ev[(ev["event_type"] == "player_possession") & (ev["period"] == per)]
+        out.append(gradient.controlled_reading(lab, pp_events(pp, home, int(d["h%d_f0" % per][0]), len(lab)), keep_s))
     return out
+
+
+def pp_events(pp, home, f0, n):
+    """(frame on the 25 fps grid, team, kind, outcome) of every player possession's start and end, in the vocabulary of
+    gradient.controlled_reading: a pass end is 'PA' (outcome 'C' when successful), a shot end 'SH'."""
+    evs = []
+    for r in pp.itertuples():
+        k = H if r.team_id == home else A
+        for fr, kind, oc in ((r.frame_start, "start", None),
+                             (r.frame_end, {"pass": "PA", "shot": "SH"}.get(r.end_type, r.end_type),
+                              "C" if r.pass_outcome == "successful" else None)):
+            f = int(round((fr - f0) * FPS / FPS_IN))
+            if 0 <= f < n:
+                evs.append((f, k, kind, oc))
+    return evs
 
 
 def _parse_job(m):
