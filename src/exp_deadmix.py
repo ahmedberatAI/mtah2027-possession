@@ -923,6 +923,29 @@ def pff_test():
     er.summarize(merged, list(names), ref="mix.5")
 
 
+def versions(src):
+    """v16, v17 and v18 side by side in BAR-ATH's condition, paired: same seeds, same transplant draws, the same evidence input (Metrica de-glued, for all three). v16 = C1 + rules + view + timing, v17 = J1 + rules + view + timing, v18 = J1 + rules + view + 0.5 x learned; all before the verifier. One source per process."""
+    convs = CONVS[src]
+    ev_src = "metrica@v3g" if src.startswith("metrica") else src
+    blocks = bench.blocks(ev_src)
+    labs = {c: [np.asarray(g) for g in bench.labels(src, c)] for c in convs}
+    base = bench.dead_probs(src, "base") if src.startswith("dfl") else bench.dead_ext("base", "v3", ev_src)
+    a_lrn = [exp_blend.logit_alive(x) for x in base]
+    smo16, smo17 = team(src, "G1"), team(src, "J1")
+    cells = {}
+    for draw in (DRAWS if not src.startswith("sc") else (0,)):
+        a_rb = rule_view(ev_src, blocks, labs[convs[0]], draw)
+        for k in es.SEEDS:
+            res = {"v16": [dt.retime(r, l) for r, l in zip(sd.decode_scores(a_rb, smo16[k]), sd.decode_scores(a_lrn, smo16[k]))],
+                   "v17": [dt.retime(r, l) for r, l in zip(sd.decode_scores(a_rb, smo17[k]), sd.decode_scores(a_lrn, smo17[k]))],
+                   "v18": sd.decode_scores(mix_evidence(a_rb, a_lrn), smo17[k])}
+            for name, preds in res.items():
+                for c in convs:
+                    cells.setdefault((src, c, TAG, name), []).append(er.by_match(blocks, labs[c], preds))
+        print("  draw %d done" % draw, flush=True)
+    er.summarize(cells, ["v16", "v17", "v18"], ref="v16")
+
+
 def stress2():
     """Round 41's bet: the rules go. What if the rules are better on the target than anything measured (kappa x the truth) or the multi-source model worse (slow noise sigma on its and the DFL model's log-odds)? Seed 0, draw 0, SkillCorner's first ten matches. Also the hedges rules + 1 / 2 x the model."""
     names = ("rules+DT", "mix.5", "DMSb+view", "r1", "r2")
@@ -1062,4 +1085,4 @@ if __name__ == "__main__":
     sys.stdout.reconfigure(encoding="utf-8")
     warnings.filterwarnings("ignore")
     {"eval": evaluate, "st": soccertrack, "v3g": deglued, "stress": stress, "dm": multi_source, "verifier": verifier, "shape": shape, "head": head, "oracle": oracle, "dm2": multi_source2, "qnorm": qnorm, "dm3": multi_source3, "dm4": multi_source4,
-     "stress2": stress2, "st2": soccertrack2, "head2": head2, "stress3": stress3, "eval2": evaluate2, "st4": soccertrack4, "pff": pff_test}[sys.argv[1]](*sys.argv[2:])
+     "stress2": stress2, "st2": soccertrack2, "head2": head2, "stress3": stress3, "eval2": evaluate2, "st4": soccertrack4, "pff": pff_test, "versions": versions}[sys.argv[1]](*sys.argv[2:])
