@@ -16,7 +16,7 @@ MODELS = ["models/v10_team.txt", "models/short_verifier_ins_g.txt", "models/shor
           "models/short_verifier_ins_g_blend50.txt", "models/short_verifier_del_g_blend50.txt",
           "models/short_verifier_ins_c1m25s.txt", "models/short_verifier_del_c1m25s.txt",
           "models/short_verifier_ins_j1m25s.txt", "models/short_verifier_del_j1m25s.txt", "models/dead_base_v3.txt",
-          "models/dead_multi_v1.txt"]
+          "models/dead_multi_v1.txt", "models/dead_multi_v2.txt"]
 
 
 class ModelFileTests(unittest.TestCase):

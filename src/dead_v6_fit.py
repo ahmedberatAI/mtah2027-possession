@@ -2,7 +2,7 @@
 
     python -I src/dead_v6_fit.py rules       models/dead_rules_open_v2.json: the thresholds and bounds of v1, the weights refitted on V6
     python -I src/dead_v6_fit.py multi       models/dead_multi_v2.txt: the multi-source LightGBM on V6
-    TD_V6=1 python -I src/exp_tdead.py train 20261104 (and 20261105, 20261106), then
+    TD_V6=1 TD_NORM=1 TD_OUT=tdead6n python -I src/exp_tdead.py train 20261104 (and 20261105, 20261106), then
     python -I src/dead_v6_fit.py td          models/tdead_v1/: the three all-data sequence models
 """
 import json
@@ -53,7 +53,7 @@ def multi():
 def td():
     os.makedirs(model_v20.TD_DIR, exist_ok=True)
     for seed in model_v20.TD_SEEDS:
-        shutil.copyfile(os.path.join(bench.CACHE, "tdead6", "all_%d.pt" % seed), os.path.join(model_v20.TD_DIR, "tdead_v6_s%d.pt" % seed))
+        shutil.copyfile(os.path.join(bench.CACHE, "tdead6n", "all_%d.pt" % seed), os.path.join(model_v20.TD_DIR, "tdead_v6n_s%d.pt" % seed))
     print("copied", model_v20.TD_DIR)
 
 

@@ -206,7 +206,44 @@ def dose():
         bw.decide(mean, "s.5", cand)
 
 
+def jmean():
+    """At weight 0.5 the specialist's seed matters more: J1 single seed against the mean of its three seeds, BiGRU single against its mean (BAR-ATH uses the mean), Metrica de-glued."""
+    names = ("s.5", "s.5 Jm", "s.5 Gm", "s.5 JmGm")
+    cells = {}
+    pool = ThreadPoolExecutor(WORKERS)
+    for src, convs in dm.CONVS.items():
+        fsrc = eg.G if src.startswith("metrica") else src
+        blocks = bench.blocks(fsrc)
+        labs = {c: [np.asarray(g) for g in bench.labels(src, c)] for c in convs}
+        a = ro.a25_evidence(src)
+        trip = [parts(src, k, True) for k in es.SEEDS]
+        for k in es.SEEDS:
+            v, g, o = trip[k]
+            sms = {n: [] for n in names}
+            for i in range(len(blocks)):
+                x, y = np.asarray(v[i], np.float64), np.asarray(g[i], np.float64)
+                sp = ss.pk(np.asarray(o[i], np.float32), 0).astype(np.float64)
+                sm = np.mean([ss.pk(np.asarray(t[2][i], np.float32), 0) for t in trip], axis=0).astype(np.float64)
+                gm = np.mean([np.asarray(t[1][i], np.float64) for t in trip], axis=0)
+                raw = {"s.5": 0.25 * x + 0.25 * y + 0.5 * sp, "s.5 Jm": 0.25 * x + 0.25 * y + 0.5 * sm, "s.5 Gm": 0.25 * x + 0.25 * gm + 0.5 * sp, "s.5 JmGm": 0.25 * x + 0.25 * gm + 0.5 * sm}
+                for n in names:
+                    sms[n].append(exp_smooth.smooth([raw[n]], 25)[0])
+            for name in names:
+                def one(i):
+                    return SPEC_PLAIN.decode(emis(a[i], sms[name][i])).astype(np.int8)
+                preds = list(pool.map(one, range(len(blocks))))
+                for c in convs:
+                    cells.setdefault((src, c, "v19 D", name), []).append(er.by_match(blocks, labs[c], preds))
+            print("  %s seed %d done" % (src, k), flush=True)
+        bench._blocks.clear()
+        bench._labels.clear()
+    mean, _ = er.summarize(cells, list(names), ref="s.5")
+    import exp_blend_weight as bw
+    for cand in names[1:]:
+        bw.decide(mean, "s.5", cand)
+
+
 if __name__ == "__main__":
     sys.stdout.reconfigure(encoding="utf-8")
     warnings.filterwarnings("ignore")
-    {"eval": evaluate, "dose": dose}[sys.argv[1]](*sys.argv[2:])
+    {"eval": evaluate, "dose": dose, "jmean": jmean}[sys.argv[1]](*sys.argv[2:])

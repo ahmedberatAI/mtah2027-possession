@@ -1,4 +1,4 @@
-"""v20 candidate (rounds 45, 46, 49, docs/RAPOR.md): the specialist's weight 0.5 and a sequence model in the dead-ball evidence, every dead-ball model trained on sim.V6's masks.
+"""v20 candidate (rounds 45, 46, 49, 51, 55, docs/RAPOR.md): the specialist's weight 0.5 and a sequence model in the dead-ball evidence, every dead-ball model trained on sim.V6's masks.
 
 Team: 0.5 x (0.5 v10 + 0.5 shared BiGRU) + 0.5 x J1, +-1 s smoothing. Round 45: with Metrica's ball de-glued for every channel J1's weight 0.5 passes the decision rule (0.35-0.65 is a plateau); the old 0.25 had been chosen with the glued ball.
 
@@ -8,7 +8,8 @@ Dead-ball evidence, the decoder's alive log-odds per frame:
 
   open-data rules   model_v19's form; thresholds and bounds from models/dead_rules_open_v1.json, weights refitted on V6 (models/dead_rules_open_v2.json)
   multi-source      as model_v19's, trained on V6 (models/dead_multi_v2.txt)
-  sequence model    src/exp_tdead.py: convolution + bidirectional GRU at 5 Hz on the same tracking features, auxiliary stop and restart heads, equal provider weight, trained on V6, mean of three seeds (models/tdead_v1/)
+  sequence model    src/exp_tdead.py: convolution + bidirectional GRU at 5 Hz on the same tracking features, each feature scaled by this half's own median and spread (so a match's absolute tempo does not move it),
+                    auxiliary stop and restart heads, equal provider weight, trained on V6, mean of three seeds (models/tdead_v1/)
   view terms        as model_v19's, both weights from SkillCorner's real flag on V6
 
 sim.V6 (round 49): V3 cut every dead-ball gap exactly at the restart; real tracking does not. V6 draws the ball around stops and restarts from the target's label-free, whole-match aggregate shares (no public window); see src/sim.py.
@@ -70,14 +71,16 @@ def ensure_td():
     torch.set_num_threads(4)
     nets = []
     for seed in TD_SEEDS:
-        ck = torch.load(os.path.join(TD_DIR, "tdead_v6_s%d.pt" % seed), map_location="cpu", weights_only=False)
+        ck = torch.load(os.path.join(TD_DIR, "tdead_v6n_s%d.pt" % seed), map_location="cpu", weights_only=False)
         net = td.Net(ck["n_in"]).to(td.DEVICE)
         net.load_state_dict(ck["state"])
         net.eval()
         nets.append((net, ck["mean"], ck["scale"]))
     bench._barath_inputs()
+    os.environ["TD_NORM"] = "1"
     out = {b["a"]: np.mean([td.score_half(n, m, s, f["XF"]) for n, m, s in nets], axis=0).astype(np.float32)
            for b, f in zip(bench.blocks("barath"), bench.features(model_v19.VERSION, "barath"))}
+    os.environ.pop("TD_NORM")
     os.makedirs(OUT, exist_ok=True)
     bench._dump(out, path)
     return out
