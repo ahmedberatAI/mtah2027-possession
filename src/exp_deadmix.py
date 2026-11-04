@@ -18,6 +18,15 @@ verifier. Three transplant draws. AGGREGATE output only.
   python -I src/exp_deadmix.py st          SoccerTrack v2 (not used to design the round)
   python -I src/exp_deadmix.py v3g         Metrica with the de-glued ball for the dead-ball evidence
   python -I src/exp_deadmix.py stress      how the mix fares if the rules are better / the learned model worse than measured
+  python -I src/exp_deadmix.py dm          the mix with a dead model trained on more sources (DM, DMS)
+  python -I src/exp_deadmix.py verifier    the verifier on the mix's decode (rows: src/exp_kpu.py build X1abETm, X1abETmS)
+  python -I src/exp_deadmix.py shape       screen around the 0.5 mix: bounds, view weights, bias, decoder penalties
+  python -I src/exp_deadmix.py head        the specialist's own dead head as evidence
+  python -I src/exp_deadmix.py oracle      where the rest of the true-dead gap of the mix lies (existence, timing)
+  python -I src/exp_deadmix.py dm2         how to use the multi-source models (alone, with the view flag, with the rules; LOPO)
+  python -I src/exp_deadmix.py qnorm       the team uncertainty out of the live / dead contest
+  python -I src/exp_deadmix.py dm3         provider-balanced training and decode profiles of the multi-source models
+  python -I src/exp_deadmix.py dm4         PFF added to the balanced multi-source dead model
 """
 import os
 import sys
@@ -45,6 +54,7 @@ DRAWS = (0, 1, 2)
 SEED = 20261104
 NAMES = ("rules", "rules+DT", "mix.25", "mix.5", "mix.5+DT", "learned")
 TAG = "BAR-like D"
+WEIGHT = 0.5
 _lib = {}
 
 
@@ -96,6 +106,10 @@ def rule_view(src, blocks, truth, draw):
         v, l = transplant(g, np.random.default_rng([SEED, draw, i]))
         out.append(a - P["w_binvalid"] * (~v) + P["w_blive"] * l)
     return out
+
+
+def mix_evidence(a_rb, a_lrn, w=WEIGHT):
+    return [a + w * b for a, b in zip(a_rb, a_lrn)]
 
 
 def team(src, variant="J1"):
@@ -219,7 +233,545 @@ def stress():
         bench._labels.clear()
 
 
+def _groups(blocks):
+    return [b["group"] for b in blocks]
+
+
+def dm_probs(name, src):
+    """P(dead) per half from a dead model on more sources, each half from models that never saw its match. DM: DFL +
+    Metrica (de-glued input, target-convention D). DMS: + SkillCorner. Cached in cache/bench/dead/."""
+    path = os.path.join(bench.CACHE, "dead", "%s_%s.pkl" % (name, src.replace("@", "-")))
+    if os.path.isfile(path):
+        return bench._load(path)
+    train = {"dfl@v3": (bench.features("base", "dfl@v3"), bench.labels("dfl", "native"), _groups(bench.blocks("dfl@v3"))),
+             "metrica@v3g": (bench.features("base", "metrica@v3g"), bench.labels("metrica@v3", "ctrl"), _groups(bench.blocks("metrica@v3g")))}
+    if name == "DMS":
+        train["sc@v3"] = (bench.features("base", "sc@v3"), bench.labels("sc@v3", "evctrl"), _groups(bench.blocks("sc@v3")))
+    fsrc = bench.features("base", src)
+    gr = _groups(bench.blocks(src))
+    un = sorted(set(gr), key=str)
+    folds = [un[i::5] for i in range(5)] if src.startswith("sc") else [[g] for g in un]
+    if src not in train and not (src == "metrica@v3" and "metrica@v3g" in train):
+        folds = [[]]
+    res = [None] * len(fsrc)
+    for fold in folds:
+        X, Y = [], []
+        for s, (fs, ls, gs) in train.items():
+            for x, y, g in zip(fs, ls, gs):
+                if g not in fold:
+                    X.append(x)
+                    Y.append(y)
+        model = bench.fit_dead(X, Y)
+        for i, (x, g) in enumerate(zip(fsrc, gr)):
+            if (not fold) or g in fold:
+                res[i] = model.predict(x["XF"], num_threads=bench.THREADS)
+        print("    %s %s fold %s done" % (name, src, fold), flush=True)
+    bench._dump(res, path)
+    return res
+
+
+def multi_source():
+    import exp_blend_weight as bw
+    names = ("mix.5", "mix.5 DM", "mix.5 DMS", "DM", "DMS", "learned")
+    cells = {}
+    for src, convs in CONVS.items():
+        ev_src = "metrica@v3g" if src.startswith("metrica") else src
+        blocks = bench.blocks(ev_src)
+        labs = {c: [np.asarray(g) for g in bench.labels(src, c)] for c in convs}
+        base = bench.dead_probs(src, "base") if src.startswith("dfl") else bench.dead_ext("base", "v3", ev_src)
+        a_lrn = {"": [exp_blend.logit_alive(x) for x in base]}
+        for nm in ("DM", "DMS"):
+            a_lrn[nm] = [exp_blend.logit_alive(x) for x in dm_probs(nm, ev_src)]
+        smos = team(src)
+        for draw in (DRAWS if not src.startswith("sc") else (0,)):
+            a_rb = rule_view(ev_src, blocks, labs[convs[0]], draw)
+            for k in es.SEEDS:
+                res = {"mix.5": sd.decode_scores([a + 0.5 * b for a, b in zip(a_rb, a_lrn[""])], smos[k]), "learned": sd.decode_scores(a_lrn[""], smos[k])}
+                for nm in ("DM", "DMS"):
+                    res["mix.5 " + nm] = sd.decode_scores([a + 0.5 * b for a, b in zip(a_rb, a_lrn[nm])], smos[k])
+                    res[nm] = sd.decode_scores(a_lrn[nm], smos[k])
+                for name, preds in res.items():
+                    for c in convs:
+                        cells.setdefault((src, c, TAG, name), []).append(er.by_match(blocks, labs[c], preds))
+            print("  %s draw %d done" % (src, draw), flush=True)
+        bench._blocks.clear()
+        bench._labels.clear()
+    mean, _ = er.summarize(cells, list(names), ref="mix.5")
+    for cand in ("mix.5 DM", "mix.5 DMS"):
+        bw.decide(mean, "mix.5", cand)
+
+
+def verifier(seeds=es.SEEDS, vseeds=(0, 1)):
+    """On the mix's decode (rows X1abETmS, transplant draw 0): no verifier; v17's (trained on the learned + true dead ball
+    rows of the other matches, J1abETmS); + the mix rows of the other matches; only the mix rows. Before and after the
+    boundary timing."""
+    import exp_rules_ctx as rc
+    shipped, mixed = "J1abETmS", "X1abETmS"
+    keys = exp_kpu.feats(shipped)
+    names = ("decoded", "shipped", "added", "mix only")
+    cells, acc = {}, {}
+    for seed in seeds:
+        ship = rc.rows_of(shipped, seed, ev.DEADS)
+        mix = rc.rows_of(mixed, seed, (ev.DEADS[0],))
+        test = [r for src in exp_kpu.SRCS for r in mix[(src, ev.DEADS[0])]["rows"]]
+        tr_ship = [r for v in ship.values() for r in v["rows"]]
+        for q in vseeds:
+            ps = {"shipped": rc.lomo(tr_ship, test, keys, q), "added": rc.lomo(tr_ship + test, test, keys, q), "mix only": rc.lomo(test, test, keys, q)}
+            n0 = 0
+            for src in exp_kpu.SRCS:
+                v = mix[(src, ev.DEADS[0])]
+                idx = np.arange(n0, n0 + len(v["rows"]))
+                n0 += len(v["rows"])
+                blocks = bench.blocks(src)
+                ref = sd.decode_scores(learned(src), team(src)[seed])
+                by = {}
+                for n, r in enumerate(v["rows"]):
+                    by.setdefault(r["i"], []).append(n)
+                labs = {c: [np.asarray(g) for g in bench.labels(src, c)] for c in CONVS[src]}
+                ins = np.array([r["typ"] == "ins" for r in v["rows"]])
+                for arm in names:
+                    if arm == "decoded":
+                        preds = [np.asarray(b) for b in v["base"]]
+                    else:
+                        pp = ps[arm][idx]
+                        preds = [ev.apply(v["base"][i], [v["rows"][n] for n in by.get(i, [])], pp[by.get(i, [])], True, True, 0.65, 0.35) for i in range(len(blocks))]
+                        acc.setdefault((src, arm), []).append(((pp[ins] >= 0.65).sum() / (len(blocks) / 2), (pp[~ins] < 0.35).sum() / (len(blocks) / 2), np.quantile(pp[ins], 0.9), np.quantile(pp[ins], 0.99)))
+                    for c in CONVS[src]:
+                        cells.setdefault((src, c, TAG, arm), []).append(er.by_match(blocks, labs[c], preds))
+                        cells.setdefault((src, c, TAG, arm + "+DT"), []).append(er.by_match(blocks, labs[c], [dt.retime(np.asarray(x), np.asarray(y)) for x, y in zip(preds, ref)]))
+                bench._blocks.clear()
+                bench._labels.clear()
+        print("  seed %d done" % seed, flush=True)
+    exp_kpu.use("v14")
+    all_names = [n for a in names for n in (a, a + "+DT")]
+    mean, _ = er.summarize(cells, all_names, ref="decoded")
+    print("\naccepted per match: inserts, deletes, insert p 90% / 99%")
+    for (src, arm), v in acc.items():
+        print("  %-8s %-9s %.1f %.1f %.2f %.2f" % ((src.split("@")[0], arm) + tuple(np.mean(v, axis=0))), flush=True)
+    import exp_blend_weight as bw
+    for cand in ("shipped", "added", "mix only", "decoded+DT", "shipped+DT"):
+        bw.decide(mean, "decoded", cand)
+
+
+def shape():
+    """Screen around the 0.5 mix (seed 0, draw 0): how the learned log-odds are bounded, stronger view weights (the flag's log-likelihood
+    ratio on SkillCorner: +1.2 valid, -2.5 invalid), a bias towards alive, decoder penalties for the new evidence scale."""
+    arms_def = {"mix.5": {}, "clip6": dict(clip=6.0), "clip4": dict(clip=4.0), "view llr": dict(view=True), "bias+.5": dict(bias=0.5), "bias+1": dict(bias=1.0), "bias-.5": dict(bias=-0.5),
+                "pen20": dict(pen_dead=20.0), "pen45": dict(pen_dead=45.0), "min25": dict(min_dead=25), "min75": dict(min_dead=75)}
+    cells = {}
+    for src, convs in CONVS.items():
+        blocks = bench.blocks(src)
+        labs = {c: [np.asarray(g) for g in bench.labels(src, c)] for c in convs}
+        a_lrn = learned(src)
+        smo = team(src)[es.SEEDS[0]]
+        a_rb = rule_view(src, blocks, labs[convs[0]], 0)
+        a_llr = None
+        if True:
+            a_rule = ds.rule_evidence(src, blocks)
+            if src.startswith("sc"):
+                a_llr = [a + (2.5 - P["w_binvalid"]) * (~v) * -1 + 1.2 * v - P["w_blive"] * (v & (n >= 4)) for a, (v, n) in zip(a_rule, sd.view_cues())]
+            else:
+                a_llr = []
+                for i, (a, g) in enumerate(zip(a_rule, labs[convs[0]])):
+                    v, l = transplant(g, np.random.default_rng([SEED, 0, i]))
+                    a_llr.append(a - 2.5 * (~v) + 1.2 * v)
+        for name, o in arms_def.items():
+            lrn = [np.clip(x, -o["clip"], o["clip"]) for x in a_lrn] if "clip" in o else a_lrn
+            base = a_llr if o.get("view") else a_rb
+            ev2 = [a + WEIGHT * b + o.get("bias", 0.0) for a, b in zip(base, lrn)]
+            preds = sd.decode_scores(ev2, smo, pen_dead=o.get("pen_dead", 30.0), min_dead=o.get("min_dead", 50))
+            for c in convs:
+                cells.setdefault((src, c, TAG, name), []).append(er.by_match(blocks, labs[c], preds))
+        print("  %s done" % src, flush=True)
+        bench._blocks.clear()
+        bench._labels.clear()
+    er.summarize(cells, list(arms_def), ref="mix.5")
+
+
+def head():
+    """The specialist's own dead head (J1, a sequence model: PFF + the ten games, held out by match) as evidence, alone and with the
+    LightGBM dead model. Seed-paired, transplant draw 0."""
+    import exp_blend_weight as bw
+    names = ("mix.5", "J1 alone", "mix.5 J1", "mix.5 mean", "mix.5 sum", "mix.75 mean")
+    cells = {}
+    for src, convs in CONVS.items():
+        blocks = bench.blocks(src)
+        labs = {c: [np.asarray(g) for g in bench.labels(src, c)] for c in convs}
+        a_lrn = learned(src)
+        smos = team(src)
+        outs = exp_kpu.outputs("J1", src)
+        a_rb = rule_view(src, blocks, labs[convs[0]], 0)
+        for k in es.SEEDS:
+            a_j = [dt.alive_logit(np.asarray(o, np.float64)[:, 2]) for o in outs[ss.SEEDS[k]]]
+            res = {"mix.5": mix_evidence(a_rb, a_lrn), "J1 alone": a_j, "mix.5 J1": mix_evidence(a_rb, a_j),
+                   "mix.5 mean": [r + 0.25 * x + 0.25 * y for r, x, y in zip(a_rb, a_lrn, a_j)],
+                   "mix.5 sum": [r + 0.5 * x + 0.5 * y for r, x, y in zip(a_rb, a_lrn, a_j)],
+                   "mix.75 mean": [r + 0.375 * x + 0.375 * y for r, x, y in zip(a_rb, a_lrn, a_j)]}
+            for name, ev2 in res.items():
+                preds = sd.decode_scores(ev2, smos[k])
+                for c in convs:
+                    cells.setdefault((src, c, TAG, name), []).append(er.by_match(blocks, labs[c], preds))
+            if k == es.SEEDS[0]:
+                truth = labs[convs[0]]
+                print("  %s: J1 alive logit q05/50/95 %s | dead F1 learned %.3f, J1 %.3f, mix.5 %.3f, mix.5 mean %.3f" % (
+                    src, np.round(np.quantile(np.concatenate(a_j), (.05, .5, .95)), 2), _dead_f1(sd.decode_scores(a_lrn, smos[k]), truth), _dead_f1(sd.decode_scores(a_j, smos[k]), truth),
+                    _dead_f1(sd.decode_scores(res["mix.5"], smos[k]), truth), _dead_f1(sd.decode_scores(res["mix.5 mean"], smos[k]), truth)), flush=True)
+        bench._blocks.clear()
+        bench._labels.clear()
+    mean, _ = er.summarize(cells, list(names), ref="mix.5")
+    for cand in names[1:]:
+        bw.decide(mean, "mix.5", cand)
+
+
+def _stretches(d):
+    return [(a, e) for a, e in segs(d) if d[a]]
+
+
+def oracle():
+    """Where is the rest of the true-dead gap of the mix? Seed 0, draw 0. existence: true dead stretches with no overlap get added, predicted ones with no overlap removed, the rest untouched; timing: overlapping
+    stretches take the true boundaries, none added or removed; stops / restarts: only those; both. Team probability re-decoded with the resulting dead mask as hard evidence, so the team side is the decoder's."""
+    for src, conv in (("dfl@v3", "evctrl"), ("metrica@v3", "ctrl"), ("sc@v3", "evctrl")):
+        blocks = bench.blocks(src)
+        truth = [np.asarray(g) for g in bench.labels(src, conv)]
+        a_lrn = learned(src)
+        smo = team(src)[es.SEEDS[0]]
+        a_rb = rule_view(src, blocks, truth, 0)
+        mix = sd.decode_scores(mix_evidence(a_rb, a_lrn), smo)
+        masks = {k: [] for k in ("existence", "timing", "stops", "restarts", "both")}
+        counts = np.zeros(4)
+        for pr, g in zip(mix, truth):
+            dp, dg = np.asarray(pr) == 2, g == 2
+            sp, sg = _stretches(dp), _stretches(dg)
+            ex = dp.copy()
+            for a, e in sp:
+                if not dg[a:e].any():
+                    ex[a:e] = False
+                    counts[0] += 1
+            for a, e in sg:
+                if not dp[a:e].any():
+                    ex[a:e] = True
+                    counts[1] += 1
+            masks["existence"].append(ex)
+            tm, st, re_ = dp.copy(), dp.copy(), dp.copy()
+            for a, e in sp:
+                ov = [(x, y) for x, y in sg if x < e and a < y]
+                if not ov:
+                    continue
+                x0, y1 = ov[0][0], ov[-1][1]
+                tm[a:e] = False
+                tm[x0:y1] = True
+                st[a:e] = False
+                st[x0:e] = True
+                re_[a:e] = False
+                re_[a:y1] = True
+                counts[2] += len(ov) > 1
+            masks["timing"].append(tm)
+            masks["stops"].append(st)
+            masks["restarts"].append(re_)
+            bo = tm.copy()
+            for a, e in sp:
+                if not dg[a:e].any():
+                    bo[a:e] = False
+            for a, e in sg:
+                if not dp[a:e].any():
+                    bo[a:e] = True
+            masks["both"].append(bo)
+        base = np.mean(list(er.by_match(blocks, truth, mix).values()))
+        tr = np.mean(list(er.by_match(blocks, truth, sd.decode_scores([np.where(g == 2, -12.0, 12.0) for g in truth], smo)).values()))
+        print("\n%s %s: mix %.4f, true dead %.4f | per match: predicted stretches with no true overlap %.1f, true with no predicted overlap %.1f, predicted overlapping several true %.1f" % (
+            src.split("@")[0], conv, base, tr, counts[0] / (len(truth) / 2), counts[1] / (len(truth) / 2), counts[2] / (len(truth) / 2)))
+        for k, ms2 in masks.items():
+            preds = sd.decode_scores([np.where(m, -12.0, 12.0) for m in ms2], smo)
+            print("  %-10s %+.4f" % (k, np.mean(list(er.by_match(blocks, truth, preds).values())) - base), flush=True)
+        bench._blocks.clear()
+        bench._labels.clear()
+
+
+def _base_of(src):
+    return src.split("@")[0]
+
+
+def lopo_probs(src):
+    """P(dead) per half from a dead model on the OTHER providers only: how a source never seen would fare. Trained on de-glued Metrica, DFL, SkillCorner minus the source itself."""
+    path = os.path.join(bench.CACHE, "dead", "LOPO_%s.pkl" % src.replace("@", "-"))
+    if os.path.isfile(path):
+        return bench._load(path)
+    train = {"dfl": (bench.features("base", "dfl@v3"), bench.labels("dfl", "native")),
+             "metrica": (bench.features("base", "metrica@v3g"), bench.labels("metrica@v3", "ctrl")),
+             "sc": (bench.features("base", "sc@v3"), bench.labels("sc@v3", "evctrl"))}
+    X, Y = [], []
+    for name, (fs, ls) in train.items():
+        if name != _base_of(src):
+            X += list(fs)
+            Y += list(ls)
+    model = bench.fit_dead(X, Y)
+    res = [model.predict(x["XF"], num_threads=bench.THREADS) for x in bench.features("base", src)]
+    bench._dump(res, path)
+    print("    LOPO %s done" % src, flush=True)
+    return res
+
+
+def view_only(src, blocks, truth, draw):
+    """The view flag's terms alone."""
+    a_rule = ds.rule_evidence(src, blocks)
+    a_rb = rule_view(src, blocks, truth, draw)
+    if src.startswith("sc"):
+        import model_v2
+        return [a - model_v2.aliveness(exp_blend.rule_f(b), P) for a, b in zip(a_rb, blocks)]
+    return [a - b for a, b in zip(a_rb, a_rule)]
+
+
+def multi_source2():
+    """How to use the multi-source models. M alone, M + view flag, rules + view + w x M, for M = DMS (all three providers, held out by match) and LOPO (the two other providers), against the 0.5 mix with the DFL model. Transplant draw 0, 3 seeds."""
+    import exp_blend_weight as bw
+    names = ["mix.5"]
+    for m in ("DMS", "LOPO"):
+        names += [m, m + "+view", m + " r.5", m + " r1", m + " r2"]
+    cells = {}
+    for src, convs in CONVS.items():
+        ev_src = "metrica@v3g" if src.startswith("metrica") else src
+        blocks = bench.blocks(ev_src)
+        labs = {c: [np.asarray(g) for g in bench.labels(src, c)] for c in convs}
+        base = bench.dead_probs(src, "base") if src.startswith("dfl") else bench.dead_ext("base", "v3", ev_src)
+        a_lrn = [exp_blend.logit_alive(x) for x in base]
+        models = {"DMS": [exp_blend.logit_alive(x) for x in dm_probs("DMS", ev_src)], "LOPO": [exp_blend.logit_alive(x) for x in lopo_probs(ev_src)]}
+        smos = team(src)
+        a_rb = rule_view(ev_src, blocks, labs[convs[0]], 0)
+        a_v = view_only(ev_src, blocks, labs[convs[0]], 0)
+        for m, al in models.items():
+            print("  %s %s alive logit q05/50/95 %s" % (src, m, np.round(np.quantile(np.concatenate(al), (.05, .5, .95)), 2)), flush=True)
+        for k in es.SEEDS:
+            res = {"mix.5": mix_evidence(a_rb, a_lrn)}
+            for m, al in models.items():
+                res[m] = al
+                res[m + "+view"] = [x + v for x, v in zip(al, a_v)]
+                for w, nm in ((0.5, " r.5"), (1.0, " r1"), (2.0, " r2")):
+                    res[m + nm] = mix_evidence(a_rb, al, w)
+            for name, ev2 in res.items():
+                preds = sd.decode_scores(ev2, smos[k])
+                for c in convs:
+                    cells.setdefault((src, c, TAG, name), []).append(er.by_match(blocks, labs[c], preds))
+            print("  %s seed %d done" % (src, k), flush=True)
+        bench._blocks.clear()
+        bench._labels.clear()
+    mean, _ = er.summarize(cells, names, ref="mix.5")
+    for cand in names[1:]:
+        bw.decide(mean, "mix.5", cand)
+
+
+def decode_norm(a_list, phl, c=1.0, pen_team=12.0, pen_dead=30.0, min_poss=8, min_dead=50):
+    """decode_scores with the team uncertainty taken out of the live / dead contest: a single path pays log max(q, 1 - q) per live frame, which a sum over the two teams would not (Viterbi's one-path bias towards D at contested moments). c = 1 removes it fully."""
+    import decode2
+    import exp_v7
+    sp = decode2.duration_spec(pen_team, pen_dead, min_poss, min_dead, exp_v7.ramp(175, 48.0))
+    out = []
+    for a, ph in zip(a_list, phl):
+        q = np.clip(ph, sd.EPS, 1 - sd.EPS)
+        n = -c * np.log(np.maximum(q, 1 - q))
+        out.append(sp.decode(np.stack([a / 2 + np.log(q) + n, a / 2 + np.log(1 - q) + n, -a / 2], 1)).astype(np.int8))
+    return out
+
+
+def qnorm():
+    import exp_blend_weight as bw
+    names = ("mix.5", "qnorm", "qnorm.5", "rules+DT", "rules qnorm+DT")
+    cells = {}
+    for src, convs in CONVS.items():
+        blocks = bench.blocks(src)
+        labs = {c: [np.asarray(g) for g in bench.labels(src, c)] for c in convs}
+        a_lrn = learned(src)
+        smos = team(src)
+        a_rb = rule_view(src, blocks, labs[convs[0]], 0)
+        ev2 = mix_evidence(a_rb, a_lrn)
+        for k in es.SEEDS:
+            ref = sd.decode_scores(a_lrn, smos[k])
+            res = {"mix.5": sd.decode_scores(ev2, smos[k]), "qnorm": decode_norm(ev2, smos[k]), "qnorm.5": decode_norm(ev2, smos[k], 0.5),
+                   "rules+DT": [dt.retime(r, l) for r, l in zip(sd.decode_scores(a_rb, smos[k]), ref)], "rules qnorm+DT": [dt.retime(r, l) for r, l in zip(decode_norm(a_rb, smos[k]), ref)]}
+            for name, preds in res.items():
+                for c in convs:
+                    cells.setdefault((src, c, TAG, name), []).append(er.by_match(blocks, labs[c], preds))
+            if k == es.SEEDS[0]:
+                truth = labs[convs[0]]
+                print("  %s: dead F1 mix.5 %.3f, qnorm %.3f; dead share %.3f, %.3f, true %.3f" % (src, _dead_f1(res["mix.5"], truth), _dead_f1(res["qnorm"], truth), np.mean(np.concatenate(res["mix.5"]) == 2), np.mean(np.concatenate(res["qnorm"]) == 2), np.mean(np.concatenate(truth) == 2)), flush=True)
+        bench._blocks.clear()
+        bench._labels.clear()
+    mean, _ = er.summarize(cells, list(names), ref="mix.5")
+    for cand in ("qnorm", "qnorm.5"):
+        bw.decide(mean, "mix.5", cand)
+
+
+SOURCES = {"dfl": ("dfl@v3", "dfl", "native"), "metrica": ("metrica@v3g", "metrica@v3", "ctrl"), "sc": ("sc@v3", "sc@v3", "evctrl")}
+
+
+def fit_balanced(parts):
+    """A dead model on several providers, each provider the same total weight: parts = {provider: (features, labels)} (bench.fit_dead's parameters)."""
+    import lightgbm as lgb
+    Xs, ys, ws = [], [], []
+    for fs, ls in parts.values():
+        x = np.concatenate([f["XF"][::bench.STRIDE] for f in fs])
+        y = np.concatenate([np.asarray(l)[::bench.STRIDE] for l in ls])
+        g = y < 3
+        Xs.append(x[g])
+        ys.append((y[g] == 2).astype(int))
+        ws.append(np.full(int(g.sum()), 1.0 / int(g.sum())))
+    w = np.concatenate(ws)
+    return lgb.train(bench.LGB_DEAD, lgb.Dataset(np.concatenate(Xs), np.concatenate(ys), weight=w * len(w) / w.sum()), bench.ROUNDS)
+
+
+def balanced_probs(name, src):
+    """DMSb: all three providers, equal weight, held out by match (SkillCorner by five folds). LOPOb: the two other providers, equal weight. Cached."""
+    path = os.path.join(bench.CACHE, "dead", "%s_%s.pkl" % (name, src.replace("@", "-")))
+    if os.path.isfile(path):
+        return bench._load(path)
+    train = {k: (bench.features("base", v[0]), bench.labels(v[1], v[2]), _groups(bench.blocks(v[0]))) for k, v in SOURCES.items()}
+    own = _base_of(src)
+    fsrc = bench.features("base", src)
+    gr = _groups(bench.blocks(src))
+    un = sorted(set(gr), key=str)
+    if name == "LOPOb" or own not in train:
+        folds = [[]]
+    else:
+        folds = [un[i::5] for i in range(5)] if own == "sc" else [[g] for g in un]
+    res = [None] * len(fsrc)
+    for fold in folds:
+        parts = {}
+        for k, (fs, ls, gs) in train.items():
+            if name == "LOPOb" and k == own:
+                continue
+            keep = [i for i, g in enumerate(gs) if g not in fold]
+            parts[k] = ([fs[i] for i in keep], [ls[i] for i in keep])
+        model = fit_balanced(parts)
+        for i, (x, g) in enumerate(zip(fsrc, gr)):
+            if (not fold) or g in fold:
+                res[i] = model.predict(x["XF"], num_threads=bench.THREADS)
+        print("    %s %s fold %s done" % (name, src, fold), flush=True)
+    bench._dump(res, path)
+    return res
+
+
+def multi_source3():
+    """Provider-balanced training, and the decode profile that goes with each: against the 0.5 mix, all with the view flag. Transplant draw 0, 3 seeds."""
+    import exp_blend_weight as bw
+    import metrica_sample as ms
+    names = ("mix.5", "DMS+view", "DMSb+view", "LOPO+view", "LOPOb+view")
+    cells = {}
+    for src, convs in CONVS.items():
+        ev_src = "metrica@v3g" if src.startswith("metrica") else src
+        blocks = bench.blocks(ev_src)
+        labs = {c: [np.asarray(g) for g in bench.labels(src, c)] for c in convs}
+        base = bench.dead_probs(src, "base") if src.startswith("dfl") else bench.dead_ext("base", "v3", ev_src)
+        a_lrn = [exp_blend.logit_alive(x) for x in base]
+        models = {"DMS": dm_probs("DMS", ev_src), "DMSb": balanced_probs("DMSb", ev_src), "LOPO": lopo_probs(ev_src), "LOPOb": balanced_probs("LOPOb", ev_src)}
+        models = {k: [exp_blend.logit_alive(x) for x in v] for k, v in models.items()}
+        smos = team(src)
+        truth = labs[convs[0]]
+        a_rb = rule_view(ev_src, blocks, truth, 0)
+        a_v = view_only(ev_src, blocks, truth, 0)
+        nm = len(truth) / 2
+        print("\n%s: true dead share %.3f, possessions / match %.1f (< 4 s %.1f)" % (src, np.mean(np.concatenate(truth) == 2), sum(len(ms.spells(g)) for g in truth) / nm, sum(sum(e - a < 100 for a, e, _ in ms.spells(g)) for g in truth) / nm), flush=True)
+        for k in es.SEEDS:
+            res = {"mix.5": sd.decode_scores(mix_evidence(a_rb, a_lrn), smos[k])}
+            for m, al in models.items():
+                res[m + "+view"] = sd.decode_scores([x + v for x, v in zip(al, a_v)], smos[k])
+            for name, preds in res.items():
+                for c in convs:
+                    cells.setdefault((src, c, TAG, name), []).append(er.by_match(blocks, labs[c], preds))
+                if k == es.SEEDS[0]:
+                    print("  %-11s dead share %.3f | possessions / match %.1f (< 4 s %.1f) | dead F1 %.3f" % (name, np.mean(np.concatenate(preds) == 2), sum(len(ms.spells(p)) for p in preds) / nm, sum(sum(e - a < 100 for a, e, _ in ms.spells(p)) for p in preds) / nm, _dead_f1(preds, truth)), flush=True)
+        bench._blocks.clear()
+        bench._labels.clear()
+    mean, _ = er.summarize(cells, list(names), ref="mix.5")
+    for cand in names[1:]:
+        bw.decide(mean, "mix.5", cand)
+    bw.decide(mean, "DMS+view", "DMSb+view")
+
+
+_pff = {}
+
+
+def pff_part():
+    """PFF as a dead-model provider: the prepared per-half features (raw broadcast-domain tracking, no extra degradation), 'base' columns only, labels with their D from the events, unknown frames masked."""
+    if _pff:
+        return _pff["part"]
+    import gradient
+    import pathlib
+    names = bench.features("base", "dfl@v3")[0]["fk"]
+    out = pathlib.Path(bench.ROOT) / "cache" / "pff_experiment" / gradient.VERSION / "features"
+    fs, ls = [], []
+    for match in gradient.matches():
+        with np.load(gradient.CACHE / gradient.VERSION / ("%s.npz" % match)) as d:
+            for per in d["periods"]:
+                path = out / ("%s_h%d.pkl" % (match, int(per)))
+                if not path.exists():
+                    continue
+                f = bench._load(str(path))
+                idx = [f["fk"].index(k) for k in names]
+                fs.append({"XF": f["XF"][:, idx].astype(np.float32)})
+                ls.append(np.asarray(d["h%d_labels" % int(per)]))
+    print("    PFF: %d halves, dead share %.3f" % (len(fs), np.mean(np.concatenate([l[l < 3] for l in ls]) == 2)), flush=True)
+    _pff["part"] = (fs, ls)
+    return _pff["part"]
+
+
+def pff_probs(src):
+    """DMSPb: DFL, Metrica, SkillCorner, PFF, equal provider weight, held out by match on the source itself. Cached."""
+    path = os.path.join(bench.CACHE, "dead", "DMSPb_%s.pkl" % src.replace("@", "-"))
+    if os.path.isfile(path):
+        return bench._load(path)
+    train = {k: (bench.features("base", v[0]), bench.labels(v[1], v[2]), _groups(bench.blocks(v[0]))) for k, v in SOURCES.items()}
+    own = _base_of(src)
+    fsrc = bench.features("base", src)
+    gr = _groups(bench.blocks(src))
+    un = sorted(set(gr), key=str)
+    folds = ([un[i::5] for i in range(5)] if own == "sc" else [[g] for g in un]) if own in train else [[]]
+    res = [None] * len(fsrc)
+    for fold in folds:
+        parts = {"pff": pff_part()}
+        for k, (fs, ls, gs) in train.items():
+            keep = [i for i, g in enumerate(gs) if g not in fold]
+            parts[k] = ([fs[i] for i in keep], [ls[i] for i in keep])
+        model = fit_balanced(parts)
+        for i, (x, g) in enumerate(zip(fsrc, gr)):
+            if (not fold) or g in fold:
+                res[i] = model.predict(x["XF"], num_threads=bench.THREADS)
+        print("    DMSPb %s fold %s done" % (src, fold), flush=True)
+    bench._dump(res, path)
+    return res
+
+
+def multi_source4():
+    """PFF added to the balanced multi-source dead model. Transplant draw 0, 3 seeds."""
+    import exp_blend_weight as bw
+    import metrica_sample as ms
+    names = ("DMSb+view", "DMSPb+view", "mix.5")
+    cells = {}
+    for src, convs in CONVS.items():
+        ev_src = "metrica@v3g" if src.startswith("metrica") else src
+        blocks = bench.blocks(ev_src)
+        labs = {c: [np.asarray(g) for g in bench.labels(src, c)] for c in convs}
+        base = bench.dead_probs(src, "base") if src.startswith("dfl") else bench.dead_ext("base", "v3", ev_src)
+        a_lrn = [exp_blend.logit_alive(x) for x in base]
+        a_b = [exp_blend.logit_alive(x) for x in balanced_probs("DMSb", ev_src)]
+        a_p = [exp_blend.logit_alive(x) for x in pff_probs(ev_src)]
+        smos = team(src)
+        truth = labs[convs[0]]
+        a_rb = rule_view(ev_src, blocks, truth, 0)
+        a_v = view_only(ev_src, blocks, truth, 0)
+        nm = len(truth) / 2
+        for k in es.SEEDS:
+            res = {"mix.5": sd.decode_scores(mix_evidence(a_rb, a_lrn), smos[k]), "DMSb+view": sd.decode_scores([x + v for x, v in zip(a_b, a_v)], smos[k]), "DMSPb+view": sd.decode_scores([x + v for x, v in zip(a_p, a_v)], smos[k])}
+            for name, preds in res.items():
+                for c in convs:
+                    cells.setdefault((src, c, TAG, name), []).append(er.by_match(blocks, labs[c], preds))
+                if k == es.SEEDS[0]:
+                    print("  %-8s %-11s dead share %.3f | possessions / match %.1f (< 4 s %.1f) | dead F1 %.3f" % (src.split("@")[0], name, np.mean(np.concatenate(preds) == 2), sum(len(ms.spells(p)) for p in preds) / nm, sum(sum(e - a < 100 for a, e, _ in ms.spells(p)) for p in preds) / nm, _dead_f1(preds, truth)), flush=True)
+        bench._blocks.clear()
+        bench._labels.clear()
+    mean, _ = er.summarize(cells, list(names), ref="DMSb+view")
+    bw.decide(mean, "DMSb+view", "DMSPb+view")
+
+
 if __name__ == "__main__":
     sys.stdout.reconfigure(encoding="utf-8")
     warnings.filterwarnings("ignore")
-    {"eval": evaluate, "st": soccertrack, "v3g": deglued, "stress": stress}[sys.argv[1]]()
+    {"eval": evaluate, "st": soccertrack, "v3g": deglued, "stress": stress, "dm": multi_source, "verifier": verifier, "shape": shape, "head": head, "oracle": oracle, "dm2": multi_source2, "qnorm": qnorm, "dm3": multi_source3, "dm4": multi_source4}[sys.argv[1]]()

@@ -148,7 +148,8 @@ def po_fuse(S, p):
     return S
 
 
-def predict(f, params=None, probs_path=None):
+def predict(f, params=None, probs_path=None, alive=None):
+    """alive: optional extra alive log-odds per frame, added to the dead-ball evidence (model_v18's learned model)."""
     p = dict(DEFAULT)
     if params:
         p.update(params)
@@ -162,6 +163,8 @@ def predict(f, params=None, probs_path=None):
     S = scores(f, p, probs_path)
     if p.get("po_lam", 0) > 0:
         S = po_fuse(S, p)
+    if alive is not None:
+        S = S + np.stack([alive / 2, alive / 2, -alive / 2], axis=1)
     sp = spec(p, switch_channels=ts)
     labels = np.full(f["n"], 3, np.int8)
     for _, a, b in atd.HALVES:

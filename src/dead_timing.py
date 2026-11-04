@@ -46,11 +46,15 @@ def retime(lab, ref, kinds=(STOP, RESTART), win=WIN):
     return out
 
 
+def alive_logit(p_dead):
+    p = np.clip(p_dead, EPS, 1 - EPS)
+    return np.log((1 - p) / p)
+
+
 def learned_decode(p_dead, ph, pen_team=12.0, pen_dead=30.0, min_poss=8, min_dead=50):
     """The learned dead model's own decode: its alive logit with the team probability ph and BAR-ATH's decoder
     settings (the scores of src/exp_scdead.py decode_scores)."""
-    p = np.clip(p_dead, EPS, 1 - EPS)
-    a = np.log((1 - p) / p)
+    a = alive_logit(p_dead)
     q = np.clip(ph, EPS, 1 - EPS)
     sp = decode2.duration_spec(pen_team, pen_dead, min_poss, min_dead, exp_v7.ramp(175, 48.0))
     return sp.decode(np.stack([a / 2 + np.log(q), a / 2 + np.log(1 - q), -a / 2], 1)).astype(np.int8)
