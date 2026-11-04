@@ -346,7 +346,7 @@ def pff():
             continue
         smo = exp_smooth.smooth(smo, 25)
         for name in names:
-            preds = sd.decode_scores(ev[name], smo)
+            preds = eg.decode_par(ev[name], smo)
             cells.setdefault(("pff", "ctrl", "edges D", name), []).append(er.by_match(blocks, labs, preds))
             for p_, g_ in zip(preds, labs):
                 ok = g_ < 3

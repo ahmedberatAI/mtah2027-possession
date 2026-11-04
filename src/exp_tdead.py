@@ -23,7 +23,7 @@ SOURCES = {"dfl": ("dfl@v3", "dfl", "native"), "metrica": ("metrica@v3g", "metri
 OUT = os.path.join(bench.CACHE, "tdead")
 if os.environ.get("TD_V6"):         # round 49: the same model on sim.V6's masks
     SOURCES = {"dfl": ("dfl@v6", "dfl", "native"), "metrica": ("metrica@v6g", "metrica@v3", "ctrl"), "sc": ("sc@v6", "sc@v3", "evctrl")}
-    OUT = os.path.join(bench.CACHE, "tdead6")
+    OUT = os.path.join(bench.CACHE, os.environ.get("TD_OUT", "tdead6"))
 STEP = 5            # frames per model step (5 Hz)
 WIN = 600           # steps per training window (2 minutes)
 STEPS = 4000
