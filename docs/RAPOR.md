@@ -2475,6 +2475,19 @@ ve açık bir risk var: tur 33'ün K5 raporu Metrica örnek topunun olaylardan k
 *Aktarım testi (ön kayıt, çalıştırmadan önce):* **D1** = C1 yalnız 7 DFL maçında ince ayar (Metrica'yı görmez), **M1** = yalnız 3 Metrica maçında (DFL'yi görmez); kendi kaynaklarında maç-dışı, öbür
 kaynakta tüm kaynak modeli; tarif F1'inki. Geçiş: D1'in Metrica kazancı (C1'e göre, iki ölü top ortalaması) ≥ +0.0025 ve M1'in DFL evctrl değişimi ≥ −0.002. İkisi de tutarsa kazanç sağlayıcılar arası
 taşınıyor, v17 = v16'da C1 yerine F1 (tüm 10 maçla ince ayarlı model) kurulur. Tutmazsa F1 kuralı geçse de Metrica'ya özgü olabilir; karar kullanıcıya sorulur. Bilgi: SoccerTrack.
+*Bilgi (ara):* SoccerTrack'te C1'e göre F1 evctrl −0.0031 / +0.0003, sağlayıcı durumu +0.0023 / +0.0050; F3 −0.0049 / −0.0044, −0.0007 / 0.
+
+**Tur 36 — Metrica topu, seçim tavanı ve uzun silme adayları (4 Kasım; kullanıcı: "bir geliştirme döngüsü daha yap, sorunu bir şekilde çözelim").**
+*Metrica topu (K5'in uyarısı doğrulandı):* temiz veride karelerin %44'ünde oyuncu topa < 0.3 m (DFL %6.5), %27'si kusursuz düz çizgi (DFL %5). Modelin gördüğü V3 girdide oyuncu < 1 m: Metrica %48, BAR-ATH %29
+(etiketsiz, toplu), DFL %23, SC %21, SoccerTrack %18; en yakın oyuncu medyanı 1.15 / 1.90 / 2.45 / 2.28 / 2.20 m. Metrica'nın topu sahibine yapışık: topa dayanan bileşenleri olduğundan iyi gösterebilir.
+*Seçim tavanı (`scratchpad lit35/sel_ceiling.py`, tohum 0, kaynak içi maç-dışı):* doğrulayıcıya temiz top ve oyuncu özellikleri + dokunuş düzeyindeki bayrak: ekleme AUC'si DFL 0.82 / 0.80 → 0.86 / 0.85,
+Metrica 0.89 / 0.85 → 0.94 / 0.92; aynı sayıda eklemeyle spellF1 yalnız DFL +0.0036 / +0.0023, Metrica +0.0062 / +0.0055. Yalnız temiz top DFL'de AUC'yi artırmıyor. Yani daha iyi algılayıcı (video dahil) seçim
+havuzunu açmıyor; belirleyici olan kontrol kararı. Video yolu bu yüzden açılmadı.
+*Kâhin merdiveni (`ladder.py`; v15, 3 tohum, öğr. / gerçek D):* yanlış tahmin edilen possession'ları (o takımın IoU ≥ 0.3 gerçek spell'i yok) silmek DFL < 2 sn +0.004 / +0.005, 2–4 sn +0.019 / +0.021, **4–8 sn +0.034 / +0.034**, 8–16 sn
++0.008 / +0.009, hepsi +0.052 / +0.057; Metrica +0.003 / +0.002, +0.015 / +0.014, **+0.012 / +0.013**, +0.004 / +0.003, hepsi +0.025 / +0.024. Tahmin edilen 4–8 sn possession maç başına DFL ~65 (isabet 0.74 / 0.78), Metrica ~56 (0.81 /
+0.87). Var olan silme adaylarında (< 4 sn) kusursuz karar +0.017 / +0.019, +0.013 / +0.012; ekleme + silme birlikte +0.041 / +0.046, +0.029 / +0.034.
+*Ön kayıt (çalıştırmadan önce):* doğrulayıcının silme adayları bugüne dek < 4 sn; 4–8 sn'lik büyük yanlış havuzu hiç aday olmadı. **L8** = v15'in tarifi, silme adayları < 8 sn; **LG** = < 16 sn. Aynı özellikler, aynı eşikler (0.65 / 0.35), 3 v10
+tohumu × doğrulayıcı tohumu 0 / 1. Karar v15'e (C1abETmS) karşı: birincil ≥ 0.005, korumalar ≥ −0.01. Bilgi: SC evctrl, silme AUC'si, SoccerTrack.
 
 ## Ek A — İlk analiz, araştırma ve baseline'lar (20 Ekim)
 

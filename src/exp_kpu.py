@@ -227,12 +227,15 @@ def relabel_sc(base, name):
     print("  %s rows written (from %s)" % (name, base), flush=True)
 
 
-def build_m(name, w=0.25, avg=False, variant="C1"):
+def build_m(name, w=0.25, avg=False, variant="C1", short=None):
     """Round 24c, C1abETm: C1's live-normalised control probability blended into v14's team probability (weight w)
     before the +-25 smoothing and the decoder; decodes, candidates (v14's rule + C1's), features (G1 + specialist +
     touch) and DFL evctrl labels rebuilt on that base. Round 27: w 0.5 (C1abETm50), or every C1 output from the mean of
     its three seeds (avg, C1abETma). Round 32: variant C2 (the specialist trained with the reading's handed-back
-    possessions masked) in C1's place, C2abETm."""
+    possessions masked) in C1's place, C2abETm. Round 36: short = longest decoded possession (frames) that is a delete
+    candidate (default ea.SHORT, 4 s): L8abETm 8 s, LGabETm 16 s."""
+    if short:
+        ea.SHORT = short
     use("v14")
     for src, convs, dec, prim in ev.SOURCES:
         kind = "rows4" if src.startswith("dfl") else "rows3"
@@ -428,8 +431,10 @@ def main():
             build_m(variant, w=0.5 if variant == "C1abETm50" else 0.25, avg=variant == "C1abETma")
         elif variant in ("C2abETm", "C3abETm", "F1abETm", "F3abETm", "D1abETm", "M1abETm"):     # rounds 32 / 34: another specialist in C1's place
             build_m(variant, variant=variant[:2])
+        elif variant in ("L8abETm", "LGabETm"):                  # round 36: longer delete candidates
+            build_m(variant, short=200 if variant[1] == "8" else 400)
         elif variant in ("C1abETmS", "C1abETm50S", "C1abETmaS", "C2abETmS", "C3abETmS", "F1abETmS", "F3abETmS", "D1abETmS",
-                         "M1abETmS"):
+                         "M1abETmS", "L8abETmS", "LGabETmS"):
             relabel_sc(variant[:-1], variant)
         else:
             build(variant)
