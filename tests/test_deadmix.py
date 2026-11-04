@@ -47,5 +47,37 @@ class EvidenceTests(unittest.TestCase):
         self.assertGreater(float(x[0]), 9.0)
 
 
+class OpenRulesTests(unittest.TestCase):
+    """model_v19 scores the rule terms the fit in src/exp_rules_open.py used."""
+
+    def setUp(self):
+        import json
+        import model_v19
+        self.mv = model_v19
+        with open(model_v19.RULES) as fh:
+            self.conf = json.load(fh)
+        rng = np.random.default_rng(0)
+        n = 600
+        P = rng.uniform(size=(n, 22, 2)).astype(np.float32)
+        B = np.cumsum(rng.normal(scale=0.002, size=(n, 2)), axis=0).astype(np.float32) + 0.5
+        B[100:160] = np.nan
+        self.b = dict(P=P, B=B, pitch=(105.0, 68.0))
+
+    def test_same_terms_as_the_fit(self):
+        import exp_blend
+        import exp_rules_open as ro
+        ours = self.mv.rule_fields(self.b)
+        theirs = exp_blend.rule_f(self.b)
+        np.testing.assert_array_equal(self.mv.rule_terms(ours, self.conf), ro.terms(theirs, self.conf["thresholds"], self.conf["bounds"]))
+
+    def test_weights_have_the_expected_signs(self):
+        beta, gamma = self.conf["beta"], self.conf["gamma"]
+        self.assertEqual(len(beta), 7)
+        self.assertGreater(beta[2], 0)      # tempo means alive
+        self.assertLess(beta[3], 0)         # ball out means dead
+        self.assertLess(gamma[0], 0)        # no valid view means dead
+        self.assertAlmostEqual(self.mv.W_RULES + self.mv.W_MODEL, 1.0)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -1,0 +1,35 @@
+{
+ "thresholds": {
+  "shift": 50,
+  "out_margin": 0.0,
+  "missing_after": 12,
+  "still_disp": 1.0,
+  "ball_fast": 3.0
+ },
+ "bounds": {
+  "v1": [
+   0.4934212889390833,
+   1.7424470490100337,
+   4.239027683968637
+  ],
+  "v3": [
+   0.5261146238401755,
+   1.8223827792637384,
+   3.770294563367001
+  ]
+ },
+ "beta": [
+  -2.6059678360126726,
+  0.4617923416498805,
+  1.967246790255137,
+  -1.620143015245883,
+  -3.480980569499975,
+  -1.400731549763583,
+  1.4403986043163872
+ ],
+ "gamma": [
+  -1.8557867885466175,
+  0.22075215881970103
+ ],
+ "note": "src/exp_rules_open.py fit: DFL, de-glued Metrica and SkillCorner only. beta: intercept, tempo +-1 s, tempo +-3 s, ball out, ball unseen, ball still, ball fast. gamma: no valid view, valid view with live players (SkillCorner's real flag)."
+}

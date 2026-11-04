@@ -456,6 +456,17 @@ def final_open(k):
         json.dump(out, fh)
 
 
+def a25_evidence(src):
+    """Round 44's choice on an open source: 0.25 open rules + 0.75 multi-source model + view terms, all held out by match."""
+    with open(OUT) as fh:
+        conf = json.load(fh)
+    k = src.split("@")[0]
+    fsrc = SOURCES[k][0]
+    track, view = evidence(k, conf)
+    a_m = [exp_blend.logit_alive(x) for x in dm.balanced_probs("DMSb", fsrc)]
+    return [0.25 * t + 0.75 * m + v for t, m, v in zip(track, a_m, view)]
+
+
 def final_decide():
     import exp_blend_weight as bw
     import pickle

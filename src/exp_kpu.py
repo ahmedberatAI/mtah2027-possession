@@ -237,7 +237,7 @@ def build_m(name, w=0.25, avg=False, variant="C1", short=None, rules=False):
     decode with BAR-ATH's kind of dead ball (v3's rules, image cues on SkillCorner; src/exp_rules_ctx.py), R1abETm. Round
     40: rules = "mix", that channel holds the decode with rules + view flag + 0.5 x learned (src/exp_deadmix.py), X1abETm.
     Round 41: rules = "dmsb", the multi-source dead model + the view flag, X2abETm; rules = "e1", the sum of the three
-    channels, X3abETm."""
+    channels, X3abETm. Round 44: rules = "a25", 0.25 open-data rules + 0.75 multi-source model + view, X4abETm."""
     if short:
         ea.SHORT = short
     use("v14")
@@ -270,6 +270,9 @@ def build_m(name, w=0.25, avg=False, variant="C1", short=None, rules=False):
             if rules == "e1":
                 import exp_deadmix as dm
                 a_rule = dm.e1_evidence(src)
+            if rules == "a25":
+                import exp_rules_open as ro
+                a_rule = ro.a25_evidence(src)
             for k in es.SEEDS:
                 bases[(k, ev.DEADS[0])] = sd.decode_scores(a_rule, smos[k])
         rows = {key: [] for key in bases}
@@ -462,8 +465,10 @@ def main():
             build_m(variant, variant="J1", rules="dmsb")
         elif variant == "X3abETm":                               # round 41: J1, the channel of rules + view + 0.5 DFL model + 0.5 multi-source
             build_m(variant, variant="J1", rules="e1")
+        elif variant == "X4abETm":                               # round 44: J1, the channel of 0.25 open rules + 0.75 multi-source + view
+            build_m(variant, variant="J1", rules="a25")
         elif variant in ("C1abETmS", "C1abETm50S", "C1abETmaS", "C2abETmS", "C3abETmS", "F1abETmS", "F3abETmS", "D1abETmS",
-                         "M1abETmS", "L8abETmS", "LGabETmS", "G1abETmS", "H1abETmS", "J1abETmS", "R1abETmS", "X1abETmS", "X2abETmS", "X3abETmS"):
+                         "M1abETmS", "L8abETmS", "LGabETmS", "G1abETmS", "H1abETmS", "J1abETmS", "R1abETmS", "X1abETmS", "X2abETmS", "X3abETmS", "X4abETmS"):
             relabel_sc(variant[:-1], variant)
         else:
             build(variant)
