@@ -363,6 +363,14 @@ Metrica with its ball de-glued gives the same gain (+0.070). SoccerTrack v2 also
 there, its ball being rebuilt from the events, so it says little. The transplanted flag is a simulation: it follows the true
 segments, which if anything favours the rules.
 
+One independent test goes the other way. On the 64 PFF matches, which no dead-ball model saw and the design did not use (raw
+broadcast-derived tracking, transplanted flag, the classifier alone as team model because the BiGRU and the specialist trained
+on PFF), v17's recipe scores 0.535 and the fusion 0.523 (-0.012, 95% interval [-0.018, -0.007]). The learned model's dead-ball recall
+collapses there (0.68), because PFF's dead frames show inflated player tempo: 38% of them above the rules' threshold, against
+12–15% on the other sets. The fusion's gain follows how often the rules' disputed dead frames are really live: PFF 0.24, -0.012;
+SkillCorner 0.53, +0.055; Metrica 0.76, +0.071; DFL 0.96, +0.095. BAR-ATH shows no such tempo inflation, and label-free estimates of
+that rate lie between 0.46 and 0.67, which is why the fusion was kept. This is a judgement, not a measurement.
+
 The submission (v16) against v15. The timing step only moves the boundaries of the rules' dead stretches, so it is
 judged with BAR-ATH-like dead ball (the rules, as above) rather than with the learned or true dead ball; v15's team
 probability (3 team-model seeds, each paired with one specialist seed), before the verifier, paired match bootstrap
