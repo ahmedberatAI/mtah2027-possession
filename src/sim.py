@@ -45,6 +45,14 @@ V4 = dict(V3, presmooth_p=1.5, presmooth_b=4.0)
 V5 = dict(V3, fab_share=0.03, fab_med=20, fab_sigma=0.6, fab_min=8, fab_max=75)
 V5C = dict(V5, clean_fab=True)
 V3C = dict(V3, clean_fab=True)
+# V6 (round 49, src/exp_edges.py): V2 / V3 cut every dead-ball gap exactly at the restart, so the ball reappears on the true restart frame at about half of the
+# restarts (DFL 0.55, Metrica 0.72); raw PFF tracking does so at 0.03, with the ball visible through the last 2 s before 0.65 of the restarts. V6 replaces the
+# first and last seconds of each dead stretch by a draw of three states: visible on, gone, or mixed. Shares: label-free statistics of the target's ball around
+# the model's own stops and restarts, whole match, no public window (all restarts: visible 0.427, mixed 0.126; all stops: visible 0.385, mixed 0.24), divided
+# by the share of edges where the ball is seen on the adjacent live frame. Own random stream; the masks in live play are V3's except for the +-edge_jitter frames
+# around a restart. Where the source has no ball on a revealed frame (Metrica's dead ball) the nearest live position is held.
+V6 = dict(V3, edge_model=True, after_vis=0.507, after_mix=0.316, before_vis=0.547, before_mix=0.16, edge_vis_median_s=4.0, edge_sigma=0.8,
+          edge_gone_median_s=10.7, edge_gone_sigma=0.9, edge_mix_frames=50, edge_jitter=6)
 
 
 def _smooth_runs(x, sigma):
@@ -280,6 +288,70 @@ def player_dropout(P, rng, p):
     return out
 
 
+def _edges(seen, finite, lab, rng, p):
+    """V6: the ball around each true dead stretch [a, b). Returns the new mask and fill: for a revealed frame without a source position the frame whose position is held, else -1."""
+    n = len(lab)
+    seen = seen.copy()
+    fill = np.full(n, -1, np.int64)
+    dead = lab == 2
+    e = np.diff(np.concatenate(([0], dead.astype(np.int8), [0])))
+    for a, b in zip(np.flatnonzero(e == 1), np.flatnonzero(e == -1)):
+        m = b - a
+        ua, ub = rng.random(), rng.random()
+        vis_a, vis_b = _lognormal_frames(rng, p["edge_vis_median_s"], p["edge_sigma"]), _lognormal_frames(rng, p["edge_vis_median_s"], p["edge_sigma"])
+        gone_a, gone_b = _lognormal_frames(rng, p["edge_gone_median_s"], p["edge_gone_sigma"]), _lognormal_frames(rng, p["edge_gone_median_s"], p["edge_gone_sigma"])
+        mix_a, mix_b = int(rng.integers(1, p["edge_mix_frames"])), int(rng.integers(1, p["edge_mix_frames"]))
+        jit = int(rng.integers(-p["edge_jitter"], p["edge_jitter"] + 1))
+        if a > 0 and seen[a - 1]:
+            src = a - 1
+            if ua < p["after_vis"]:
+                e1 = min(a + max(vis_a, 50), b)
+                seen[a:e1] = True
+                nofin = np.flatnonzero(~finite[a:e1]) + a
+                fill[nofin] = src
+                if e1 < b:
+                    seen[e1:min(e1 + max(gone_a, 50), b)] = False
+            elif ua < p["after_vis"] + p["after_mix"]:
+                e1 = min(a + mix_a, b)
+                seen[a:e1] = True
+                nofin = np.flatnonzero(~finite[a:e1]) + a
+                fill[nofin] = src
+                seen[e1:min(e1 + max(gone_a, 50), b)] = False
+            else:
+                seen[a:min(a + max(gone_a, 50), b)] = False
+        if b < n and seen[b]:          # not one of the restarts where the ball stays missing
+            nxt = b
+            while nxt < n and not finite[nxt]:
+                nxt += 1
+            if nxt < n:
+                if ub < p["before_vis"]:
+                    s1 = max(b - max(vis_b, 50), a)
+                    seen[s1:b] = True
+                    nofin = np.flatnonzero(~finite[s1:b]) + s1
+                    fill[nofin] = nxt
+                    if s1 > a:
+                        seen[max(s1 - max(gone_b, 50), a):s1] = False
+                elif ub < p["before_vis"] + p["before_mix"]:
+                    s1 = max(b - mix_b, a)
+                    seen[s1:b] = True
+                    nofin = np.flatnonzero(~finite[s1:b]) + s1
+                    fill[nofin] = nxt
+                    seen[max(s1 - max(gone_b, 50), a):s1] = False
+                else:
+                    seen[max(b - max(gone_b, 50), a):b] = False
+                    if jit < 0:             # the tracker picks the ball up just before the kick
+                        s1 = max(b + jit, a)
+                        seen[s1:b] = True
+                        nofin = np.flatnonzero(~finite[s1:b]) + s1
+                        fill[nofin] = nxt
+                    elif jit > 0:           # or just after it
+                        stop = b
+                        while stop < min(n, b + jit) and not dead[stop]:
+                            stop += 1
+                        seen[b:stop] = False
+    return seen & (finite | (fill >= 0)), fill
+
+
 def degrade(P, B, lab, pitch, seed=0, params=None):
     p = dict(DEFAULT)
     if params:
@@ -313,6 +385,10 @@ def degrade(P, B, lab, pitch, seed=0, params=None):
         # random stream (paired v1/v2 comparisons); the v2 ball mask has a stream of its own
         present = np.isfinite(B[:, 0])
         seen = ball_dropout_v2(lab, z, np.random.default_rng([seed, 2]), p, present) & present
+    if p.get("edge_model"):
+        seen, fill = _edges(seen, np.isfinite(Bn[:, 0]), np.asarray(lab), np.random.default_rng([seed, 6]), p)
+        held = fill >= 0
+        Bn[held] = Bn[fill[held]]
     Bn[~seen, :] = np.nan
     if p.get("fab_share", 0) > 0:
         Bn = _fabricate(Bn, lab, p, np.random.default_rng([seed, 3]))
