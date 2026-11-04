@@ -239,6 +239,50 @@ def train(seed):
     print("  seed %d all-data model done" % seed, flush=True)
 
 
+def train_mix(seed):
+    """Round 53: the mask's true behaviour around stops and restarts is unknown, so train on all three versions (V3, V6, V6B; domain randomisation over the simulator's uncertainty). Same folds, same steps; held-out outputs on each version."""
+    seed = int(seed)
+    out = os.path.join(bench.CACHE, os.environ.get("TD_OUT", "tdeadmix"))
+    os.makedirs(out, exist_ok=True)
+    lab = {"dfl": ("dfl", "native"), "metrica": ("metrica@v3", "ctrl"), "sc": ("sc@v3", "evctrl")}
+    names = {"dfl": ("dfl@v3", "dfl@v6", "dfl@v6b"), "metrica": ("metrica@v3g", "metrica@v6g", "metrica@v6bg"), "sc": ("sc@v3", "sc@v6", "sc@v6b")}
+    data = {}
+    index = {}
+    feats = {}
+    for k, srcs in names.items():
+        data[k] = []
+        for fsrc in srcs:
+            fs = bench.features("base", fsrc)
+            ls = bench.labels(*lab[k])
+            gs = [b["group"] for b in bench.blocks(fsrc)]
+            feats[fsrc] = fs
+            for j, (f, l, g) in enumerate(zip(fs, ls, gs)):
+                index[(fsrc, j)] = g
+                data[k].append((g, pool(f["XF"]).astype(np.float32),) + targets(l))
+            bench._blocks.clear()
+        print("  %s: %d halves" % (k, len(data[k])), flush=True)
+    dfl = sorted({r[0] for r in data["dfl"]}, key=str)
+    met = sorted({r[0] for r in data["metrica"]}, key=str)
+    sc = sorted({r[0] for r in data["sc"]}, key=str)
+    res = {key: [] for key in index}
+    for i in range(len(dfl)):
+        t0 = time.time()
+        hold = {dfl[i], met[i % len(met)]} | set(sc[i::len(dfl)])
+        net, mean, scale = fit(data, hold, seed + i)
+        for (fsrc, j), g in index.items():
+            if g in hold:
+                res[(fsrc, j)].append(score_half(net, mean, scale, feats[fsrc][j]["XF"]))
+        print("  seed %d fold %d done, %.0f s" % (seed, i, time.time() - t0), flush=True)
+        del net
+        torch.cuda.empty_cache()
+    for fsrc in {key[0] for key in index}:
+        m = sum(1 for key in index if key[0] == fsrc)
+        bench._dump([np.mean(np.stack(res[(fsrc, j)]), axis=0) for j in range(m)], os.path.join(out, "held_%d_%s.pkl" % (seed, fsrc.replace("@", "-"))))
+    net, mean, scale = fit(data, set(), seed + 100)
+    torch.save(dict(state={k: v.cpu() for k, v in net.state_dict().items()}, mean=mean, scale=scale, n_in=len(mean)), os.path.join(out, "all_%d.pt" % seed))
+    print("  seed %d all-data model done" % seed, flush=True)
+
+
 def load_all_model(seed):
     ck = torch.load(os.path.join(OUT, "all_%d.pt" % int(seed)), map_location="cpu", weights_only=False)
     net = Net(ck["n_in"]).to(DEVICE)
@@ -258,5 +302,7 @@ if __name__ == "__main__":
     warnings.filterwarnings("ignore")
     if sys.argv[1] == "train":
         train(sys.argv[2])
+    elif sys.argv[1] == "mix":
+        train_mix(sys.argv[2])
     else:
         raise SystemExit(__doc__)
