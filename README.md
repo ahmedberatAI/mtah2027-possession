@@ -25,11 +25,13 @@ Fikirler, denemeler ve sonuçlar tek bir belgede: **[`docs/RAPOR.md`](docs/RAPOR
 
 ## Submission
 
-- **The file:** `submissions/candidate_v17.csv` (model_v17 = model_v16 with the short-possession specialist J1 in C1's
-  place; model_v16 = model_v15 + the dead-ball boundary timing of the learned dead model; model_v15 = v14's v10 /
+- **The file:** `submissions/candidate_v18.csv` (model_v18 = model_v17 with fused dead-ball evidence: rules + broadcast
+  + half the learned dead model, no boundary timing step; model_v17 = model_v16 with the short-possession specialist J1
+  in C1's place; model_v16 = model_v15 + the dead-ball boundary timing of the learned dead model; model_v15 = v14's v10 /
   shared-BiGRU blend mixed with the short-possession specialist C1 + the short-possession verifier retrained on that
-  base, no whistle), MD5 `55dfc08216c344f7077d4fac88c51a86`.
-  `python src/make_submission.py` regenerates it; `--model model_v16 --out submissions/candidate_v16.csv` still writes
+  base, no whistle), MD5 `b6101389cd877edec44bbe64cd00c4b3`.
+  `python src/make_submission.py` regenerates it; `--model model_v17 --out submissions/candidate_v17.csv` still writes
+  v17 (MD5 `55dfc08216c344f7077d4fac88c51a86`), `--model model_v16 --out submissions/candidate_v16.csv`
   v16 (MD5 `c89208a3a034ee73bb41f3fb28390f87`), `--model model_v15 --out submissions/candidate_v15.csv`
   v15 (MD5 `6081216bcf484049d8e6e84b27fc85dd`), `--model model_v14 --out
   submissions/candidate_v14.csv` v14 (MD5 `5e7363fc83c6f56a923033894a28d3a1`), `--model model_v13 --out
@@ -76,11 +78,21 @@ uv pip install --python .venv/Scripts/python.exe numpy pandas scipy numba lightg
 git clone https://github.com/metrica-sports/more-than-a-hack-2027 external/more-than-a-hack-2027
 # unpack the match bundle into ./data (or set MTAH_DATA_DIR)
 .venv/Scripts/python.exe src/download_idsse.py            # open DFL data, CC BY 4.0, ~2.6 GB
-.venv/Scripts/python.exe src/make_submission.py           # the submission: model_v17 -> submissions/candidate_v17.csv
-python external/more-than-a-hack-2027/evaluation/validate_submission.py submissions/candidate_v17.csv
+.venv/Scripts/python.exe src/make_submission.py           # the submission: model_v18 -> submissions/candidate_v18.csv
+python external/more-than-a-hack-2027/evaluation/validate_submission.py submissions/candidate_v18.csv
 ```
 
-**The submission is `model_v17`: `model_v16` with the short-possession specialist J1 in C1's place**
+**The submission is `model_v18`: `model_v17` with fused dead-ball evidence** (`submissions/candidate_v18.csv`, MD5
+`b6101389cd877edec44bbe64cd00c4b3`; rounds 40 and 41 in `docs/RAPOR.md`). The decoder's alive log-odds are the rules + the aligned broadcast + 0.5 x
+the alive log-odds of the learned dead model (`models/dead_base_v3.txt`); the boundary timing step is gone. The open sets'
+rules used to lack the broadcast, so they understated BAR-ATH's; with SkillCorner's real view flag transplanted onto DFL and
+Metrica (`src/exp_deadmix.py`) the rule formula is the same on every set. Held out, before the verifier, against v17's
+recipe: DFL evctrl 0.685 -> 0.782, DFL tracking-derived 0.665 -> 0.761, Metrica ctrl 0.768 -> 0.837, SkillCorner evctrl /
+phases / player possessions 0.642 / 0.605 / 0.599 -> 0.702 / 0.659 / 0.653 (every match better); worst-case regret on the
+target convention's contexts +0.097. On BAR-ATH 6.95% of the frames change, and the structure of the changes lies in the
+open sets' range. The gain cannot be measured on BAR-ATH itself.
+
+**Its base, `model_v17`: `model_v16` with the short-possession specialist J1 in C1's place**
 (`submissions/candidate_v17.csv`, MD5 `55dfc08216c344f7077d4fac88c51a86`; round 37 in `docs/RAPOR.md`). J1 (`models/kpu_j1`) is C1
 fine-tuned on the ten open games in the challenge's controlled-possession reading (DFL event-derived, Metrica sample
 games; `src/short_specialist.py` `finetune`). Metrica's sample ball sits on its owner, so its windows use 0.8 m of extra
@@ -90,7 +102,7 @@ to come from that glued ball. Held out, against C1 on the same input, learned / 
 guard (DFL tracking-derived) −0.0050. The verifier is retrained on J1's outputs
 (`models/short_verifier_{ins,del}_j1m25s.txt`). On BAR-ATH v17 differs from v16 on 0.43% of the frames.
 
-**Its base, `model_v16`: `model_v15` with its dead-ball boundaries timed by the learned dead model**
+**`model_v16`: `model_v15` with its dead-ball boundaries timed by the learned dead model**
 (`submissions/candidate_v16.csv`, MD5 `c89208a3a034ee73bb41f3fb28390f87`; round 29 in `docs/RAPOR.md`). v15's dead
 stretches (v3's rules + the aligned broadcast) stay; each stop and restart moves onto the nearest boundary of the same
 kind in the learned dead model's own decode, within ±2 s and never across another boundary (`src/dead_timing.py`; the

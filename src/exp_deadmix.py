@@ -33,6 +33,7 @@ verifier. Three transplant draws. AGGREGATE output only.
   python -I src/exp_deadmix.py stress3 SRC hedges: sums of the channels under better rules and worse learned channels
   python -I src/exp_deadmix.py eval2       round 41's decision run: E1 = rules + view + 0.5 DFL model + 0.5 multi-source model
   python -I src/exp_deadmix.py st4         SoccerTrack v2 with the channels and their sums
+  python -I src/exp_deadmix.py pff         round 42: PFF's 64 matches as an independent test of the dead-ball evidence
 """
 import os
 import sys
@@ -858,6 +859,70 @@ def soccertrack4():
     er.summarize(cells, list(names), ref="mix.5")
 
 
+def pff_test():
+    """Round 42: PFF's 64 World Cup matches as an independent test of the dead-ball evidence: neither dead model nor the team model
+    below ever saw them, and they played no part in designing the fusion. Raw broadcast-domain tracking (no extra degradation), labels in the
+    controlled reading, the view flag transplanted, the all-DFL team LightGBM of v7 (not the blend: its BiGRU and specialist trained on PFF).
+    The dead models: all-DFL (models/dead_base_v3.txt) and the all-three-providers one (cache/bench/dead/dead_multi_v1.txt)."""
+    import gradient
+    import lightgbm as lgb
+    import model_v2
+    import model_v7
+    import pathlib
+    names = ("rules+DT", "mix.5", "L+view", "M+view", "both+view", "r.5 both", "E1")
+    tag = "%s_native_v3" % bench._safe(model_v7.VERSION)
+    team_model = lgb.Booster(model_file=os.path.join(bench.CACHE, "models", tag + ".txt"))
+    l_model = bench.load_booster(os.path.join(bench.ROOT, "models", "dead_base_v3.txt"))
+    m_model = bench.load_booster(os.path.join(bench.CACHE, "dead", "dead_multi_v1.txt"))
+    base_names = bench.features("base", "dfl@v3")[0]["fk"]
+    out = pathlib.Path(bench.ROOT) / "cache" / "pff_experiment" / gradient.VERSION / "features"
+    cells = {}
+    n = 0
+    tot = {k: [0, 0, 0] for k in ("rules", "L", "M", "true")}
+    for match in gradient.matches():
+        blocks, labs, a_t, a_v, a_l, a_m, smo = [], [], [], [], [], [], []
+        with np.load(gradient.CACHE / gradient.VERSION / ("%s.npz" % match)) as d:
+            for per in d["periods"]:
+                path = out / ("%s_h%d.pkl" % (match, int(per)))
+                if not path.exists():
+                    continue
+                f = bench._load(str(path))
+                tagp = "h%d" % int(per)
+                b = dict(P=d[tagp + "_players"], B=d[tagp + "_ball"], team=d["team"], gk=d["gk"], pitch=tuple(d["pitch"]), group=match)
+                lab = np.asarray(d[tagp + "_labels"])
+                idx = [f["fk"].index(k) for k in base_names]
+                x = f["XF"][:, idx]
+                blocks.append(b)
+                labs.append(lab)
+                a_t.append(model_v2.aliveness(exp_blend.rule_f(b), P))
+                v, l = transplant(lab, np.random.default_rng([SEED, n]))
+                a_v.append(-P["w_binvalid"] * (~v) + P["w_blive"] * l)
+                a_l.append(exp_blend.logit_alive(l_model.predict(x, num_threads=bench.THREADS)))
+                a_m.append(exp_blend.logit_alive(m_model.predict(x, num_threads=bench.THREADS)))
+                smo.append(bench.predict_team(team_model, f))
+                n += 1
+        if not blocks:
+            continue
+        smo = exp_smooth.smooth(smo, 25)
+        rb = [a + v for a, v in zip(a_t, a_v)]
+        ref = sd.decode_scores(a_l, smo)
+        res = {"rules+DT": [dt.retime(r, l) for r, l in zip(sd.decode_scores(rb, smo), ref)], "mix.5": sd.decode_scores(mix_evidence(rb, a_l), smo),
+               "L+view": sd.decode_scores([x + v for x, v in zip(a_l, a_v)], smo), "M+view": sd.decode_scores([x + v for x, v in zip(a_m, a_v)], smo),
+               "both+view": sd.decode_scores([0.5 * x + 0.5 * y + v for x, y, v in zip(a_l, a_m, a_v)], smo),
+               "r.5 both": sd.decode_scores([0.5 * t + 0.5 * x + 0.5 * y + v for t, x, y, v in zip(a_t, a_l, a_m, a_v)], smo),
+               "E1": sd.decode_scores([r + 0.5 * x + 0.5 * y for r, x, y in zip(rb, a_l, a_m)], smo)}
+        for name, preds in res.items():
+            cells.setdefault(("pff", "ctrl", TAG, name), []).append(er.by_match(blocks, labs, preds))
+        print("  %s done" % match, flush=True)
+    merged = {}
+    for k, v in cells.items():
+        d = {}
+        for x in v:
+            d.update(x)
+        merged[k] = [d]
+    er.summarize(merged, list(names), ref="mix.5")
+
+
 def stress2():
     """Round 41's bet: the rules go. What if the rules are better on the target than anything measured (kappa x the truth) or the multi-source model worse (slow noise sigma on its and the DFL model's log-odds)? Seed 0, draw 0, SkillCorner's first ten matches. Also the hedges rules + 1 / 2 x the model."""
     names = ("rules+DT", "mix.5", "DMSb+view", "r1", "r2")
@@ -997,4 +1062,4 @@ if __name__ == "__main__":
     sys.stdout.reconfigure(encoding="utf-8")
     warnings.filterwarnings("ignore")
     {"eval": evaluate, "st": soccertrack, "v3g": deglued, "stress": stress, "dm": multi_source, "verifier": verifier, "shape": shape, "head": head, "oracle": oracle, "dm2": multi_source2, "qnorm": qnorm, "dm3": multi_source3, "dm4": multi_source4,
-     "stress2": stress2, "st2": soccertrack2, "head2": head2, "stress3": stress3, "eval2": evaluate2, "st4": soccertrack4}[sys.argv[1]](*sys.argv[2:])
+     "stress2": stress2, "st2": soccertrack2, "head2": head2, "stress3": stress3, "eval2": evaluate2, "st4": soccertrack4, "pff": pff_test}[sys.argv[1]](*sys.argv[2:])

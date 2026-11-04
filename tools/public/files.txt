@@ -1,6 +1,6 @@
 # Files of the public repository (tools/export_public.py). Source modules: the import closure of
-# src/make_submission.py with model_v17 = the v10 / shared BiGRU blend mixed with the short-possession specialist J1 +
-# the short-possession verifier + the dead-ball boundary timing of the learned dead model (incl. lazily imported option
+# src/make_submission.py with model_v18 = the v10 / shared BiGRU blend mixed with the short-possession specialist J1 +
+# the short-possession verifier, decoded with rules + broadcast + half the learned dead model (incl. lazily imported option
 # modules, the feature plugins named in model_v7.VERSION, src/reproduce_shared_bigru.py, which rebuilds the shared
 # BiGRU's BAR-ATH probabilities, and src/exp_bigru_lomo.py, whose held-out DFL probabilities the blend verifiers were
 # trained with), the open-data download script, the team classifier, the verifier classifiers (v13's, v14's, v15's and
@@ -45,6 +45,7 @@ src/model_v14.py
 src/model_v15.py
 src/model_v16.py
 src/model_v17.py
+src/model_v18.py
 src/model_v2.py
 src/model_v3.py
 src/model_v5.py
