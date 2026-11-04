@@ -2497,6 +2497,14 @@ tohumu × doğrulayıcı tohumu 0 / 1. Karar v15'e (C1abETmS) karşı: birincil 
 Ayıran test: `bench` varyantı **v3g** = V3 + top gürültüsü 0.8 m (girdi istatistiğine göre seçildi: oyuncu < 1 m Metrica 0.29, BAR-ATH 0.29). **G1** = C1, Metrica çıktıları v3g girdisinde; **H1** = C1 yalnız v3g Metrica'da ince ayar; **J1** = C1 DFL + v3g Metrica'da ince ayar; Metrica çıktıları hep v3g girdisinde, maç-dışı. v10, BiGRU ve aday özellikleri aynı
 (yani yalnız uzman yolu sınanıyor). Karşılaştırma G1'e göre, 3 v10 tohumu × doğrulayıcı tohumu 0 / 1. Geçiş: J1'in Metrica kazancı (iki ölü top ortalaması) ≥ +0.0035 ve karar kuralı (birincil ≥ 0.005, korumalar ≥ −0.01) → kazanç kuraldan; v17 = v16'da C1 yerine J1 (hedefin top istatistiğine yakın eğitim). Değilse F1 / J1 paketlenmez, v16 kalır. Bilgi: G1 − C1 (uzmanın Metrica'daki yapışıklık payı), SoccerTrack.
 
+**Tur 38 — alanlar arası filo (4 Kasım; kullanıcı: "hemen fikir üretmektense uzun süre farklı alanlarda yaklaşımlar türet; Codex alt ajanları kullan; ciddi kazanç gördüğün yerlere saldır").** 8 Codex ajanı: konuşmacı ayrıştırma, gen bulma, radar takibi, hayvan davranışı, nokta süreçleri, robotik / oyun teorisi,
+zayıf denetim / alan uyarlama, ses olayı tespiti. Brifte yalnız açık veri sayıları ve kapanan yollar; BAR-ATH'tan sayı yok.
+
+**Tur 39 — doğrulayıcı BAR-ATH'ın koşulunda (4 Kasım; ön kayıt, çalıştırmadan önce).** Etiketsiz denetim (`scratchpad lit38/target_audit.py`, toplu): v15'in BAR-ATH'taki doğrulayıcısı 54 ekleme adayından 1'ini kabul ediyor (p 90 / 99. yüzdelik 0.24 / 0.71), açık setlerde öğrenilmiş ve gerçek D'de maç başına ~4 (0.46–0.51 / 0.88–0.94). Çözümlenen < 4 sn possession sayısı
+ise kural tabanlı ölü topta açık setlerle aynı düzeyde (BAR-ATH 13, DFL 16.8, Metrica 10.2, SC 15.3; öğrenilmiş / gerçek D'de 27–36). Yani fark takım kanıtında değil, ölü top kanalında: doğrulayıcı hiç kurallı çözümde eğitilmedi ve ölçülmedi (tur 17'nin dersi: bileşeni BAR-ATH'taki koşulunda ölç). Tur 26–29'un kurallı değerlendirmeleri de doğrulayıcı öncesiydi.
+Sınama (`src/exp_rules_ctx.py`): açık setlere kurallı kanal (R1), kollar: çözüm / bugünkü gibi eğitilmiş doğrulayıcı / kurallı satırlar eklenmiş / yalnız kurallı satırlar, DT öncesi ve sonrası, 3 v10 tohumu × doğrulayıcı tohumu 0 / 1, maç-dışı. Karar, kurallı + DT bağlamlarında bugünkü kola karşı: birincil (DFL evctrl, Metrica ctrl) ≥ 0.005, korumalar (DFL-trk, SC faz / pp) ≥ −0.01.
+Geçerse v17 = v16'nın doğrulayıcısı yeni satırlarla yeniden eğitilir (eşikler aynı).
+
 ## Ek A — İlk analiz, araştırma ve baseline'lar (20 Ekim)
 
 *Tarihsel rapor; özgün başlığı: More than a Hack 2027 — Faz 1 (Top Sahipliği) · Analiz, Araştırma ve Baseline Raporu. Güncel durum için §1.*
