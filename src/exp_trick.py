@@ -639,9 +639,13 @@ def _f1(blocks, labs, base, rows, p):
 def screen(names, seed=0, vseed=0):
     params = dict(ev.PARAMS, seed=vseed, deterministic=True, force_row_wise=True,
                   num_threads=int(os.environ.get("VERIFY_THREADS", "8")))
-    exp_kpu.use(BASE)
+    base_name = os.environ.get("TRICK_BASE", BASE)
+    exp_kpu.use(base_name)
     data = {(src, d): ev._rows4(src, seed, d) for src in exp_kpu.SRCS for d in ev.DEADS}
-    keys = exp_kpu.feats(BASE)
+    for (src, d), v in data.items():
+        for r in v["rows"]:
+            r["_dead"] = d
+    keys = exp_kpu.feats(base_name)
     new = []
     for src in exp_kpu.SRCS:
         blocks = bench.blocks(src)
@@ -649,6 +653,7 @@ def screen(names, seed=0, vseed=0):
             rows = [r for d in ev.DEADS for r in data[(src, d)]["rows"] if r["i"] == i]
             ctx = Ctx(src, i, b)
             ctx.seed = seed
+            ctx.bases = {d: np.asarray(data[(src, d)]["base"][i]) for d in ev.DEADS}
             for name in names:
                 got = TRICKS[name](ctx, rows)
                 new += [k for k in got if k not in new]

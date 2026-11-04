@@ -62,6 +62,9 @@ VARIANTS.update({"v5": sim.V5, "v5c": sim.V5C, "v3c": sim.V3C})   # ATD-like fab
 VARIANTS["v3s2"] = dict(sim.V3, seed_offset=50000)   # a second, independently degraded copy (training augmentation)
 # exact positions (round 10, src/exp_clean.py): V3's masks (same random stream) without position noise / aerial parallax
 VARIANTS["v3p0"] = dict(sim.V3, ball_noise=0.0, p_noise=0.0, cam=(0.5, -0.45, 1e6))
+# round 37: Metrica's sample ball sits on its owner (rebuilt from events); ball noise 0.8 m puts it as far from the players as the
+# target's automatic ball (share within 1 m: 0.29 / 0.29; V3 alone 0.48). Input statistics only, like V3 itself.
+VARIANTS["v3g"] = dict(sim.V3, ball_noise=0.8)
 LGB_DEAD = dict(td.LGB_DEAD, num_threads=THREADS)
 
 

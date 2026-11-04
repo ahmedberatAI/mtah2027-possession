@@ -155,7 +155,7 @@ def theta(variant):
 
 
 THETA = {"S1": 0.7, "S2": 0.8, "C1": 0.7, "C2": 0.7,      # src/exp_kpu.py theta, recorded in docs/RAPOR.md before gate 2
-         "C3": 0.7, "F1": 0.7, "F3": 0.7, "D1": 0.7, "M1": 0.7}                 # (C2, round 32; C3 / F1 / F3, round 34: C1's value, not re-chosen)
+         "C3": 0.7, "F1": 0.7, "F3": 0.7, "D1": 0.7, "M1": 0.7, "G1": 0.7, "H1": 0.7, "J1": 0.7}                 # (C2, round 32; C3 / F1 / F3, round 34: C1's value, not re-chosen)
 _path = ev._path
 
 
@@ -429,12 +429,12 @@ def main():
             build_m(variant)
         elif variant in ("C1abETm50", "C1abETma"):
             build_m(variant, w=0.5 if variant == "C1abETm50" else 0.25, avg=variant == "C1abETma")
-        elif variant in ("C2abETm", "C3abETm", "F1abETm", "F3abETm", "D1abETm", "M1abETm"):     # rounds 32 / 34: another specialist in C1's place
+        elif variant in ("C2abETm", "C3abETm", "F1abETm", "F3abETm", "D1abETm", "M1abETm", "G1abETm", "H1abETm", "J1abETm"):     # rounds 32 / 34: another specialist in C1's place
             build_m(variant, variant=variant[:2])
         elif variant in ("L8abETm", "LGabETm"):                  # round 36: longer delete candidates
             build_m(variant, short=200 if variant[1] == "8" else 400)
         elif variant in ("C1abETmS", "C1abETm50S", "C1abETmaS", "C2abETmS", "C3abETmS", "F1abETmS", "F3abETmS", "D1abETmS",
-                         "M1abETmS", "L8abETmS", "LGabETmS"):
+                         "M1abETmS", "L8abETmS", "LGabETmS", "G1abETmS", "H1abETmS", "J1abETmS"):
             relabel_sc(variant[:-1], variant)
         else:
             build(variant)

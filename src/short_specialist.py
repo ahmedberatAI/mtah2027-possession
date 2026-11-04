@@ -49,7 +49,9 @@ KS = {"C3": 11, "F3": 11}       # round 34: players per team in a variant's repr
 ROOT = os.path.dirname(HERE)
 OUT = os.path.join(ROOT, "cache", "kpu")
 TARGET = (("dfl@v3", "evctrl"), ("metrica@v3", "ctrl"))       # round 34: the target-convention games (fine-tuning)
-FT_TARGET = {"D1": TARGET[:1], "M1": TARGET[1:]}              # transfer test: fine-tuned on one provider only
+FT_TARGET = {"D1": TARGET[:1], "M1": TARGET[1:],              # transfer test: fine-tuned on one provider only
+             "H1": (("metrica@v3g", "ctrl"),),                # round 37: Metrica's ball moved off its owner (bench v3g)
+             "J1": (TARGET[0], ("metrica@v3g", "ctrl"))}
 FT_STEPS, FT_LR = 2000, 3e-4
 
 
@@ -646,7 +648,7 @@ def finetune(base, new, k_seed, pff_folder):
               flush=True)
     for src, lst in outs.items():
         assert all(o is not None for o in lst), src
-        dest = os.path.join(OUT, "%s_%s.pkl" % (new, src.replace("@", "-")))
+        dest = os.path.join(OUT, "%s_%s.pkl" % (new, src.replace("@v3g", "@v3").replace("@", "-")))
         res = bench._load(dest) if os.path.isfile(dest) else {}
         res[seed] = lst
         bench._dump(res, dest)
