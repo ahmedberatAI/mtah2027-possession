@@ -146,6 +146,20 @@ def team_raws(src, seed, v10_kind, w_gru=0.5, w_spec=0.25):
     return [(1 - w_spec) * ((1 - w_gru) * np.asarray(a, np.float64) + w_gru * np.asarray(b, np.float64)) + w_spec * ss.pk(o, 0) for a, b, o in zip(v, members[k], outs)]
 
 
+def decode_par(a_list, phl, pen_team=12.0, pen_dead=30.0, min_poss=8, min_dead=50):
+    """sd.decode_scores on a thread pool (the decoder releases the GIL)."""
+    from concurrent.futures import ThreadPoolExecutor
+    import decode2
+    import exp_v7
+    sp = decode2.duration_spec(pen_team, pen_dead, min_poss, min_dead, exp_v7.ramp(175, 48.0))
+
+    def one(i):
+        q = np.clip(phl[i], sd.EPS, 1 - sd.EPS)
+        return sp.decode(np.stack([a_list[i] / 2 + np.log(q), a_list[i] / 2 + np.log(1 - q), -a_list[i] / 2], 1)).astype(np.int8)
+    with ThreadPoolExecutor(int(os.environ.get("DECODE_WORKERS", "6"))) as pool:
+        return list(pool.map(one, range(len(a_list))))
+
+
 def evaluate():
     import exp_blend_weight as bw
     import exp_deadmix as dm
@@ -163,7 +177,7 @@ def evaluate():
             for name, (kind, wg, ws) in cfg.items():
                 smo = exp_smooth.smooth(team_raws(src, k, kind, wg, ws), 25)
                 for dname, ev2 in (("v19 D", a), ("true D", [np.where(g == 2, -12.0, 12.0) for g in labs[convs[0]]])):
-                    preds = sd.decode_scores(ev2, smo)
+                    preds = decode_par(ev2, smo)
                     for c in convs:
                         cells.setdefault((src, c, dname, name), []).append(er.by_match(blocks, labs[c], preds))
             print("  %s seed %d done" % (src, k), flush=True)

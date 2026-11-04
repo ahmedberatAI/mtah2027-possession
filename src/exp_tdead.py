@@ -141,6 +141,17 @@ def score_half(net, mean, scale, xf):
     return (1 / (1 + np.exp(-z))).astype(np.float32)
 
 
+def score_heads(net, mean, scale, xf):
+    """Per frame: stop and restart heat of the model's auxiliary heads, as probabilities, interpolated to 25 fps (float16 pair)."""
+    x = pool(xf)
+    xx = np.nan_to_num((x - mean) / scale, nan=0.0)
+    with torch.no_grad():
+        out = net(torch.as_tensor(xx[None], dtype=torch.float32, device=DEVICE))[0, :, 1:].cpu().numpy()
+    grid = (np.arange(len(out)) + 0.5) * STEP
+    t = np.arange(len(xf)) + 0.5
+    return np.stack([1 / (1 + np.exp(-np.interp(t, grid, out[:, c]))) for c in (0, 1)], 1).astype(np.float16)
+
+
 def train(seed):
     seed = int(seed)
     os.makedirs(OUT, exist_ok=True)
@@ -150,6 +161,7 @@ def train(seed):
     sc = sorted({r[0] for r in data["sc"]}, key=str)
     feats = {k: bench.features("base", SOURCES[k][0]) for k in SOURCES}
     res = {k: [[] for _ in data[k]] for k in SOURCES}
+    heads = {k: [[] for _ in data[k]] for k in SOURCES}
     for i in range(len(dfl)):
         t0 = time.time()
         hold = {dfl[i], met[i % len(met)]} | set(sc[i::len(dfl)])
@@ -158,6 +170,7 @@ def train(seed):
             for j, r in enumerate(data[k]):
                 if r[0] in hold:
                     res[k][j].append(score_half(net, mean, scale, feats[k][j]["XF"]))
+                    heads[k][j].append(score_heads(net, mean, scale, feats[k][j]["XF"]))
         print("  seed %d fold %d done, %.0f s" % (seed, i, time.time() - t0), flush=True)
         del net
         torch.cuda.empty_cache()
@@ -165,6 +178,7 @@ def train(seed):
         out = [np.mean(np.stack(v), axis=0) for v in res[k]]
         assert all(len(v) for v in res[k])
         bench._dump(out, os.path.join(OUT, "held_%d_%s.pkl" % (seed, SOURCES[k][0].replace("@", "-"))))
+        bench._dump([np.mean(np.stack(v), axis=0).astype(np.float16) for v in heads[k]], os.path.join(OUT, "heads_%d_%s.pkl" % (seed, SOURCES[k][0].replace("@", "-"))))
     net, mean, scale = fit(data, set(), seed + 100)
     torch.save(dict(state={k: v.cpu() for k, v in net.state_dict().items()}, mean=mean, scale=scale, n_in=len(mean)), os.path.join(OUT, "all_%d.pt" % seed))
     print("  seed %d all-data model done" % seed, flush=True)

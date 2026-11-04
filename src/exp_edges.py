@@ -21,6 +21,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import bench  # noqa: E402
 import exp_blend  # noqa: E402
 import exp_deadmix as dm  # noqa: E402
+import exp_deglue as eg  # noqa: E402
 import exp_refine as er  # noqa: E402
 import exp_rules_open as ro  # noqa: E402
 import exp_scdead as sd  # noqa: E402
@@ -224,7 +225,7 @@ def evaluate(k):
     names = list(arms)
     for s in es.SEEDS:
         for name, e in arms.items():
-            preds = sd.decode_scores(e, smos[s])
+            preds = eg.decode_par(e, smos[s])
             for c in convs:
                 cells.setdefault((src, c, "edges D", name), []).append(er.by_match(blocks, labs[c], preds))
             if s == es.SEEDS[0]:
@@ -284,7 +285,24 @@ def pff():
     m6 = bench.load_booster(os.path.join(OUT, "M_v6_all.txt"))
     base_names = bench.features("base", "dfl@v3")[0]["fk"]
     out = pathlib.Path(bench.ROOT) / "cache" / "pff_experiment" / gradient.VERSION / "features"
-    names = ("v19", "rules3", "M6 A25", "M6 A50", "M6 A75", "M6 only", "rules6")
+    names = ("v19", "rules3", "M6 A25", "M6 A50", "M6 A75", "M6 only", "rules6", "TD3 A25", "M3+TD3 A25", "TD6 A25", "M6+TD6 A25", "M6+TD6 A50")
+    import exp_tdead as etd
+    import torch
+
+    def td_nets(folder):
+        nets = []
+        for seed in (20261104, 20261105, 20261106):
+            ck = torch.load(os.path.join(bench.CACHE, folder, "all_%d.pt" % seed), map_location="cpu", weights_only=False)
+            net = etd.Net(ck["n_in"]).to(etd.DEVICE)
+            net.load_state_dict(ck["state"])
+            net.eval()
+            nets.append((net, ck["mean"], ck["scale"]))
+        return nets
+
+    def td_alive(nets, x):
+        return exp_blend.logit_alive(np.mean([etd.score_half(n_, m_, s_, x) for n_, m_, s_ in nets], axis=0))
+
+    td3, td6 = td_nets("tdead"), td_nets("tdead6")
     cells = {}
     n = 0
     dead = {k: [0, 0, 0] for k in names}
@@ -317,6 +335,12 @@ def pff():
                 ev["M6 A75"].append(0.75 * tr6 + 0.25 * a6 + vi6)
                 ev["M6 only"].append(a6 + vi6)
                 ev["rules6"].append(tr6 + vi6)
+                x3, x6 = td_alive(td3, x), td_alive(td6, x)
+                ev["TD3 A25"].append(0.25 * tr3 + 0.75 * x3 + vi3)
+                ev["M3+TD3 A25"].append(0.25 * tr3 + 0.375 * a3 + 0.375 * x3 + vi3)
+                ev["TD6 A25"].append(0.25 * tr6 + 0.75 * x6 + vi6)
+                ev["M6+TD6 A25"].append(0.25 * tr6 + 0.375 * a6 + 0.375 * x6 + vi6)
+                ev["M6+TD6 A50"].append(0.5 * tr6 + 0.25 * a6 + 0.25 * x6 + vi6)
                 smo.append(bench.predict_team(team_model, f))
         if not blocks:
             continue

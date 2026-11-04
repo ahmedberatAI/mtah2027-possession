@@ -162,7 +162,51 @@ def evaluate(seeds="0,1,2", deglued="0"):
         bw.decide(mean, "today", cand)
 
 
+def dose():
+    """Round 45's follow-up: with Metrica de-glued J1's weight 0.5 passed; the neighbours, and the unseen-ball gate on top."""
+    names = ("s.25", "s.35", "s.5", "s.65", "s.75", "s1", "s.5 G1", "s.5 G2", "s.5 L")
+    cells = {}
+    pool = ThreadPoolExecutor(WORKERS)
+    for src, convs in dm.CONVS.items():
+        fsrc = eg.G if src.startswith("metrica") else src
+        blocks = bench.blocks(fsrc)
+        labs = {c: [np.asarray(g) for g in bench.labels(src, c)] for c in convs}
+        a = ro.a25_evidence(src)
+        gaps = gates(blocks)
+        true_a = [np.where(g == 2, -12.0, 12.0) for g in labs[convs[0]]]
+        for k in es.SEEDS:
+            v, g, o = parts(src, k, True)
+            sms = {n: [] for n in names}
+            for x, y, z, q in zip(v, g, o, gaps):
+                x, y, z = np.asarray(x, np.float64), np.asarray(y, np.float64), np.asarray(z, np.float64)
+                sp = ss.pk(z, 0).astype(np.float64)
+                base = 0.5 * x + 0.5 * y
+                heads = peaks(z[:, 3:7].max(1), HEAD_W) > HEAD_TAU
+                raw = {"s.25": 0.75 * base + 0.25 * sp, "s.35": 0.65 * base + 0.35 * sp, "s.5": 0.5 * base + 0.5 * sp, "s.65": 0.35 * base + 0.65 * sp, "s.75": 0.25 * base + 0.75 * sp, "s1": sp,
+                       "s.5 G1": np.where(q, base, 0.5 * base + 0.5 * sp), "s.5 G2": np.where(heads, 0.25 * base + 0.75 * sp, 0.5 * base + 0.5 * sp), "s.5 L": sig(0.25 * logit(x) + 0.25 * logit(y) + 0.5 * logit(sp))}
+                for n in names:
+                    sms[n].append(exp_smooth.smooth([raw[n]], 25)[0])
+            for name in names:
+                for dname, ev2 in (("v19 D", a), ("true D", true_a)):
+                    def one(i):
+                        return SPEC_PLAIN.decode(emis(ev2[i], sms[name][i])).astype(np.int8)
+                    preds = list(pool.map(one, range(len(blocks))))
+                    for c in convs:
+                        cells.setdefault((src, c, dname, name), []).append(er.by_match(blocks, labs[c], preds))
+            print("  %s seed %d done" % (src, k), flush=True)
+        bench._blocks.clear()
+        bench._labels.clear()
+    mean, _ = er.summarize(cells, list(names), ref="s.25")
+    with open(os.path.join(RUNS, "r50_dose_cells.pkl"), "wb") as fh:
+        pickle.dump(cells, fh)
+    import exp_blend_weight as bw
+    for cand in names[1:]:
+        bw.decide(mean, "s.25", cand)
+    for cand in ("s.35", "s.65", "s.75", "s1", "s.5 G1", "s.5 G2", "s.5 L"):
+        bw.decide(mean, "s.5", cand)
+
+
 if __name__ == "__main__":
     sys.stdout.reconfigure(encoding="utf-8")
     warnings.filterwarnings("ignore")
-    {"eval": evaluate}[sys.argv[1]](*sys.argv[2:])
+    {"eval": evaluate, "dose": dose}[sys.argv[1]](*sys.argv[2:])
