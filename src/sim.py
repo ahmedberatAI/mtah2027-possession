@@ -302,23 +302,19 @@ def _edges(seen, finite, lab, rng, p):
         gone_a, gone_b = _lognormal_frames(rng, p["edge_gone_median_s"], p["edge_gone_sigma"]), _lognormal_frames(rng, p["edge_gone_median_s"], p["edge_gone_sigma"])
         mix_a, mix_b = int(rng.integers(1, p["edge_mix_frames"])), int(rng.integers(1, p["edge_mix_frames"]))
         jit = int(rng.integers(-p["edge_jitter"], p["edge_jitter"] + 1))
+        keep = a                        # the stop's own visible run: the restart's draw does not undo it
         if a > 0 and seen[a - 1]:
-            src = a - 1
             if ua < p["after_vis"]:
                 e1 = min(a + max(vis_a, 50), b)
-                seen[a:e1] = True
-                nofin = np.flatnonzero(~finite[a:e1]) + a
-                fill[nofin] = src
-                if e1 < b:
-                    seen[e1:min(e1 + max(gone_a, 50), b)] = False
             elif ua < p["after_vis"] + p["after_mix"]:
                 e1 = min(a + mix_a, b)
-                seen[a:e1] = True
-                nofin = np.flatnonzero(~finite[a:e1]) + a
-                fill[nofin] = src
-                seen[e1:min(e1 + max(gone_a, 50), b)] = False
             else:
-                seen[a:min(a + max(gone_a, 50), b)] = False
+                e1 = min(a + abs(jit) + 1, b)   # lost just after the stop
+            seen[a:e1] = True
+            fill[np.flatnonzero(~finite[a:e1]) + a] = a - 1
+            if e1 < b:
+                seen[e1:min(e1 + max(gone_a, 50), b)] = False
+            keep = e1
         if b < n and seen[b]:          # not one of the restarts where the ball stays missing
             nxt = b
             while nxt < n and not finite[nxt]:
@@ -326,29 +322,21 @@ def _edges(seen, finite, lab, rng, p):
             if nxt < n:
                 if ub < p["before_vis"]:
                     s1 = max(b - max(vis_b, 50), a)
-                    seen[s1:b] = True
-                    nofin = np.flatnonzero(~finite[s1:b]) + s1
-                    fill[nofin] = nxt
-                    if s1 > a:
-                        seen[max(s1 - max(gone_b, 50), a):s1] = False
                 elif ub < p["before_vis"] + p["before_mix"]:
                     s1 = max(b - mix_b, a)
-                    seen[s1:b] = True
-                    nofin = np.flatnonzero(~finite[s1:b]) + s1
-                    fill[nofin] = nxt
-                    seen[max(s1 - max(gone_b, 50), a):s1] = False
                 else:
-                    seen[max(b - max(gone_b, 50), a):b] = False
-                    if jit < 0:             # the tracker picks the ball up just before the kick
-                        s1 = max(b + jit, a)
-                        seen[s1:b] = True
-                        nofin = np.flatnonzero(~finite[s1:b]) + s1
-                        fill[nofin] = nxt
-                    elif jit > 0:           # or just after it
+                    s1 = min(b + min(jit, 0), b)   # the tracker picks the ball up around the kick
+                    s1 = max(s1, a)
+                    if jit > 0:
                         stop = b
                         while stop < min(n, b + jit) and not dead[stop]:
                             stop += 1
                         seen[b:stop] = False
+                if s1 < b:
+                    seen[s1:b] = True
+                    fill[np.flatnonzero(~finite[s1:b]) + s1] = nxt
+                if s1 > keep:
+                    seen[max(s1 - max(gone_b, 50), keep):s1] = False
     return seen & (finite | (fill >= 0)), fill
 
 

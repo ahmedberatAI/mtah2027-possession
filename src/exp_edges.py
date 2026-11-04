@@ -197,6 +197,14 @@ def evidence_arms(k, conf):
             "rules6": [t + v for t, v in zip(tr6, vi6)],
             "M6P A25": [0.25 * t + 0.75 * m + v for t, m, v in zip(tr6, m6p, vi6)],
             "M6P A50": [0.5 * t + 0.5 * m + v for t, m, v in zip(tr6, m6p, vi6)]}
+    paths = [os.path.join(bench.CACHE, "tdead6", "held_%d_%s.pkl" % (s, fsrc.replace("@", "-"))) for s in (20261104, 20261105, 20261106)]
+    if all(os.path.isfile(x) for x in paths):       # the sequence model of src/exp_tdead.py on V6's masks, mean of three seeds
+        runs = [bench._load(x) for x in paths]
+        td = [exp_blend.logit_alive(np.mean(np.stack([r[i] for r in runs]), axis=0)) for i in range(len(runs[0]))]
+        arms["TD6 A25"] = [0.25 * t + 0.75 * x + v for t, x, v in zip(tr6, td, vi6)]
+        arms["M6+TD6 A25"] = [0.25 * t + 0.375 * m + 0.375 * x + v for t, m, x, v in zip(tr6, m6, td, vi6)]
+        arms["M6+TD6 A50"] = [0.5 * t + 0.25 * m + 0.25 * x + v for t, m, x, v in zip(tr6, m6, td, vi6)]
+        arms["M6P+TD6 A25"] = [0.25 * t + 0.375 * m + 0.375 * x + v for t, m, x, v in zip(tr6, m6p, td, vi6)]
     return arms
 
 
@@ -241,7 +249,100 @@ def decide():
         bw.decide(mean, "v19", cand)
 
 
+def weights_on(table, conf):
+    """The rule and view weights fitted on all of `table`."""
+    ro.SOURCES = table
+    ro._f.clear()
+    t, c = conf["thresholds"], conf["bounds"]
+    X, y, w = ro.design(t, c)
+    beta, _ = ro.logistic(X, y, w)
+    gamma = ro.fit_view(t, c, beta)
+    ro.SOURCES = V3
+    ro._f.clear()
+    bench._blocks.clear()
+    bench._labels.clear()
+    return beta, gamma
+
+
+def pff():
+    """PFF raw: real tracking with its real ball gaps, no simulated mask, and no model below saw these matches (the view flag is transplanted, the team model is the all-DFL LightGBM, as in round 42). Is what wins on V6 also better on real gaps?"""
+    import gradient
+    import lightgbm as lgb
+    import model_v7
+    import pathlib
+    import exp_smooth
+    with open(ro.OUT) as fh:
+        conf = json.load(fh)
+    t, c = conf["thresholds"], conf["bounds"]
+    b3, g3 = weights_on(V3, conf)
+    b6, g6 = weights_on(V6, conf)
+    print("rule weights V3 %s view %s" % (np.round(b3, 3).tolist(), np.round(g3, 3).tolist()))
+    print("rule weights V6 %s view %s" % (np.round(b6, 3).tolist(), np.round(g6, 3).tolist()), flush=True)
+    tag = "%s_native_v3" % bench._safe(model_v7.VERSION)
+    team_model = lgb.Booster(model_file=os.path.join(bench.CACHE, "models", tag + ".txt"))
+    m3 = bench.load_booster(os.path.join(OUT, "M_v3_all.txt"))
+    m6 = bench.load_booster(os.path.join(OUT, "M_v6_all.txt"))
+    base_names = bench.features("base", "dfl@v3")[0]["fk"]
+    out = pathlib.Path(bench.ROOT) / "cache" / "pff_experiment" / gradient.VERSION / "features"
+    names = ("v19", "rules3", "M6 A25", "M6 A50", "M6 A75", "M6 only", "rules6")
+    cells = {}
+    n = 0
+    dead = {k: [0, 0, 0] for k in names}
+    for match in gradient.matches():
+        blocks, labs, ev, smo = [], [], {k: [] for k in names}, []
+        with np.load(gradient.CACHE / gradient.VERSION / ("%s.npz" % match)) as d:
+            for per in d["periods"]:
+                path = out / ("%s_h%d.pkl" % (match, int(per)))
+                if not path.exists():
+                    continue
+                f = bench._load(str(path))
+                t0 = "h%d" % int(per)
+                b = dict(P=d[t0 + "_players"], B=d[t0 + "_ball"], team=d["team"], gk=d["gk"], pitch=tuple(d["pitch"]), group=match)
+                lab = np.asarray(d[t0 + "_labels"])
+                x = f["XF"][:, [f["fk"].index(k) for k in base_names]]
+                rf = exp_blend.rule_f(b)
+                v, l = dm.transplant(lab, np.random.default_rng([dm.SEED, n]))
+                n += 1
+                T = ro.terms(rf, t, c)
+                tr3, tr6 = T @ b3, T @ b6
+                vi3, vi6 = g3[0] * (~v) + g3[1] * l, g6[0] * (~v) + g6[1] * l
+                a3 = exp_blend.logit_alive(m3.predict(x, num_threads=bench.THREADS))
+                a6 = exp_blend.logit_alive(m6.predict(x, num_threads=bench.THREADS))
+                blocks.append(b)
+                labs.append(lab)
+                ev["v19"].append(0.25 * tr3 + 0.75 * a3 + vi3)
+                ev["rules3"].append(tr3 + vi3)
+                ev["M6 A25"].append(0.25 * tr6 + 0.75 * a6 + vi6)
+                ev["M6 A50"].append(0.5 * tr6 + 0.5 * a6 + vi6)
+                ev["M6 A75"].append(0.75 * tr6 + 0.25 * a6 + vi6)
+                ev["M6 only"].append(a6 + vi6)
+                ev["rules6"].append(tr6 + vi6)
+                smo.append(bench.predict_team(team_model, f))
+        if not blocks:
+            continue
+        smo = exp_smooth.smooth(smo, 25)
+        for name in names:
+            preds = sd.decode_scores(ev[name], smo)
+            cells.setdefault(("pff", "ctrl", "edges D", name), []).append(er.by_match(blocks, labs, preds))
+            for p_, g_ in zip(preds, labs):
+                ok = g_ < 3
+                dead[name][0] += int(((p_ == 2) & (g_ == 2) & ok).sum())
+                dead[name][1] += int(((p_ == 2) & (g_ < 2) & ok).sum())
+                dead[name][2] += int(((p_ < 2) & (g_ == 2) & ok).sum())
+        print("  %s done" % match, flush=True)
+    merged = {}
+    for k, v in cells.items():
+        d = {}
+        for x in v:
+            d.update(x)
+        merged[k] = [d]
+    er.summarize(merged, list(names), ref="v19")
+    for name in names:
+        tp, fp, fn = dead[name]
+        print("  %-9s dead F1 %.3f, precision %.3f, recall %.3f" % (name, 2 * tp / (2 * tp + fp + fn), tp / max(tp + fp, 1), tp / max(tp + fn, 1)), flush=True)
+
+
 if __name__ == "__main__":
     sys.stdout.reconfigure(encoding="utf-8")
     warnings.filterwarnings("ignore")
-    {"inputs": inputs, "models": models, "eval": evaluate, "decide": decide}[sys.argv[1]](*sys.argv[2:])
+    {"inputs": inputs, "models": models, "eval": evaluate, "decide": decide, "pff": pff}[sys.argv[1]](*sys.argv[2:])
