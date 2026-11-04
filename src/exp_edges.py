@@ -1084,6 +1084,108 @@ def r54_unseen():
         print("  %-15s dead F1 %.3f, precision %.3f, recall %.3f" % (name, 2 * tp_ / (2 * tp_ + fp + fn), tp_ / max(tp_ + fp, 1), tp_ / max(tp_ + fn, 1)), flush=True)
 
 
+def _lopo_td(folder, fsrc):
+    runs = [bench._load(os.path.join(bench.CACHE, folder, "lopo_%d_%s.pkl" % (s_, fsrc.replace("@", "-")))) for s_ in (20261104, 20261105, 20261106)]
+    return [exp_blend.logit_alive(np.mean(np.stack([r[i] for r in runs]), axis=0)) for i in range(len(runs[0]))]
+
+
+def lopo_m(tag, table, k, normed=False):
+    """The multi-source LightGBM trained on the two other providers, on provider k's V6 features."""
+    path = os.path.join(OUT, "L_%s_%s.pkl" % (tag, V6[k][0].replace("@", "-")))
+    if os.path.isfile(path):
+        return bench._load(path)
+    conv = norm_table if normed else (lambda x: x)
+    parts = {p_: (conv(bench.features("base", v[0])), bench.labels(v[1], v[2])) for p_, v in table.items() if p_ != k}
+    model = dm.fit_balanced(parts)
+    res = [model.predict(x["XF"], num_threads=bench.THREADS).astype(np.float32) for x in conv(bench.features("base", V6[k][0]))]
+    bench._dump(res, path)
+    return res
+
+
+def lopo_rules(k, table, conf):
+    """Rule and view weights without provider k (the view weights need SkillCorner: for k = sc they stay those of round 44)."""
+    ro.SOURCES = {p_: v for p_, v in table.items() if p_ != k}
+    ro._f.clear()
+    t, c = conf["thresholds"], conf["bounds"]
+    X, y, w = ro.design(t, c)
+    beta, _ = ro.logistic(X, y, w)
+    gamma = np.asarray(conf["gamma"]) if k == "sc" else ro.fit_view(t, c, beta)
+    ro.SOURCES = V3
+    ro._f.clear()
+    bench._blocks.clear()
+    bench._labels.clear()
+    return beta, gamma
+
+
+def r55(k):
+    """Round 55 on one provider: leave that provider out of every dead-ball model, the condition the target is in. V6 masks, team channels as in v19, three seeds."""
+    with open(ro.OUT) as fh:
+        conf = json.load(fh)
+    t, c = conf["thresholds"], conf["bounds"]
+    fsrc = V6[k][0]
+    src = V3[k][1]
+    b3, g3 = lopo_rules(k, V3, conf)
+    b6, g6 = lopo_rules(k, V6, conf)
+    m3 = [exp_blend.logit_alive(x) for x in lopo_m("v3", V3, k)]
+    m6 = [exp_blend.logit_alive(x) for x in lopo_m("v6", V6, k)]
+    mn = [exp_blend.logit_alive(x) for x in lopo_m("v6n", V6, k, True)]
+    td, tn = _lopo_td("tdead6", fsrc), _lopo_td("tdead6n", fsrc)
+    blocks = bench.blocks(fsrc)
+    convs = dm.CONVS[src]
+    labs = {c_: [np.asarray(g) for g in bench.labels(src, c_)] for c_ in convs}
+    truth = labs[convs[0]]
+    cues = sd.view_cues() if k == "sc" else [(None, None)] * len(blocks)
+    T, V_ = [], []
+    for i, (b, g) in enumerate(zip(blocks, truth)):
+        T.append(ro.terms(exp_blend.rule_f(b), t, c))
+        if cues[i][0] is None:
+            V_.append(dm.transplant(g, np.random.default_rng([dm.SEED, 0, i])))
+        else:
+            V_.append((cues[i][0], cues[i][0] & (cues[i][1] >= 4)))
+    tr3 = [x @ b3 for x in T]
+    tr6 = [x @ b6 for x in T]
+    vi3 = [g3[0] * (~v) + g3[1] * l for v, l in V_]
+    vi6 = [g6[0] * (~v) + g6[1] * l for v, l in V_]
+    ev = {"v19": [0.25 * a + 0.75 * m + v for a, m, v in zip(tr3, m3, vi3)],
+          "rules3": [a + v for a, v in zip(tr3, vi3)],
+          "M6 A25": [0.25 * a + 0.75 * m + v for a, m, v in zip(tr6, m6, vi6)],
+          "M6n A25": [0.25 * a + 0.75 * m + v for a, m, v in zip(tr6, mn, vi6)],
+          "TD6 A25": [0.25 * a + 0.75 * x + v for a, x, v in zip(tr6, td, vi6)],
+          "TD6n A25": [0.25 * a + 0.75 * x + v for a, x, v in zip(tr6, tn, vi6)],
+          "M6+TD6 A25": [0.25 * a + 0.375 * m + 0.375 * x + v for a, m, x, v in zip(tr6, m6, td, vi6)],
+          "M6+TD6n A25": [0.25 * a + 0.375 * m + 0.375 * x + v for a, m, x, v in zip(tr6, m6, tn, vi6)],
+          "M6n+TD6n A25": [0.25 * a + 0.375 * m + 0.375 * x + v for a, m, x, v in zip(tr6, mn, tn, vi6)]}
+    names = list(ev)
+    smos = dm.team(src)
+    cells = {}
+    for s_ in es.SEEDS:
+        for name in names:
+            preds = eg.decode_par(ev[name], smos[s_])
+            for c_ in convs:
+                cells.setdefault((src, c_, "LOPO D", name), []).append(er.by_match(blocks, labs[c_], preds))
+            if s_ == es.SEEDS[0]:
+                print("  %-13s dead share %.3f (true %.3f), dead F1 %.3f" % (name, np.mean(np.concatenate(preds) == 2), np.mean(np.concatenate(truth) == 2), dm._dead_f1(preds, truth)), flush=True)
+        print("  seed %d done" % s_, flush=True)
+    er.summarize(cells, names, ref="v19")
+    with open(os.path.join(RUNS, "r55_cells_%s.pkl" % k), "wb") as fh:
+        pickle.dump(cells, fh)
+
+
+def r55_decide():
+    import exp_blend_weight as bw
+    cells = {}
+    for k in V6:
+        with open(os.path.join(RUNS, "r55_cells_%s.pkl" % k), "rb") as fh:
+            cells.update(pickle.load(fh))
+    names = sorted({c[3] for c in cells}, key=lambda n: (n != "v19", n))
+    mean, _ = er.summarize(cells, names, ref="v19")
+    for cand in names[1:]:
+        bw.decide(mean, "v19", cand)
+    for cand in names[1:]:
+        if cand != "M6+TD6n A25":
+            bw.decide(mean, "M6+TD6n A25", cand)
+
+
 def soccertrack(var="v6"):
     """SoccerTrack v2: a full-pitch camera and the provider's own per-frame ball status; no model saw it. Team channels frozen as in round 44; masks V3 or V6; all-data dead models."""
     import exp_smooth
@@ -1157,4 +1259,4 @@ def soccertrack(var="v6"):
 if __name__ == "__main__":
     sys.stdout.reconfigure(encoding="utf-8")
     warnings.filterwarnings("ignore")
-    {"inputs": inputs, "models": models, "eval": evaluate, "decide": decide, "pff": pff, "st": soccertrack, "heads": boundary_heads, "stress": stress, "r51": r51, "r51decide": r51_decide, "r51pff": r51_pff, "combo": combo, "decoder": decoder_screen, "r51st": r51_st, "r54models": r54_models, "r54": r54, "r54decide": r54_decide, "r54unseen": r54_unseen}[sys.argv[1]](*sys.argv[2:])
+    {"inputs": inputs, "models": models, "eval": evaluate, "decide": decide, "pff": pff, "st": soccertrack, "heads": boundary_heads, "stress": stress, "r51": r51, "r51decide": r51_decide, "r51pff": r51_pff, "combo": combo, "decoder": decoder_screen, "r51st": r51_st, "r54models": r54_models, "r54": r54, "r54decide": r54_decide, "r54unseen": r54_unseen, "r55": r55, "r55decide": r55_decide}[sys.argv[1]](*sys.argv[2:])

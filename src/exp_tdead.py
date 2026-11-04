@@ -148,7 +148,7 @@ def fit(data, hold, seed):
     net = Net(n_in).to(DEVICE)
     opt = torch.optim.AdamW(net.parameters(), lr=LR, weight_decay=1e-4)
     sch = torch.optim.lr_scheduler.OneCycleLR(opt, LR, total_steps=STEPS, pct_start=0.1)
-    keys = list(pools)
+    keys = [k for k in pools if pools[k]]
     net.train()
     for step in range(STEPS):
         X, Yd, M, H = [], [], [], []
@@ -283,6 +283,23 @@ def train_mix(seed):
     print("  seed %d all-data model done" % seed, flush=True)
 
 
+def lopo(seed):
+    """Round 55: a whole provider unseen, the condition the target is in: each provider scored by models trained on the other two."""
+    seed = int(seed)
+    os.makedirs(OUT, exist_ok=True)
+    data = load_all()
+    feats = {k: bench.features("base", SOURCES[k][0]) for k in SOURCES}
+    for i, k in enumerate(SOURCES):
+        t0 = time.time()
+        hold = {r[0] for r in data[k]}
+        net, mean, scale = fit(data, hold, seed + 200 + i)
+        out = [score_half(net, mean, scale, f["XF"]) for f in feats[k]]
+        bench._dump(out, os.path.join(OUT, "lopo_%d_%s.pkl" % (seed, SOURCES[k][0].replace("@", "-"))))
+        print("  seed %d provider %s done, %.0f s" % (seed, k, time.time() - t0), flush=True)
+        del net
+        torch.cuda.empty_cache()
+
+
 def load_all_model(seed):
     ck = torch.load(os.path.join(OUT, "all_%d.pt" % int(seed)), map_location="cpu", weights_only=False)
     net = Net(ck["n_in"]).to(DEVICE)
@@ -304,5 +321,7 @@ if __name__ == "__main__":
         train(sys.argv[2])
     elif sys.argv[1] == "mix":
         train_mix(sys.argv[2])
+    elif sys.argv[1] == "lopo":
+        lopo(sys.argv[2])
     else:
         raise SystemExit(__doc__)
