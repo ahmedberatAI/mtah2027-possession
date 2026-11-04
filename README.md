@@ -25,12 +25,14 @@ Fikirler, denemeler ve sonuçlar tek bir belgede: **[`docs/RAPOR.md`](docs/RAPOR
 
 ## Submission
 
-- **The file:** `submissions/candidate_v18.csv` (model_v18 = model_v17 with fused dead-ball evidence: rules + broadcast
-  + half the learned dead model, no boundary timing step; model_v17 = model_v16 with the short-possession specialist J1
+- **The file:** `submissions/candidate_v19.csv` (model_v19 = model_v17's team side with dead-ball evidence free of the
+  public window: open-data rules + a multi-source dead model + view terms; model_v18 = model_v17 with rules + broadcast + half
+  the learned dead model; model_v17 = model_v16 with the short-possession specialist J1
   in C1's place; model_v16 = model_v15 + the dead-ball boundary timing of the learned dead model; model_v15 = v14's v10 /
   shared-BiGRU blend mixed with the short-possession specialist C1 + the short-possession verifier retrained on that
-  base, no whistle), MD5 `b6101389cd877edec44bbe64cd00c4b3`.
-  `python src/make_submission.py` regenerates it; `--model model_v17 --out submissions/candidate_v17.csv` still writes
+  base, no whistle), MD5 `45096061ebdc3aac6e2087d8a047246a`.
+  `python src/make_submission.py` regenerates it; `--model model_v18 --out submissions/candidate_v18.csv` still writes
+  v18 (MD5 `b6101389cd877edec44bbe64cd00c4b3`), `--model model_v17 --out submissions/candidate_v17.csv`
   v17 (MD5 `55dfc08216c344f7077d4fac88c51a86`), `--model model_v16 --out submissions/candidate_v16.csv`
   v16 (MD5 `c89208a3a034ee73bb41f3fb28390f87`), `--model model_v15 --out submissions/candidate_v15.csv`
   v15 (MD5 `6081216bcf484049d8e6e84b27fc85dd`), `--model model_v14 --out
@@ -78,11 +80,21 @@ uv pip install --python .venv/Scripts/python.exe numpy pandas scipy numba lightg
 git clone https://github.com/metrica-sports/more-than-a-hack-2027 external/more-than-a-hack-2027
 # unpack the match bundle into ./data (or set MTAH_DATA_DIR)
 .venv/Scripts/python.exe src/download_idsse.py            # open DFL data, CC BY 4.0, ~2.6 GB
-.venv/Scripts/python.exe src/make_submission.py           # the submission: model_v18 -> submissions/candidate_v18.csv
-python external/more-than-a-hack-2027/evaluation/validate_submission.py submissions/candidate_v18.csv
+.venv/Scripts/python.exe src/make_submission.py           # the submission: model_v19 -> submissions/candidate_v19.csv
+python external/more-than-a-hack-2027/evaluation/validate_submission.py submissions/candidate_v19.csv
 ```
 
-**The submission is `model_v18`: `model_v17` with fused dead-ball evidence** (`submissions/candidate_v18.csv`, MD5
+**The submission is `model_v19`: `model_v17`'s team side with dead-ball evidence free of the public window**
+(`submissions/candidate_v19.csv`, MD5 `45096061ebdc3aac6e2087d8a047246a`; rounds 43 and 44 in `docs/RAPOR.md`). The official rules say the public window
+is not a tuning set, and the dead-ball rules up to v18 were written looking at it. In v19 the decoder's alive log-odds are 0.25 x
+rules whose constants all come from the open sets (`models/dead_rules_open_v1.json`, `src/dead_rules_fit.py`) + 0.75 x a dead
+model trained on DFL, de-glued Metrica and SkillCorner with equal provider weight (`models/dead_multi_v1.txt`) + the view terms,
+with weights from SkillCorner's real flag. The verifier stays. Held out, before the verifier, v17's recipe / v18 / v19: DFL evctrl
+0.682 / 0.784 / 0.794, Metrica ctrl 0.768 / 0.837 / 0.855, SkillCorner evctrl 0.642 / 0.702 / 0.731, PFF (independent) 0.535 / 0.523 /
+0.533. Worst-case regret on the target convention's contexts +0.018 against v18. The gain cannot be measured on BAR-ATH itself; v19
+differs from v18 on 3.95% of its frames.
+
+**`model_v18`: `model_v17` with fused dead-ball evidence** (`submissions/candidate_v18.csv`, MD5
 `b6101389cd877edec44bbe64cd00c4b3`; rounds 40 and 41 in `docs/RAPOR.md`). The decoder's alive log-odds are the rules + the aligned broadcast + 0.5 x
 the alive log-odds of the learned dead model (`models/dead_base_v3.txt`); the boundary timing step is gone. The open sets'
 rules used to lack the broadcast, so they understated BAR-ATH's; with SkillCorner's real view flag transplanted onto DFL and

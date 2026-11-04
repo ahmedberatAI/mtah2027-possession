@@ -43,16 +43,18 @@ User instructions carried forward from the 27 October 2026 continuation note.
 - Python command convention on Windows: `.venv/Scripts/python.exe -I src/<script>.py`.
   Scripts must add their own `src/` import path when using isolated mode.
 
-Current submission (4 November 2026, rounds 40-41, the user's decision): `model_v18` = `model_v17` with fused dead-ball
-evidence (rules + aligned broadcast + 0.5 x the learned DFL dead model's alive log-odds, `models/dead_base_v3.txt`; no boundary
-timing step; verifier as in v17). `model_v17` = `model_v16` with the specialist J1 in C1's place (C1
+Current submission (4 November 2026, rounds 43-44, the user's decision): `model_v19` = `model_v17`'s team side with dead-ball
+evidence free of the public window: 0.25 x open-data rules (`models/dead_rules_open_v1.json`, `src/dead_rules_fit.py`) + 0.75 x a
+multi-source dead model (`models/dead_multi_v1.txt`) + view terms, verifier as in v17, no boundary timing. `model_v18` = `model_v17` with
+v3's rules (constants set looking at the public window, not allowed in a submission) + aligned broadcast + 0.5 x the DFL dead model.
+`model_v17` = `model_v16` with the specialist J1 in C1's place (C1
 fine-tuned on the ten open target-convention games, Metrica's ball de-glued, `models/kpu_j1/`) + the verifier retrained
 on it; `model_v16` = `model_v15` with its dead-ball boundaries (stops and
 restarts) moved onto the learned all-DFL dead model's own decode within +-2 s (`src/dead_timing.py`,
 `models/dead_base_v3.txt`); `model_v15` = v14's blend (0.5 v10 + 0.5 shared BiGRU) mixed 0.75 / 0.25 with the
 short-possession specialist C1 (open PFF data only, `models/kpu_c1/`) + the verifier retrained on that base with
-target-convention labels. Expected CSV MD5 `b6101389cd877edec44bbe64cd00c4b3` (`submissions/candidate_v18.csv`). With `--model` always
-pass `--out`, the default path is v18's. v17 (`--model model_v17`, MD5 `55dfc08216c344f7077d4fac88c51a86`), v16 (`--model model_v16`, MD5 `c89208a3a034ee73bb41f3fb28390f87`),
+target-convention labels. Expected CSV MD5 `45096061ebdc3aac6e2087d8a047246a` (`submissions/candidate_v19.csv`). With `--model` always
+pass `--out`, the default path is v19's. v18 (`--model model_v18`, MD5 `b6101389cd877edec44bbe64cd00c4b3`), v17 (`--model model_v17`, MD5 `55dfc08216c344f7077d4fac88c51a86`), v16 (`--model model_v16`, MD5 `c89208a3a034ee73bb41f3fb28390f87`),
 v15 (`--model model_v15`, MD5 `6081216bcf484049d8e6e84b27fc85dd`), v14 (`--model model_v14`, MD5
 `5e7363fc83c6f56a923033894a28d3a1`), v13 (`--model model_v13`, MD5 `ed8ad739207f367017bb8d8c8204c82a`) and v10
 (`--model model_v10`, MD5 `ca20c5b657a395d2f7c0e310cdaabd64`) stay reproducible. Recheck this after integration changes.
