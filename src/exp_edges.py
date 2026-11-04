@@ -860,6 +860,230 @@ def r54_models():
     fold_models_n("v6n", V6)
 
 
+R54 = ("M6+TD6n A25", "M6n+TD6n A25", "M6+TDmix A25", "M6+TDmixn A25", "TDmixn A25", "M6n+TDmixn A25", "R n M6+TD6n", "v19")
+
+
+def norm_rules(fields):
+    """The rule fields with tempo rescaled by the half's own median to the pooled median (label-free): the rules' only absolute-tempo inputs."""
+    out = dict(fields)
+    with np.errstate(invalid="ignore"):
+        for key, ref in (("spd_all_s25", 1.7424), ("spd_all_s100", 1.8224)):
+            med = np.nanmedian(fields[key])
+            out[key] = fields[key] * ref / med
+    return out
+
+
+def r54(k, var=None):
+    """Round 54 on one provider, on V6 (or V3 / V6B masks for the sensitivity: var)."""
+    with open(ro.OUT) as fh:
+        conf = json.load(fh)
+    fsrc = V6[k][0]
+    src = V3[k][1]
+    tr3, vi3 = rule_evidence(k, V3, conf)
+    tr6, vi6 = rule_evidence(k, V6, conf)
+    load = lambda tag: [exp_blend.logit_alive(x) for x in bench._load(os.path.join(OUT, "M_%s_%s.pkl" % (tag, fsrc.replace("@", "-"))))]
+    m3, m6, mn = load("v3"), load("v6"), load("v6n")
+    tn, tm, tmn = _held("tdead6n", fsrc), _held("tdeadmix", fsrc), _held("tdeadmixn", fsrc)
+    blocks = bench.blocks(fsrc)
+    # the rules with the half's tempo level removed, weights refitted on the same footing
+    t, c = conf["thresholds"], conf["bounds"]
+    ro.SOURCES = V6
+    ro._f.clear()
+    d = ro.data()
+    un = sorted({str(x[2]) for x in d[k]})
+    folds = [un[i::5] for i in range(5)] if k == "sc" else [[g] for g in un]
+    fields = [norm_rules(exp_blend.rule_f(x)) for x in blocks]
+    trn = [None] * len(blocks)
+    grp = _groups(blocks)
+    for fold in folds:
+        Xs, ys, ws = [], [], []
+        for p_ in d:
+            xk, yk = [], []
+            for f, g, gr, _, _ in d[p_]:
+                if str(gr) in fold:
+                    continue
+                m = g[::ro.STRIDE] < 3
+                xk.append(ro.terms(norm_rules(f), t, c)[::ro.STRIDE][m])
+                yk.append((g[::ro.STRIDE][m] < 2).astype(float))
+            x_, y_ = np.concatenate(xk), np.concatenate(yk)
+            Xs.append(x_)
+            ys.append(y_)
+            ws.append(np.full(len(y_), 1.0 / len(y_)))
+        beta, _ = ro.logistic(np.concatenate(Xs), np.concatenate(ys), np.concatenate(ws))
+        for i, g in enumerate(grp):
+            if g in fold:
+                trn[i] = ro.terms(fields[i], t, c) @ beta
+    ro.SOURCES = V3
+    ro._f.clear()
+    bench._blocks.clear()
+    bench._labels.clear()
+    blocks = bench.blocks(fsrc)
+    ev = {"v19": [0.25 * t_ + 0.75 * m + v for t_, m, v in zip(tr3, m3, vi3)],
+          "M6+TD6n A25": [0.25 * t_ + 0.375 * m + 0.375 * x + v for t_, m, x, v in zip(tr6, m6, tn, vi6)],
+          "M6n+TD6n A25": [0.25 * t_ + 0.375 * m + 0.375 * x + v for t_, m, x, v in zip(tr6, mn, tn, vi6)],
+          "M6+TDmix A25": [0.25 * t_ + 0.375 * m + 0.375 * x + v for t_, m, x, v in zip(tr6, m6, tm, vi6)],
+          "M6+TDmixn A25": [0.25 * t_ + 0.375 * m + 0.375 * x + v for t_, m, x, v in zip(tr6, m6, tmn, vi6)],
+          "TDmixn A25": [0.25 * t_ + 0.75 * x + v for t_, x, v in zip(tr6, tmn, vi6)],
+          "M6n+TDmixn A25": [0.25 * t_ + 0.375 * m + 0.375 * x + v for t_, m, x, v in zip(tr6, mn, tmn, vi6)],
+          "R n M6+TD6n": [0.25 * t_ + 0.375 * m + 0.375 * x + v for t_, m, x, v in zip(trn, m6, tn, vi6)]}
+    convs = dm.CONVS[src]
+    labs = {c_: [np.asarray(g) for g in bench.labels(src, c_)] for c_ in convs}
+    truth = labs[convs[0]]
+    smos = dm.team(src)
+    cells = {}
+    for s_ in es.SEEDS:
+        for name in R54:
+            preds = eg.decode_par(ev[name], smos[s_])
+            for c_ in convs:
+                cells.setdefault((src, c_, "edges D", name), []).append(er.by_match(blocks, labs[c_], preds))
+            if s_ == es.SEEDS[0]:
+                print("  %-15s dead share %.3f (true %.3f), dead F1 %.3f" % (name, np.mean(np.concatenate(preds) == 2), np.mean(np.concatenate(truth) == 2), dm._dead_f1(preds, truth)), flush=True)
+        print("  seed %d done" % s_, flush=True)
+    er.summarize(cells, list(R54), ref="M6+TD6n A25")
+    with open(os.path.join(RUNS, "r54_cells_%s.pkl" % k), "wb") as fh:
+        pickle.dump(cells, fh)
+
+
+def r54_decide():
+    import exp_blend_weight as bw
+    cells = {}
+    for k in V6:
+        with open(os.path.join(RUNS, "r54_cells_%s.pkl" % k), "rb") as fh:
+            cells.update(pickle.load(fh))
+    mean, _ = er.summarize(cells, list(R54), ref="M6+TD6n A25")
+    for cand in R54[1:-1]:
+        bw.decide(mean, "M6+TD6n A25", cand)
+    for cand in R54[:-1]:
+        bw.decide(mean, "v19", cand)
+
+
+def r54_unseen():
+    """PFF raw and SoccerTrack for round 54's arms: all-data models, none saw these sets."""
+    import gradient
+    import lightgbm as lgb
+    import model_v7
+    import pathlib
+    import exp_smooth
+    import exp_st
+    import exp_tdead as etd
+    import short_specialist as ss
+    import torch
+    with open(ro.OUT) as fh:
+        conf = json.load(fh)
+    t, c = conf["thresholds"], conf["bounds"]
+    b3, g3 = weights_on(V3, conf)
+    b6, g6 = weights_on(V6, conf)
+    m3 = bench.load_booster(os.path.join(OUT, "M_v3_all.txt"))
+    m6 = bench.load_booster(os.path.join(OUT, "M_v6_all.txt"))
+    mn = bench.load_booster(os.path.join(OUT, "M_v6n_all.txt"))
+
+    def nets(folder):
+        res = []
+        for seed in (20261104, 20261105, 20261106):
+            ck = torch.load(os.path.join(bench.CACHE, folder, "all_%d.pt" % seed), map_location="cpu", weights_only=False)
+            net = etd.Net(ck["n_in"]).to(etd.DEVICE)
+            net.load_state_dict(ck["state"])
+            net.eval()
+            res.append((net, ck["mean"], ck["scale"]))
+        return res
+
+    def alive(ns, x, norm=False):
+        ps = []
+        for n_, m_, s_ in ns:
+            if norm:
+                os.environ["TD_NORM"] = "1"
+            ps.append(etd.score_half(n_, m_, s_, x))
+            os.environ.pop("TD_NORM", None)
+        return exp_blend.logit_alive(np.mean(ps, axis=0))
+
+    tn, tm, tmn = nets("tdead6n"), nets("tdeadmix"), nets("tdeadmixn")
+    names = ("v19", "M6+TD6n A25", "M6n+TD6n A25", "M6+TDmix A25", "M6+TDmixn A25", "TDmixn A25", "M6n+TDmixn A25")
+
+    def arms(T, x, v, l):
+        tr3, tr6, vi3, vi6 = T @ b3, T @ b6, g3[0] * (~v) + g3[1] * l, g6[0] * (~v) + g6[1] * l
+        a3 = exp_blend.logit_alive(m3.predict(x, num_threads=bench.THREADS))
+        a6 = exp_blend.logit_alive(m6.predict(x, num_threads=bench.THREADS))
+        an = exp_blend.logit_alive(mn.predict(etd.half_norm(np.asarray(x, np.float64)), num_threads=bench.THREADS))
+        xn, xm, xmn = alive(tn, x, True), alive(tm, x), alive(tmn, x, True)
+        return {"v19": 0.25 * tr3 + 0.75 * a3 + vi3, "M6+TD6n A25": 0.25 * tr6 + 0.375 * a6 + 0.375 * xn + vi6, "M6n+TD6n A25": 0.25 * tr6 + 0.375 * an + 0.375 * xn + vi6,
+                "M6+TDmix A25": 0.25 * tr6 + 0.375 * a6 + 0.375 * xm + vi6, "M6+TDmixn A25": 0.25 * tr6 + 0.375 * a6 + 0.375 * xmn + vi6, "TDmixn A25": 0.25 * tr6 + 0.75 * xmn + vi6,
+                "M6n+TDmixn A25": 0.25 * tr6 + 0.375 * an + 0.375 * xmn + vi6}
+
+    # SoccerTrack
+    src = "st@v6"
+    blocks = bench.blocks(src)
+    labs = {cv: [np.asarray(g) for g in bench.labels(exp_st.SRC, cv)] for cv in exp_st.CONVS}
+    truth = labs["evctrl"]
+    ev = {n: [] for n in names}
+    for i, (b, f, g) in enumerate(zip(blocks, bench.features("base", src), truth)):
+        v, l = dm.transplant(g, np.random.default_rng([dm.SEED, 0, i]))
+        res = arms(ro.terms(exp_blend.rule_f(b), t, c), f["XF"], v, l)
+        for n in names:
+            ev[n].append(res[n])
+    gru = exp_st.gru_mean()
+    outs = bench._load(os.path.join(ss.OUT, "J1_%s.pkl" % exp_st.SRC.replace("@", "-")))
+    cells = {}
+    for k in es.SEEDS:
+        raw14 = es.blend(exp_st.v10_raw(k), gru, 0.5)
+        smo = exp_smooth.smooth([0.75 * r + 0.25 * ss.pk(np.asarray(x, np.float32), 0) for r, x in zip(raw14, outs[ss.SEEDS[k]])], 25)
+        for name in names:
+            preds = eg.decode_par(ev[name], smo)
+            if k == es.SEEDS[0]:
+                print("  ST %-15s dead share %.3f (true %.3f), dead F1 %.3f" % (name, np.mean(np.concatenate(preds) == 2), np.mean(np.concatenate(truth) == 2), dm._dead_f1(preds, truth)), flush=True)
+            for cv in exp_st.CONVS:
+                cells.setdefault((exp_st.SRC, cv, "edges D", name), []).append(er.by_match(blocks, labs[cv], preds))
+    er.summarize(cells, list(names), ref="v19")
+    # PFF raw
+    tag = "%s_native_v3" % bench._safe(model_v7.VERSION)
+    team_model = lgb.Booster(model_file=os.path.join(bench.CACHE, "models", tag + ".txt"))
+    base_names = bench.features("base", "dfl@v3")[0]["fk"]
+    out = pathlib.Path(bench.ROOT) / "cache" / "pff_experiment" / gradient.VERSION / "features"
+    cells = {}
+    dead = {k: [0, 0, 0] for k in names}
+    n = 0
+    for match in gradient.matches():
+        blocks, labs, ev, smo = [], [], {k: [] for k in names}, []
+        with np.load(gradient.CACHE / gradient.VERSION / ("%s.npz" % match)) as d:
+            for per in d["periods"]:
+                path = out / ("%s_h%d.pkl" % (match, int(per)))
+                if not path.exists():
+                    continue
+                f = bench._load(str(path))
+                t0 = "h%d" % int(per)
+                b = dict(P=d[t0 + "_players"], B=d[t0 + "_ball"], team=d["team"], gk=d["gk"], pitch=tuple(d["pitch"]), group=match)
+                lab = np.asarray(d[t0 + "_labels"])
+                v, l = dm.transplant(lab, np.random.default_rng([dm.SEED, n]))
+                n += 1
+                res = arms(ro.terms(exp_blend.rule_f(b), t, c), f["XF"][:, [f["fk"].index(k) for k in base_names]], v, l)
+                for k in names:
+                    ev[k].append(res[k])
+                blocks.append(b)
+                labs.append(lab)
+                smo.append(bench.predict_team(team_model, f))
+        if not blocks:
+            continue
+        smo = exp_smooth.smooth(smo, 25)
+        for name in names:
+            preds = eg.decode_par(ev[name], smo)
+            cells.setdefault(("pff", "ctrl", "edges D", name), []).append(er.by_match(blocks, labs, preds))
+            for p_, g_ in zip(preds, labs):
+                ok = g_ < 3
+                dead[name][0] += int(((p_ == 2) & (g_ == 2) & ok).sum())
+                dead[name][1] += int(((p_ == 2) & (g_ < 2) & ok).sum())
+                dead[name][2] += int(((p_ < 2) & (g_ == 2) & ok).sum())
+        print("  %s done" % match, flush=True)
+    merged = {}
+    for k, v_ in cells.items():
+        d_ = {}
+        for x in v_:
+            d_.update(x)
+        merged[k] = [d_]
+    er.summarize(merged, list(names), ref="v19")
+    for name in names:
+        tp_, fp, fn = dead[name]
+        print("  %-15s dead F1 %.3f, precision %.3f, recall %.3f" % (name, 2 * tp_ / (2 * tp_ + fp + fn), tp_ / max(tp_ + fp, 1), tp_ / max(tp_ + fn, 1)), flush=True)
+
+
 def soccertrack(var="v6"):
     """SoccerTrack v2: a full-pitch camera and the provider's own per-frame ball status; no model saw it. Team channels frozen as in round 44; masks V3 or V6; all-data dead models."""
     import exp_smooth
@@ -933,4 +1157,4 @@ def soccertrack(var="v6"):
 if __name__ == "__main__":
     sys.stdout.reconfigure(encoding="utf-8")
     warnings.filterwarnings("ignore")
-    {"inputs": inputs, "models": models, "eval": evaluate, "decide": decide, "pff": pff, "st": soccertrack, "heads": boundary_heads, "stress": stress, "r51": r51, "r51decide": r51_decide, "r51pff": r51_pff, "combo": combo, "decoder": decoder_screen, "r51st": r51_st, "r54models": r54_models}[sys.argv[1]](*sys.argv[2:])
+    {"inputs": inputs, "models": models, "eval": evaluate, "decide": decide, "pff": pff, "st": soccertrack, "heads": boundary_heads, "stress": stress, "r51": r51, "r51decide": r51_decide, "r51pff": r51_pff, "combo": combo, "decoder": decoder_screen, "r51st": r51_st, "r54models": r54_models, "r54": r54, "r54decide": r54_decide, "r54unseen": r54_unseen}[sys.argv[1]](*sys.argv[2:])
