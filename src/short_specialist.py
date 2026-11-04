@@ -49,6 +49,7 @@ KS = {"C3": 11, "F3": 11}       # round 34: players per team in a variant's repr
 ROOT = os.path.dirname(HERE)
 OUT = os.path.join(ROOT, "cache", "kpu")
 TARGET = (("dfl@v3", "evctrl"), ("metrica@v3", "ctrl"))       # round 34: the target-convention games (fine-tuning)
+FT_TARGET = {"D1": TARGET[:1], "M1": TARGET[1:]}              # transfer test: fine-tuned on one provider only
 FT_STEPS, FT_LR = 2000, 3e-4
 
 
@@ -576,12 +577,12 @@ def infer(src, variant):
 
 # -- round 34: fine-tuning on the target-convention games ---------------------------------------------------------------
 
-def _target_halves(k):
+def _target_halves(k, target=TARGET):
     """The target-convention halves (bench's degraded blocks) as fine-tuning data: per half its source, index, match,
     features, control / event targets (no touch target there: NaN, outside the loss) and window centres."""
     import bench
     out = []
-    for src, conv in TARGET:
+    for src, conv in target:
         for i, (b, lab) in enumerate(zip(bench.blocks(src), bench.labels(src, conv))):
             x = features(b["P"], b["B"], b["team"], b["gk"], b["pitch"], k=k).astype(np.float16)
             ctrl, ev = targets(lab)
@@ -600,7 +601,8 @@ def finetune(base, new, k_seed, pff_folder):
     import bench
     seed = SEEDS[k_seed]
     k = KS.get(base, K)
-    halves = _target_halves(k)
+    target = FT_TARGET.get(new, TARGET)
+    halves = _target_halves(k, target)
     with open(os.path.join(pff_folder, "index.json")) as fh:
         idx = json.load(fh)
     dp = Data(pff_folder, [key for key in idx["keys"] if key.split("_")[0] not in set(idx["val_matches"])], base)
@@ -608,7 +610,7 @@ def finetune(base, new, k_seed, pff_folder):
     dev = "cuda" if torch.cuda.is_available() else "cpu"
     ck = torch.load(os.path.join(OUT, "models", "kpu_%s_s%d.pt" % (base, seed)), map_location="cpu", weights_only=False)
     folds = sorted(set(h["match"] for h in halves))
-    outs = {src: [None] * sum(h["src"] == src for h in halves) for src, _ in TARGET}
+    outs = {src: [None] * sum(h["src"] == src for h in halves) for src, _ in target}
     for j, fold in enumerate(folds + [None]):
         sel = [h for h in halves if h["match"] != fold]
         dt = Data(None, [], base, arrays=([h["x"] for h in sel], [h["ctrl"] for h in sel], [h["ev"] for h in sel],
