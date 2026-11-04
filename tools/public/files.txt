@@ -1,11 +1,12 @@
 # Files of the public repository (tools/export_public.py). Source modules: the import closure of
-# src/make_submission.py with model_v16 = the v10 / shared BiGRU blend mixed with the short-possession specialist C1 +
+# src/make_submission.py with model_v17 = the v10 / shared BiGRU blend mixed with the short-possession specialist J1 +
 # the short-possession verifier + the dead-ball boundary timing of the learned dead model (incl. lazily imported option
 # modules, the feature plugins named in model_v7.VERSION, src/reproduce_shared_bigru.py, which rebuilds the shared
 # BiGRU's BAR-ATH probabilities, and src/exp_bigru_lomo.py, whose held-out DFL probabilities the blend verifiers were
-# trained with), the open-data download script, the team classifier, the verifier classifiers (v13's, v14's and v15's)
+# trained with), the open-data download script, the team classifier, the verifier classifiers (v13's, v14's, v15's and
+# v17's)
 # and the dead-ball classifier trained on open data, the shared BiGRU checkpoints (open DFL + PFF data) and the
-# specialist C1's checkpoint (open PFF data only).
+# specialists' checkpoints (C1: open PFF data only; J1: C1 fine-tuned on the open DFL and Metrica games).
 src/atd.py
 src/ballclean.py
 src/bench.py
@@ -43,6 +44,7 @@ src/model_v13.py
 src/model_v14.py
 src/model_v15.py
 src/model_v16.py
+src/model_v17.py
 src/model_v2.py
 src/model_v3.py
 src/model_v5.py
@@ -74,11 +76,15 @@ models/bigru_dfl_pff_v1/manifest.json
 models/kpu_c1/README.md
 models/kpu_c1/kpu_C1_s20261102.json
 models/kpu_c1/kpu_C1_s20261102.pt
+models/kpu_j1/README.md
+models/kpu_j1/kpu_J1_s20261102.pt
 models/short_verifier_del_g.txt
 models/short_verifier_del_g_blend50.txt
 models/short_verifier_del_c1m25s.txt
+models/short_verifier_del_j1m25s.txt
 models/short_verifier_ins_g.txt
 models/short_verifier_ins_g_blend50.txt
 models/short_verifier_ins_c1m25s.txt
+models/short_verifier_ins_j1m25s.txt
 models/dead_base_v3.txt
 models/v10_team.txt

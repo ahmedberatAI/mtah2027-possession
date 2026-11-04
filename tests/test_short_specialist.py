@@ -125,6 +125,7 @@ class V15Tests(unittest.TestCase):
 
     def test_shipped_specialist_runs(self):
         import model_v15
+        import model_v17
         rng = np.random.default_rng(0)
         n = 160
         team = np.array([0] * 11 + [1] * 11)
@@ -132,9 +133,10 @@ class V15Tests(unittest.TestCase):
         gk[[0, 11]] = True
         x = ss.features(rng.uniform(size=(n, 22, 2)).astype(np.float32), rng.uniform(size=(n, 2)).astype(np.float32),
                         team, gk, (105.0, 68.0))
-        out = ss.predict(ss.load(model_v15.C1_MODEL), x)
-        self.assertEqual(out.shape, (n, 9))
-        self.assertTrue(np.allclose(out[:, :3].sum(1), 1, atol=1e-4))
+        for path in (model_v15.C1_MODEL, model_v17.CONFIG["model"]):
+            out = ss.predict(ss.load(path), x)
+            self.assertEqual(out.shape, (n, 9))
+            self.assertTrue(np.allclose(out[:, :3].sum(1), 1, atol=1e-4))
 
 
 if __name__ == "__main__":

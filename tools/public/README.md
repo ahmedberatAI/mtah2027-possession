@@ -7,9 +7,10 @@ the provided data and open data:
 - **Team in possession:** a LightGBM classifier on team-level tracking features, trained on open tracking (IDSSE /
   DFL, Metrica Sports sample games) degraded to look like automatic single-camera tracking, averaged in equal parts
   with a bidirectional GRU trained on open DFL and PFF World Cup 2022 tracking (`models/bigru_dfl_pff_v1`).
-- **Short-possession specialist:** a ball-centred tracking model trained only on open PFF World Cup 2022 data, with
-  PFF's possessions in the challenge's controlled-possession reading (`models/kpu_c1`); 0.25 of its probability of
-  control enters the team probability.
+- **Short-possession specialist:** a ball-centred tracking model trained on open PFF World Cup 2022 data, with
+  PFF's possessions in the challenge's controlled-possession reading (`models/kpu_c1`), then fine-tuned on the open
+  DFL and Metrica games in the same reading (`models/kpu_j1`); 0.25 of its probability of control enters the team
+  probability.
 - **Decoding:** a duration-aware Viterbi decoder per half.
 - **Short possessions:** a verifier re-examines the decoder's short decisions with two LightGBM classifiers trained on
   open data labelled in the same controlled-possession reading; its inputs include the blend's and the GRU's margins and
@@ -25,8 +26,8 @@ uv venv --python 3.12 .venv
 uv pip install --python .venv/Scripts/python.exe -r requirements.txt
 git clone https://github.com/metrica-sports/more-than-a-hack-2027 external/more-than-a-hack-2027
 # unpack the match bundle into ./data/{tactical,broadcast}  (or set MTAH_DATA_DIR)
-.venv/Scripts/python.exe src/make_submission.py           # -> submissions/candidate_v16.csv (a few minutes)
-python external/more-than-a-hack-2027/evaluation/validate_submission.py submissions/candidate_v16.csv
+.venv/Scripts/python.exe src/make_submission.py           # -> submissions/candidate_v17.csv (a few minutes)
+python external/more-than-a-hack-2027/evaluation/validate_submission.py submissions/candidate_v17.csv
 
 # optional: retrain the team classifier from the open data (rewrites models/v10_team.txt, about 7 min on 24 cores)
 .venv/Scripts/python.exe src/download_idsse.py            # open DFL / IDSSE data, CC BY 4.0, ~2.6 GB
@@ -37,8 +38,8 @@ MTAH_RETRAIN=1 .venv/Scripts/python.exe src/make_submission.py
 - On Linux / macOS, use `.venv/bin/python` instead of `.venv/Scripts/python.exe`.
 - `.gitattributes` keeps the LightGBM model files (`models/*.txt`) byte for byte: LightGBM 4.7 cannot read them with
   the CRLF line endings a Windows checkout would otherwise write (the pipeline also reads them as text).
-- `models/v10_team.txt` is the team classifier, `models/kpu_c1/kpu_C1_s20261102.pt` the specialist,
-  `models/short_verifier_{ins,del}_c1m25s.txt` the verifier and `models/dead_base_v3.txt` the dead-ball classifier
+- `models/v10_team.txt` is the team classifier, `models/kpu_j1/kpu_J1_s20261102.pt` the specialist,
+  `models/short_verifier_{ins,del}_j1m25s.txt` the verifier and `models/dead_base_v3.txt` the dead-ball classifier
   whose own decode times the dead-ball boundaries, all trained only on open data, so the default run needs
   only the provided data. On its first run it rebuilds the BiGRU's BAR-ATH probabilities on the CPU
   (`src/reproduce_shared_bigru.py`, checked against `models/bigru_dfl_pff_v1/manifest.json`) and runs the specialist on
@@ -53,18 +54,21 @@ MTAH_RETRAIN=1 .venv/Scripts/python.exe src/make_submission.py
 ## Layout
 
 ```
-src/make_submission.py   end to end: provided data -> submissions/candidate_v16.csv
-src/model_v16.py         the submitted model: model_v15 with its dead-ball boundaries timed by the learned dead model
+src/make_submission.py   end to end: provided data -> submissions/candidate_v17.csv
+src/model_v17.py         the submitted model: model_v16 with the specialist J1 in C1's place
+src/model_v16.py         its base: model_v15 with its dead-ball boundaries timed by the learned dead model
 src/dead_timing.py       that timing step: stops / restarts onto the dead model's own decode within +-2 s
-src/model_v15.py         its base: v14's blend mixed with the specialist C1 + the verifier on that base
-src/short_specialist.py  the specialist C1: inputs, network, inference, its candidates and verifier features
+src/model_v15.py         the recipe under it: v14's blend mixed with a specialist + the verifier on that base
+src/short_specialist.py  the specialist: inputs, network, inference, its candidates and verifier features
 src/model_v14.py         the previous submission: 0.5 v10 + 0.5 BiGRU blend + the short-possession verifier
 src/model_v13.py         model_v10 + the verifier (src/short_verifier.py)
 src/model_v10.py         team classifier training + prediction, decoder settings
 models/v10_team.txt      the team classifier (LightGBM, trained on the open data only)
-models/short_verifier_*  the verifier's classifiers (LightGBM, open data only; *_c1m25s = v15's, *_blend50 = v14's)
+models/short_verifier_*  the verifier's classifiers (LightGBM, open data only; *_j1m25s = v17's, *_c1m25s = v15's,
+                         *_blend50 = v14's)
 models/dead_base_v3.txt  the dead-ball classifier (LightGBM, open DFL data only) used for v16's boundary timing
 models/bigru_dfl_pff_v1/ the shared BiGRU checkpoints; src/reproduce_shared_bigru.py and src/seq_pff.py run them
+models/kpu_j1/           the specialist J1's checkpoint (C1 fine-tuned on the open DFL and Metrica games)
 models/kpu_c1/           the specialist C1's checkpoint (open PFF data only) and its validation history
 src/model_v2/3/5/7/9.py  dead-ball evidence, emission scores, the B2 soft-minimum decoder (decode2.py)
 src/bench.py, sim.py     open-data inputs: parsing (dfl.py, metrica_sample.py), simulated degradation, features
@@ -81,6 +85,7 @@ docs/TECHNICAL_DOCUMENT.md   the technical document
   - IDSSE / DFL open data: Bassek et al. 2025, CC BY 4.0, figshare article 28196177.
   - Metrica Sports sample data: github.com/metrica-sports/sample-data, credited as its README asks.
 - The BiGRU checkpoints in `models/bigru_dfl_pff_v1/` were trained on the open DFL data and on PFF FC / Gradient Sports
-  FIFA World Cup 2022 tracking, obtained through the provider's access form, and the specialist in `models/kpu_c1/` on
-  that PFF data alone (tracking and its human-labelled events); they contain no match data, and the PFF data itself is
+  FIFA World Cup 2022 tracking, obtained through the provider's access form, the specialist in `models/kpu_c1/` on
+  that PFF data alone (tracking and its human-labelled events), and `models/kpu_j1/` is that specialist fine-tuned on
+  the open DFL and Metrica games; they contain no match data, and the PFF data itself is
   not needed to reproduce the submission.

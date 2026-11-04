@@ -52,9 +52,9 @@ def ensure_dead(refresh=False):
     return out
 
 
-def predict(f, params=None):
-    labels = np.asarray(model_v15.predict(f, params)).copy()
-    probs = bench._load(model_v15.ensure_probs())
+def predict(f, params=None, cfg=model_v15.V15):
+    labels = np.asarray(model_v15.predict(f, params, cfg=cfg)).copy()
+    probs = bench._load(model_v15.ensure_probs(cfg=cfg))
     dead = ensure_dead()
     for b in bench.blocks("barath"):
         sl = slice(b["a"], b["b"] + 1)

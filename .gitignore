@@ -28,3 +28,4 @@ runs/
 !models/bigru_dfl_pff_v1/bigru_s20261026.pt
 !models/bigru_dfl_pff_v1/bigru_s20261027.pt
 !models/kpu_c1/kpu_C1_s20261102.pt
+!models/kpu_j1/kpu_J1_s20261102.pt

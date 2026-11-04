@@ -41,29 +41,30 @@ C1_OUT = os.path.join(ROOT, "cache", "v15", "c1_barath.pkl")
 PROBS = os.path.join(ROOT, "cache", "v15", "barath_probs.pkl")
 ROWS = "C1abETmS"                                  # src/exp_kpu.py rows the verifier is trained on
 TAG = "c1m25s"
+V15 = dict(model=C1_MODEL, out=C1_OUT, probs=PROBS, rows=ROWS, tag=TAG)     # model_v17 runs the same recipe with its own specialist
 THETA = 0.7                                        # src/exp_kpu.py THETA["C1"]
 KEYS = ev.FEATSETS["G1"] + ["kpu_c", "kpu_cmax", "kpu_gin", "kpu_gout", "kpu_ctx", "kpu_tin", "kpu_tmean", "kpu_tout"]
 DEFAULT = dict(model_v10.DEFAULT)
 VERIFIER = dict(t_ins=model_v13.VERIFIER["t_ins"], t_del=model_v13.VERIFIER["t_del"])
 
 
-def ensure_c1(refresh=False):
-    """C1's outputs on BAR-ATH's halves, {block start: (T, 9) float16} (stored as the research outputs are)."""
-    if os.path.isfile(C1_OUT) and not refresh:
-        return bench._load(C1_OUT)
-    model = ss.load(C1_MODEL)
+def ensure_c1(refresh=False, cfg=V15):
+    """The specialist's outputs on BAR-ATH's halves, {block start: (T, 9) float16} (stored as the research outputs are)."""
+    if os.path.isfile(cfg["out"]) and not refresh:
+        return bench._load(cfg["out"])
+    model = ss.load(cfg["model"])
     bench._barath_inputs()
     out = {b["a"]: ss.predict(model, ss.features(b["P"], b["B"], b["team"], b["gk"], b["pitch"])).astype(np.float16)
            for b in bench.blocks("barath")}
-    os.makedirs(os.path.dirname(C1_OUT), exist_ok=True)
-    bench._dump(out, C1_OUT)
+    os.makedirs(os.path.dirname(cfg["out"]), exist_ok=True)
+    bench._dump(out, cfg["out"])
     return out
 
 
-def _raws():
+def _raws(cfg=V15):
     """{block start: v15's raw team probability} = 0.75 x v14's blend + 0.25 x C1's live-normalised P(home)."""
     gru = bench._load(model_v13.ensure_gru())
-    c1 = ensure_c1()
+    c1 = ensure_c1(cfg=cfg)
     model = model_v10.team_model()
     bench._barath_inputs()
     out = {}
@@ -75,26 +76,26 @@ def _raws():
     return out
 
 
-def ensure_probs(refresh=False):
-    if os.path.isfile(PROBS) and not refresh:
-        return PROBS
-    probs = {a: (None, model_v9.smooth(raw)) for a, raw in _raws().items()}
-    os.makedirs(os.path.dirname(PROBS), exist_ok=True)
-    bench._dump(probs, PROBS)
-    return PROBS
+def ensure_probs(refresh=False, cfg=V15):
+    if os.path.isfile(cfg["probs"]) and not refresh:
+        return cfg["probs"]
+    probs = {a: (None, model_v9.smooth(raw)) for a, raw in _raws(cfg).items()}
+    os.makedirs(os.path.dirname(cfg["probs"]), exist_ok=True)
+    bench._dump(probs, cfg["probs"])
+    return cfg["probs"]
 
 
-def train_verifier(retrain=None):
+def train_verifier(retrain=None, cfg=V15):
     """The insert / delete classifiers, loaded from models/ unless missing or MTAH_RETRAIN_VERIFIER=1."""
     import lightgbm as lgb
     import short_verifier
     if retrain is None:
         retrain = os.environ.get("MTAH_RETRAIN_VERIFIER") == "1"
-    paths = {typ: os.path.join(ROOT, "models", "short_verifier_%s_%s.txt" % (typ, TAG)) for typ in ("ins", "del")}
+    paths = {typ: os.path.join(ROOT, "models", "short_verifier_%s_%s.txt" % (typ, cfg["tag"])) for typ in ("ins", "del")}
     if not retrain and all(os.path.isfile(p) for p in paths.values()):
         return {typ: bench.load_booster(p) for typ, p in paths.items()}
     import exp_kpu
-    exp_kpu.use(ROWS)
+    exp_kpu.use(cfg["rows"])
     rows = [r for src in exp_kpu.SRCS for d in ev.DEADS for r in ev._rows4(src, 0, d)["rows"]]
     exp_kpu.use("v14")
     out = {}
@@ -108,12 +109,12 @@ def train_verifier(retrain=None):
     return out
 
 
-def verify(labels, t_ins, t_del):
+def verify(labels, t_ins, t_del, cfg=V15):
     """The verifier's decisions on BAR-ATH's decoded labels (both halves); returns new labels."""
-    models = train_verifier()
+    models = train_verifier(cfg=cfg)
     gru = bench._load(model_v13.ensure_gru())
-    c1 = ensure_c1()
-    raws = _raws()
+    c1 = ensure_c1(cfg=cfg)
+    raws = _raws(cfg)
     out = np.asarray(labels).copy()
     min_len = int(model_v7.DEFAULT["min_poss"])
     for b in bench.blocks("barath"):
@@ -141,9 +142,9 @@ def verify(labels, t_ins, t_del):
     return out
 
 
-def predict(f, params=None):
+def predict(f, params=None, cfg=V15):
     p = dict(DEFAULT)
     if params:
         p.update(params)
-    labels = model_v7.predict(f, p, probs_path=ensure_probs())
-    return verify(labels, **VERIFIER)
+    labels = model_v7.predict(f, p, probs_path=ensure_probs(cfg=cfg))
+    return verify(labels, **VERIFIER, cfg=cfg)
