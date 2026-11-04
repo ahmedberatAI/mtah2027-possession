@@ -235,7 +235,9 @@ def build_m(name, w=0.25, avg=False, variant="C1", short=None, rules=False):
     possessions masked) in C1's place, C2abETm. Round 36: short = longest decoded possession (frames) that is a delete
     candidate (default ea.SHORT, 4 s): L8abETm 8 s, LGabETm 16 s. Round 39: rules = the first dead-ball channel holds the
     decode with BAR-ATH's kind of dead ball (v3's rules, image cues on SkillCorner; src/exp_rules_ctx.py), R1abETm. Round
-    40: rules = "mix", that channel holds the decode with rules + view flag + 0.5 x learned (src/exp_deadmix.py), X1abETm."""
+    40: rules = "mix", that channel holds the decode with rules + view flag + 0.5 x learned (src/exp_deadmix.py), X1abETm.
+    Round 41: rules = "dmsb", the multi-source dead model + the view flag, X2abETm; rules = "e1", the sum of the three
+    channels, X3abETm."""
     if short:
         ea.SHORT = short
     use("v14")
@@ -262,6 +264,12 @@ def build_m(name, w=0.25, avg=False, variant="C1", short=None, rules=False):
                 import exp_deadmix as dm
                 a_rule = dm.mix_evidence(dm.rule_view(src, blocks, [np.asarray(g) for g in bench.labels(src, dm.CONVS[src][0])], 0),
                                          [exp_blend.logit_alive(x) for x in learned])
+            if rules == "dmsb":
+                import exp_deadmix as dm
+                a_rule = dm.dmsb_evidence(src)
+            if rules == "e1":
+                import exp_deadmix as dm
+                a_rule = dm.e1_evidence(src)
             for k in es.SEEDS:
                 bases[(k, ev.DEADS[0])] = sd.decode_scores(a_rule, smos[k])
         rows = {key: [] for key in bases}
@@ -450,8 +458,12 @@ def main():
             build_m(variant, rules=True)
         elif variant == "X1abETm":                               # round 40: J1, the channel of rules + view + 0.5 x learned
             build_m(variant, variant="J1", rules="mix")
+        elif variant == "X2abETm":                               # round 41: J1, the channel of the multi-source dead model + view
+            build_m(variant, variant="J1", rules="dmsb")
+        elif variant == "X3abETm":                               # round 41: J1, the channel of rules + view + 0.5 DFL model + 0.5 multi-source
+            build_m(variant, variant="J1", rules="e1")
         elif variant in ("C1abETmS", "C1abETm50S", "C1abETmaS", "C2abETmS", "C3abETmS", "F1abETmS", "F3abETmS", "D1abETmS",
-                         "M1abETmS", "L8abETmS", "LGabETmS", "G1abETmS", "H1abETmS", "J1abETmS", "R1abETmS", "X1abETmS"):
+                         "M1abETmS", "L8abETmS", "LGabETmS", "G1abETmS", "H1abETmS", "J1abETmS", "R1abETmS", "X1abETmS", "X2abETmS", "X3abETmS"):
             relabel_sc(variant[:-1], variant)
         else:
             build(variant)

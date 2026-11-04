@@ -27,6 +27,12 @@ verifier. Three transplant draws. AGGREGATE output only.
   python -I src/exp_deadmix.py qnorm       the team uncertainty out of the live / dead contest
   python -I src/exp_deadmix.py dm3         provider-balanced training and decode profiles of the multi-source models
   python -I src/exp_deadmix.py dm4         PFF added to the balanced multi-source dead model
+  python -I src/exp_deadmix.py stress2     round 41's bet: better rules, worse model, hedges
+  python -I src/exp_deadmix.py st2         SoccerTrack v2 with the multi-source model
+  python -I src/exp_deadmix.py head2       screen on top of the multi-source model + view flag
+  python -I src/exp_deadmix.py stress3 SRC hedges: sums of the channels under better rules and worse learned channels
+  python -I src/exp_deadmix.py eval2       round 41's decision run: E1 = rules + view + 0.5 DFL model + 0.5 multi-source model
+  python -I src/exp_deadmix.py st4         SoccerTrack v2 with the channels and their sums
 """
 import os
 import sys
@@ -301,12 +307,12 @@ def multi_source():
         bw.decide(mean, "mix.5", cand)
 
 
-def verifier(seeds=es.SEEDS, vseeds=(0, 1)):
+def verifier(mixed="X1abETmS", seeds=es.SEEDS, vseeds=(0, 1)):
     """On the mix's decode (rows X1abETmS, transplant draw 0): no verifier; v17's (trained on the learned + true dead ball
     rows of the other matches, J1abETmS); + the mix rows of the other matches; only the mix rows. Before and after the
     boundary timing."""
     import exp_rules_ctx as rc
-    shipped, mixed = "J1abETmS", "X1abETmS"
+    shipped = "J1abETmS"
     keys = exp_kpu.feats(shipped)
     names = ("decoded", "shipped", "added", "mix only")
     cells, acc = {}, {}
@@ -771,7 +777,224 @@ def multi_source4():
     bw.decide(mean, "DMSb+view", "DMSPb+view")
 
 
+def dmsb_evidence(src, draw=0):
+    """Round 41's dead-ball evidence on an open source: the provider-balanced multi-source dead model's alive log-odds (held out by match) + the view flag's terms. The evidence comes from de-glued Metrica."""
+    ev_src = "metrica@v3g" if src.startswith("metrica") else src
+    blocks = bench.blocks(ev_src)
+    truth = [np.asarray(g) for g in bench.labels(src, CONVS[src][0])]
+    return [exp_blend.logit_alive(x) + v for x, v in zip(balanced_probs("DMSb", ev_src), view_only(ev_src, blocks, truth, draw))]
+
+
+def e1_evidence(src, draw=0):
+    """E1, round 41's evidence on an open source: rules + view + 0.5 x the DFL dead model + 0.5 x the multi-source dead model, each channel held out from the match. The evidence comes from de-glued Metrica."""
+    ev_src = "metrica@v3g" if src.startswith("metrica") else src
+    blocks = bench.blocks(ev_src)
+    truth = [np.asarray(g) for g in bench.labels(src, CONVS[src][0])]
+    base = bench.dead_probs(src, "base") if src.startswith("dfl") else bench.dead_ext("base", "v3", ev_src)
+    return [r + 0.5 * exp_blend.logit_alive(x) + 0.5 * exp_blend.logit_alive(y) for r, x, y in zip(rule_view(ev_src, blocks, truth, draw), base, balanced_probs("DMSb", ev_src))]
+
+
+def evaluate2():
+    """Round 41's decision run: E1 and the others against the 0.5 mix and v17's recipe, 3 seeds, 3 transplant draws (SkillCorner its real flag). E1 lopo: the multi-source channel from the other providers only."""
+    import exp_blend_weight as bw
+    names = ("rules+DT", "mix.5", "DMSb+view", "E1", "E1 lopo")
+    cells = {}
+    for src, convs in CONVS.items():
+        ev_src = "metrica@v3g" if src.startswith("metrica") else src
+        blocks = bench.blocks(ev_src)
+        labs = {c: [np.asarray(g) for g in bench.labels(src, c)] for c in convs}
+        base = bench.dead_probs(src, "base") if src.startswith("dfl") else bench.dead_ext("base", "v3", ev_src)
+        a_lrn = [exp_blend.logit_alive(x) for x in base]
+        a_m = [exp_blend.logit_alive(x) for x in balanced_probs("DMSb", ev_src)]
+        a_o = [exp_blend.logit_alive(x) for x in balanced_probs("LOPOb", ev_src)]
+        smos = team(src)
+        truth = labs[convs[0]]
+        for draw in (DRAWS if not src.startswith("sc") else (0,)):
+            a_rb = rule_view(ev_src, blocks, truth, draw)
+            a_v = view_only(ev_src, blocks, truth, draw)
+            for k in es.SEEDS:
+                ref = sd.decode_scores(a_lrn, smos[k])
+                res = {"rules+DT": [dt.retime(r, l) for r, l in zip(sd.decode_scores(a_rb, smos[k]), ref)], "mix.5": sd.decode_scores(mix_evidence(a_rb, a_lrn), smos[k]),
+                       "DMSb+view": sd.decode_scores([m + v for m, v in zip(a_m, a_v)], smos[k]), "E1": sd.decode_scores([r + 0.5 * l + 0.5 * m for r, l, m in zip(a_rb, a_lrn, a_m)], smos[k]),
+                       "E1 lopo": sd.decode_scores([r + 0.5 * l + 0.5 * m for r, l, m in zip(a_rb, a_lrn, a_o)], smos[k])}
+                for name, preds in res.items():
+                    for c in convs:
+                        cells.setdefault((src, c, TAG, name), []).append(er.by_match(blocks, labs[c], preds))
+                if draw == 0 and k == es.SEEDS[0]:
+                    print("  %s: dead F1 %s" % (src, " ".join("%s %.3f" % (n, _dead_f1(res[n], truth)) for n in names)), flush=True)
+            print("  %s draw %d done" % (src, draw), flush=True)
+        bench._blocks.clear()
+        bench._labels.clear()
+    mean, _ = er.summarize(cells, list(names), ref="mix.5")
+    for cur, cand in (("mix.5", "E1"), ("mix.5", "E1 lopo"), ("rules+DT", "E1"), ("E1", "DMSb+view")):
+        bw.decide(mean, cur, cand)
+
+
+def soccertrack4():
+    """SoccerTrack v2, the channels and their sums, 3 seeds, 3 draws (its rule channel is broken: its ball is rebuilt from the events)."""
+    import exp_st
+    src = exp_st.SRC
+    blocks = bench.blocks(src)
+    labs = {c: [np.asarray(g) for g in bench.labels(src, c)] for c in exp_st.CONVS}
+    gru = exp_st.gru_mean()
+    outs = bench._load(os.path.join(ss.OUT, "J1_%s.pkl" % src.replace("@", "-")))
+    a_lrn = [exp_blend.logit_alive(x) for x in bench.dead_ext("base", "v3", src)]
+    a_m = [exp_blend.logit_alive(x) for x in balanced_probs("DMSb", src)]
+    names = ("mix.5", "E1", "DMSb+view", "DFL+view", "both+view")
+    cells = {}
+    for draw in DRAWS:
+        a_rb = rule_view(src, blocks, labs["evctrl"], draw)
+        a_v = view_only(src, blocks, labs["evctrl"], draw)
+        for k in es.SEEDS:
+            raw14 = es.blend(exp_st.v10_raw(k), gru, 0.5)
+            smo = exp_smooth.smooth([0.75 * r + 0.25 * ss.pk(np.asarray(x, np.float32), 0) for r, x in zip(raw14, outs[ss.SEEDS[k]])], 25)
+            res = {"mix.5": mix_evidence(a_rb, a_lrn), "E1": [r + 0.5 * l + 0.5 * m for r, l, m in zip(a_rb, a_lrn, a_m)], "DMSb+view": [m + v for m, v in zip(a_m, a_v)],
+                   "DFL+view": [m + v for m, v in zip(a_lrn, a_v)], "both+view": [0.5 * l + 0.5 * m + v for l, m, v in zip(a_lrn, a_m, a_v)]}
+            for name, ev2 in res.items():
+                preds = sd.decode_scores(ev2, smo)
+                for c in exp_st.CONVS:
+                    cells.setdefault((src, c, TAG, name), []).append(er.by_match(blocks, labs[c], preds))
+        print("  draw %d done" % draw, flush=True)
+    er.summarize(cells, list(names), ref="mix.5")
+
+
+def stress2():
+    """Round 41's bet: the rules go. What if the rules are better on the target than anything measured (kappa x the truth) or the multi-source model worse (slow noise sigma on its and the DFL model's log-odds)? Seed 0, draw 0, SkillCorner's first ten matches. Also the hedges rules + 1 / 2 x the model."""
+    names = ("rules+DT", "mix.5", "DMSb+view", "r1", "r2")
+    regret = {n: {} for n in names}
+    for src, conv in (("dfl@v3", "evctrl"), ("metrica@v3", "ctrl"), ("sc@v3", "evctrl")):
+        ev_src = "metrica@v3g" if src.startswith("metrica") else src
+        blocks = bench.blocks(ev_src)
+        truth = [np.asarray(g) for g in bench.labels(src, conv)]
+        base = bench.dead_probs(src, "base") if src.startswith("dfl") else bench.dead_ext("base", "v3", ev_src)
+        a_lrn = [exp_blend.logit_alive(x) for x in base]
+        a_m = [exp_blend.logit_alive(x) for x in balanced_probs("DMSb", ev_src)]
+        smo = team(src)[es.SEEDS[0]]
+        a_rb = rule_view(ev_src, blocks, truth, 0)
+        a_v = view_only(ev_src, blocks, truth, 0)
+        if src.startswith("sc"):
+            keep = list(range(20))
+            blocks, truth, a_lrn, a_m, smo, a_rb, a_v = [blocks[i] for i in keep], [truth[i] for i in keep], [a_lrn[i] for i in keep], [a_m[i] for i in keep], [smo[i] for i in keep], [a_rb[i] for i in keep], [a_v[i] for i in keep]
+        print("\n%s %s: kappa sigma | dead F1 rules, DFL model, multi-source | spellF1 %s" % (src.split("@")[0], conv, " ".join(names)), flush=True)
+        for sigma in (0.0, 4.0):
+            noise = [_ar1(len(a), np.random.default_rng([SEED, 11, i]), sigma) if sigma else 0.0 for i, a in enumerate(a_lrn)]
+            lrn2 = [a + n for a, n in zip(a_lrn, noise)]
+            m2 = [a + n for a, n in zip(a_m, noise)]
+            ref = sd.decode_scores(lrn2, smo)
+            dmsb = sd.decode_scores([x + v for x, v in zip(m2, a_v)], smo)
+            f_m = _dead_f1(sd.decode_scores(m2, smo), truth)
+            for kappa in (0.0, 1.0, 2.0):
+                rb2 = [a + kappa * np.where(g == 2, -1.0, 1.0) for a, g in zip(a_rb, truth)]
+                rule = sd.decode_scores(rb2, smo)
+                res = {"rules+DT": [dt.retime(r, l) for r, l in zip(rule, ref)], "mix.5": sd.decode_scores(mix_evidence(rb2, lrn2), smo), "DMSb+view": dmsb, "r1": sd.decode_scores(mix_evidence(rb2, m2, 1.0), smo), "r2": sd.decode_scores(mix_evidence(rb2, m2, 2.0), smo)}
+                sc = {n: float(np.mean(list(er.by_match(blocks, truth, res[n]).values()))) for n in names}
+                best = max(sc.values())
+                for n in names:
+                    regret[n][(src, kappa, sigma)] = best - sc[n]
+                print("  %.0f %.0f | %.3f %.3f %.3f | %s" % (kappa, sigma, _dead_f1(rule, truth), _dead_f1(ref, truth), f_m, " ".join("%.4f" % sc[n] for n in names)), flush=True)
+        bench._blocks.clear()
+        bench._labels.clear()
+    print("\nmax regret over all scenarios: " + " | ".join("%s %.4f" % (n, max(regret[n].values())) for n in names))
+    for ks in ((0.0,), (0.0, 1.0)):
+        sel = lambda k: k[1] in ks
+        print("max regret, kappa in %s: " % (ks,) + " | ".join("%s %.4f" % (n, max(v for k, v in regret[n].items() if sel(k))) for n in names), flush=True)
+
+
+def stress3(src):
+    """Hedges: which sum of the channels keeps most of the multi-source model's gain and stays safe if a channel is much worse or better on the target than measured? kappa x the truth on the rules; slow noise sigma, drawn apart, on each learned channel. Seed 0, draw 0, SkillCorner's first ten matches. One source per process; the table goes to tools/runs/r41_stress3_<source>.json."""
+    import json
+    conv = CONVS[src][0]
+    names = ("rules+DT", "mix.5", "DMSb+view", "E1", "E2", "E3", "E4")
+    ev_src = "metrica@v3g" if src.startswith("metrica") else src
+    blocks = bench.blocks(ev_src)
+    truth = [np.asarray(g) for g in bench.labels(src, conv)]
+    base = bench.dead_probs(src, "base") if src.startswith("dfl") else bench.dead_ext("base", "v3", ev_src)
+    a_lrn = [exp_blend.logit_alive(x) for x in base]
+    a_m = [exp_blend.logit_alive(x) for x in balanced_probs("DMSb", ev_src)]
+    smo = team(src)[es.SEEDS[0]]
+    a_rb = rule_view(ev_src, blocks, truth, 0)
+    a_v = view_only(ev_src, blocks, truth, 0)
+    if src.startswith("sc"):
+        keep = list(range(20))
+        blocks, truth, a_lrn, a_m, smo, a_rb, a_v = [blocks[i] for i in keep], [truth[i] for i in keep], [a_lrn[i] for i in keep], [a_m[i] for i in keep], [smo[i] for i in keep], [a_rb[i] for i in keep], [a_v[i] for i in keep]
+    out = {}
+    print("%s %s: kappa sigma | %s" % (src, conv, " ".join(names)), flush=True)
+    for kappa, sigma in ((0, 0), (1, 0), (2, 0), (0, 2), (1, 2), (0, 4), (1, 4), (2, 4)):
+        lrn2 = [a + _ar1(len(a), np.random.default_rng([SEED, 21, i]), sigma) if sigma else a for i, a in enumerate(a_lrn)]
+        m2 = [a + _ar1(len(a), np.random.default_rng([SEED, 22, i]), sigma) if sigma else a for i, a in enumerate(a_m)]
+        rb2 = [a + kappa * np.where(g == 2, -1.0, 1.0) for a, g in zip(a_rb, truth)]
+        ref = sd.decode_scores(lrn2, smo)
+        ev2 = {"mix.5": [r + 0.5 * l for r, l in zip(rb2, lrn2)], "DMSb+view": [m + v for m, v in zip(m2, a_v)],
+               "E1": [r + 0.5 * l + 0.5 * m for r, l, m in zip(rb2, lrn2, m2)], "E2": [r + 0.5 * l + m for r, l, m in zip(rb2, lrn2, m2)],
+               "E3": [r + 0.25 * l + m for r, l, m in zip(rb2, lrn2, m2)], "E4": [r + 0.5 * l + 2 * m for r, l, m in zip(rb2, lrn2, m2)]}
+        res = {k: sd.decode_scores(v, smo) for k, v in ev2.items()}
+        res["rules+DT"] = [dt.retime(r, l) for r, l in zip(sd.decode_scores(rb2, smo), ref)]
+        sc = {n: float(np.mean(list(er.by_match(blocks, truth, res[n]).values()))) for n in names}
+        out["%d %d" % (kappa, sigma)] = sc
+        print("  %d %d | %s" % (kappa, sigma, " ".join("%.4f" % sc[n] for n in names)), flush=True)
+    with open(os.path.join(bench.ROOT, "tools", "runs", "r41_stress3_%s.json" % src.split("@")[0]), "w") as fh:
+        json.dump(out, fh)
+
+
+def soccertrack2():
+    """SoccerTrack v2 (never used for the dead model or the design): rules+DT, the 0.5 mix, the multi-source model on an unseen provider, with the transplanted view flag."""
+    import exp_st
+    src = exp_st.SRC
+    blocks = bench.blocks(src)
+    labs = {c: [np.asarray(g) for g in bench.labels(src, c)] for c in exp_st.CONVS}
+    gru = exp_st.gru_mean()
+    outs = bench._load(os.path.join(ss.OUT, "J1_%s.pkl" % src.replace("@", "-")))
+    a_lrn = [exp_blend.logit_alive(x) for x in bench.dead_ext("base", "v3", src)]
+    a_m = [exp_blend.logit_alive(x) for x in balanced_probs("DMSb", src)]
+    names = ("mix.5", "DMSb+view", "DMSb", "learned")
+    cells = {}
+    for draw in DRAWS:
+        a_rb = rule_view(src, blocks, labs["evctrl"], draw)
+        a_v = view_only(src, blocks, labs["evctrl"], draw)
+        for k in es.SEEDS:
+            raw14 = es.blend(exp_st.v10_raw(k), gru, 0.5)
+            smo = exp_smooth.smooth([0.75 * r + 0.25 * ss.pk(np.asarray(x, np.float32), 0) for r, x in zip(raw14, outs[ss.SEEDS[k]])], 25)
+            res = {"mix.5": mix_evidence(a_rb, a_lrn), "DMSb+view": [x + v for x, v in zip(a_m, a_v)], "DMSb": a_m, "learned": a_lrn}
+            for name, ev2 in res.items():
+                preds = sd.decode_scores(ev2, smo)
+                for c in exp_st.CONVS:
+                    cells.setdefault((src, c, TAG, name), []).append(er.by_match(blocks, labs[c], preds))
+        print("  draw %d done" % draw, flush=True)
+    er.summarize(cells, list(names), ref="mix.5")
+
+
+def head2():
+    """Small screen on top of DMSb + view: the specialist's dead head, the DFL model, the rules' tracking terms. Draw 0, 3 seeds."""
+    import exp_blend_weight as bw
+    names = ("DMSb+view", "+.25 J1", "+.5 J1", "+.25 DFL", "+.25 rules")
+    cells = {}
+    for src, convs in CONVS.items():
+        ev_src = "metrica@v3g" if src.startswith("metrica") else src
+        blocks = bench.blocks(ev_src)
+        labs = {c: [np.asarray(g) for g in bench.labels(src, c)] for c in convs}
+        base = bench.dead_probs(src, "base") if src.startswith("dfl") else bench.dead_ext("base", "v3", ev_src)
+        a_lrn = [exp_blend.logit_alive(x) for x in base]
+        a_e = dmsb_evidence(src)
+        a_rb = rule_view(ev_src, blocks, labs[convs[0]], 0)
+        smos = team(src)
+        outs = exp_kpu.outputs("J1", src)
+        for k in es.SEEDS:
+            a_j = [dt.alive_logit(np.asarray(o, np.float64)[:, 2]) for o in outs[ss.SEEDS[k]]]
+            res = {"DMSb+view": a_e, "+.25 J1": mix_evidence(a_e, a_j, 0.25), "+.5 J1": mix_evidence(a_e, a_j, 0.5), "+.25 DFL": mix_evidence(a_e, a_lrn, 0.25), "+.25 rules": mix_evidence(a_e, a_rb, 0.25)}
+            for name, ev2 in res.items():
+                preds = sd.decode_scores(ev2, smos[k])
+                for c in convs:
+                    cells.setdefault((src, c, TAG, name), []).append(er.by_match(blocks, labs[c], preds))
+        print("  %s done" % src, flush=True)
+        bench._blocks.clear()
+        bench._labels.clear()
+    mean, _ = er.summarize(cells, list(names), ref="DMSb+view")
+    for cand in names[1:]:
+        bw.decide(mean, "DMSb+view", cand)
+
+
 if __name__ == "__main__":
     sys.stdout.reconfigure(encoding="utf-8")
     warnings.filterwarnings("ignore")
-    {"eval": evaluate, "st": soccertrack, "v3g": deglued, "stress": stress, "dm": multi_source, "verifier": verifier, "shape": shape, "head": head, "oracle": oracle, "dm2": multi_source2, "qnorm": qnorm, "dm3": multi_source3, "dm4": multi_source4}[sys.argv[1]]()
+    {"eval": evaluate, "st": soccertrack, "v3g": deglued, "stress": stress, "dm": multi_source, "verifier": verifier, "shape": shape, "head": head, "oracle": oracle, "dm2": multi_source2, "qnorm": qnorm, "dm3": multi_source3, "dm4": multi_source4,
+     "stress2": stress2, "st2": soccertrack2, "head2": head2, "stress3": stress3, "eval2": evaluate2, "st4": soccertrack4}[sys.argv[1]](*sys.argv[2:])
