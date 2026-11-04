@@ -53,6 +53,8 @@ V3C = dict(V3, clean_fab=True)
 # around a restart. Where the source has no ball on a revealed frame (Metrica's dead ball) the nearest live position is held.
 V6 = dict(V3, edge_model=True, after_vis=0.507, after_mix=0.316, before_vis=0.547, before_mix=0.16, edge_vis_median_s=4.0, edge_sigma=0.8,
           edge_gone_median_s=10.7, edge_gone_sigma=0.9, edge_mix_frames=50, edge_jitter=6)
+# V6B: the same with shares like raw PFF's (the ball nearly always visible right after a stop and right before a restart): the sensitivity test of round 49.
+V6B = dict(V6, after_vis=0.90, after_mix=0.10, before_vis=0.80, before_mix=0.18)
 
 
 def _smooth_runs(x, sigma):

@@ -22,14 +22,15 @@ import bench  # noqa: E402
 SOURCES = {"dfl": ("dfl@v3", "dfl", "native"), "metrica": ("metrica@v3g", "metrica@v3", "ctrl"), "sc": ("sc@v3", "sc@v3", "evctrl")}
 OUT = os.path.join(bench.CACHE, "tdead")
 if os.environ.get("TD_V6"):         # round 49: the same model on sim.V6's masks
-    SOURCES = {"dfl": ("dfl@v6", "dfl", "native"), "metrica": ("metrica@v6g", "metrica@v3", "ctrl"), "sc": ("sc@v6", "sc@v3", "evctrl")}
+    _v = os.environ.get("TD_VAR", "v6")
+    SOURCES = {"dfl": ("dfl@%s" % _v, "dfl", "native"), "metrica": ("metrica@%sg" % _v, "metrica@v3", "ctrl"), "sc": ("sc@%s" % _v, "sc@v3", "evctrl")}
     OUT = os.path.join(bench.CACHE, os.environ.get("TD_OUT", "tdead6"))
 STEP = 5            # frames per model step (5 Hz)
 WIN = 600           # steps per training window (2 minutes)
 STEPS = 4000
 BATCH = 24
 LR = 1e-3
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+DEVICE = "cuda" if torch.cuda.is_available() and not os.environ.get("TD_CPU") else "cpu"
 
 
 class Net(nn.Module):
