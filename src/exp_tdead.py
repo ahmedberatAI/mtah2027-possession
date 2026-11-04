@@ -45,13 +45,24 @@ class Net(nn.Module):
         return self.head(h)
 
 
+def half_norm(x):
+    """TD_NORM=1 (round 51): every feature centred and scaled by this half's own median and spread, so that the model cannot lean on a match's absolute tempo. Label-free and per half."""
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        q1, q2, q3 = np.nanquantile(x, (0.25, 0.5, 0.75), axis=0)
+        sd = np.nanstd(x, axis=0)
+    scale = np.where(q3 - q1 > 1e-6, q3 - q1, np.where(sd > 1e-6, sd, 1.0))
+    return (x - q2) / scale
+
+
 def pool(x, step=STEP):
     """Mean over step frames, NaNs ignored."""
     n = len(x) // step
     x = x[:n * step].reshape(n, step, -1)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        return np.nanmean(x, axis=1)
+        out = np.nanmean(x, axis=1)
+    return half_norm(out) if os.environ.get("TD_NORM") else out
 
 
 def targets(lab, step=STEP):
@@ -74,6 +85,26 @@ def targets(lab, step=STEP):
     return dead.astype(np.float32), mask, heat
 
 
+def pff_rows():
+    """PFF raw as a fourth provider (TD_PFF=1): the prepared per-half features ('base' columns, real ball gaps), its own D."""
+    import gradient
+    import pathlib
+    names = bench.features("base", "dfl@v3")[0]["fk"]
+    out = pathlib.Path(bench.ROOT) / "cache" / "pff_experiment" / gradient.VERSION / "features"
+    rows, lens = [], []
+    for match in gradient.matches():
+        with np.load(gradient.CACHE / gradient.VERSION / ("%s.npz" % match)) as d:
+            for per in d["periods"]:
+                path = out / ("%s_h%d.pkl" % (match, int(per)))
+                if not path.exists():
+                    continue
+                f = bench._load(str(path))
+                x = pool(f["XF"][:, [f["fk"].index(k) for k in names]])
+                rows.append(("pff:%s" % match, x.astype(np.float32),) + targets(np.asarray(d["h%d_labels" % int(per)])))
+                lens.append(len(f["XF"]))
+    return rows, lens
+
+
 def load_all():
     data = {}
     for k, (fsrc, lsrc, conv) in SOURCES.items():
@@ -86,7 +117,23 @@ def load_all():
             rows.append((g, x.astype(np.float32),) + targets(l))
         data[k] = rows
         print("  %s: %d halves" % (k, len(rows)), flush=True)
+    if os.environ.get("TD_PFF"):
+        data["pff"], _lens["pff"] = pff_rows()
+        print("  pff: %d halves" % len(data["pff"]), flush=True)
     return data
+
+
+_lens = {}
+
+
+def score_pooled(net, mean, scale, x, n):
+    """score_half on an already pooled half of n frames."""
+    xx = np.nan_to_num((x - mean) / scale, nan=0.0)
+    with torch.no_grad():
+        out = net(torch.as_tensor(xx[None], dtype=torch.float32, device=DEVICE))[0, :, 0].cpu().numpy()
+    grid = (np.arange(len(out)) + 0.5) * STEP
+    z = np.interp(np.arange(n) + 0.5, grid, out)
+    return (1 / (1 + np.exp(-z))).astype(np.float32)
 
 
 def fit(data, hold, seed):
@@ -162,10 +209,15 @@ def train(seed):
     feats = {k: bench.features("base", SOURCES[k][0]) for k in SOURCES}
     res = {k: [[] for _ in data[k]] for k in SOURCES}
     heads = {k: [[] for _ in data[k]] for k in SOURCES}
+    pf = sorted({r[0] for r in data.get("pff", [])})
+    res_p = [[] for _ in data.get("pff", [])]
     for i in range(len(dfl)):
         t0 = time.time()
-        hold = {dfl[i], met[i % len(met)]} | set(sc[i::len(dfl)])
+        hold = {dfl[i], met[i % len(met)]} | set(sc[i::len(dfl)]) | set(pf[i::len(dfl)])
         net, mean, scale = fit(data, hold, seed + i)
+        for j, r in enumerate(data.get("pff", [])):
+            if r[0] in hold:
+                res_p[j].append(score_pooled(net, mean, scale, r[1], _lens["pff"][j]))
         for k in SOURCES:
             for j, r in enumerate(data[k]):
                 if r[0] in hold:
@@ -179,6 +231,8 @@ def train(seed):
         assert all(len(v) for v in res[k])
         bench._dump(out, os.path.join(OUT, "held_%d_%s.pkl" % (seed, SOURCES[k][0].replace("@", "-"))))
         bench._dump([np.mean(np.stack(v), axis=0).astype(np.float16) for v in heads[k]], os.path.join(OUT, "heads_%d_%s.pkl" % (seed, SOURCES[k][0].replace("@", "-"))))
+    if res_p:
+        bench._dump([np.mean(np.stack(v), axis=0) for v in res_p], os.path.join(OUT, "held_%d_pff.pkl" % seed))
     net, mean, scale = fit(data, set(), seed + 100)
     torch.save(dict(state={k: v.cpu() for k, v in net.state_dict().items()}, mean=mean, scale=scale, n_in=len(mean)), os.path.join(OUT, "all_%d.pt" % seed))
     print("  seed %d all-data model done" % seed, flush=True)

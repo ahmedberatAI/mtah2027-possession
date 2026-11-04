@@ -188,16 +188,18 @@ def evidence_arms(k, conf):
     tr3, vi3 = rule_evidence(k, V3, conf)
     tr6, vi6 = rule_evidence(k, V6, conf)
     load = lambda tag: [exp_blend.logit_alive(x) for x in bench._load(os.path.join(OUT, "M_%s_%s.pkl" % (tag, fsrc.replace("@", "-"))))]
-    m3, m6, m6p = load("v3"), load("v6"), load("v6p")
+    m3, m6 = load("v3"), load("v6")
+    m6p = load("v6p") if os.path.isfile(os.path.join(OUT, "M_v6p_done")) else None
     arms = {"v19": [0.25 * t + 0.75 * m + v for t, m, v in zip(tr3, m3, vi3)],
             "rules3": [t + v for t, v in zip(tr3, vi3)],
             "M6 A25": [0.25 * t + 0.75 * m + v for t, m, v in zip(tr6, m6, vi6)],
             "M6 A50": [0.5 * t + 0.5 * m + v for t, m, v in zip(tr6, m6, vi6)],
             "M6 A75": [0.75 * t + 0.25 * m + v for t, m, v in zip(tr6, m6, vi6)],
             "M6 only": [m + v for m, v in zip(m6, vi6)],
-            "rules6": [t + v for t, v in zip(tr6, vi6)],
-            "M6P A25": [0.25 * t + 0.75 * m + v for t, m, v in zip(tr6, m6p, vi6)],
-            "M6P A50": [0.5 * t + 0.5 * m + v for t, m, v in zip(tr6, m6p, vi6)]}
+            "rules6": [t + v for t, v in zip(tr6, vi6)]}
+    if m6p is not None:
+        arms["M6P A25"] = [0.25 * t + 0.75 * m + v for t, m, v in zip(tr6, m6p, vi6)]
+        arms["M6P A50"] = [0.5 * t + 0.5 * m + v for t, m, v in zip(tr6, m6p, vi6)]
     paths = [os.path.join(bench.CACHE, "tdead6", "held_%d_%s.pkl" % (s, fsrc.replace("@", "-"))) for s in (20261104, 20261105, 20261106)]
     if all(os.path.isfile(x) for x in paths):       # the sequence model of src/exp_tdead.py on V6's masks, mean of three seeds
         runs = [bench._load(x) for x in paths]
@@ -205,7 +207,8 @@ def evidence_arms(k, conf):
         arms["TD6 A25"] = [0.25 * t + 0.75 * x + v for t, x, v in zip(tr6, td, vi6)]
         arms["M6+TD6 A25"] = [0.25 * t + 0.375 * m + 0.375 * x + v for t, m, x, v in zip(tr6, m6, td, vi6)]
         arms["M6+TD6 A50"] = [0.5 * t + 0.25 * m + 0.25 * x + v for t, m, x, v in zip(tr6, m6, td, vi6)]
-        arms["M6P+TD6 A25"] = [0.25 * t + 0.375 * m + 0.375 * x + v for t, m, x, v in zip(tr6, m6p, td, vi6)]
+        if m6p is not None:
+            arms["M6P+TD6 A25"] = [0.25 * t + 0.375 * m + 0.375 * x + v for t, m, x, v in zip(tr6, m6p, td, vi6)]
     return arms
 
 
@@ -236,6 +239,12 @@ def evaluate(k):
     er.summarize(cells, names, ref="v19")
     with open(os.path.join(RUNS, "r49_cells_%s.pkl" % k), "wb") as fh:
         pickle.dump(cells, fh)
+    if len(arms) > 2:
+        import exp_blend_weight as bw
+        mean = {}
+        for c, runs in cells.items():
+            mean[c] = {m: float(np.mean([r[m] for r in runs])) for m in runs[0]}
+        print("(one provider: per-context deltas above)", flush=True)
 
 
 def decide():
@@ -366,7 +375,172 @@ def pff():
         print("  %-9s dead F1 %.3f, precision %.3f, recall %.3f" % (name, 2 * tp / (2 * tp + fp + fn), tp / max(tp + fp, 1), tp / max(tp + fn, 1)), flush=True)
 
 
+def boundary_heads():
+    """The sequence model's stop and restart heads as time-varying costs of entering and leaving D: the timing pool (+0.014 / +0.016 / +0.054). M6+TD6 A25's evidence, V6 harness."""
+    from concurrent.futures import ThreadPoolExecutor
+    import decode2
+    import exp_v7
+    with open(ro.OUT) as fh:
+        conf = json.load(fh)
+    ramp = exp_v7.ramp(175, 48.0)
+    macros = [dict(emis=0, out=0, L=len(ramp), min_exit=7, exit_cost=ramp), dict(emis=1, out=1, L=len(ramp), min_exit=7, exit_cost=ramp), dict(emis=2, out=2, L=50)]
+    pen = [[0, 12.0, 30.0], [12.0, 0, 30.0], [30.0, 30.0, 0]]
+    spec = decode2.Spec(macros, pen, [[-1, -1, 0], [-1, -1, 0], [1, 1, -1]])
+    lams = (10.0, 20.0, 30.0)
+    names = ["M6+TD6 A25"] + ["h%d" % l for l in lams]
+    cells = {}
+    pool = ThreadPoolExecutor(int(os.environ.get("DECODE_WORKERS", "5")))
+    for k in V6:
+        fsrc = V6[k][0]
+        src = V3[k][1]
+        ev = evidence_arms(k, conf)["M6+TD6 A25"]
+        heads = [bench._load(os.path.join(bench.CACHE, "tdead6h", "heads_%d_%s.pkl" % (s, fsrc.replace("@", "-")))) for s in (20261104, 20261105, 20261106)]
+        heat = [np.mean(np.stack([np.asarray(h[i], np.float32) for h in heads]), axis=0) for i in range(len(heads[0]))]
+        convs = dm.CONVS[src]
+        blocks = bench.blocks(fsrc)
+        labs = {c: [np.asarray(g) for g in bench.labels(src, c)] for c in convs}
+        smos = dm.team(src)
+        for s in es.SEEDS:
+            ems = [np.stack([a / 2 + np.log(np.clip(q, sd.EPS, 1 - sd.EPS)), a / 2 + np.log(np.clip(1 - q, sd.EPS, 1 - sd.EPS)), -a / 2], 1) for a, q in zip(ev, smos[s])]
+            for name in names:
+                lam = 0.0 if name == names[0] else float(name[1:])
+
+                def one(i):
+                    return spec.decode(ems[i], -lam * heat[i][:len(ems[i])].astype(np.float64)).astype(np.int8)
+                preds = list(pool.map(one, range(len(ems))))
+                for c in convs:
+                    cells.setdefault((src, c, "edges D", name), []).append(er.by_match(blocks, labs[c], preds))
+            print("  %s seed %d done" % (k, s), flush=True)
+        bench._blocks.clear()
+        bench._labels.clear()
+    mean, _ = er.summarize(cells, names, ref=names[0])
+    import exp_blend_weight as bw
+    for cand in names[1:]:
+        bw.decide(mean, names[0], cand)
+
+
+def stress():
+    """As round 41: what if a channel is much worse or better on the target than measured? kappa: the rules know the truth by +-kappa log-odds; sigma: slow AR(1) noise on each learned channel (independent). One seed; DFL, Metrica, half of SkillCorner; max regret across the cells."""
+    with open(ro.OUT) as fh:
+        conf = json.load(fh)
+    names = ("v19", "M6 A25", "M6 A50", "TD6 A25", "M6+TD6 A25", "M6+TD6 A50")
+    grid = ((0, 0), (1, 0), (2, 0), (0, 2), (1, 2), (0, 4), (1, 4), (2, 4))
+    res = {}
+    for k in V6:
+        fsrc = V6[k][0]
+        src = V3[k][1]
+        conv = dm.CONVS[src][0]
+        tr3, vi3 = rule_evidence(k, V3, conf)
+        tr6, vi6 = rule_evidence(k, V6, conf)
+        load = lambda tag: [exp_blend.logit_alive(x) for x in bench._load(os.path.join(OUT, "M_%s_%s.pkl" % (tag, fsrc.replace("@", "-"))))]
+        m3, m6 = load("v3"), load("v6")
+        runs = [bench._load(os.path.join(bench.CACHE, "tdead6", "held_%d_%s.pkl" % (s, fsrc.replace("@", "-")))) for s in (20261104, 20261105, 20261106)]
+        td = [exp_blend.logit_alive(np.mean(np.stack([r[i] for r in runs]), axis=0)) for i in range(len(runs[0]))]
+        blocks = bench.blocks(fsrc)
+        truth = [np.asarray(g) for g in bench.labels(src, conv)]
+        smo = dm.team(src)[es.SEEDS[0]]
+        keep = list(range(20)) if k == "sc" else list(range(len(blocks)))
+        for kappa, sigma in grid:
+            def noisy(x, tag):
+                return [x[i] + dm._ar1(len(x[i]), np.random.default_rng([dm.SEED, tag, i]), sigma) if sigma else x[i] for i in keep]
+            n3, n6, nt = noisy(m3, 31), noisy(m6, 32), noisy(td, 33)
+            bias = [kappa * np.where(truth[i] == 2, -1.0, 1.0) for i in keep]
+            t3 = [tr3[i] + b for i, b in zip(keep, bias)]
+            t6 = [tr6[i] + b for i, b in zip(keep, bias)]
+            v3 = [vi3[i] for i in keep]
+            v6 = [vi6[i] for i in keep]
+            ev = {"v19": [0.25 * t + 0.75 * m + v for t, m, v in zip(t3, n3, v3)],
+                  "M6 A25": [0.25 * t + 0.75 * m + v for t, m, v in zip(t6, n6, v6)],
+                  "M6 A50": [0.5 * t + 0.5 * m + v for t, m, v in zip(t6, n6, v6)],
+                  "TD6 A25": [0.25 * t + 0.75 * x + v for t, x, v in zip(t6, nt, v6)],
+                  "M6+TD6 A25": [0.25 * t + 0.375 * m + 0.375 * x + v for t, m, x, v in zip(t6, n6, nt, v6)],
+                  "M6+TD6 A50": [0.5 * t + 0.25 * m + 0.25 * x + v for t, m, x, v in zip(t6, n6, nt, v6)]}
+            b_, g_ = [blocks[i] for i in keep], [truth[i] for i in keep]
+            sm = [smo[i] for i in keep]
+            sc = {n: float(np.mean(list(er.by_match(b_, g_, eg.decode_par(ev[n], sm)).values()))) for n in names}
+            res.setdefault((kappa, sigma), {})[k] = sc
+            print("  %s kappa %d sigma %d | %s" % (k, kappa, sigma, " ".join("%s %.4f" % (n, sc[n]) for n in names)), flush=True)
+        bench._blocks.clear()
+        bench._labels.clear()
+    reg = {n: 0.0 for n in names}
+    reg2 = {n: 0.0 for n in names}
+    for cell, per in res.items():
+        for k, sc in per.items():
+            best = max(sc.values())
+            for n in names:
+                reg[n] = max(reg[n], best - sc[n])
+                if cell[1] <= 2:
+                    reg2[n] = max(reg2[n], best - sc[n])
+    print("max regret, all cells: %s" % " | ".join("%s %.4f" % (n, reg[n]) for n in names))
+    print("max regret, sigma <= 2: %s" % " | ".join("%s %.4f" % (n, reg2[n]) for n in names), flush=True)
+
+
+def soccertrack(var="v6"):
+    """SoccerTrack v2: a full-pitch camera and the provider's own per-frame ball status; no model saw it. Team channels frozen as in round 44; masks V3 or V6; all-data dead models."""
+    import exp_smooth
+    import exp_st
+    import exp_tdead as etd
+    import short_specialist as ss
+    import torch
+    with open(ro.OUT) as fh:
+        conf = json.load(fh)
+    t, c = conf["thresholds"], conf["bounds"]
+    b3, g3 = weights_on(V3, conf)
+    b6, g6 = weights_on(V6, conf)
+    m3 = bench.load_booster(os.path.join(OUT, "M_v3_all.txt"))
+    m6 = bench.load_booster(os.path.join(OUT, "M_v6_all.txt"))
+
+    def nets(folder):
+        out = []
+        for seed in (20261104, 20261105, 20261106):
+            ck = torch.load(os.path.join(bench.CACHE, folder, "all_%d.pt" % seed), map_location="cpu", weights_only=False)
+            net = etd.Net(ck["n_in"]).to(etd.DEVICE)
+            net.load_state_dict(ck["state"])
+            net.eval()
+            out.append((net, ck["mean"], ck["scale"]))
+        return out
+
+    td3, td6 = nets("tdead"), nets("tdead6")
+    src = "st@%s" % var
+    blocks = bench.blocks(src)
+    labs = {cv: [np.asarray(g) for g in bench.labels(exp_st.SRC, cv)] for cv in exp_st.CONVS}
+    truth = labs["evctrl"]
+    fs = bench.features("base", src)
+    names = ("v19", "rules3", "M6 A25", "M6 A50", "TD3 A25", "M3+TD3 A25", "TD6 A25", "M6+TD6 A25", "M6+TD6 A50")
+    ev = {n: [] for n in names}
+    for i, (b, f, g) in enumerate(zip(blocks, fs, truth)):
+        T = ro.terms(exp_blend.rule_f(b), t, c)
+        v, l = dm.transplant(g, np.random.default_rng([dm.SEED, 0, i]))
+        tr3, tr6, vi3, vi6 = T @ b3, T @ b6, g3[0] * (~v) + g3[1] * l, g6[0] * (~v) + g6[1] * l
+        a3, a6 = exp_blend.logit_alive(m3.predict(f["XF"], num_threads=bench.THREADS)), exp_blend.logit_alive(m6.predict(f["XF"], num_threads=bench.THREADS))
+        x3 = exp_blend.logit_alive(np.mean([etd.score_half(n_, m_, s_, f["XF"]) for n_, m_, s_ in td3], axis=0))
+        x6 = exp_blend.logit_alive(np.mean([etd.score_half(n_, m_, s_, f["XF"]) for n_, m_, s_ in td6], axis=0))
+        ev["v19"].append(0.25 * tr3 + 0.75 * a3 + vi3)
+        ev["rules3"].append(tr3 + vi3)
+        ev["M6 A25"].append(0.25 * tr6 + 0.75 * a6 + vi6)
+        ev["M6 A50"].append(0.5 * tr6 + 0.5 * a6 + vi6)
+        ev["TD3 A25"].append(0.25 * tr3 + 0.75 * x3 + vi3)
+        ev["M3+TD3 A25"].append(0.25 * tr3 + 0.375 * a3 + 0.375 * x3 + vi3)
+        ev["TD6 A25"].append(0.25 * tr6 + 0.75 * x6 + vi6)
+        ev["M6+TD6 A25"].append(0.25 * tr6 + 0.375 * a6 + 0.375 * x6 + vi6)
+        ev["M6+TD6 A50"].append(0.5 * tr6 + 0.25 * a6 + 0.25 * x6 + vi6)
+    gru = exp_st.gru_mean()
+    outs = bench._load(os.path.join(ss.OUT, "J1_%s.pkl" % exp_st.SRC.replace("@", "-")))
+    cells = {}
+    for k in es.SEEDS:
+        raw14 = es.blend(exp_st.v10_raw(k), gru, 0.5)
+        smo = exp_smooth.smooth([0.75 * r + 0.25 * ss.pk(np.asarray(x, np.float32), 0) for r, x in zip(raw14, outs[ss.SEEDS[k]])], 25)
+        for name in names:
+            preds = eg.decode_par(ev[name], smo)
+            if k == es.SEEDS[0]:
+                print("  %-11s dead share %.3f (true %.3f), dead F1 %.3f" % (name, np.mean(np.concatenate(preds) == 2), np.mean(np.concatenate(truth) == 2), dm._dead_f1(preds, truth)), flush=True)
+            for cv in exp_st.CONVS:
+                cells.setdefault((exp_st.SRC, cv, "edges D", name), []).append(er.by_match(blocks, labs[cv], preds))
+        print("  seed %d done" % k, flush=True)
+    er.summarize(cells, list(names), ref="v19")
+
+
 if __name__ == "__main__":
     sys.stdout.reconfigure(encoding="utf-8")
     warnings.filterwarnings("ignore")
-    {"inputs": inputs, "models": models, "eval": evaluate, "decide": decide, "pff": pff}[sys.argv[1]](*sys.argv[2:])
+    {"inputs": inputs, "models": models, "eval": evaluate, "decide": decide, "pff": pff, "st": soccertrack, "heads": boundary_heads, "stress": stress}[sys.argv[1]](*sys.argv[2:])
