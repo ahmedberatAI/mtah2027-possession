@@ -1,4 +1,4 @@
-"""v20 candidate (rounds 45, 46, 49, 51, 55, docs/RAPOR.md): the specialist's weight 0.5 and a sequence model in the dead-ball evidence, every dead-ball model trained on sim.V6's masks.
+"""v20 (rounds 45, 46, 49, 51-55, docs/RAPOR.md, the user's decision): the specialist's weight 0.5 and a sequence model in the dead-ball evidence, every dead-ball model trained on sim.V6's masks.
 
 Team: 0.5 x (0.5 v10 + 0.5 shared BiGRU) + 0.5 x J1, +-1 s smoothing. Round 45: with Metrica's ball de-glued for every channel J1's weight 0.5 passes the decision rule (0.35-0.65 is a plateau); the old 0.25 had been chosen with the glued ball.
 
@@ -14,7 +14,7 @@ Dead-ball evidence, the decoder's alive log-odds per frame:
 
 sim.V6 (round 49): V3 cut every dead-ball gap exactly at the restart; real tracking does not. V6 draws the ball around stops and restarts from the target's label-free, whole-match aggregate shares (no public window); see src/sim.py.
 
-The decoder's settings are v17's; no verifier and no boundary timing (both ~0 on this evidence). Frames before the second kick-off (official FAQ) are dead.
+The decoder's settings are v17's; no verifier (+0.0002 on the primary contexts on v19's evidence, not retrained for this base) and no boundary timing. Frames before the second kick-off (official FAQ) are dead.
 
 Cached: cache/v20/barath_td.pkl, cache/v20/barath_m.pkl, cache/v20/barath_probs.pkl; deterministic on CPU.
 """

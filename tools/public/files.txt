@@ -1,13 +1,14 @@
 # Files of the public repository (tools/export_public.py). Source modules: the import closure of
-# src/make_submission.py with model_v19 = the v10 / shared BiGRU blend mixed with the short-possession specialist J1 +
-# the short-possession verifier, decoded with open-data rules + a multi-source dead model + view terms (incl. lazily imported option
+# src/make_submission.py with model_v20 = the v10 / shared BiGRU blend mixed with the short-possession specialist J1,
+# decoded with open-data rules + a multi-source dead model + a sequence dead model + view terms (incl. lazily imported option
 # modules, the feature plugins named in model_v7.VERSION, src/reproduce_shared_bigru.py, which rebuilds the shared
 # BiGRU's BAR-ATH probabilities, and src/exp_bigru_lomo.py, whose held-out DFL probabilities the blend verifiers were
 # trained with), the open-data download script, the team classifier, the verifier classifiers (v13's, v14's, v15's and
 # v17's)
 # and the dead-ball classifier trained on open data, the shared BiGRU checkpoints (open DFL + PFF data) and the
 # specialists' checkpoints (C1: open PFF data only; J1: C1 fine-tuned on the open DFL and Metrica games). Also the scripts that
-# measured the broadcast lags (src/align_ball.py) and fit the open-data rule constants (src/dead_rules_fit.py, src/dfl_events.py).
+# measured the broadcast lags (src/align_ball.py) and fit the open-data rule constants and dead-ball models (src/dead_rules_fit.py,
+# src/dead_v6_fit.py, src/exp_tdead.py, src/dfl_events.py).
 src/align_ball.py
 src/atd.py
 src/ballclean.py
@@ -17,6 +18,7 @@ src/broadcast.py
 src/ctrl_model.py
 src/dead_rules_fit.py
 src/dead_timing.py
+src/dead_v6_fit.py
 src/decode.py
 src/decode2.py
 src/dfl.py
@@ -33,6 +35,7 @@ src/exp_short.py
 src/exp_short_angles.py
 src/exp_short_cands.py
 src/exp_smooth.py
+src/exp_tdead.py
 src/exp_v4.py
 src/exp_v7.py
 src/exp_verify.py
@@ -51,6 +54,7 @@ src/model_v16.py
 src/model_v17.py
 src/model_v18.py
 src/model_v19.py
+src/model_v20.py
 src/model_v2.py
 src/model_v3.py
 src/model_v5.py
@@ -94,5 +98,11 @@ models/short_verifier_ins_c1m25s.txt
 models/short_verifier_ins_j1m25s.txt
 models/dead_base_v3.txt
 models/dead_multi_v1.txt
+models/dead_multi_v2.txt
 models/dead_rules_open_v1.json
+models/dead_rules_open_v2.json
+models/tdead_v1/README.md
+models/tdead_v1/tdead_v6n_s20261104.pt
+models/tdead_v1/tdead_v6n_s20261105.pt
+models/tdead_v1/tdead_v6n_s20261106.pt
 models/v10_team.txt

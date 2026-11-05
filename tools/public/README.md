@@ -3,19 +3,16 @@
 Per-frame `H` / `A` / `D` labels for the BAR-ATH match of More than a Hack 2027 (Phase 1), produced end to end from
 the provided data and open data:
 
-- **Dead ball:** a small rule model on player tempo and ball state, a dead-ball classifier and the time-aligned broadcast
-  recording's view; all constants and models come from open data.
+- **Dead ball:** a small rule model on player tempo and ball state, a dead-ball classifier, a sequence model whose inputs are
+  scaled by each half's own level, and the time-aligned broadcast recording's view; all weights and models come from open data.
 - **Team in possession:** a LightGBM classifier on team-level tracking features, trained on open tracking (IDSSE /
   DFL, Metrica Sports sample games) degraded to look like automatic single-camera tracking, averaged in equal parts
   with a bidirectional GRU trained on open DFL and PFF World Cup 2022 tracking (`models/bigru_dfl_pff_v1`).
 - **Short-possession specialist:** a ball-centred tracking model trained on open PFF World Cup 2022 data, with
   PFF's possessions in the challenge's controlled-possession reading (`models/kpu_c1`), then fine-tuned on the open
-  DFL and Metrica games in the same reading (`models/kpu_j1`); 0.25 of its probability of control enters the team
+  DFL and Metrica games in the same reading (`models/kpu_j1`); its probability of control is half of the team
   probability.
 - **Decoding:** a duration-aware Viterbi decoder per half.
-- **Short possessions:** a verifier re-examines the decoder's short decisions with two LightGBM classifiers trained on
-  open data labelled in the same controlled-possession reading; its inputs include the blend's and the GRU's margins and
-  the specialist's control, change and touch outputs, and the specialist proposes candidates of its own.
 
 The approach, the validation protocol and the results are in **[docs/TECHNICAL_DOCUMENT.md](docs/TECHNICAL_DOCUMENT.md)**.
 
@@ -27,8 +24,8 @@ uv venv --python 3.12 .venv
 uv pip install --python .venv/Scripts/python.exe -r requirements.txt
 git clone https://github.com/metrica-sports/more-than-a-hack-2027 external/more-than-a-hack-2027
 # unpack the match bundle into ./data/{tactical,broadcast}  (or set MTAH_DATA_DIR)
-.venv/Scripts/python.exe src/make_submission.py           # -> submissions/candidate_v19.csv (a few minutes)
-python external/more-than-a-hack-2027/evaluation/validate_submission.py submissions/candidate_v19.csv
+.venv/Scripts/python.exe src/make_submission.py           # -> submissions/candidate_v20.csv (a few minutes)
+python external/more-than-a-hack-2027/evaluation/validate_submission.py submissions/candidate_v20.csv
 
 # optional: retrain the team classifier from the open data (rewrites models/v10_team.txt, about 7 min on 24 cores)
 .venv/Scripts/python.exe src/download_idsse.py            # open DFL / IDSSE data, CC BY 4.0, ~2.6 GB
@@ -40,23 +37,27 @@ MTAH_RETRAIN=1 .venv/Scripts/python.exe src/make_submission.py
 - `.gitattributes` keeps the LightGBM model files (`models/*.txt`) byte for byte: LightGBM 4.7 cannot read them with
   the CRLF line endings a Windows checkout would otherwise write (the pipeline also reads them as text).
 - `models/v10_team.txt` is the team classifier, `models/kpu_j1/kpu_J1_s20261102.pt` the specialist,
-  `models/short_verifier_{ins,del}_j1m25s.txt` the verifier, `models/dead_multi_v1.txt` the dead-ball classifier and
-  `models/dead_rules_open_v1.json` the rule constants, all from open data only, so the default run needs
+  `models/dead_multi_v2.txt` the dead-ball classifier, `models/tdead_v1/` the sequence dead-ball model and
+  `models/dead_rules_open_v2.json` the rule weights, all from open data only, so the default run needs
   only the provided data. On its first run it rebuilds the BiGRU's BAR-ATH probabilities on the CPU
-  (`src/reproduce_shared_bigru.py`, checked against `models/bigru_dfl_pff_v1/manifest.json`) and runs the specialist on
-  the CPU.
+  (`src/reproduce_shared_bigru.py`, checked against `models/bigru_dfl_pff_v1/manifest.json`) and runs the specialist and
+  the sequence model on the CPU.
 - The run is deterministic: fixed simulation seeds, LightGBM deterministic mode with a fixed seed and thread count,
   and no GPU. Both the default run and a retrain of the team classifier from an empty `cache/` write the submitted
-  file, MD5 `c89208a3a034ee73bb41f3fb28390f87`. `--model model_v15 --out submissions/candidate_v15.csv` writes the
-  previous submission (MD5 `6081216bcf484049d8e6e84b27fc85dd`), `--model model_v14 --out
-  submissions/candidate_v14.csv` the one before (MD5 `5e7363fc83c6f56a923033894a28d3a1`) and `--model model_v13
-  --out submissions/candidate_v13.csv` v13 (MD5 `ed8ad739207f367017bb8d8c8204c82a`).
+  file, MD5 `d909212952998c76568b09c17b76b5d5`. `--model model_v19 --out submissions/candidate_v19.csv` writes the
+  previous submission (MD5 `45096061ebdc3aac6e2087d8a047246a`), `--model model_v15 --out submissions/candidate_v15.csv`
+  v15 (MD5 `6081216bcf484049d8e6e84b27fc85dd`), `--model model_v14 --out submissions/candidate_v14.csv` v14 (MD5
+  `5e7363fc83c6f56a923033894a28d3a1`) and `--model model_v13 --out submissions/candidate_v13.csv` v13 (MD5
+  `ed8ad739207f367017bb8d8c8204c82a`).
 
 ## Layout
 
 ```
-src/make_submission.py   end to end: provided data -> submissions/candidate_v19.csv
-src/model_v19.py         the submitted model: v17's team side, dead-ball evidence free of the public window
+src/make_submission.py   end to end: provided data -> submissions/candidate_v20.csv
+src/model_v20.py         the submitted model: the specialist at 0.5, dead-ball evidence with the sequence model
+src/exp_tdead.py         the sequence dead-ball model: network, per-half normalisation, training
+src/dead_v6_fit.py       re-derives v20's rule weights and dead-ball models from open data on sim.V6's masks
+src/model_v19.py         the previous submission: v17's team side, dead-ball evidence free of the public window
 src/dead_rules_fit.py    re-derives the rule constants from open data
 src/model_v18.py         the previous fusion: v3's rules + the broadcast + half the DFL dead model
 src/model_v17.py         the specialist J1 in C1's place (on v16's recipe)
@@ -70,8 +71,10 @@ src/model_v10.py         team classifier training + prediction, decoder settings
 models/v10_team.txt      the team classifier (LightGBM, trained on the open data only)
 models/short_verifier_*  the verifier's classifiers (LightGBM, open data only; *_j1m25s = v17's, *_c1m25s = v15's,
                          *_blend50 = v14's)
-models/dead_multi_v1.txt the dead-ball classifier (LightGBM, open DFL, Metrica and SkillCorner data, equal provider weight)
-models/dead_rules_open_v1.json  the rule constants (open data only)
+models/dead_multi_v2.txt the dead-ball classifier (LightGBM, open DFL, Metrica and SkillCorner data, equal provider weight, sim.V6)
+models/tdead_v1/         the sequence dead-ball model's three checkpoints (the same open data, sim.V6)
+models/dead_rules_open_v2.json  the rule weights (open data only, sim.V6)
+models/dead_multi_v1.txt, models/dead_rules_open_v1.json   v19's
 models/dead_base_v3.txt  the DFL dead-ball classifier of v16 to v18
 models/bigru_dfl_pff_v1/ the shared BiGRU checkpoints; src/reproduce_shared_bigru.py and src/seq_pff.py run them
 models/kpu_j1/           the specialist J1's checkpoint (C1 fine-tuned on the open DFL and Metrica games)
