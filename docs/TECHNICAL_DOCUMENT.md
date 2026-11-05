@@ -379,9 +379,8 @@ On the primary contexts the worst-case regret falls by 0.0126 (90% bootstrap int
 other context changes by −0.001. Without the SkillCorner relabelling (only DFL's verifier rows in the controlled
 reading) the gain was +0.0116 but Metrica improved in one game of three; with it, in all three (own dead ball).
 
-- **Public window** (sanity check only, never used for selection): the file passes the official validator. The last
-  reported check is v10's (v13 changes no frame there): spellF1 0.667 (bootstrap 0.44–0.83), macroF1 0.932, alive/dead
-  F1 0.982, team accuracy on alive frames 0.953. The official smoothing baseline scores 0.326 there.
+- **Public window** (sanity check only, never used for selection; v20's numbers were read after v20 was chosen): the file passes the official validator. v20: spellF1 0.667 (bootstrap 0.44–0.83),
+  macroF1 0.915, alive/dead F1 0.981, team accuracy on alive frames 0.936, 10 possessions against 17. v10's: 0.667, 0.932, 0.982, 0.953. The official smoothing baseline scores 0.326 there.
 - **Full match** (no labels): v20 has 192 possessions (v19: 193, v18 and v17: 208, v16 and v15: 207, v14: 216, v13: 214, v10: 203), 18 of
   them shorter than 4 s (v19: 18, v18: 21, v17: 18, v16: 15, v15: 13, v14: 19), 105 dead-ball stretches (v19: 105, v18: 110, v17: 118), 45% dead time
   (v19: 48%, v18: 45%, v17: 49%), home share of possession 0.60; v15 and v14 differ on 0.92% of the frames, v16 and v15 on 1.07%, v17 and v16 on
@@ -538,6 +537,9 @@ Each of these is ≤ +0.003 or negative on the external protocol:
   give the same decision, and raw PFF is the only external set with real gaps.
 - On SoccerTrack v2, a set no model saw, the dead ball remains the larger loss (0.794 against 0.85 with the true dead ball). BAR-ATH is also unseen, so this may hold there too.
 - The verifier has not been retrained on v20's base, so a small gain may remain there.
+- The ground truth's rule is unpublished. Frame-level labels, frame alignment and the timing of changes behave on the public window as our reading expects, but the window holds more short in-play possessions between two possessions of
+  the other team than our controlled reading (0.99 per live minute against 0.20–0.24), and the model finds 10 possessions of 17 there. The evidence is thin (five minutes, four such possessions) and nothing was tuned on it, but the scores in section 7 may be optimistic: under looser
+  readings of the open sets v20 scores 0.69–0.71.
 
 ## 10. Reproducing the submission
 
