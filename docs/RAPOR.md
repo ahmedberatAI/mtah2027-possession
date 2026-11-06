@@ -2671,6 +2671,8 @@ Hakem (görüntü bayrağı izleme kanıtlarının dışında tutuldu; `scratchp
 
 **Tur 68 ek (6 Kasım; yukarı doz sonucu görülmeden).** Yerel GPU boşaldı (`nvidia-smi` 3 MiB, %0). Aşağı doz, tek başına doğruluk, 1,500 → 6,000 adım: DFL 0.9145 → 0.9186, Metrica 0.9396 → 0.9431, SC 0.9236 → 0.9307. **Yukarı doz:** BF tam ayar (60 sn pencere, yığın 32, 12,000 adım; bugünküne göre 16 kat veri; `BF_TAG=_f`, tohum 0); tek başına doğruluk; Hx = Hv'nin düzeni, girdide tam ayar BF. **Colab'a geçme kuralı buna da uygulanır:** Hx − Hv birincil ya da SC evctrl'de ≥ +0.003 ise topsuz kanala daha çok kaynak değer (tohumlar, hedef kurallı maçlarda ince ayar); altındaysa bu kanal doymuştur, küçültülmüş ayar kalır. GPU başka iş alırsa kendi işlerim durdurulur.
 
+**Tur 68 ek 2 (6 Kasım; Hy'nin sonucu görülmeden).** Tam ayar BF'nin üç tohumu, tek başına doğruluk, tohumlar / ortalama: DFL 0.9225, 0.9199, 0.9217 / **0.9245**; Metrica 0.9490, 0.9483, 0.9487 / **0.9514** (J1 0.9517); SC 0.9326, 0.9280, 0.9316 / **0.9354** (v20'nin karışımı 0.9222 / 0.9560 / 0.9299). Ortalama tek tohumun ortalamasından +0.0031 / +0.0027 / +0.0047: varyans payı büyük, doz kuralı (doğrulukta ≥ +0.003) DFL ve SC'de geçiyor. **Hy** = Hv'nin düzeni, girdide üç tam ayar BF tohumunun ortalaması. Seçim: Hv, Hx, Hy arasında tohum 0'da birincilde büyük olan 3 tohuma gider; fark < 0.005 ise basit olan (Hz'ye karşı da). Koşullar tur 67'ninki.
+
 ## Ek A — İlk analiz, araştırma ve baseline'lar (20 Ekim)
 
 *Tarihsel rapor; özgün başlığı: More than a Hack 2027 — Faz 1 (Top Sahipliği) · Analiz, Araştırma ve Baseline Raporu. Güncel durum için §1.*
