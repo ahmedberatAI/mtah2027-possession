@@ -46,8 +46,12 @@ def is_path(tag):
 
 
 def canon(tag):
-    """The input of a tag: Gs and Hs read the same columns."""
-    return "G" + tag[1:2]
+    """The input of a tag: Gs and Hs read the same columns; Hv = Hf's input (round 66) with Hz's augmentation."""
+    return "Gf" if tag[:2] == "Hv" else "G" + tag[1:2]
+
+
+def augmented(tag):
+    return tag[:2] in ("Hz", "Hv")
 
 
 def step_of(tag):
@@ -230,6 +234,11 @@ def augment(x, rng):
         x[:, c] *= f
         x[:, c + n] *= f
     x[:, 2 * n] = x[:, 2 * n] * rng.uniform(0.7, 1.2) + rng.uniform(-0.3, 0.3)
+    if x.shape[1] > BASE_COLS:             # the ball-free channel: both views' logit, then its alive evidence
+        f = 0.0 if rng.random() < 0.1 else rng.uniform(0.5, 1.2)
+        x[:, BASE_COLS] *= f
+        x[:, BASE_COLS + 1] *= f
+        x[:, BASE_COLS + 2] *= rng.uniform(0.7, 1.2)
     return x
 
 
@@ -252,7 +261,7 @@ def fit(data, hold, seed, device, steps=None, e=0, step_=STEP, tag="G"):
             _, x, y, _ = rows[int(rng.integers(len(rows)))]
             win = WIN * STEP // step_
             a = int(rng.integers(0, max(1, len(x) - win)))
-            X.append(augment(x[a:a + win], rng) if tag[:2] == "Hz" else x[a:a + win])
+            X.append(augment(x[a:a + win], rng) if augmented(tag) else x[a:a + win])
             Y.append(y[a:a + win])
         L = min(len(v) for v in X)
         X = torch.as_tensor(np.stack([v[:L] for v in X]), dtype=torch.float32, device=device)
@@ -309,6 +318,16 @@ def _channel_stats(src, s_i):
     return out
 
 
+def _bf_path(src, s_i):
+    """The ball-free channel's outputs of this seed index; index 0's while the others are not trained yet."""
+    path = os.path.join(bench.ROOT, "cache", "ballfree", "held_%s_%d.pkl" % (src.replace("@", "-"), s_i))
+    return path if os.path.isfile(path) else os.path.join(bench.ROOT, "cache", "ballfree", "held_%s_0.pkl" % src.replace("@", "-"))
+
+
+def _bf_cols(q, a):
+    return np.stack([ec._logit(q), -ec._logit(q), np.clip(a, -20, 20) / 5.0], 1)
+
+
 def extras(tag, k, s_i):
     """Round 65's added inputs per half at 25 fps (they are pooled like the others); None for the base input."""
     fsrc, src = ee.V6[k][0], ee.V3[k][1]
@@ -325,7 +344,7 @@ def extras(tag, k, s_i):
     if tag.startswith("Gm"):
         return _channel_stats(src, s_i)
     if tag.startswith("Gf"):
-        h = bench._load(os.path.join(bench.ROOT, "cache", "ballfree", "held_%s_%d.pkl" % (ee.V3[k][0 if k != "metrica" else 1].replace("@", "-"), s_i)))
+        h = bench._load(_bf_path(ee.V3[k][0 if k != "metrica" else 1], s_i))
         return [np.stack([ec._logit(q), -ec._logit(q), np.clip(a, -20, 20) / 5.0], 1) for q, a in zip(h["q"], h["alive"])]
     if tag.startswith("Gp"):
         out = []
@@ -662,7 +681,15 @@ def st(tags, seed_is):
                 net = make_net(tag, ck["d_in"], ck.get("e", 0)).to(device)
                 net.load_state_dict(ck["state"])
                 net.eval()
-                zs = [score_half(net, half_norm(r[1]) if tag[:2] == "Hn" else r[1], r[3], device, step_of(tag), tag) for r in d["rows"]]
+                rows_ = d["rows"]
+                if canon(tag) == "Gf":
+                    h = bench._load(_bf_path("st@v3", s_i))
+                    rows_ = []
+                    for r, q, a in zip(d["rows"], h["q"], h["alive"]):
+                        z = ec.pool(_bf_cols(q, a).astype(np.float64)).astype(np.float32)
+                        n = min(len(r[1]), len(z))
+                        rows_.append((r[0], np.hstack([r[1][:n], z[:n]]), None, r[3]))
+                zs = [score_half(net, half_norm(r[1]) if tag[:2] == "Hn" else r[1], r[3], device, step_of(tag), tag) for r in rows_]
             arms.update(_decode_arms(tag, ev, s50, [z[0] for z in zs], [z[1] for z in zs]))
         for name, preds in arms.items():
             preds = [np.asarray(p)[:len(labs["evctrl"][i])] for i, p in enumerate(preds)]
