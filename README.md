@@ -25,7 +25,7 @@ Fikirler, denemeler ve sonuçlar tek bir belgede: **[`docs/RAPOR.md`](docs/RAPOR
 
 ## Submission
 
-- **The file:** `submissions/candidate_v20.csv` (model_v20 = the specialist J1 at weight 0.5 in the team probability and dead-ball
+- **The file:** `submissions/candidate_v21.csv` (model_v21 = model_v20 + a channel that never sees the ball + a path-model stacker on the channels' outputs; model_v20 = the specialist J1 at weight 0.5 in the team probability and dead-ball
   evidence from open-data rules + a multi-source dead model + a sequence dead model with per-half normalised input + view terms,
   all on `sim.V6`'s masks, no verifier; model_v19 = model_v17's team side with dead-ball evidence free of the
   public window: open-data rules + a multi-source dead model + view terms; model_v18 = model_v17 with rules + broadcast + half
@@ -83,11 +83,13 @@ uv pip install --python .venv/Scripts/python.exe numpy pandas scipy numba lightg
 git clone https://github.com/metrica-sports/more-than-a-hack-2027 external/more-than-a-hack-2027
 # unpack the match bundle into ./data (or set MTAH_DATA_DIR)
 .venv/Scripts/python.exe src/download_idsse.py            # open DFL data, CC BY 4.0, ~2.6 GB
-.venv/Scripts/python.exe src/make_submission.py           # the submission: model_v20 -> submissions/candidate_v20.csv
-python external/more-than-a-hack-2027/evaluation/validate_submission.py submissions/candidate_v20.csv
+.venv/Scripts/python.exe src/make_submission.py           # the submission: model_v21 -> submissions/candidate_v21.csv
+python external/more-than-a-hack-2027/evaluation/validate_submission.py submissions/candidate_v21.csv
 ```
 
-**The submission is `model_v20`** (`submissions/candidate_v20.csv`, MD5 `d909212952998c76568b09c17b76b5d5`; rounds 45, 46, 49 and 51–55 in `docs/RAPOR.md`).
+**The submission is `model_v21`** (`submissions/candidate_v21.csv`, MD5 `10ee3c08e6a5d5de1d3951652eca26f2`; rounds 61 and 65–69 in `docs/RAPOR.md`). v20's channels and dead-ball evidence, plus a channel that reads only the players (`src/exp_ballfree.py`, `models/ballfree_v1/`, open PFF data only, mean of three seeds) and a path-model stacker on the channels' outputs (`src/stack_model.py`, `models/stack_v1/`, open games only). Team: logit mix 0.5 stacker + 0.5 v20's smoothed blend. Alive evidence: 0.5 v20's + 0.5 the stacker's. Decoder: pen_team 6, B2 c 24. Held out, 3 seeds, v20 -> v21: DFL evctrl 0.8078 -> 0.8217, DFL tracking-derived 0.7886 -> 0.7997, Metrica ctrl 0.8694 -> 0.8930, SkillCorner evctrl / phases / player possessions 0.7604 / 0.7114 / 0.7020 -> 0.7848 / 0.7351 / 0.7210; worst-case regret on the target convention's contexts +0.0236 (90% [+0.0225, +0.0251]). SoccerTrack v2, which no model saw: 0.7936 / 0.7255 -> 0.8191 / 0.7589 (8/8). `--model model_v20 --out ...` writes v20.
+
+**The previous submission is `model_v20`** (`submissions/candidate_v20.csv`, MD5 `d909212952998c76568b09c17b76b5d5`; rounds 45, 46, 49 and 51–55 in `docs/RAPOR.md`).
 Team: J1's weight rises from 0.25 to 0.5 once Metrica's ball is de-glued for every channel. Dead ball: 0.25 x open-data rules + 0.375 x the
 multi-source dead model + 0.375 x a sequence model (`src/exp_tdead.py`, `models/tdead_v1/`: convolution + bidirectional GRU at 5 Hz, every input
 feature scaled by the half's own median and spread, three seeds) + view terms, all refitted on `sim.V6`, whose ball no longer reappears exactly on

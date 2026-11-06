@@ -1,5 +1,6 @@
 # Files of the public repository (tools/export_public.py). Source modules: the import closure of
-# src/make_submission.py with model_v20 = the v10 / shared BiGRU blend mixed with the short-possession specialist J1,
+# src/make_submission.py with model_v21 = model_v20 plus a channel that never sees the ball (open PFF data only) and a stacker on the channels' outputs (open games only);
+# model_v20 = the v10 / shared BiGRU blend mixed with the short-possession specialist J1,
 # decoded with open-data rules + a multi-source dead model + a sequence dead model + view terms (incl. lazily imported option
 # modules, the feature plugins named in model_v7.VERSION, src/reproduce_shared_bigru.py, which rebuilds the shared
 # BiGRU's BAR-ATH probabilities, and src/exp_bigru_lomo.py, whose held-out DFL probabilities the blend verifiers were

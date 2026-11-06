@@ -12,6 +12,11 @@ the provided data and open data:
   PFF's possessions in the challenge's controlled-possession reading (`models/kpu_c1`), then fine-tuned on the open
   DFL and Metrica games in the same reading (`models/kpu_j1`); its probability of control is half of the team
   probability.
+- **Ball-free channel:** a model that reads only the players, never the ball: every player of both teams as a set per
+  step, a bidirectional GRU, trained on open PFF World Cup 2022 data alone (`models/ballfree_v1`, mean of three seeds).
+- **Stacker:** a small sequence model on all the channels' outputs, a path model in which possession passes to the other
+  team only through its control state; trained on their held-out outputs on the open games only (`models/stack_v1`). It
+  supplies half of the team evidence and half of the alive evidence.
 - **Decoding:** a duration-aware Viterbi decoder per half.
 
 The approach, the validation protocol and the results are in **[docs/TECHNICAL_DOCUMENT.md](docs/TECHNICAL_DOCUMENT.md)**.
@@ -24,8 +29,8 @@ uv venv --python 3.12 .venv
 uv pip install --python .venv/Scripts/python.exe -r requirements.txt
 git clone https://github.com/metrica-sports/more-than-a-hack-2027 external/more-than-a-hack-2027
 # unpack the match bundle into ./data/{tactical,broadcast}  (or set MTAH_DATA_DIR)
-.venv/Scripts/python.exe src/make_submission.py           # -> submissions/candidate_v20.csv (a few minutes)
-python external/more-than-a-hack-2027/evaluation/validate_submission.py submissions/candidate_v20.csv
+.venv/Scripts/python.exe src/make_submission.py           # -> submissions/candidate_v21.csv (a few minutes)
+python external/more-than-a-hack-2027/evaluation/validate_submission.py submissions/candidate_v21.csv
 
 # optional: retrain the team classifier from the open data (rewrites models/v10_team.txt, about 7 min on 24 cores)
 .venv/Scripts/python.exe src/download_idsse.py            # open DFL / IDSSE data, CC BY 4.0, ~2.6 GB
@@ -38,14 +43,16 @@ MTAH_RETRAIN=1 .venv/Scripts/python.exe src/make_submission.py
   the CRLF line endings a Windows checkout would otherwise write (the pipeline also reads them as text).
 - `models/v10_team.txt` is the team classifier, `models/kpu_j1/kpu_J1_s20261102.pt` the specialist,
   `models/dead_multi_v2.txt` the dead-ball classifier, `models/tdead_v1/` the sequence dead-ball model and
-  `models/dead_rules_open_v2.json` the rule weights, all from open data only, so the default run needs
+  `models/dead_rules_open_v2.json` the rule weights, `models/ballfree_v1/` the ball-free channel and `models/stack_v1/`
+  the stacker, all from open data only, so the default run needs
   only the provided data. On its first run it rebuilds the BiGRU's BAR-ATH probabilities on the CPU
-  (`src/reproduce_shared_bigru.py`, checked against `models/bigru_dfl_pff_v1/manifest.json`) and runs the specialist and
-  the sequence model on the CPU.
+  (`src/reproduce_shared_bigru.py`, checked against `models/bigru_dfl_pff_v1/manifest.json`) and runs the specialist,
+  the sequence model, the ball-free channel and the stacker on the CPU.
 - The run is deterministic: fixed simulation seeds, LightGBM deterministic mode with a fixed seed and thread count,
   and no GPU. Both the default run and a retrain of the team classifier from an empty `cache/` write the submitted
-  file, MD5 `d909212952998c76568b09c17b76b5d5`. `--model model_v19 --out submissions/candidate_v19.csv` writes the
-  previous submission (MD5 `45096061ebdc3aac6e2087d8a047246a`), `--model model_v15 --out submissions/candidate_v15.csv`
+  file, MD5 `10ee3c08e6a5d5de1d3951652eca26f2`. `--model model_v20 --out submissions/candidate_v20.csv` writes the
+  previous submission (MD5 `d909212952998c76568b09c17b76b5d5`), `--model model_v19 --out submissions/candidate_v19.csv`
+  v19 (MD5 `45096061ebdc3aac6e2087d8a047246a`), `--model model_v15 --out submissions/candidate_v15.csv`
   v15 (MD5 `6081216bcf484049d8e6e84b27fc85dd`), `--model model_v14 --out submissions/candidate_v14.csv` v14 (MD5
   `5e7363fc83c6f56a923033894a28d3a1`) and `--model model_v13 --out submissions/candidate_v13.csv` v13 (MD5
   `ed8ad739207f367017bb8d8c8204c82a`).
@@ -53,8 +60,11 @@ MTAH_RETRAIN=1 .venv/Scripts/python.exe src/make_submission.py
 ## Layout
 
 ```
-src/make_submission.py   end to end: provided data -> submissions/candidate_v20.csv
-src/model_v20.py         the submitted model: the specialist at 0.5, dead-ball evidence with the sequence model
+src/make_submission.py   end to end: provided data -> submissions/candidate_v21.csv
+src/model_v21.py         the submitted model: v20's channels, the ball-free channel and the stacker
+src/stack_model.py       the stacker: inputs, network, path model
+src/exp_ballfree.py      the ball-free channel: inputs, network, training
+src/model_v20.py         the previous submission: the specialist at 0.5, dead-ball evidence with the sequence model
 src/exp_tdead.py         the sequence dead-ball model: network, per-half normalisation, training
 src/dead_v6_fit.py       re-derives v20's rule weights and dead-ball models from open data on sim.V6's masks
 src/model_v19.py         the previous submission: v17's team side, dead-ball evidence free of the public window
@@ -68,6 +78,8 @@ src/short_specialist.py  the specialist: inputs, network, inference, its candida
 src/model_v14.py         the previous submission: 0.5 v10 + 0.5 BiGRU blend + the short-possession verifier
 src/model_v13.py         model_v10 + the verifier (src/short_verifier.py)
 src/model_v10.py         team classifier training + prediction, decoder settings
+models/ballfree_v1/      the ball-free channel's three checkpoints (open PFF data only)
+models/stack_v1/         the stacker's checkpoint (the channels' outputs on the open games)
 models/v10_team.txt      the team classifier (LightGBM, trained on the open data only)
 models/short_verifier_*  the verifier's classifiers (LightGBM, open data only; *_j1m25s = v17's, *_c1m25s = v15's,
                          *_blend50 = v14's)
@@ -93,8 +105,9 @@ docs/TECHNICAL_DOCUMENT.md   the technical document
 - Open data is fetched from its sources by the scripts above and is not redistributed:
   - IDSSE / DFL open data: Bassek et al. 2025, CC BY 4.0, figshare article 28196177.
   - Metrica Sports sample data: github.com/metrica-sports/sample-data, credited as its README asks.
+  - SkillCorner open data (MIT): the dead-ball models and the stacker.
 - The BiGRU checkpoints in `models/bigru_dfl_pff_v1/` were trained on the open DFL data and on PFF FC / Gradient Sports
   FIFA World Cup 2022 tracking, obtained through the provider's access form, the specialist in `models/kpu_c1/` on
   that PFF data alone (tracking and its human-labelled events), and `models/kpu_j1/` is that specialist fine-tuned on
-  the open DFL and Metrica games; they contain no match data, and the PFF data itself is
+  the open DFL and Metrica games, and the ball-free channel in `models/ballfree_v1/` on that PFF data alone; they contain no match data, and the PFF data itself is
   not needed to reproduce the submission.
