@@ -2641,6 +2641,8 @@ Hakem (görüntü bayrağı izleme kanıtlarının dışında tutuldu; `scratchp
 
 **Tur 62 — ölü topu yarının kendisine uydurmak (6 Kasım; ön kayıt, sonuç görülmeden; `src/exp_selfd.py`).** Neden: devreye göre normalizasyon görülmemiş veride en büyük ölü top kazancını verdi, alan farkı gerçek; test maçında kendi kendine eğitim yalnız takım kanalında denenmişti (❌), ölü topta hiç. Kurallar algoritmanın ürettiği sözde etiketlere izin veriyor. Yöntem: her yarıda v20'nin canlı kanıtının emin olduğu kareler (|a| ≥ τ) sözde etiket, yarının kendi 59 izleme özelliğiyle küçük LightGBM (5 Hz, sınıf dengeli), yeni kanıt a' = (1 − w) a + w a₂. **Kollar:** τ 2 / 4 × w 0.25 / 0.5. **Karar (tur 51'deki gibi):** birincil ≥ 0.005 ya da görülmemiş iki sette (PFF ham, SoccerTrack) ≥ 0.005 iken birincil kaybı < 0.005; korumalar ≥ −0.01. Varsayılan değişikliği kullanıcıya sorulur; public pencereye bakılmaz.
 
+**Tur 63 — J1'in kendi ölü top başlığı (6 Kasım; ön kayıt, sonuç görülmeden; `src/exp_j1dead.py`).** J1'in 25 Hz, topa merkezli, kısmen gerçek izlemeyle (PFF) eğitilmiş bir ölü top başlığı var, v20'nin kanıtı onu kullanmıyor. Eğitim yok, çözüm düzeyinde. **Kollar:** J.125 (0.25 kural + 0.3125 M + 0.3125 TD + 0.125 J), J.25 (0.25 + 0.25 + 0.25 + 0.25), J+.25 (v20 + 0.25 J). **Karar:** birincil ≥ 0.005, korumalar ≥ −0.01; ya da SoccerTrack ≥ +0.005 iken birincil kaybı < 0.005. PFF bu başlıkta bağımsız değil (J1 PFF'le eğitildi), karara girmez. Varsayılan değişikliği kullanıcıya sorulur.
+
 ## Ek A — İlk analiz, araştırma ve baseline'lar (20 Ekim)
 
 *Tarihsel rapor; özgün başlığı: More than a Hack 2027 — Faz 1 (Top Sahipliği) · Analiz, Araştırma ve Baseline Raporu. Güncel durum için §1.*

@@ -19,6 +19,7 @@ import time
 import warnings
 
 import numpy as np
+import torch
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 _argv = list(sys.argv)
@@ -36,8 +37,8 @@ import short_specialist as ss  # noqa: E402
 sys.argv = _argv
 
 STEP = 5
-WIN = 450               # steps per training window (90 s)
-STEPS = 2500
+WIN = 300               # steps per training window (60 s)
+STEPS = 2000
 BATCH = 16
 LR = 1e-3
 OUT = os.path.join(bench.CACHE, "crf")
@@ -109,14 +110,12 @@ def step_labels(lab, step=STEP):
 
 def view(x, side):
     """x (B, T, N) -> one team's view: its own columns then the common ones."""
-    import torch
     own = x[..., :N_OWN] if side == 0 else x[..., N_OWN:2 * N_OWN]
     return torch.cat([own, x[..., 2 * N_OWN:]], -1)
 
 
 def build_net(d_in, width=64, drop=0.1):
-    import torch
-    from torch import nn
+    nn = torch.nn
 
     class Net(nn.Module):
         def __init__(self):
@@ -138,7 +137,6 @@ def build_net(d_in, width=64, drop=0.1):
 
 def transitions(net, arm):
     """Log potentials (S, S). HC: 0 Hc, 1 Hf, 2 Ac, 3 Af, 4 D. P: 0 H, 1 A, 2 D."""
-    import torch
     t = net.t
     if arm == "P":
         A = torch.zeros((3, 3), device=t.device)
@@ -155,7 +153,6 @@ def transitions(net, arm):
 
 
 def emissions(oh, oa, arm):
-    import torch
     d = 0.5 * (oh[..., 2] + oa[..., 2])
     if arm == "P":
         return torch.stack([oh[..., 0], oa[..., 0], d], -1)
@@ -164,7 +161,6 @@ def emissions(oh, oa, arm):
 
 def allowed(y, arm, device):
     """(B, T, S) additive mask for the labelled path: 0 where the state agrees with the label."""
-    import torch
     groups = {"P": ((0,), (1,), (2,)), "HC": ((0, 1), (2, 3), (4,))}[arm]
     S = sum(len(g) for g in groups)
     m = torch.full(y.shape + (S,), _FIX, device=device)
@@ -175,12 +171,12 @@ def allowed(y, arm, device):
     return m
 
 
-def forward(e, A):
+@torch.jit.script
+def forward(e: torch.Tensor, A: torch.Tensor) -> torch.Tensor:
     """log Z over the paths: e (B, T, S), A (S, S)."""
-    import torch
     al = e[:, 0]
     for t in range(1, e.shape[1]):
-        al = torch.logsumexp(al.unsqueeze(1) + A.unsqueeze(0), dim=1) + e[:, t] if False else torch.logsumexp(al.unsqueeze(2) + A.unsqueeze(0), dim=1) + e[:, t]
+        al = torch.logsumexp(al.unsqueeze(2) + A.unsqueeze(0), dim=1) + e[:, t]
     return torch.logsumexp(al, dim=1)
 
 
@@ -189,14 +185,12 @@ def nll(net, x, y, arm):
     e = emissions(oh, oa, arm)
     A = transitions(net, arm)
     B = len(x)
-    all_e = forward(e, A)
-    lab_e = forward(e + allowed(y, arm, x.device), A)
-    return (all_e - lab_e).sum() / (B * x.shape[1])
+    z = forward(torch.cat([e, e + allowed(y, arm, x.device)]), A)
+    return (z[:B] - z[B:]).sum() / (B * x.shape[1])
 
 
 def posterior(net, x, arm):
     """Per step of a whole half (CPU-friendly loops): log P(H), log P(A), log P(D), and the Viterbi label path."""
-    import torch
     with torch.no_grad():
         oh, oa = net(x)
         e = emissions(oh, oa, arm)[0]
@@ -243,8 +237,9 @@ def evidence(k):
     return [0.25 * t + 0.375 * m + 0.375 * x + v for t, m, x, v in zip(tr6, m6, tn, vi6)]
 
 
-def inputs():
+def inputs(seed_is=None):
     os.makedirs(OUT, exist_ok=True)
+    seed_is = range(len(es.SEEDS)) if seed_is is None else seed_is
     for k in SETS:
         fsrc, src = ee.V6[k][0], ee.V3[k][1]
         blocks = bench.blocks(fsrc)
@@ -252,7 +247,7 @@ def inputs():
         labs = [np.asarray(g) for g in bench.labels(src, ee.V3[k][2])]
         groups = [b["group"] for b in blocks]
         bench._dump(dict(ev=[np.asarray(a, np.float32) for a in ev]), os.path.join(OUT, "evidence_%s.pkl" % k))
-        for s_i in range(len(es.SEEDS)):
+        for s_i in seed_is:
             v, g, o = eg2.parts(src, s_i, True)
             rows = []
             for i, b in enumerate(blocks):
@@ -269,7 +264,6 @@ def load_rows(s_i):
 
 
 def fit(data, hold, seed, arm, device):
-    import torch
     torch.manual_seed(seed)
     rng = np.random.default_rng(seed)
     pools = {k: [r for r in rows if r[0] not in hold] for k, rows in data.items()}
@@ -304,7 +298,6 @@ def fit(data, hold, seed, arm, device):
 
 def score_half(net, x, n, arm, device):
     """(q at 25 fps: P(H | live) as a probability, alive log-odds at 25 fps, Viterbi labels at 25 fps)"""
-    import torch
     lp, path = posterior(net, torch.as_tensor(x[None], dtype=torch.float32, device=device), arm)
     grid = (np.arange(len(lp)) + 0.5) * STEP
     t = np.arange(n) + 0.5
@@ -317,7 +310,6 @@ def score_half(net, x, n, arm, device):
 
 
 def train(s_i, arm):
-    import torch
     s_i = int(s_i)
     device = "cuda" if torch.cuda.is_available() else "cpu"
     data = load_rows(s_i)
@@ -404,7 +396,7 @@ if __name__ == "__main__":
     warnings.filterwarnings("ignore")
     cmd = sys.argv[1]
     if cmd == "inputs":
-        inputs()
+        inputs([int(s) for s in sys.argv[2:]] or None)
     elif cmd == "train":
         train(sys.argv[2], sys.argv[3])
     elif cmd == "eval":
