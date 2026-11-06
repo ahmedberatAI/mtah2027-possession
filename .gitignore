@@ -29,6 +29,10 @@ runs/
 !models/bigru_dfl_pff_v1/bigru_s20261027.pt
 !models/kpu_c1/kpu_C1_s20261102.pt
 !models/kpu_j1/kpu_J1_s20261102.pt
+!models/ballfree_v1/bf_s20261106.pt
+!models/ballfree_v1/bf_s20261107.pt
+!models/ballfree_v1/bf_s20261108.pt
+!models/stack_v1/stack_s0.pt
 !models/tdead_v1/tdead_v6n_s20261104.pt
 !models/tdead_v1/tdead_v6n_s20261105.pt
 !models/tdead_v1/tdead_v6n_s20261106.pt

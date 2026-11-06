@@ -55,6 +55,9 @@ src/model_v17.py
 src/model_v18.py
 src/model_v19.py
 src/model_v20.py
+src/model_v21.py
+src/stack_model.py
+src/exp_ballfree.py
 src/model_v2.py
 src/model_v3.py
 src/model_v5.py
@@ -101,6 +104,12 @@ models/dead_multi_v1.txt
 models/dead_multi_v2.txt
 models/dead_rules_open_v1.json
 models/dead_rules_open_v2.json
+models/ballfree_v1/README.md
+models/ballfree_v1/bf_s20261106.pt
+models/ballfree_v1/bf_s20261107.pt
+models/ballfree_v1/bf_s20261108.pt
+models/stack_v1/README.md
+models/stack_v1/stack_s0.pt
 models/tdead_v1/README.md
 models/tdead_v1/tdead_v6n_s20261104.pt
 models/tdead_v1/tdead_v6n_s20261105.pt
