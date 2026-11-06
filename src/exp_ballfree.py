@@ -19,8 +19,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
 STEP = 5
-WIN = 300
-CORE = 150
+WIN = int(os.environ.get("BF_WIN", "300"))
+CORE = WIN // 2
 M = 14                 # players kept per team and step
 FPS = 25
 SEEDS = (20261106, 20261107, 20261108)

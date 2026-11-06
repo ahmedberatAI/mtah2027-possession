@@ -32,7 +32,29 @@ BASE = {"H": (6.0, 24.0)}
 ARMS = {"q": (0.5, 6.0, 24.0, 0.0), "S.25": (0.5, 6.0, 24.0, 0.25), "S1": (0.5, 6.0, 24.0, 0.5), "S.75": (0.5, 6.0, 24.0, 0.75)}     # stacker's share in q, pen_team, c, stacker's share in the alive evidence
 
 
-E_OWN = {"Gp": 2, "Gm": 6}      # extra columns that swap between the two views (see view)
+E_OWN = {"Gp": 2, "Gm": 6, "Gf": 1}      # extra columns that swap between the two views (see view)
+STEP_OF = {"G2": 2}             # frames per step of a tag (default exp_crf.STEP, 5 Hz)
+OPTS = {"Hw": dict(width=128), "Hl": dict(steps=4000), "Hd": dict(drop=0.3)}      # path-model variants on the base input
+
+
+def is_path(tag):
+    """H...: the path model of exp_crf (arm HC) on this file's inputs; "HC" alone means exp_crf's own files."""
+    return tag[0] == "H" and tag != "HC"
+
+
+def canon(tag):
+    """The input of a tag: Gs and Hs read the same columns."""
+    return "G" + tag[1:2]
+
+
+def step_of(tag):
+    return STEP_OF.get(canon(tag), STEP)
+
+
+def e_of(tag):
+    return E_OWN.get(canon(tag), 0)
+
+
 BASE_COLS = 2 * ec.N_OWN + 4
 
 
@@ -67,13 +89,133 @@ def build_net(d_in, width=64, drop=0.1, e=0):
     return Net()
 
 
-def fit(data, hold, seed, device, steps=STEPS, e=0):
+@torch.jit.script
+def forward_tv(e: torch.Tensor, A: torch.Tensor) -> torch.Tensor:
+    """log Z over the paths with per-step moves: e (B, T, S), A (B, T, S, S)."""
+    al = e[:, 0]
+    for t in range(1, e.shape[1]):
+        al = torch.logsumexp(al.unsqueeze(2) + A[:, t], dim=1) + e[:, t]
+    return torch.logsumexp(al, dim=1)
+
+
+def moves_tv(net, uh, ua):
+    """(B, T, 5, 5): the fixed moves of exp_crf.transitions plus what each team's view says about this step: gain, free, back, start, stop. Moves to the other team still enter only its control state."""
+    A = ec.transitions(net, "HC").view(1, 1, 5, 5).expand(uh.shape[0], uh.shape[1], 5, 5).clone()
+    A[:, :, 0, 2] += ua[..., 0]
+    A[:, :, 1, 2] += ua[..., 0]
+    A[:, :, 2, 0] += uh[..., 0]
+    A[:, :, 3, 0] += uh[..., 0]
+    A[:, :, 0, 1] += uh[..., 1]
+    A[:, :, 2, 3] += ua[..., 1]
+    A[:, :, 1, 0] += uh[..., 2]
+    A[:, :, 3, 2] += ua[..., 2]
+    A[:, :, 4, 0] += uh[..., 3]
+    A[:, :, 4, 1] += uh[..., 3]
+    A[:, :, 4, 2] += ua[..., 3]
+    A[:, :, 4, 3] += ua[..., 3]
+    A[:, :, 0, 4] += uh[..., 4]
+    A[:, :, 1, 4] += uh[..., 4]
+    A[:, :, 2, 4] += ua[..., 4]
+    A[:, :, 3, 4] += ua[..., 4]
+    return A
+
+
+def nll_tv(net, x, y):
+    (oh, uh), (oa, ua) = net.both(x)
+    e = ec.emissions(oh, oa, "HC")
+    A = moves_tv(net, uh, ua)
+    B = len(x)
+    z = forward_tv(torch.cat([e, e + ec.allowed(y, "HC", x.device)]), torch.cat([A, A]))
+    return (z[:B] - z[B:]).sum() / (B * x.shape[1])
+
+
+def score_tv(net, x, n, device, step_=STEP):
+    with torch.no_grad():
+        (oh, uh), (oa, ua) = net.both(torch.as_tensor(x[None], dtype=torch.float32, device=device))
+        e = ec.emissions(oh, oa, "HC")[0]
+        A = moves_tv(net, uh, ua)[0]
+        T, S = e.shape
+        fw = torch.zeros((T, S), device=e.device)
+        bw = torch.zeros((T, S), device=e.device)
+        fw[0] = e[0]
+        for t in range(1, T):
+            fw[t] = torch.logsumexp(fw[t - 1].unsqueeze(1) + A[t], dim=0) + e[t]
+        for t in range(T - 2, -1, -1):
+            bw[t] = torch.logsumexp(A[t + 1] + (e[t + 1] + bw[t + 1]).unsqueeze(0), dim=1)
+        post = fw + bw
+        post = post - torch.logsumexp(post, dim=1, keepdim=True)
+        lp = torch.stack([torch.logsumexp(post[:, [0, 1]], dim=1), torch.logsumexp(post[:, [2, 3]], dim=1), post[:, 4]], 1).cpu().numpy()
+    grid = (np.arange(len(lp)) + 0.5) * step_
+    t = np.arange(n) + 0.5
+    q = 1 / (1 + np.exp(-np.interp(t, grid, lp[:, 0] - lp[:, 1])))
+    alive = np.logaddexp(lp[:, 0], lp[:, 1]) - lp[:, 2]
+    return q.astype(np.float32), np.interp(t, grid, alive).astype(np.float32)
+
+
+def build_tv(d_in, width=64, drop=0.1, e=0):
+    """Round 65: the path model whose moves also depend on the step (feature-dependent edges), so that a team change can be cheap exactly where the evidence for one is."""
+    nn = torch.nn
+
+    class Net(nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.front = nn.Sequential(nn.Conv1d(d_in, width, 5, padding=2), nn.GELU(), nn.Dropout(drop), nn.Conv1d(width, width, 5, padding=2), nn.GELU())
+            self.gru = nn.GRU(width, width, batch_first=True, bidirectional=True)
+            self.head = nn.Linear(2 * width, 3)
+            self.edge = nn.Linear(2 * width, 5)
+            nn.init.zeros_(self.edge.weight)
+            nn.init.zeros_(self.edge.bias)
+            self.t = nn.Parameter(torch.tensor([-3.0, -2.0, -6.0, -4.0, -5.0, -5.0, -3.0, -6.0]))
+
+        def one(self, x):
+            h = self.front(x.transpose(1, 2)).transpose(1, 2)
+            h, _ = self.gru(h)
+            return self.head(h), self.edge(h)
+
+        def both(self, x):
+            return self.one(view(x, 0, e)), self.one(view(x, 1, e))
+    return Net()
+
+
+def build_path(d_in, width=64, drop=0.1, e=0):
+    """exp_crf.build_net with this file's views."""
+    nn = torch.nn
+
+    class Net(nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.front = nn.Sequential(nn.Conv1d(d_in, width, 5, padding=2), nn.GELU(), nn.Dropout(drop), nn.Conv1d(width, width, 5, padding=2), nn.GELU())
+            self.gru = nn.GRU(width, width, batch_first=True, bidirectional=True)
+            self.head = nn.Linear(2 * width, 3)      # own control, own free, dead
+            self.t = nn.Parameter(torch.tensor([-3.0, -2.0, -6.0, -4.0, -5.0, -5.0, -3.0, -6.0]))    # c>f, f>c, c>C, f>C, c>d, f>d, d>c, d>f
+
+        def one(self, x):
+            h = self.front(x.transpose(1, 2)).transpose(1, 2)
+            h, _ = self.gru(h)
+            return self.head(h)
+
+        def forward(self, x):
+            return self.one(view(x, 0, e)), self.one(view(x, 1, e))
+    return Net()
+
+
+def make_net(tag, d_in, e):
+    o = OPTS.get(tag[:2], {})
+    if tag[:2] == "Ht":
+        return build_tv(d_in, e=e)
+    if is_path(tag):
+        return build_path(d_in, width=o.get("width", 64), drop=o.get("drop", 0.1), e=e)
+    return build_net(d_in, e=e)
+
+
+def fit(data, hold, seed, device, steps=None, e=0, step_=STEP, tag="G"):
+    steps = steps or OPTS.get(tag[:2], {}).get("steps", STEPS)
     torch.manual_seed(seed)
     rng = np.random.default_rng(seed)
     pools = {k: [r for r in rows if r[0] not in hold] for k, rows in data.items()}
     keys = [k for k in pools if pools[k]]
     d_in = next(iter(data.values()))[0][1].shape[1] - ec.N_OWN - e
-    net = build_net(d_in, e=e).to(device)
+    net = make_net(tag, d_in, e).to(device)
     opt = torch.optim.AdamW(net.parameters(), lr=LR, weight_decay=1e-4)
     sch = torch.optim.lr_scheduler.OneCycleLR(opt, LR, total_steps=steps, pct_start=0.1)
     net.train()
@@ -83,15 +225,21 @@ def fit(data, hold, seed, device, steps=STEPS, e=0):
         for b in range(BATCH):
             rows = pools[keys[b % len(keys)]]
             _, x, y, _ = rows[int(rng.integers(len(rows)))]
-            a = int(rng.integers(0, max(1, len(x) - WIN)))
-            X.append(x[a:a + WIN])
-            Y.append(y[a:a + WIN])
+            win = WIN * STEP // step_
+            a = int(rng.integers(0, max(1, len(x) - win)))
+            X.append(x[a:a + win])
+            Y.append(y[a:a + win])
         L = min(len(v) for v in X)
         X = torch.as_tensor(np.stack([v[:L] for v in X]), dtype=torch.float32, device=device)
         Y = torch.as_tensor(np.stack([v[:L] for v in Y]), dtype=torch.long, device=device)
-        o = net(X)
-        ok = Y >= 0
-        loss = torch.nn.functional.cross_entropy(o[ok], Y[ok])
+        if tag[:2] == "Ht":
+            loss = nll_tv(net, X, Y)
+        elif is_path(tag):
+            loss = ec.nll(net, X, Y, "HC")
+        else:
+            o = net(X)
+            ok = Y >= 0
+            loss = torch.nn.functional.cross_entropy(o[ok], Y[ok])
         opt.zero_grad()
         loss.backward()
         torch.nn.utils.clip_grad_norm_(net.parameters(), 1.0)
@@ -102,12 +250,16 @@ def fit(data, hold, seed, device, steps=STEPS, e=0):
     return net, float(np.mean(tail[-200:]))
 
 
-def score_half(net, x, n, device):
+def score_half(net, x, n, device, step_=STEP, tag="G"):
     """(q at 25 fps: P(H | live), alive log-odds at 25 fps)"""
+    if tag[:2] == "Ht":
+        return score_tv(net, x, n, device, step_)
+    if is_path(tag):
+        return ec.score_half(net, x, n, "HC", device)[:2]
     with torch.no_grad():
         o = net(torch.as_tensor(x[None], dtype=torch.float32, device=device))[0]
         lp = torch.log_softmax(o, -1).cpu().numpy()
-    grid = (np.arange(len(lp)) + 0.5) * STEP
+    grid = (np.arange(len(lp)) + 0.5) * step_
     t = np.arange(n) + 0.5
     lq = lp[:, 0] - lp[:, 1]
     q = 1 / (1 + np.exp(-np.interp(t, grid, lq)))
@@ -147,6 +299,9 @@ def extras(tag, k, s_i):
         return [np.clip(np.stack([t, m, x, v], 1), -20, 20) / 5.0 for t, m, x, v in zip(tr6, m6, tn, vi6)]
     if tag.startswith("Gm"):
         return _channel_stats(src, s_i)
+    if tag.startswith("Gf"):
+        h = bench._load(os.path.join(bench.ROOT, "cache", "ballfree", "held_%s_%d.pkl" % (ee.V3[k][0 if k != "metrica" else 1].replace("@", "-"), s_i)))
+        return [np.stack([ec._logit(q), -ec._logit(q), np.clip(a, -20, 20) / 5.0], 1) for q, a in zip(h["q"], h["alive"])]
     if tag.startswith("Gp"):
         out = []
         for b in bench.blocks(fsrc):
@@ -168,12 +323,34 @@ def extras(tag, k, s_i):
     return None
 
 
+def _rows_step(k, s_i, step_):
+    """exp_crf.inputs at another step."""
+    path = os.path.join(OUT, "inputs_step%d_%s_%d.pkl" % (step_, k, s_i))
+    if os.path.isfile(path):
+        return bench._load(path)
+    fsrc, src = ee.V6[k][0], ee.V3[k][1]
+    blocks = bench.blocks(fsrc)
+    ev = bench._load(os.path.join(OUT, "evidence_%s.pkl" % k))["ev"]
+    labs = [np.asarray(g) for g in bench.labels(src, ee.V3[k][2])]
+    v, g, o = eg2.parts(src, s_i, True)
+    rows = []
+    for i, b in enumerate(blocks):
+        x = ec.pool(ec.frame_inputs(b, v[i], g[i], o[i], ev[i]), step_)
+        rows.append((b["group"], x.astype(np.float32), ec.step_labels(labs[i], step_)[:len(x)], len(labs[i])))
+    bench._dump(rows, path)
+    bench._blocks.clear()
+    bench._labels.clear()
+    return rows
+
+
 def load_rows(s_i, tag):
     """The base rows of exp_crf.inputs, plus a tag's added columns (cached per set and seed)."""
+    if canon(tag) == "G2":
+        return {k: _rows_step(k, s_i, step_of(tag)) for k in SETS}
     data = {k: bench._load(ec._in_path(k, s_i)) for k in SETS}
-    if not tag.startswith(("Gh", "Gs", "Gm", "Gp")):
+    if canon(tag) not in ("Gh", "Gs", "Gm", "Gp", "Gf"):
         return data
-    head = tag[:2]
+    head = canon(tag)
     for k in SETS:
         path = os.path.join(OUT, "inputs_%s_%s_%d.pkl" % (head, k, s_i))
         if os.path.isfile(path):
@@ -195,38 +372,55 @@ def _save(tag, s_i, kind, k, zs):
     bench._dump(dict(q=[z[0] for z in zs], alive=[z[1] for z in zs]), os.path.join(OUT, "%s_%s_%d_%s.pkl" % (kind, tag, s_i, k)))
 
 
+def _fold_job(job):
+    """One stacker fit in its own process (CRF_WORKERS > 1): on the CPU one thread per fit beats shared threads."""
+    s_i, tag, i, hold, seed = job
+    if os.environ.get("CRF_WORKERS"):
+        torch.set_num_threads(1)
+    t0 = time.time()
+    device = ec.pick_device()
+    data = load_rows(s_i, tag)
+    e = e_of(tag)
+    net, tail = fit(data, hold, seed, device, e=e, step_=step_of(tag), tag=tag)
+    out = {k: {j: score_half(net, r[1], r[3], device, step_of(tag), tag) for j, r in enumerate(data[k]) if r[0] in hold} for k in SETS}
+    print("  %s seed %d fold %s: loss %.4f, %.0f s" % (tag, s_i, i, tail, time.time() - t0), flush=True)
+    state = {k: v.cpu() for k, v in net.state_dict().items()} if not hold else None
+    d_in = next(iter(data.values()))[0][1].shape[1] - ec.N_OWN - e
+    return out, state, tail, d_in, e
+
+
+def _pool_map(fn, jobs):
+    workers = int(os.environ.get("CRF_WORKERS", "1"))
+    if workers > 1:
+        from concurrent.futures import ProcessPoolExecutor
+        with ProcessPoolExecutor(max_workers=workers) as pool:
+            return list(pool.map(fn, jobs))
+    return [fn(j) for j in jobs]
+
+
 def train(s_i, tag):
     s_i = int(s_i)
-    device = ec.pick_device()
     data = load_rows(s_i, tag)
     dfl = sorted({r[0] for r in data["dfl"]}, key=str)
     met = sorted({r[0] for r in data["metrica"]}, key=str)
     sc = sorted({r[0] for r in data["sc"]}, key=str)
-    res = {k: [None] * len(data[k]) for k in SETS}
+    res = {k: [[] for _ in data[k]] for k in SETS}
     base = 20261107 + 100 * s_i + 1000 * (ord(tag[-1]) - ord("a") + 1 if tag[-1] in "abc" else 0)     # Gb, Gc: the same input, other initial weights
-    for i in range(len(dfl)):
-        t0 = time.time()
-        hold = {dfl[i], met[i % len(met)]} | set(sc[i::len(dfl)])
-        net, tail = fit(data, hold, base + i, device, e=E_OWN.get(tag[:2], 0))
+    jobs = [(s_i, tag, i, {dfl[i], met[i % len(met)]} | set(sc[i::len(dfl)]), base + i) for i in range(len(dfl))] + [(s_i, tag, "all", set(), base + 50)]
+    done = _pool_map(_fold_job, jobs)
+    for d in done[:-1]:
         for k in SETS:
-            for j, r in enumerate(data[k]):
-                if r[0] in hold:
-                    if res[k][j] is None:
-                        res[k][j] = []
-                    res[k][j].append(score_half(net, r[1], r[3], device))
-        print("  %s seed %d fold %d: loss %.4f, %.0f s" % (tag, s_i, i, tail, time.time() - t0), flush=True)
-        del net
+            for j, z in d[0][k].items():
+                res[k][j].append(z)
     for k in SETS:
-        assert all(v is not None for v in res[k])
+        assert all(len(v) for v in res[k])
         out = []
         for v in res[k]:
             lq = np.mean([ec._logit(z[0]) for z in v], axis=0)
             out.append(((1 / (1 + np.exp(-lq))).astype(np.float32), np.mean([z[1] for z in v], axis=0).astype(np.float32)))
         _save(tag, s_i, "sheld", k, out)
-    e = E_OWN.get(tag[:2], 0)
-    net, tail = fit(data, set(), base + 50, device, e=e)
-    torch.save(dict(state={k: v.cpu() for k, v in net.state_dict().items()}, d_in=next(iter(data.values()))[0][1].shape[1] - ec.N_OWN - e, e=e), os.path.join(OUT, "sall_%s_%d.pt" % (tag, s_i)))
-    print("  %s seed %d all-data model, loss %.4f" % (tag, s_i, tail), flush=True)
+    torch.save(dict(state=done[-1][1], d_in=done[-1][3], e=done[-1][4]), os.path.join(OUT, "sall_%s_%d.pt" % (tag, s_i)))
+    print("  %s seed %d all-data model, loss %.4f" % (tag, s_i, done[-1][2]), flush=True)
 
 
 def lopo_evidence(k):
@@ -255,27 +449,36 @@ def lopo_evidence(k):
     return ev
 
 
+def _lopo_job(job):
+    s_i, tag, j, k = job
+    if os.environ.get("CRF_WORKERS"):
+        torch.set_num_threads(1)
+    t0 = time.time()
+    device = ec.pick_device()
+    data = load_rows(s_i, tag)
+    hold = {r[0] for r in data[k]}
+    net, tail = fit(data, hold, 20261207 + 100 * s_i + j, device, e=e_of(tag), step_=step_of(tag), tag=tag)
+    ev = lopo_evidence(k)
+    zs = []
+    for r, a in zip(data[k], ev):
+        x = r[1].copy()
+        col = ec.pool(np.clip(np.asarray(a, np.float64), -20, 20)[:, None] / 5.0).astype(np.float32)
+        n = min(len(x), len(col))
+        x = x[:n]
+        x[:, 2 * ec.N_OWN] = col[:n, 0]
+        zs.append(score_half(net, x, r[3], device, step_of(tag), tag))
+    _save(tag, s_i, "slopo", k, zs)
+    print("  %s seed %d without %s: loss %.4f, %.0f s" % (tag, s_i, k, tail, time.time() - t0), flush=True)
+
+
 def lopo(s_i, tag):
     """Each provider out of the stacker and out of the dead-ball models behind its input."""
     s_i = int(s_i)
-    device = ec.pick_device()
-    data = load_rows(s_i, tag)
-    base = 20261207 + 100 * s_i
-    for j, k in enumerate(SETS):
-        t0 = time.time()
-        hold = {r[0] for r in data[k]}
-        net, tail = fit(data, hold, base + j, device)
-        ev = lopo_evidence(k)
-        zs = []
-        for r, a in zip(data[k], ev):
-            x = r[1].copy()
-            col = ec.pool(np.clip(np.asarray(a, np.float64), -20, 20)[:, None] / 5.0).astype(np.float32)
-            n = min(len(x), len(col))
-            x = x[:n]
-            x[:, 2 * ec.N_OWN] = col[:n, 0]
-            zs.append(score_half(net, x, r[3], device))
-        _save(tag, s_i, "slopo", k, zs)
-        print("  %s seed %d without %s: loss %.4f, %.0f s" % (tag, s_i, k, tail, time.time() - t0), flush=True)
+    for k in SETS:
+        lopo_evidence(k)           # once, before the workers read it
+        bench._blocks.clear()
+        bench._labels.clear()
+    _pool_map(_lopo_job, [(s_i, tag, j, k) for j, k in enumerate(SETS)])
 
 
 def _mix(hq, s, w):
@@ -405,10 +608,10 @@ def st(tags, seed_is):
                 zs = [ec.score_half(net, r[1], r[3], "HC", device)[:2] for r in d["rows"]]
             else:
                 ck = torch.load(os.path.join(OUT, "sall_%s_%d.pt" % (tag, s_i)), map_location="cpu", weights_only=False)
-                net = build_net(ck["d_in"]).to(device)
+                net = make_net(tag, ck["d_in"], ck.get("e", 0)).to(device)
                 net.load_state_dict(ck["state"])
                 net.eval()
-                zs = [score_half(net, r[1], r[3], device) for r in d["rows"]]
+                zs = [score_half(net, r[1], r[3], device, step_of(tag), tag) for r in d["rows"]]
             arms.update(_decode_arms(tag, ev, s50, [z[0] for z in zs], [z[1] for z in zs]))
         for name, preds in arms.items():
             preds = [np.asarray(p)[:len(labs["evctrl"][i])] for i, p in enumerate(preds)]

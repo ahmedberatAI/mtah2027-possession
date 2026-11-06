@@ -314,26 +314,41 @@ def score_half(net, x, n, arm, device):
     return q.astype(np.float32), np.interp(t, grid, alive).astype(np.float32), lab.astype(np.int8)
 
 
+def _fold_job(job):
+    """One stacker fit in its own process (CRF_WORKERS > 1): on the CPU one thread per fit beats shared threads (a step takes 0.45 s with one, 0.9 s with six)."""
+    s_i, arm, i, hold, seed = job
+    if os.environ.get("CRF_WORKERS"):
+        torch.set_num_threads(1)
+    t0 = time.time()
+    device = pick_device()
+    data = load_rows(s_i)
+    net, tail = fit(data, hold, seed, arm, device)
+    out = {k: {j: score_half(net, r[1], r[3], arm, device) for j, r in enumerate(data[k]) if r[0] in hold} for k in SETS}
+    print("  seed %d arm %s fold %s: nll %.4f, %.0f s, moves %s" % (s_i, arm, i, tail, time.time() - t0, np.round(net.t.detach().cpu().numpy(), 2).tolist()), flush=True)
+    state = {k: v.cpu() for k, v in net.state_dict().items()} if not hold else None
+    return out, state, tail
+
+
 def train(s_i, arm):
     s_i = int(s_i)
-    device = pick_device()
     data = load_rows(s_i)
     dfl = sorted({r[0] for r in data["dfl"]}, key=str)
     met = sorted({r[0] for r in data["metrica"]}, key=str)
     sc = sorted({r[0] for r in data["sc"]}, key=str)
     res = {k: [[] for _ in data[k]] for k in SETS}
     base = 20261106 + 100 * s_i
-    for i in range(len(dfl)):
-        t0 = time.time()
-        hold = {dfl[i], met[i % len(met)]} | set(sc[i::len(dfl)])
-        net, tail = fit(data, hold, base + i, arm, device)
+    jobs = [(s_i, arm, i, {dfl[i], met[i % len(met)]} | set(sc[i::len(dfl)]), base + i) for i in range(len(dfl))] + [(s_i, arm, "all", set(), base + 50)]
+    workers = int(os.environ.get("CRF_WORKERS", "1"))
+    if workers > 1:
+        from concurrent.futures import ProcessPoolExecutor
+        with ProcessPoolExecutor(max_workers=workers) as pool:
+            done = list(pool.map(_fold_job, jobs))
+    else:
+        done = [_fold_job(j) for j in jobs]
+    for out, _, _ in done[:-1]:
         for k in SETS:
-            for j, r in enumerate(data[k]):
-                if r[0] in hold:
-                    res[k][j].append(score_half(net, r[1], r[3], arm, device))
-        print("  seed %d arm %s fold %d: nll %.4f, %.0f s, moves %s" % (s_i, arm, i, tail, time.time() - t0, np.round(net.t.detach().cpu().numpy(), 2).tolist()), flush=True)
-        del net
-        torch.cuda.empty_cache()
+            for j, z in out[k].items():
+                res[k][j].append(z)
     for k in SETS:
         assert all(len(v) for v in res[k])
         out = []
@@ -341,9 +356,8 @@ def train(s_i, arm):
             lq = np.mean([np.log(np.clip(z[0], 1e-4, 1 - 1e-4)) - np.log(1 - np.clip(z[0], 1e-4, 1 - 1e-4)) for z in v], axis=0)
             out.append((1 / (1 + np.exp(-lq))).astype(np.float32))
         bench._dump(dict(q=out, alive=[np.mean([z[1] for z in v], axis=0).astype(np.float32) for v in res[k]], path=[v[0][2] for v in res[k]]), os.path.join(OUT, "held_%s_%d_%s.pkl" % (arm, s_i, k)))
-    net, tail = fit(data, set(), base + 50, arm, device)
-    torch.save(dict(state={k: v.cpu() for k, v in net.state_dict().items()}, d_in=next(iter(data.values()))[0][1].shape[1] - N_OWN, arm=arm), os.path.join(OUT, "all_%s_%d.pt" % (arm, s_i)))
-    print("  seed %d arm %s all-data model done, nll %.4f" % (s_i, arm, tail), flush=True)
+    torch.save(dict(state=done[-1][1], d_in=next(iter(data.values()))[0][1].shape[1] - N_OWN, arm=arm), os.path.join(OUT, "all_%s_%d.pt" % (arm, s_i)))
+    print("  seed %d arm %s all-data model done, nll %.4f" % (s_i, arm, done[-1][2]), flush=True)
 
 
 def decode_all(a_list, q_list, pen_team=12.0, c_=48.0, pen_dead=30.0):
