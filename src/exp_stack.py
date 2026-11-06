@@ -35,7 +35,7 @@ ARMS = {"q": (0.5, 6.0, 24.0, 0.0), "S.25": (0.5, 6.0, 24.0, 0.25), "S1": (0.5, 
 if os.environ.get("STACK_ARMS") == "wide":
     ARMS = dict(ARMS)
     ARMS.update({"w.35 a.25": (0.35, 6.0, 24.0, 0.25), "w.35 a.5": (0.35, 6.0, 24.0, 0.5), "w.25 a.25": (0.25, 6.0, 24.0, 0.25), "8/24 a.25": (0.5, 8.0, 24.0, 0.25), "w.35 8/24": (0.35, 8.0, 24.0, 0.25), "w.25 8/48": (0.25, 8.0, 48.0, 0.25)})
-E_OWN = {"Gp": 2, "Gm": 6, "Gf": 1, "Gu": 1}      # extra columns that swap between the two views (see view)
+E_OWN = {"Gp": 2, "Gm": 6, "Gf": 1, "Gu": 1, "Gx": 1}      # extra columns that swap between the two views (see view)
 STEP_OF = {"G2": 2}             # frames per step of a tag (default exp_crf.STEP, 5 Hz)
 OPTS = {"Hw": dict(width=128), "Hl": dict(steps=4000), "Hd": dict(drop=0.3)}      # path-model variants on the base input
 
@@ -51,7 +51,7 @@ def canon(tag):
 
 
 def augmented(tag):
-    return tag[:2] in ("Hz", "Hv")
+    return tag[:2] in ("Hz", "Hv", "Hx")
 
 
 def step_of(tag):
@@ -355,6 +355,9 @@ def extras(tag, k, s_i):
     if tag.startswith("Gu"):                   # the dose test: the ball-free channel after a quarter of the training
         h = bench._load(os.path.join(bench.ROOT, "cache", "ballfree", "held_q_%s_%d.pkl" % (ee.V3[k][0 if k != "metrica" else 1].replace("@", "-"), s_i)))
         return [_bf_cols(q, a) for q, a in zip(h["q"], h["alive"])]
+    if tag.startswith("Gx"):                   # round 68's upward dose: the ball-free channel at its full settings
+        h = bench._load(os.path.join(bench.ROOT, "cache", "ballfree", "held_f_%s_%d.pkl" % (ee.V3[k][0 if k != "metrica" else 1].replace("@", "-"), s_i)))
+        return [_bf_cols(q, a) for q, a in zip(h["q"], h["alive"])]
     if tag.startswith("Gp"):
         out = []
         for b in bench.blocks(fsrc):
@@ -423,7 +426,7 @@ def load_rows(s_i, tag):
         labs = [np.asarray(g) for g in bench.labels(exp_st.SRC, "evctrl")]
         data["st"] = [(r[0] if r[0] not in {x[0] for k in SETS for x in data[k]} else "st/%s" % r[0], r[1], ec.step_labels(g)[:len(r[1])], r[3]) for r, g in zip(d["rows"], labs)]
         return data
-    if canon(tag) not in ("Gh", "Gs", "Gm", "Gp", "Gf", "Gu"):
+    if canon(tag) not in ("Gh", "Gs", "Gm", "Gp", "Gf", "Gu", "Gx"):
         return data
     head = canon(tag)
     for k in SETS:
@@ -691,8 +694,8 @@ def st(tags, seed_is):
                 net.load_state_dict(ck["state"])
                 net.eval()
                 rows_ = d["rows"]
-                if canon(tag) == "Gf":
-                    h = bench._load(_bf_path("st@v3", s_i))
+                if canon(tag) in ("Gf", "Gx"):
+                    h = bench._load(_bf_path("st@v3", s_i) if canon(tag) == "Gf" else os.path.join(bench.ROOT, "cache", "ballfree", "held_f_st-v3_%d.pkl" % s_i))
                     rows_ = []
                     for r, q, a in zip(d["rows"], h["q"], h["alive"]):
                         z = ec.pool(_bf_cols(q, a).astype(np.float64)).astype(np.float32)
