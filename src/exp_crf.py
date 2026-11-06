@@ -354,9 +354,19 @@ def decode_all(a_list, q_list, pen_team=12.0, c_=48.0, pen_dead=30.0):
         return list(pool_.map(one, range(len(a_list))))
 
 
+LOW = ("qH.5 6/24", "qH.5 8/24", "qH.5 4/24")      # round 61's added pre-registration: 6/24 decides, the neighbours show flatness
+PEN = {"qH.5 6/24": (6.0, 24.0), "qH.5 8/24": (8.0, 24.0), "qH.5 4/24": (4.0, 24.0)}
+
+
+def _arms(seed_is):
+    """qP failed round 61's screen on seed 0, so seeds 1-2 train the HC arm only."""
+    have_p = all(os.path.exists(os.path.join(OUT, "all_P_%d.pt" % s)) for s in seed_is)
+    return ("v20", "qP", "qH", "qH.5", "qHl", "VH") + LOW if have_p else ("v20", "qH", "qH.5", "qHl", "VH") + LOW
+
+
 def evaluate(seed_is):
     import exp_blend_weight as bw
-    names = ("v20", "qP", "qH", "qH.5", "qHl", "VH")
+    names = _arms(seed_is)
     cells = {}
     os.makedirs(os.path.join(bench.ROOT, "tools", "runs"), exist_ok=True)
     for k in SETS:
@@ -369,10 +379,13 @@ def evaluate(seed_is):
         for s_i in seed_is:
             v, g, o = eg2.parts(src, s_i, True)
             s50 = exp_smooth.smooth([0.25 * np.asarray(x, np.float64) + 0.25 * np.asarray(y, np.float64) + 0.5 * ss.pk(np.asarray(z, np.float32), 0) for x, y, z in zip(v, g, o)], 25)
-            hp = bench._load(os.path.join(OUT, "held_P_%d_%s.pkl" % (s_i, k)))
             hh = bench._load(os.path.join(OUT, "held_HC_%d_%s.pkl" % (s_i, k)))
             half = [1 / (1 + np.exp(-0.5 * (_logit(q) + _logit(s)))) for q, s in zip(hh["q"], s50)]
-            arms = {"v20": eg.decode_par(ev, s50), "qP": decode_all(ev, hp["q"]), "qH": decode_all(ev, hh["q"]), "qH.5": decode_all(ev, half), "qHl": decode_all(ev, hh["q"], 6.0, 24.0), "VH": hh["path"]}
+            arms = {"v20": eg.decode_par(ev, s50), "qH": decode_all(ev, hh["q"]), "qH.5": decode_all(ev, half), "qHl": decode_all(ev, hh["q"], 6.0, 24.0), "VH": hh["path"]}
+            for name in LOW:
+                arms[name] = decode_all(ev, half, *PEN[name])
+            if "qP" in names:
+                arms["qP"] = decode_all(ev, bench._load(os.path.join(OUT, "held_P_%d_%s.pkl" % (s_i, k)))["q"])
             for name, preds in arms.items():
                 preds = [np.asarray(p)[:len(labs[convs[0]][i])] for i, p in enumerate(preds)]
                 for c in convs:
@@ -391,6 +404,69 @@ def evaluate(seed_is):
         bw.decide(mean, "v20", cand)
 
 
+def st(seed_is):
+    """SoccerTrack, unseen by every model: all-data stacker, channels as in exp_edges.final_st."""
+    import exp_deadmix as dm
+    import exp_st
+    import exp_tdead as etd
+    with open(ro.OUT) as fh:
+        conf = json.load(fh)
+    t_, c_ = conf["thresholds"], conf["bounds"]
+    b6, g6 = ee.weights_on(ee.V6, conf)
+    m6 = bench.load_booster(os.path.join(ee.OUT, "M_v6_all.txt"))
+    nets = []
+    for seed in (20261104, 20261105, 20261106):
+        ck = torch.load(os.path.join(bench.CACHE, "tdead6n", "all_%d.pt" % seed), map_location="cpu", weights_only=False)
+        net = etd.Net(ck["n_in"]).to(etd.DEVICE)
+        net.load_state_dict(ck["state"])
+        net.eval()
+        nets.append((net, ck["mean"], ck["scale"]))
+    gru = exp_st.gru_mean()
+    outs = bench._load(os.path.join(ss.OUT, "J1_%s.pkl" % exp_st.SRC.replace("@", "-")))
+    labs = {cv: [np.asarray(g) for g in bench.labels(exp_st.SRC, cv)] for cv in exp_st.CONVS}
+    truth = labs["evctrl"]
+    src = "st@v6"
+    blocks = bench.blocks(src)
+    ev = []
+    os.environ["TD_NORM"] = "1"
+    for i, (b, f, g) in enumerate(zip(blocks, bench.features("base", src), truth)):
+        T = ro.terms(exp_blend.rule_f(b), t_, c_)
+        vv, l = dm.transplant(g, np.random.default_rng([dm.SEED, 0, i]))
+        a6 = exp_blend.logit_alive(m6.predict(f["XF"], num_threads=bench.THREADS))
+        xn = exp_blend.logit_alive(np.mean([etd.score_half(n_, m_, s_, f["XF"]) for n_, m_, s_ in nets], axis=0))
+        ev.append(0.25 * (T @ b6) + 0.375 * a6 + 0.375 * xn + g6[0] * (~vv) + g6[1] * l)
+    os.environ.pop("TD_NORM")
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    names = _arms(seed_is)
+    cells = {}
+    for s_i in seed_is:
+        raw = exp_st.v10_raw(s_i)
+        oo = outs[ss.SEEDS[s_i]]
+        s50 = exp_smooth.smooth([0.25 * np.asarray(x, np.float64) + 0.25 * np.asarray(y, np.float64) + 0.5 * ss.pk(np.asarray(z, np.float32), 0) for x, y, z in zip(raw, gru, oo)], 25)
+        models = {}
+        for arm in ("P", "HC") if "qP" in names else ("HC",):
+            ck = torch.load(os.path.join(OUT, "all_%s_%d.pt" % (arm, s_i)), map_location="cpu", weights_only=False)
+            net = build_net(ck["d_in"]).to(device)
+            net.load_state_dict(ck["state"])
+            net.eval()
+            models[arm] = net
+        res = {arm: [] for arm in models}
+        for b, r, gg, o, a, g in zip(blocks, raw, gru, oo, ev, truth):
+            x = pool(frame_inputs(b, r, gg, o, a)).astype(np.float32)
+            for arm in res:
+                res[arm].append(score_half(models[arm], x, len(g), arm, device))
+        half = [1 / (1 + np.exp(-0.5 * (_logit(z[0]) + _logit(q)))) for z, q in zip(res["HC"], s50)]
+        arms = {"v20": eg.decode_par(ev, s50), "qH": decode_all(ev, [z[0] for z in res["HC"]]), "qH.5": decode_all(ev, half), "qHl": decode_all(ev, [z[0] for z in res["HC"]], 6.0, 24.0), "VH": [z[2] for z in res["HC"]]}
+        for name in LOW:
+            arms[name] = decode_all(ev, half, *PEN[name])
+        if "qP" in names:
+            arms["qP"] = decode_all(ev, [z[0] for z in res["P"]])
+        for name, preds in arms.items():
+            for cv in exp_st.CONVS:
+                cells.setdefault((exp_st.SRC, cv, "v6", name), []).append(er.by_match(blocks, labs[cv], preds))
+    er.summarize(cells, list(names), ref="v20")
+
+
 if __name__ == "__main__":
     sys.stdout.reconfigure(encoding="utf-8")
     warnings.filterwarnings("ignore")
@@ -401,5 +477,7 @@ if __name__ == "__main__":
         train(sys.argv[2], sys.argv[3])
     elif cmd == "eval":
         evaluate([int(s) for s in sys.argv[2:]])
+    elif cmd == "st":
+        st([int(s) for s in sys.argv[2:]])
     else:
         raise SystemExit(__doc__)

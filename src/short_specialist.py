@@ -39,7 +39,7 @@ import numpy as np  # noqa: E402
 
 FPS = 25
 K = 5
-CORE, HALO = 50, 50
+CORE, HALO = 50, int(os.environ.get("KPU_HALO", "50"))          # round 64: KPU_HALO 150 for CL / JL (+-6 s of context)
 WIN = CORE + 2 * HALO
 SIGMA = 3.0
 MASK_PAD = 6                    # round 32 (C2): frames around a masked spell without gain / lose target
@@ -51,7 +51,8 @@ OUT = os.path.join(ROOT, "cache", "kpu")
 TARGET = (("dfl@v3", "evctrl"), ("metrica@v3", "ctrl"))       # round 34: the target-convention games (fine-tuning)
 FT_TARGET = {"D1": TARGET[:1], "M1": TARGET[1:],              # transfer test: fine-tuned on one provider only
              "H1": (("metrica@v3g", "ctrl"),),                # round 37: Metrica's ball moved off its owner (bench v3g)
-             "J1": (TARGET[0], ("metrica@v3g", "ctrl"))}
+             "J1": (TARGET[0], ("metrica@v3g", "ctrl")),
+             "JL": (TARGET[0], ("metrica@v3g", "ctrl"))}      # round 64: J1's recipe on CL
 FT_STEPS, FT_LR = 2000, 3e-4
 
 
