@@ -301,15 +301,15 @@ def fit(data, hold, seed, arm, device):
     return net, float(np.mean(tail[-200:]))
 
 
-def score_half(net, x, n, arm, device):
+def score_half(net, x, n, arm, device, step=STEP):
     """(q at 25 fps: P(H | live) as a probability, alive log-odds at 25 fps, Viterbi labels at 25 fps)"""
     lp, path = posterior(net, torch.as_tensor(x[None], dtype=torch.float32, device=device), arm)
-    grid = (np.arange(len(lp)) + 0.5) * STEP
+    grid = (np.arange(len(lp)) + 0.5) * step
     t = np.arange(n) + 0.5
     lq = lp[:, 0] - lp[:, 1]
     q = 1 / (1 + np.exp(-np.interp(t, grid, lq)))
     alive = np.logaddexp(lp[:, 0], lp[:, 1]) - lp[:, 2]
-    lab = np.repeat(path, STEP)
+    lab = np.repeat(path, step)
     lab = np.r_[lab, np.full(max(0, n - len(lab)), lab[-1])][:n]
     return q.astype(np.float32), np.interp(t, grid, alive).astype(np.float32), lab.astype(np.int8)
 

@@ -32,6 +32,9 @@ BASE = {"H": (6.0, 24.0)}
 ARMS = {"q": (0.5, 6.0, 24.0, 0.0), "S.25": (0.5, 6.0, 24.0, 0.25), "S1": (0.5, 6.0, 24.0, 0.5), "S.75": (0.5, 6.0, 24.0, 0.75)}     # stacker's share in q, pen_team, c, stacker's share in the alive evidence
 
 
+if os.environ.get("STACK_ARMS") == "wide":
+    ARMS = dict(ARMS)
+    ARMS.update({"w.35 a.25": (0.35, 6.0, 24.0, 0.25), "w.35 a.5": (0.35, 6.0, 24.0, 0.5), "w.25 a.25": (0.25, 6.0, 24.0, 0.25), "8/24 a.25": (0.5, 8.0, 24.0, 0.25), "w.35 8/24": (0.35, 8.0, 24.0, 0.25), "w.25 8/48": (0.25, 8.0, 48.0, 0.25)})
 E_OWN = {"Gp": 2, "Gm": 6, "Gf": 1}      # extra columns that swap between the two views (see view)
 STEP_OF = {"G2": 2}             # frames per step of a tag (default exp_crf.STEP, 5 Hz)
 OPTS = {"Hw": dict(width=128), "Hl": dict(steps=4000), "Hd": dict(drop=0.3)}      # path-model variants on the base input
@@ -208,6 +211,28 @@ def make_net(tag, d_in, e):
     return build_net(d_in, e=e)
 
 
+CH_COLS = [0, 1, 2, 3]            # channel logits in H's view; the same + N_OWN in A's
+HEAD_COLS = [4, 5, 6, 7, 8, 9]     # J1's gain / lose / touch heads
+
+
+def augment(x, rng):
+    """Round 65 (Hz), one training window: the channels' quality and calibration differ on a provider nobody trained them on (SkillCorner, SoccerTrack, the target), so the stacker must not lean on their exact scale. Random scale per channel, sometimes a channel missing for the whole window, scale and offset on the alive evidence."""
+    x = x.copy()
+    n = ec.N_OWN
+    for c in CH_COLS:
+        f = rng.uniform(0.5, 1.2)
+        if c != 3 and rng.random() < 0.1:
+            f = 0.0
+        x[:, c] *= f
+        x[:, c + n] *= f
+    f = rng.uniform(0.7, 1.2)
+    for c in HEAD_COLS:
+        x[:, c] *= f
+        x[:, c + n] *= f
+    x[:, 2 * n] = x[:, 2 * n] * rng.uniform(0.7, 1.2) + rng.uniform(-0.3, 0.3)
+    return x
+
+
 def fit(data, hold, seed, device, steps=None, e=0, step_=STEP, tag="G"):
     steps = steps or OPTS.get(tag[:2], {}).get("steps", STEPS)
     torch.manual_seed(seed)
@@ -227,7 +252,7 @@ def fit(data, hold, seed, device, steps=None, e=0, step_=STEP, tag="G"):
             _, x, y, _ = rows[int(rng.integers(len(rows)))]
             win = WIN * STEP // step_
             a = int(rng.integers(0, max(1, len(x) - win)))
-            X.append(x[a:a + win])
+            X.append(augment(x[a:a + win], rng) if tag[:2] == "Hz" else x[a:a + win])
             Y.append(y[a:a + win])
         L = min(len(v) for v in X)
         X = torch.as_tensor(np.stack([v[:L] for v in X]), dtype=torch.float32, device=device)
@@ -255,7 +280,7 @@ def score_half(net, x, n, device, step_=STEP, tag="G"):
     if tag[:2] == "Ht":
         return score_tv(net, x, n, device, step_)
     if is_path(tag):
-        return ec.score_half(net, x, n, "HC", device)[:2]
+        return ec.score_half(net, x, n, "HC", device, step_)[:2]
     with torch.no_grad():
         o = net(torch.as_tensor(x[None], dtype=torch.float32, device=device))[0]
         lp = torch.log_softmax(o, -1).cpu().numpy()
@@ -323,6 +348,20 @@ def extras(tag, k, s_i):
     return None
 
 
+def half_norm(x):
+    """Round 65 (Hn; the idea of round 51): each half's own scale, label-free. Channel logits and heads by the half's spread of the blend's logit; the alive evidence and J1's dead logit to the half's own median and spread."""
+    x = x.copy()
+    n = ec.N_OWN
+    ref = max(np.quantile(np.abs(x[:, 3]), 0.9), 1e-3)
+    for c in CH_COLS:
+        x[:, c] *= 4.5 / ref
+        x[:, c + n] *= 4.5 / ref
+    for c in (2 * n, 2 * n + 1):
+        q = np.quantile(x[:, c], (0.1, 0.5, 0.9))
+        x[:, c] = (x[:, c] - q[1]) / max(q[2] - q[0], 1e-3) * 2.0
+    return x.astype(np.float32)
+
+
 def _rows_step(k, s_i, step_):
     """exp_crf.inputs at another step."""
     path = os.path.join(OUT, "inputs_step%d_%s_%d.pkl" % (step_, k, s_i))
@@ -348,6 +387,14 @@ def load_rows(s_i, tag):
     if canon(tag) == "G2":
         return {k: _rows_step(k, s_i, step_of(tag)) for k in SETS}
     data = {k: bench._load(ec._in_path(k, s_i)) for k in SETS}
+    if tag[:2] == "Hn":
+        return {k: [(r[0], half_norm(r[1]), r[2], r[3]) for r in rows] for k, rows in data.items()}
+    if tag[:2] == "HS":                        # diagnosis: SoccerTrack as a further provider nobody trained the channels on
+        d = bench._load(os.path.join(OUT, "inputs_st_%d.pkl" % s_i))
+        import exp_st
+        labs = [np.asarray(g) for g in bench.labels(exp_st.SRC, "evctrl")]
+        data["st"] = [(r[0] if r[0] not in {x[0] for k in SETS for x in data[k]} else "st/%s" % r[0], r[1], ec.step_labels(g)[:len(r[1])], r[3]) for r, g in zip(d["rows"], labs)]
+        return data
     if canon(tag) not in ("Gh", "Gs", "Gm", "Gp", "Gf"):
         return data
     head = canon(tag)
@@ -460,25 +507,28 @@ def _lopo_job(job):
     net, tail = fit(data, hold, 20261207 + 100 * s_i + j, device, e=e_of(tag), step_=step_of(tag), tag=tag)
     ev = lopo_evidence(k)
     zs = []
+    raw_rows = bench._load(ec._in_path(k, s_i)) if tag[:2] == "Hn" else None
     for r, a in zip(data[k], ev):
-        x = r[1].copy()
+        x = (raw_rows[len(zs)] if raw_rows else r)[1].copy()
         col = ec.pool(np.clip(np.asarray(a, np.float64), -20, 20)[:, None] / 5.0).astype(np.float32)
         n = min(len(x), len(col))
         x = x[:n]
         x[:, 2 * ec.N_OWN] = col[:n, 0]
+        if tag[:2] == "Hn":
+            x = half_norm(x)
         zs.append(score_half(net, x, r[3], device, step_of(tag), tag))
     _save(tag, s_i, "slopo", k, zs)
     print("  %s seed %d without %s: loss %.4f, %.0f s" % (tag, s_i, k, tail, time.time() - t0), flush=True)
 
 
-def lopo(s_i, tag):
+def lopo(s_i, tag, sets=SETS):
     """Each provider out of the stacker and out of the dead-ball models behind its input."""
     s_i = int(s_i)
-    for k in SETS:
+    for k in sets:
         lopo_evidence(k)           # once, before the workers read it
         bench._blocks.clear()
         bench._labels.clear()
-    _pool_map(_lopo_job, [(s_i, tag, j, k) for j, k in enumerate(SETS)])
+    _pool_map(_lopo_job, [(s_i, tag, SETS.index(k), k) for k in sets])
 
 
 def _mix(hq, s, w):
@@ -506,12 +556,12 @@ def _held(tag, s_i, k, kind):
     return h["q"], h["alive"]
 
 
-def evaluate(tags, seed_is, kind="sheld"):
+def evaluate(tags, seed_is, kind="sheld", sets=SETS):
     import exp_blend_weight as bw
     import exp_deadmix as dm
     names = _arms(tags)
     cells = {}
-    for k in SETS:
+    for k in sets:
         fsrc, src = ee.V6[k][0], ee.V3[k][1]
         blocks = bench.blocks(fsrc)
         convs = dm.CONVS[src]
@@ -536,8 +586,9 @@ def evaluate(tags, seed_is, kind="sheld"):
     with open(os.path.join(RUNS, "stack_cells_%s_%s_%s.pkl" % (kind, "-".join(tags), "".join(str(s) for s in seed_is))), "wb") as fh:
         pickle.dump(cells, fh)
     mean, _ = er.summarize(cells, names, ref="v20")
-    for cand in names[1:]:
-        bw.decide(mean, "v20", cand)
+    if len(sets) == len(SETS):
+        for cand in names[1:]:
+            bw.decide(mean, "v20", cand)
 
 
 def stinputs(s_i):
@@ -611,7 +662,7 @@ def st(tags, seed_is):
                 net = make_net(tag, ck["d_in"], ck.get("e", 0)).to(device)
                 net.load_state_dict(ck["state"])
                 net.eval()
-                zs = [score_half(net, r[1], r[3], device, step_of(tag), tag) for r in d["rows"]]
+                zs = [score_half(net, half_norm(r[1]) if tag[:2] == "Hn" else r[1], r[3], device, step_of(tag), tag) for r in d["rows"]]
             arms.update(_decode_arms(tag, ev, s50, [z[0] for z in zs], [z[1] for z in zs]))
         for name, preds in arms.items():
             preds = [np.asarray(p)[:len(labs["evctrl"][i])] for i, p in enumerate(preds)]
@@ -627,9 +678,9 @@ if __name__ == "__main__":
     if cmd == "train":
         train(sys.argv[2], sys.argv[3])
     elif cmd == "lopo":
-        lopo(sys.argv[2], sys.argv[3])
+        lopo(sys.argv[2], sys.argv[3], sys.argv[4].split() if len(sys.argv) > 4 else SETS)
     elif cmd == "eval":
-        evaluate(sys.argv[2].split(), [int(s) for s in sys.argv[3].split()], ("s" + sys.argv[4]) if len(sys.argv) > 4 else "sheld")
+        evaluate(sys.argv[2].split(), [int(s) for s in sys.argv[3].split()], ("s" + sys.argv[4]) if len(sys.argv) > 4 else "sheld", sys.argv[5].split() if len(sys.argv) > 5 else SETS)
     elif cmd == "stinputs":
         stinputs(sys.argv[2])
     elif cmd == "st":
