@@ -35,7 +35,7 @@ ARMS = {"q": (0.5, 6.0, 24.0, 0.0), "S.25": (0.5, 6.0, 24.0, 0.25), "S1": (0.5, 
 if os.environ.get("STACK_ARMS") == "wide":
     ARMS = dict(ARMS)
     ARMS.update({"w.35 a.25": (0.35, 6.0, 24.0, 0.25), "w.35 a.5": (0.35, 6.0, 24.0, 0.5), "w.25 a.25": (0.25, 6.0, 24.0, 0.25), "8/24 a.25": (0.5, 8.0, 24.0, 0.25), "w.35 8/24": (0.35, 8.0, 24.0, 0.25), "w.25 8/48": (0.25, 8.0, 48.0, 0.25)})
-E_OWN = {"Gp": 2, "Gm": 6, "Gf": 1}      # extra columns that swap between the two views (see view)
+E_OWN = {"Gp": 2, "Gm": 6, "Gf": 1, "Gu": 1}      # extra columns that swap between the two views (see view)
 STEP_OF = {"G2": 2}             # frames per step of a tag (default exp_crf.STEP, 5 Hz)
 OPTS = {"Hw": dict(width=128), "Hl": dict(steps=4000), "Hd": dict(drop=0.3)}      # path-model variants on the base input
 
@@ -247,6 +247,12 @@ def fit(data, hold, seed, device, steps=None, e=0, step_=STEP, tag="G"):
     torch.manual_seed(seed)
     rng = np.random.default_rng(seed)
     pools = {k: [r for r in rows if r[0] not in hold] for k, rows in data.items()}
+    if tag[:2] == "Hq":                        # learning curve: half of each provider's other matches
+        for k in pools:
+            groups = sorted({r[0] for r in pools[k]}, key=str)
+            keep = set(np.random.default_rng(seed + 7).permutation(len(groups))[:max(1, len(groups) // 2)].tolist())
+            keep = {g for i, g in enumerate(groups) if i in keep}
+            pools[k] = [r for r in pools[k] if r[0] in keep]
     keys = [k for k in pools if pools[k]]
     d_in = next(iter(data.values()))[0][1].shape[1] - ec.N_OWN - e
     net = make_net(tag, d_in, e).to(device)
@@ -346,6 +352,9 @@ def extras(tag, k, s_i):
     if tag.startswith("Gf"):
         h = bench._load(_bf_path(ee.V3[k][0 if k != "metrica" else 1], s_i))
         return [np.stack([ec._logit(q), -ec._logit(q), np.clip(a, -20, 20) / 5.0], 1) for q, a in zip(h["q"], h["alive"])]
+    if tag.startswith("Gu"):                   # the dose test: the ball-free channel after a quarter of the training
+        h = bench._load(os.path.join(bench.ROOT, "cache", "ballfree", "held_q_%s_%d.pkl" % (ee.V3[k][0 if k != "metrica" else 1].replace("@", "-"), s_i)))
+        return [_bf_cols(q, a) for q, a in zip(h["q"], h["alive"])]
     if tag.startswith("Gp"):
         out = []
         for b in bench.blocks(fsrc):
@@ -414,7 +423,7 @@ def load_rows(s_i, tag):
         labs = [np.asarray(g) for g in bench.labels(exp_st.SRC, "evctrl")]
         data["st"] = [(r[0] if r[0] not in {x[0] for k in SETS for x in data[k]} else "st/%s" % r[0], r[1], ec.step_labels(g)[:len(r[1])], r[3]) for r, g in zip(d["rows"], labs)]
         return data
-    if canon(tag) not in ("Gh", "Gs", "Gm", "Gp", "Gf"):
+    if canon(tag) not in ("Gh", "Gs", "Gm", "Gp", "Gf", "Gu"):
         return data
     head = canon(tag)
     for k in SETS:

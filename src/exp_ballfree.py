@@ -31,6 +31,7 @@ ROOT = os.path.dirname(HERE)
 OUT = os.path.join(ROOT, "cache", "ballfree")
 PREP = os.path.join(OUT, "pff")
 C1_PREP = os.path.join(ROOT, "cache", "kpu", "prep_c1")
+TAG = os.environ.get("BF_TAG", "")      # dose test: a run with another amount of training keeps its own files
 
 
 def tokens(P, B, team, gk, pitch):
@@ -255,7 +256,7 @@ def train(s_i):
     vrng = np.random.default_rng(7)
     vb = [dv.batch(vrng, 16) for _ in range(8)]
     best, t0 = np.inf, time.time()
-    path = os.path.join(OUT, "bf_s%d.pt" % seed)
+    path = os.path.join(OUT, "bf%s_s%d.pt" % (TAG, seed))
     for step in range(1, STEPS + 1):
         net.train()
         x, bb, g, y = dt.batch(rng, BATCH)
@@ -308,7 +309,7 @@ def predict(net, tok, signs, n, dev):
 
 def load_model(s_i, dev):
     import torch
-    ck = torch.load(os.path.join(OUT, "bf_s%d.pt" % SEEDS[int(s_i)]), map_location="cpu", weights_only=False)
+    ck = torch.load(os.path.join(OUT, "bf%s_s%d.pt" % (TAG, SEEDS[int(s_i)])), map_location="cpu", weights_only=False)
     net = build_net().to(dev)
     net.load_state_dict(ck["state"])
     return net.eval()
@@ -322,7 +323,7 @@ def infer(src, s_i):
     for b in bench.blocks(src):
         tok, _, signs = tokens(b["P"], b["B"], b["team"], b["gk"], b["pitch"])
         res.append(predict(net, tok, signs, len(b["P"]), dev))
-    bench._dump(dict(q=[z[0] for z in res], alive=[z[1] for z in res]), os.path.join(OUT, "held_%s_%d.pkl" % (src.replace("@", "-"), int(s_i))))
+    bench._dump(dict(q=[z[0] for z in res], alive=[z[1] for z in res]), os.path.join(OUT, "held%s_%s_%d.pkl" % (TAG, src.replace("@", "-"), int(s_i))))
     print("  %s seed index %s: %d halves" % (src, s_i, len(res)), flush=True)
 
 
@@ -342,7 +343,7 @@ def audit(s_i):
         src = ee.V3[k][1]
         labs = [np.asarray(g) for g in bench.labels(src, ee.V3[k][2])]
         v, g, o = eg2.parts(src, s_i, True)
-        h = bench._load(os.path.join(OUT, "held_%s_%d.pkl" % (_source(k).replace("@", "-"), s_i)))
+        h = bench._load(os.path.join(OUT, "held%s_%s_%d.pkl" % (TAG, _source(k).replace("@", "-"), s_i)))
         tot = {}
         dis = np.zeros(2)
         for i, y in enumerate(labs):
