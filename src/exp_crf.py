@@ -48,6 +48,11 @@ N_OWN = 14              # columns that swap with the other team's view (see view
 _FIX = -1e4
 
 
+def pick_device():
+    """CRF_CPU=1 keeps a run off the GPU (hiding the devices breaks torch's cudnn check on CPU tensors)."""
+    return "cpu" if os.environ.get("CRF_CPU") == "1" else ("cuda" if torch.cuda.is_available() else "cpu")
+
+
 def _logit(p):
     p = np.clip(np.asarray(p, np.float64), 1e-4, 1 - 1e-4)
     return np.clip(np.log(p / (1 - p)), -CLIP, CLIP)
@@ -311,7 +316,7 @@ def score_half(net, x, n, arm, device):
 
 def train(s_i, arm):
     s_i = int(s_i)
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = pick_device()
     data = load_rows(s_i)
     dfl = sorted({r[0] for r in data["dfl"]}, key=str)
     met = sorted({r[0] for r in data["metrica"]}, key=str)
@@ -436,7 +441,7 @@ def st(seed_is):
         xn = exp_blend.logit_alive(np.mean([etd.score_half(n_, m_, s_, f["XF"]) for n_, m_, s_ in nets], axis=0))
         ev.append(0.25 * (T @ b6) + 0.375 * a6 + 0.375 * xn + g6[0] * (~vv) + g6[1] * l)
     os.environ.pop("TD_NORM")
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = pick_device()
     names = _arms(seed_is)
     cells = {}
     for s_i in seed_is:
