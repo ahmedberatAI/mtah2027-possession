@@ -35,7 +35,7 @@ ARMS = {"q": (0.5, 6.0, 24.0, 0.0), "S.25": (0.5, 6.0, 24.0, 0.25), "S1": (0.5, 
 if os.environ.get("STACK_ARMS") == "wide":
     ARMS = dict(ARMS)
     ARMS.update({"w.35 a.25": (0.35, 6.0, 24.0, 0.25), "w.35 a.5": (0.35, 6.0, 24.0, 0.5), "w.25 a.25": (0.25, 6.0, 24.0, 0.25), "8/24 a.25": (0.5, 8.0, 24.0, 0.25), "w.35 8/24": (0.35, 8.0, 24.0, 0.25), "w.25 8/48": (0.25, 8.0, 48.0, 0.25)})
-E_OWN = {"Gp": 2, "Gm": 6, "Gf": 1, "Gu": 1, "Gx": 1, "Gy": 1, "Gr": 1}      # extra columns that swap between the two views (see view)
+E_OWN = {"Gp": 2, "Gm": 6, "Gf": 1, "Gu": 1, "Gx": 1, "Gy": 1, "Gr": 1, "Gk": 2, "Gg": 2, "Gj": 2, "Gi": 2, "Go": 1, "Gc": 2, "G1": 2, "G3": 2, "G5": 2, "G6": 2, "G7": 2, "G8": 2}      # extra columns that swap between the two views (see view)
 STEP_OF = {"G2": 2}             # frames per step of a tag (default exp_crf.STEP, 5 Hz)
 OPTS = {"Hw": dict(width=128), "Hl": dict(steps=4000), "Hd": dict(drop=0.3)}      # path-model variants on the base input
 
@@ -47,11 +47,13 @@ def is_path(tag):
 
 def canon(tag):
     """The input of a tag: Gs and Hs read the same columns; Hv = Hf's input (round 66) with Hz's augmentation."""
+    if tag[:2] in ("He", "Ha"):                # Hy's input; He (round 74): the free states supervised; Ha (round 75): feature-dependent moves. Tags differ in more than case: file names on Windows do not.
+        return "Gy"
     return "Gf" if tag[:2] == "Hv" else "G" + tag[1:2]
 
 
 def augmented(tag):
-    return tag[:2] in ("Hz", "Hv", "Hx", "Hy", "Hr")
+    return tag[:2] in ("Hz", "Hv", "Hx", "Hy", "Hr", "Hk", "Hg", "Hj", "Hi", "Ho", "He", "Ha", "Hc", "H1", "H3", "H5", "H6", "H7", "H8")
 
 
 def step_of(tag):
@@ -208,7 +210,7 @@ def build_path(d_in, width=64, drop=0.1, e=0):
 
 def make_net(tag, d_in, e):
     o = OPTS.get(tag[:2], {})
-    if tag[:2] == "Ht":
+    if tag[:2] in ("Ht", "Ha"):
         return build_tv(d_in, e=e)
     if is_path(tag):
         return build_path(d_in, width=o.get("width", 64), drop=o.get("drop", 0.1), e=e)
@@ -234,11 +236,12 @@ def augment(x, rng):
         x[:, c] *= f
         x[:, c + n] *= f
     x[:, 2 * n] = x[:, 2 * n] * rng.uniform(0.7, 1.2) + rng.uniform(-0.3, 0.3)
-    if x.shape[1] > BASE_COLS:             # the ball-free channel: both views' logit, then its alive evidence
+    e = (x.shape[1] - BASE_COLS) // 3
+    for j in range(e):                     # the added channels (ball-free, round 71's BS): both views' logit, then its alive evidence
         f = 0.0 if rng.random() < 0.1 else rng.uniform(0.5, 1.2)
-        x[:, BASE_COLS] *= f
-        x[:, BASE_COLS + 1] *= f
-        x[:, BASE_COLS + 2] *= rng.uniform(0.7, 1.2)
+        x[:, BASE_COLS + j] *= f
+        x[:, BASE_COLS + e + j] *= f
+        x[:, BASE_COLS + 2 * e + j] *= rng.uniform(0.7, 1.2)
     return x
 
 
@@ -272,8 +275,10 @@ def fit(data, hold, seed, device, steps=None, e=0, step_=STEP, tag="G"):
         L = min(len(v) for v in X)
         X = torch.as_tensor(np.stack([v[:L] for v in X]), dtype=torch.float32, device=device)
         Y = torch.as_tensor(np.stack([v[:L] for v in Y]), dtype=torch.long, device=device)
-        if tag[:2] == "Ht":
+        if tag[:2] in ("Ht", "Ha"):
             loss = nll_tv(net, X, Y)
+        elif tag[:2] == "He":
+            loss = nll5(net, X, Y)
         elif is_path(tag):
             loss = ec.nll(net, X, Y, "HC")
         else:
@@ -292,7 +297,7 @@ def fit(data, hold, seed, device, steps=None, e=0, step_=STEP, tag="G"):
 
 def score_half(net, x, n, device, step_=STEP, tag="G"):
     """(q at 25 fps: P(H | live), alive log-odds at 25 fps)"""
-    if tag[:2] == "Ht":
+    if tag[:2] in ("Ht", "Ha"):
         return score_tv(net, x, n, device, step_)
     if is_path(tag):
         return ec.score_half(net, x, n, "HC", device, step_)[:2]
@@ -344,6 +349,48 @@ def bf_mean(src, seeds=(0, 1, 2)):
     return res
 
 
+def bs_mean(src, seeds, tag=""):
+    """Round 71: the ball-and-set channel's outputs of these seed indices, per half: logit mean, alive mean. tag J: fine-tuned on the target convention."""
+    runs = [bench._load(os.path.join(bench.ROOT, "cache", "ballset", "held%s_%s_%d.pkl" % (tag, src.replace("@", "-"), i))) for i in seeds]
+    res = []
+    for j in range(len(runs[0]["q"])):
+        lq = np.mean([ec._logit(r["q"][j]) for r in runs], axis=0)
+        res.append((1 / (1 + np.exp(-lq)), np.mean([r["alive"][j] for r in runs], axis=0)))
+    return res
+
+
+def _bs_cols(p, p2):
+    """Round 71, one half: ball-free, BS: H's view logits, A's view logits, then both alive evidences."""
+    n = min(len(p[0]), len(p2[0]))
+    l1, l2 = ec._logit(p[0][:n]), ec._logit(p2[0][:n])
+    return np.stack([l1, l2, -l1, -l2, np.clip(p[1][:n], -20, 20) / 5.0, np.clip(p2[1][:n], -20, 20) / 5.0], 1)
+
+
+SENSORS = {"G5": (0.7, 0.4, 0.8), "G6": (0.5, 0.4, 0.8), "G7": (0.3, 0.4, 0.9), "G8": (0.5, 0.4, 0.6)}      # round 81: recall, timing error (s), precision of a simulated touch sensor
+
+
+def noisy_sensor(y, recall, sigma_s, precision, rng):
+    """Round 81: what a real touch sensor could be: the touch-level reading's changes of team, some missed, late or early, some invented. (P(H) from the last event, recency of that event.) Built from the labels, so never a candidate: it only says how good a sensor must be."""
+    y = np.asarray(y)
+    n = len(y)
+    idx = np.flatnonzero(y < 2)
+    if not len(idx):
+        return np.full(n, 0.5), np.zeros(n)
+    t = y[idx]
+    ch = np.flatnonzero(t[1:] != t[:-1]) + 1
+    ev = [(int(idx[c]), int(t[c])) for c in ch if rng.random() < recall]
+    n_false = int(round(len(ev) * (1 - precision) / max(precision, 1e-6)))
+    for f in rng.choice(idx, size=min(n_false, len(idx)), replace=False):
+        ev.append((int(f), 1 - int(y[f])))
+    ev = sorted((int(np.clip(f + rng.normal(0, sigma_s * 25), 0, n - 1)), k) for f, k in ev)
+    q = np.full(n, 0.5)
+    rec = np.zeros(n)
+    for (f, k), nx in zip(ev, [e[0] for e in ev[1:]] + [n]):
+        q[f:nx] = 0.9 if k == 0 else 0.1
+        rec[f:nx] = np.exp(-(np.arange(nx - f)) / 50.0)
+    return q, 5.0 * rec
+
+
 def extras(tag, k, s_i):
     """Round 65's added inputs per half at 25 fps (they are pooled like the others); None for the base input."""
     fsrc, src = ee.V6[k][0], ee.V3[k][1]
@@ -369,6 +416,47 @@ def extras(tag, k, s_i):
         return [_bf_cols(q, a) for q, a in bf_mean(ee.V3[k][0 if k != "metrica" else 1])]
     if tag.startswith("Gr"):
         return [_bf_cols(q, a) for q, a in bf_mean(ee.V3[k][0 if k != "metrica" else 1], (3, 4, 5))]
+    if tag[:2] in ("Gk", "Gg", "Gj", "Gi"):    # round 71: the ball-free mean + BS (k: this seed's BS, g: the mean of three; j, i: the same fine-tuned on the target convention)
+        pb = bf_mean(ee.V3[k][0 if k != "metrica" else 1])
+        ps = bs_mean(fsrc, [s_i] if tag[:2] in ("Gk", "Gj") else [0, 1, 2], "J" if tag[:2] in ("Gj", "Gi") else "")
+        return [_bs_cols(a, b) for a, b in zip(pb, ps)]
+    if tag[:2] == "Gc":                        # round 77, an upper bound, never a candidate: the stacker told each provider's touch-level reading
+        pb = bf_mean(ee.V3[k][0 if k != "metrica" else 1])
+        labs = bench.labels(ee.V3[k][1], TOUCH[k])
+        out = []
+        for a, y in zip(pb, labs):
+            y = np.asarray(y)
+            n = min(len(a[0]), len(y))
+            o = (np.where(y[:n] == 0, 0.95, np.where(y[:n] == 1, 0.05, 0.5)), np.where(y[:n] < 2, 5.0, -5.0))
+            out.append(_bs_cols((a[0][:n], a[1][:n]), o))
+        return out
+    if tag[:2] in SENSORS:
+        pb = bf_mean(ee.V3[k][0 if k != "metrica" else 1])
+        labs = bench.labels(ee.V3[k][1], TOUCH[k])
+        out = []
+        for j, (a, y) in enumerate(zip(pb, labs)):
+            n = min(len(a[0]), len(y))
+            out.append(_bs_cols((a[0][:n], a[1][:n]), noisy_sensor(np.asarray(y)[:n], *SENSORS[tag[:2]], np.random.default_rng([20261181, SETS.index(k), j]))))
+        return out
+    if tag[:2] == "G3":                        # round 78: the ball-free mean + BSt, the channel that learned the touch-level reading
+        pb = bf_mean(ee.V3[k][0 if k != "metrica" else 1])
+        ps = bs_mean(fsrc, [s_i], "_t")
+        return [_bs_cols(a, b) for a, b in zip(pb, ps)]
+    if tag[:2] == "G1":                        # round 77, the same bound without the reading's dead ball: the last touching team, nothing about the stops
+        pb = bf_mean(ee.V3[k][0 if k != "metrica" else 1])
+        labs = bench.labels(ee.V3[k][1], TOUCH[k])
+        out = []
+        for a, y in zip(pb, labs):
+            y = np.asarray(y)
+            n = min(len(a[0]), len(y))
+            idx = np.where(y[:n] < 2, np.arange(n), -1)
+            idx = np.maximum.accumulate(idx)
+            t = np.where(idx >= 0, y[:n][np.maximum(idx, 0)], 2)
+            o = (np.where(t == 0, 0.95, np.where(t == 1, 0.05, 0.5)), np.zeros(n))
+            out.append(_bs_cols((a[0][:n], a[1][:n]), o))
+        return out
+    if tag[:2] == "Go":                        # BS's mean of three in the ball-free channel's place
+        return [_bf_cols(q, a) for q, a in bs_mean(fsrc, [0, 1, 2])]
     if tag.startswith("Gx"):                   # round 68's upward dose: the ball-free channel at its full settings
         h = bench._load(os.path.join(bench.ROOT, "cache", "ballfree", "held_f_%s_%d.pkl" % (ee.V3[k][0 if k != "metrica" else 1].replace("@", "-"), s_i)))
         return [_bf_cols(q, a) for q, a in zip(h["q"], h["alive"])]
@@ -440,7 +528,7 @@ def load_rows(s_i, tag):
         labs = [np.asarray(g) for g in bench.labels(exp_st.SRC, "evctrl")]
         data["st"] = [(r[0] if r[0] not in {x[0] for k in SETS for x in data[k]} else "st/%s" % r[0], r[1], ec.step_labels(g)[:len(r[1])], r[3]) for r, g in zip(d["rows"], labs)]
         return data
-    if canon(tag) not in ("Gh", "Gs", "Gm", "Gp", "Gf", "Gu", "Gx", "Gy", "Gr"):
+    if canon(tag) not in ("Gh", "Gs", "Gm", "Gp", "Gf", "Gu", "Gx", "Gy", "Gr", "Gk", "Gg", "Gj", "Gi", "Go", "Gc", "G1", "G3", "G5", "G6", "G7", "G8"):
         return data
     head = canon(tag)
     for k in SETS:
@@ -457,7 +545,58 @@ def load_rows(s_i, tag):
         data[k] = rows
         bench._blocks.clear()
         bench._labels.clear()
+    if tag[:2] == "He":
+        for k in SETS:
+            ys = supervised_states(k, data[k])
+            data[k] = [(r[0], r[1], y.astype(np.int64)[:len(r[1])], r[3]) for r, y in zip(data[k], ys)]
     return data
+
+
+TOUCH = {"dfl": "native", "metrica": "events", "sc": "pp"}
+
+
+def supervised_states(k, rows):
+    """Round 74: each provider's two readings give the free states a label. Codes: 0 H control, 1 H free, 2 A control, 3 A free, 4 dead, 5 H either, 6 A either, -1 anything. Control reading H and touch reading A: H keeps it while A touches it. Near a change of the control reading (+-3 steps) the two readings' timing is not trusted."""
+    path = os.path.join(OUT, "y5_%s.pkl" % k)
+    if os.path.isfile(path):
+        ys = bench._load(path)
+    else:
+        labs = bench.labels(ee.V3[k][1], TOUCH[k])
+        ys = []
+        for r, lt in zip(rows, labs):
+            y = np.asarray(r[2], np.int64)
+            yt = np.full(len(y), -1, np.int64)
+            st = ec.step_labels(np.asarray(lt))[:len(y)]
+            yt[:len(st)] = st
+            near = np.zeros(len(y), bool)
+            for c in np.flatnonzero(y[1:] != y[:-1]) + 1:
+                near[max(0, c - 3):c + 3] = True
+            z = np.full(len(y), -1, np.int64)
+            z[y == 2] = 4
+            z[y == 0] = 5
+            z[y == 1] = 6
+            z[(y == 0) & (yt == 0) & ~near] = 0
+            z[(y == 0) & (yt == 1) & ~near] = 1
+            z[(y == 1) & (yt == 1) & ~near] = 2
+            z[(y == 1) & (yt == 0) & ~near] = 3
+            ys.append(z.astype(np.int8))
+        bench._dump(ys, path)
+        bench._labels.clear()
+    return ys
+
+
+def nll5(net, x, y):
+    oh, oa = net(x)
+    e = ec.emissions(oh, oa, "HC")
+    A = ec.transitions(net, "HC")
+    B = len(x)
+    m = torch.full(y.shape + (5,), ec._FIX, device=x.device)
+    for code, states in ((0, (0,)), (1, (1,)), (2, (2,)), (3, (3,)), (4, (4,)), (5, (0, 1)), (6, (2, 3))):
+        for s in states:
+            m[..., s][y == code] = 0.0
+    m[y < 0] = 0.0
+    z = ec.forward(torch.cat([e, e + m]), A)
+    return (z[:B] - z[B:]).sum() / (B * x.shape[1])
 
 
 def _save(tag, s_i, kind, k, zs):
@@ -630,10 +769,12 @@ def evaluate(tags, seed_is, kind="sheld", sets=SETS):
         bench._labels.clear()
     with open(os.path.join(RUNS, "stack_cells_%s_%s_%s.pkl" % (kind, "-".join(tags), "".join(str(s) for s in seed_is))), "wb") as fh:
         pickle.dump(cells, fh)
-    mean, _ = er.summarize(cells, names, ref="v20")
+    ref = os.environ.get("STACK_REF", "v20")
+    mean, _ = er.summarize(cells, names, ref=ref)
     if len(sets) == len(SETS):
-        for cand in names[1:]:
-            bw.decide(mean, "v20", cand)
+        for cand in names:
+            if cand != ref:
+                bw.decide(mean, ref, cand)
 
 
 def stinputs(s_i):
@@ -708,7 +849,19 @@ def st(tags, seed_is):
                 net.load_state_dict(ck["state"])
                 net.eval()
                 rows_ = d["rows"]
-                if canon(tag) in ("Gf", "Gx", "Gy", "Gr"):
+                if canon(tag) == "Go":
+                    rows_ = []
+                    for r, p in zip(d["rows"], bs_mean("st@v6", [0, 1, 2])):
+                        z = ec.pool(_bf_cols(p[0], p[1]).astype(np.float64)).astype(np.float32)
+                        n = min(len(r[1]), len(z))
+                        rows_.append((r[0], np.hstack([r[1][:n], z[:n]]), None, r[3]))
+                elif canon(tag) in ("Gk", "Gg", "Gj", "Gi", "G3"):
+                    rows_ = []
+                    for r, p, p2 in zip(d["rows"], bf_mean("st@v3"), bs_mean("st@v6", [s_i] if canon(tag) in ("Gk", "Gj", "G3") else [0, 1, 2], {"Gj": "J", "Gi": "J", "G3": "_t"}.get(canon(tag), ""))):
+                        z = ec.pool(_bs_cols(p, p2).astype(np.float64)).astype(np.float32)
+                        n = min(len(r[1]), len(z))
+                        rows_.append((r[0], np.hstack([r[1][:n], z[:n]]), None, r[3]))
+                elif canon(tag) in ("Gf", "Gx", "Gy", "Gr"):
                     if canon(tag) in ("Gy", "Gr"):
                         pairs = bf_mean("st@v3", (0, 1, 2) if canon(tag) == "Gy" else (3, 4, 5))
                     else:
@@ -725,7 +878,7 @@ def st(tags, seed_is):
             preds = [np.asarray(p)[:len(labs["evctrl"][i])] for i, p in enumerate(preds)]
             for cv in exp_st.CONVS:
                 cells.setdefault((exp_st.SRC, cv, "v6", name), []).append(er.by_match(blocks, labs[cv], preds))
-    er.summarize(cells, names, ref="v20")
+    er.summarize(cells, names, ref=os.environ.get("STACK_REF", "v20"))
 
 
 if __name__ == "__main__":

@@ -75,7 +75,7 @@ def step_labels(lab):
     y = np.stack([lab[idx + d] for d in range(-(STEP // 2), STEP // 2 + 1)], 1)
     out = np.full(len(idx), -1, np.int64)
     for k in (0, 1, 2):
-        out[(y == k).sum(1) >= 3] = k
+        out[(y == k).sum(1) >= STEP // 2 + 1] = k
     return out
 
 
