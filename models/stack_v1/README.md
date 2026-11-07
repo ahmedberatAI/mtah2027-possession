@@ -12,3 +12,5 @@ only its control state, and free is latent. Trained on the likelihood of the who
   channels and a shift of the alive evidence, so that it does not lean on their exact calibration.
 - `stack_s0.pt`: trained on all thirty games with seed index 0 of the channels. It contains no match data and has never
   seen BAR-ATH.
+
+- `stack_s1.pt`, `stack_s2.pt` (candidate v22, round 88): the same recipe with seed indices 1 and 2 of the channels (their v10 and J1 seeds). `src/model_v22.py` samples from all three path models and lets `src/stack_decode.py` choose the labelling. They contain no match data and have never seen BAR-ATH.

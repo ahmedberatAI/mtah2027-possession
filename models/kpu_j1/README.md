@@ -14,3 +14,5 @@ Their tracking is degraded as in `sim.V3`. Metrica's sample ball sits on its own
 `src/model_v17.py` uses it in C1's three places: 0.25 of its live-normalised P(home control) in the team probability,
 candidate and touch features of the short-possession verifier and its own insert candidates
 (`models/short_verifier_{ins,del}_j1m25s.txt`).
+
+- `kpu_J1_s20261103.pt`, `kpu_J1_s20261104.pt` (candidate v22, round 88): the same fine-tuning from C1's seeds 20261103 and 20261104, all ten games. They contain no match data; they never saw BAR-ATH.
