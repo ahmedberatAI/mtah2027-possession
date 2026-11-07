@@ -405,8 +405,8 @@ On the primary contexts the worst-case regret falls by 0.0126 (90% bootstrap int
 other context changes by −0.001. Without the SkillCorner relabelling (only DFL's verifier rows in the controlled
 reading) the gain was +0.0116 but Metrica improved in one game of three; with it, in all three (own dead ball).
 
-- **Public window** (sanity check only, never used for selection; v20's numbers were read after v20 was chosen, v21's have not been read): the file passes the official validator. v20: spellF1 0.667 (bootstrap 0.44–0.83),
-  macroF1 0.915, alive/dead F1 0.981, team accuracy on alive frames 0.936, 10 possessions against 17. v10's: 0.667, 0.932, 0.982, 0.953. The official smoothing baseline scores 0.326 there.
+- **Public window** (sanity check only, never used for selection; v20's and v21's numbers were each read after that version was chosen): the file passes the official validator. v21: spellF1 0.772 (bootstrap 0.55–0.90),
+  macroF1 0.945, alive/dead F1 0.986, team accuracy on alive frames 0.962, 12 possessions against 17. v20: 0.667 (0.44–0.83), 0.915, 0.981, 0.936, 10 against 17. The intervals overlap, and one matched possession moves spellF1 by about 0.07 here, so this says nothing about v21 against v20. v10's: 0.667, 0.932, 0.982, 0.953. The official smoothing baseline scores 0.326 there.
 - **Full match** (no labels): v21 has 187 possessions, 20 of them shorter than 4 s, 104 dead-ball stretches, 46% dead time, home share of possession 0.61; v21 and v20 differ on 2.55% of the frames. v20 has 192 possessions (v19: 193, v18 and v17: 208, v16 and v15: 207, v14: 216, v13: 214, v10: 203), 18 of
   them shorter than 4 s (v19: 18, v18: 21, v17: 18, v16: 15, v15: 13, v14: 19), 105 dead-ball stretches (v19: 105, v18: 110, v17: 118), 45% dead time
   (v19: 48%, v18: 45%, v17: 49%), home share of possession 0.60; v15 and v14 differ on 0.92% of the frames, v16 and v15 on 1.07%, v17 and v16 on
