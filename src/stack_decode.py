@@ -100,16 +100,16 @@ def match_counts(x, y, k, seg, off, ious):
 
 
 @njit(cache=True, nogil=True)
-def rewards(cand, seg, off, ious, lam, cum):
-    """Per candidate (x, y, k, in_reference): possession: mean chance of matching - lam; dead: 0 where most samples
-    are dead or the reference is, else not allowed (-inf)."""
+def rewards(cand, seg, off, ious, lam, cum, dshare=0.5):
+    """Per candidate (x, y, k, in_reference): possession: mean chance of matching - lam; dead: 0 where at least dshare
+    of the samples are dead or the reference is, else not allowed (-inf)."""
     m = off.shape[0] - 1
     out = np.full(cand.shape[0], -np.inf)
     for i in range(cand.shape[0]):
         x, y, k = cand[i, 0], cand[i, 1], cand[i, 2]
         share = (cum[y, k] - cum[x, k]) / (y - x)
         if k == 2:
-            if share >= 0.5 or cand[i, 3] == 1:
+            if share >= dshare or cand[i, 3] == 1:
                 out[i] = 0.0
             continue
         c_ = match_counts(x, y, k, seg, off, ious)
@@ -161,7 +161,7 @@ def reference_segments(path, n):
     return np.stack([st, en, mp[st]], 1).astype(np.int32)
 
 
-def solve(n, seg, off, ref_seg, lam, ious=IOUS):
+def solve(n, seg, off, ref_seg, lam, ious=IOUS, dshare=0.5):
     both = np.vstack([seg, ref_seg])
     key = both[:, 2].astype(np.int64) + 3 * (both[:, 1].astype(np.int64) + (n + 1) * both[:, 0].astype(np.int64))
     uniq, idx = np.unique(key, return_index=True)
@@ -176,7 +176,7 @@ def solve(n, seg, off, ref_seg, lam, ious=IOUS):
     Pk /= off.shape[0] - 1
     cum = np.zeros((n + 1, 3))
     cum[1:] = np.cumsum(Pk, axis=0)
-    return chain(n, cand, rewards(cand, seg, off, ious, lam, cum))
+    return chain(n, cand, rewards(cand, seg, off, ious, lam, cum, dshare))
 
 
 def keep_reference_dead(labels, reference):
@@ -203,7 +203,7 @@ def keep_reference_dead(labels, reference):
     return out
 
 
-def decide(members, reference, lam, m, seed):
+def decide(members, reference, lam, m, seed, dshare=0.5):
     """members: [(emissions (T, S), moves (S, S))] of the stackers on one half; reference: a labelling of the half at
     25 fps (H 0, A 1, D 2), whose segments stay available. Returns the decided labelling at 25 fps."""
     reference = np.asarray(reference, np.int8)
@@ -218,7 +218,7 @@ def decide(members, reference, lam, m, seed):
         base += len(seg)
     seg = np.vstack(segs)
     off = np.array(offs, np.int64)
-    lab, ok = solve(n, seg, off, ref_seg, lam)
+    lab, ok = solve(n, seg, off, ref_seg, lam, dshare=dshare)
     if not ok:
         return reference.copy()
     out = np.repeat(lab, STEP)
