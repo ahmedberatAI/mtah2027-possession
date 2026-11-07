@@ -25,15 +25,17 @@ Fikirler, denemeler ve sonuçlar tek bir belgede: **[`docs/RAPOR.md`](docs/RAPOR
 
 ## Submission
 
-- **The file:** `submissions/candidate_v21.csv` (model_v21 = model_v20 + a channel that never sees the ball + a path-model stacker on the channels' outputs; model_v20 = the specialist J1 at weight 0.5 in the team probability and dead-ball
+- **The file:** `submissions/candidate_v22.csv` (model_v22 = model_v21 over three seeds, labelled by the metric's Bayes decision on the stackers' joint posterior; model_v21 = model_v20 + a channel that never sees the ball + a path-model stacker on the channels' outputs; model_v20 = the specialist J1 at weight 0.5 in the team probability and dead-ball
   evidence from open-data rules + a multi-source dead model + a sequence dead model with per-half normalised input + view terms,
   all on `sim.V6`'s masks, no verifier; model_v19 = model_v17's team side with dead-ball evidence free of the
   public window: open-data rules + a multi-source dead model + view terms; model_v18 = model_v17 with rules + broadcast + half
   the learned dead model; model_v17 = model_v16 with the short-possession specialist J1
   in C1's place; model_v16 = model_v15 + the dead-ball boundary timing of the learned dead model; model_v15 = v14's v10 /
   shared-BiGRU blend mixed with the short-possession specialist C1 + the short-possession verifier retrained on that
-  base, no whistle), MD5 `d909212952998c76568b09c17b76b5d5`.
-  `python src/make_submission.py` regenerates it; `--model model_v19 --out submissions/candidate_v19.csv` still writes
+  base, no whistle), MD5 `010ef513c270f702e46a1cce06224af4`.
+  `python src/make_submission.py` regenerates it; `--model model_v21 --out submissions/candidate_v21.csv` writes v21
+  (MD5 `10ee3c08e6a5d5de1d3951652eca26f2`), `--model model_v20 --out submissions/candidate_v20.csv` v20 (MD5
+  `d909212952998c76568b09c17b76b5d5`), `--model model_v19 --out submissions/candidate_v19.csv` still writes
   v19 (MD5 `45096061ebdc3aac6e2087d8a047246a`), `--model model_v18 --out submissions/candidate_v18.csv`
   v18 (MD5 `b6101389cd877edec44bbe64cd00c4b3`), `--model model_v17 --out submissions/candidate_v17.csv`
   v17 (MD5 `55dfc08216c344f7077d4fac88c51a86`), `--model model_v16 --out submissions/candidate_v16.csv`
@@ -83,11 +85,13 @@ uv pip install --python .venv/Scripts/python.exe numpy pandas scipy numba lightg
 git clone https://github.com/metrica-sports/more-than-a-hack-2027 external/more-than-a-hack-2027
 # unpack the match bundle into ./data (or set MTAH_DATA_DIR)
 .venv/Scripts/python.exe src/download_idsse.py            # open DFL data, CC BY 4.0, ~2.6 GB
-.venv/Scripts/python.exe src/make_submission.py           # the submission: model_v21 -> submissions/candidate_v21.csv
-python external/more-than-a-hack-2027/evaluation/validate_submission.py submissions/candidate_v21.csv
+.venv/Scripts/python.exe src/make_submission.py           # the submission: model_v22 -> submissions/candidate_v22.csv
+python external/more-than-a-hack-2027/evaluation/validate_submission.py submissions/candidate_v22.csv
 ```
 
-**The submission is `model_v21`** (`submissions/candidate_v21.csv`, MD5 `10ee3c08e6a5d5de1d3951652eca26f2`; rounds 61 and 65–69 in `docs/RAPOR.md`). v20's channels and dead-ball evidence, plus a channel that reads only the players (`src/exp_ballfree.py`, `models/ballfree_v1/`, open PFF data only, mean of three seeds) and a path-model stacker on the channels' outputs (`src/stack_model.py`, `models/stack_v1/`, open games only). Team: logit mix 0.5 stacker + 0.5 v20's smoothed blend. Alive evidence: 0.5 v20's + 0.5 the stacker's. Decoder: pen_team 6, B2 c 24. Held out, 3 seeds, v20 -> v21: DFL evctrl 0.8078 -> 0.8217, DFL tracking-derived 0.7886 -> 0.7997, Metrica ctrl 0.8694 -> 0.8930, SkillCorner evctrl / phases / player possessions 0.7604 / 0.7114 / 0.7020 -> 0.7848 / 0.7351 / 0.7210; worst-case regret on the target convention's contexts +0.0236 (90% [+0.0225, +0.0251]). SoccerTrack v2, which no model saw: 0.7936 / 0.7255 -> 0.8191 / 0.7589 (8/8). `--model model_v20 --out ...` writes v20.
+**The submission is `model_v22`** (`submissions/candidate_v22.csv`, MD5 `010ef513c270f702e46a1cce06224af4`; rounds 87–88 in `docs/RAPOR.md`). v21's channels and stacker over three seeds (v10, J1 and the stacker; `models/v10_seeds/`, `models/kpu_j1/`, `models/stack_v1/`), and the labelling chosen by the metric's Bayes decision on the stackers' joint posterior (`src/stack_decode.py`): the path models' samples are calibrated (as many possessions per half, of the same lengths, as the truth), so 3,000 of them are drawn and each possession is kept when its mean chance of matching over the IoU thresholds exceeds 0.5. Held out, 3 seeds, v21 -> v22: DFL evctrl 0.8217 -> 0.8307, DFL tracking-derived 0.7997 -> 0.8235, Metrica ctrl 0.8930 -> 0.9011, SkillCorner evctrl / phases / player possessions 0.7848 / 0.7351 / 0.7210 -> 0.8046 / 0.7512 / 0.7375; worst-case regret on the target convention's contexts +0.0090 (90% [+0.0045, +0.0191]). SoccerTrack v2, which no model saw: 0.8191 / 0.7589 -> 0.8247 / 0.7652. About half of the gain comes from longer dead stretches at stoppage edges (macroF1, the tie-break, -0.013); `--params '{"keep_dead": 1}'` keeps the reference's dead/alive call. `--model model_v21 --out ...` writes v21.
+
+**The previous submission is `model_v21`** (`submissions/candidate_v21.csv`, MD5 `10ee3c08e6a5d5de1d3951652eca26f2`; rounds 61 and 65–69 in `docs/RAPOR.md`). v20's channels and dead-ball evidence, plus a channel that reads only the players (`src/exp_ballfree.py`, `models/ballfree_v1/`, open PFF data only, mean of three seeds) and a path-model stacker on the channels' outputs (`src/stack_model.py`, `models/stack_v1/`, open games only). Team: logit mix 0.5 stacker + 0.5 v20's smoothed blend. Alive evidence: 0.5 v20's + 0.5 the stacker's. Decoder: pen_team 6, B2 c 24. Held out, 3 seeds, v20 -> v21: DFL evctrl 0.8078 -> 0.8217, DFL tracking-derived 0.7886 -> 0.7997, Metrica ctrl 0.8694 -> 0.8930, SkillCorner evctrl / phases / player possessions 0.7604 / 0.7114 / 0.7020 -> 0.7848 / 0.7351 / 0.7210; worst-case regret on the target convention's contexts +0.0236 (90% [+0.0225, +0.0251]). SoccerTrack v2, which no model saw: 0.7936 / 0.7255 -> 0.8191 / 0.7589 (8/8). `--model model_v20 --out ...` writes v20.
 
 **The previous submission is `model_v20`** (`submissions/candidate_v20.csv`, MD5 `d909212952998c76568b09c17b76b5d5`; rounds 45, 46, 49 and 51–55 in `docs/RAPOR.md`).
 Team: J1's weight rises from 0.25 to 0.5 once Metrica's ball is de-glued for every channel. Dead ball: 0.25 x open-data rules + 0.375 x the
