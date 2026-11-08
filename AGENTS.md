@@ -60,7 +60,7 @@ on it; `model_v16` = `model_v15` with its dead-ball boundaries (stops and
 restarts) moved onto the learned all-DFL dead model's own decode within +-2 s (`src/dead_timing.py`,
 `models/dead_base_v3.txt`); `model_v15` = v14's blend (0.5 v10 + 0.5 shared BiGRU) mixed 0.75 / 0.25 with the
 short-possession specialist C1 (open PFF data only, `models/kpu_c1/`) + the verifier retrained on that base with
-target-convention labels. Expected CSV MD5 `010ef513c270f702e46a1cce06224af4` (`submissions/candidate_v22.csv`). With `--model` always
+target-convention labels. Expected CSV MD5 `b4c1a9e50638da8a268b1fc0d0506ff0` (`submissions/candidate_v22.csv`). With `--model` always
 pass `--out`, the default path is v22's. v21 (`--model model_v21`, MD5 `10ee3c08e6a5d5de1d3951652eca26f2`), v20 (`--model model_v20`, MD5 `d909212952998c76568b09c17b76b5d5`), v19 (`--model model_v19`, MD5 `45096061ebdc3aac6e2087d8a047246a`), v18 (`--model model_v18`, MD5 `b6101389cd877edec44bbe64cd00c4b3`), v17 (`--model model_v17`, MD5 `55dfc08216c344f7077d4fac88c51a86`), v16 (`--model model_v16`, MD5 `c89208a3a034ee73bb41f3fb28390f87`),
 v15 (`--model model_v15`, MD5 `6081216bcf484049d8e6e84b27fc85dd`), v14 (`--model model_v14`, MD5
 `5e7363fc83c6f56a923033894a28d3a1`), v13 (`--model model_v13`, MD5 `ed8ad739207f367017bb8d8c8204c82a`) and v10

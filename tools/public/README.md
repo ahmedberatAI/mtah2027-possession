@@ -55,7 +55,7 @@ MTAH_RETRAIN=1 .venv/Scripts/python.exe src/make_submission.py
   the sequence model, the ball-free channel and the stacker on the CPU.
 - The run is deterministic: fixed simulation seeds, LightGBM deterministic mode with a fixed seed and thread count,
   and no GPU. Both the default run and a retrain of the team classifier from an empty `cache/` write the submitted
-  file, MD5 `010ef513c270f702e46a1cce06224af4` (the decision's random draws use fixed seeds). `--model model_v21 --out
+  file, MD5 `b4c1a9e50638da8a268b1fc0d0506ff0` (the decision's random draws use fixed seeds). `--model model_v21 --out
   submissions/candidate_v21.csv` writes the previous submission (MD5 `10ee3c08e6a5d5de1d3951652eca26f2`),
   `--model model_v20 --out submissions/candidate_v20.csv` v20 (MD5 `d909212952998c76568b09c17b76b5d5`), `--model model_v19 --out submissions/candidate_v19.csv`
   v19 (MD5 `45096061ebdc3aac6e2087d8a047246a`), `--model model_v15 --out submissions/candidate_v15.csv`

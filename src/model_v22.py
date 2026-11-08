@@ -40,7 +40,7 @@ V10 = (os.path.join(MODELS, "v10_team.txt"), os.path.join(MODELS, "v10_seeds", "
 J1 = tuple(os.path.join(MODELS, "kpu_j1", "kpu_J1_s%d.pt" % s) for s in (20261102, 20261103, 20261104))
 STACKS = tuple(os.path.join(MODELS, "stack_v1", "stack_s%d.pt" % s) for s in (0, 1, 2))
 DEFAULT = dict(model_v21.DEFAULT)
-DEFAULT.update(lam=0.5, samples=1000, seed=20261108)
+DEFAULT.update(lam=0.5, samples=3000, seed=20261108)
 W_Q, W_A = model_v21.W_Q, model_v21.W_A
 
 
