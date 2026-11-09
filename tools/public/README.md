@@ -21,8 +21,9 @@ the provided data and open data:
   `models/kpu_j1/`, `models/stack_v1/`).
 - **Decoding:** the stacker is a path model whose samples are calibrated (as many possessions, of the same lengths, as
   the truth on open data). The labelling of each half is the metric's Bayes decision on those samples
-  (`src/stack_decode.py`): 3,000 paths from the three stackers; candidates are their segments and a duration-aware
-  Viterbi path; each possession is kept when its mean chance of matching over the IoU thresholds exceeds 0.5.
+  (`src/stack_decode.py`): 3,000 paths from three stackers of width 128 (`models/stack_v2`, the same inputs, training
+  and seeds as `models/stack_v1`); candidates are their segments and a duration-aware Viterbi path on the width-64
+  stackers' evidence; each possession is kept when its mean chance of matching over the IoU thresholds exceeds 0.5.
 
 The approach, the validation protocol and the results are in **[docs/TECHNICAL_DOCUMENT.md](docs/TECHNICAL_DOCUMENT.md)**.
 
@@ -34,8 +35,8 @@ uv venv --python 3.12 .venv
 uv pip install --python .venv/Scripts/python.exe -r requirements.txt
 git clone https://github.com/metrica-sports/more-than-a-hack-2027 external/more-than-a-hack-2027
 # unpack the match bundle into ./data/{tactical,broadcast}  (or set MTAH_DATA_DIR)
-.venv/Scripts/python.exe src/make_submission.py           # -> submissions/candidate_v22.csv (a few minutes)
-python external/more-than-a-hack-2027/evaluation/validate_submission.py submissions/candidate_v22.csv
+.venv/Scripts/python.exe src/make_submission.py           # -> submissions/candidate_v23.csv (a few minutes)
+python external/more-than-a-hack-2027/evaluation/validate_submission.py submissions/candidate_v23.csv
 
 # optional: retrain the team classifier from the open data (rewrites models/v10_team.txt, about 7 min on 24 cores)
 .venv/Scripts/python.exe src/download_idsse.py            # open DFL / IDSSE data, CC BY 4.0, ~2.6 GB
@@ -48,15 +49,16 @@ MTAH_RETRAIN=1 .venv/Scripts/python.exe src/make_submission.py
   the CRLF line endings a Windows checkout would otherwise write (the pipeline also reads them as text).
 - `models/v10_team.txt` is the team classifier, `models/kpu_j1/kpu_J1_s20261102.pt` the specialist,
   `models/dead_multi_v2.txt` the dead-ball classifier, `models/tdead_v1/` the sequence dead-ball model and
-  `models/dead_rules_open_v2.json` the rule weights, `models/ballfree_v1/` the ball-free channel and `models/stack_v1/`
-  the stacker (three seeds each with `models/v10_seeds/` and `models/kpu_j1/`), all from open data only, so the default run needs
+  `models/dead_rules_open_v2.json` the rule weights, `models/ballfree_v1/` the ball-free channel, `models/stack_v1/`
+  the stacker and `models/stack_v2/` its wider version for the decision's samples (three seeds each with `models/v10_seeds/` and `models/kpu_j1/`), all from open data only, so the default run needs
   only the provided data. On its first run it rebuilds the BiGRU's BAR-ATH probabilities on the CPU
   (`src/reproduce_shared_bigru.py`, checked against `models/bigru_dfl_pff_v1/manifest.json`) and runs the specialist,
   the sequence model, the ball-free channel and the stacker on the CPU.
 - The run is deterministic: fixed simulation seeds, LightGBM deterministic mode with a fixed seed and thread count,
   and no GPU. Both the default run and a retrain of the team classifier from an empty `cache/` write the submitted
-  file, MD5 `b4c1a9e50638da8a268b1fc0d0506ff0` (the decision's random draws use fixed seeds). `--model model_v21 --out
-  submissions/candidate_v21.csv` writes the previous submission (MD5 `10ee3c08e6a5d5de1d3951652eca26f2`),
+  file, MD5 `dfe55fb8ee8c450df4e6f79e27899dcc` (the decision's random draws use fixed seeds). `--model model_v22 --out
+  submissions/candidate_v22.csv` writes the previous submission (MD5 `b4c1a9e50638da8a268b1fc0d0506ff0`),
+  `--model model_v21 --out submissions/candidate_v21.csv` v21 (MD5 `10ee3c08e6a5d5de1d3951652eca26f2`),
   `--model model_v20 --out submissions/candidate_v20.csv` v20 (MD5 `d909212952998c76568b09c17b76b5d5`), `--model model_v19 --out submissions/candidate_v19.csv`
   v19 (MD5 `45096061ebdc3aac6e2087d8a047246a`), `--model model_v15 --out submissions/candidate_v15.csv`
   v15 (MD5 `6081216bcf484049d8e6e84b27fc85dd`), `--model model_v14 --out submissions/candidate_v14.csv` v14 (MD5
@@ -66,8 +68,9 @@ MTAH_RETRAIN=1 .venv/Scripts/python.exe src/make_submission.py
 ## Layout
 
 ```
-src/make_submission.py   end to end: provided data -> submissions/candidate_v22.csv
-src/model_v22.py         the submitted model: v21 over three seeds and the Bayes decision
+src/make_submission.py   end to end: provided data -> submissions/candidate_v23.csv
+src/model_v23.py         the submitted model: v22 with the decision's samples from the width-128 stackers
+src/model_v22.py         the previous submission: v21 over three seeds and the Bayes decision
 src/stack_decode.py      the Bayes decision: samples of the path models, candidates, values, dynamic programming
 src/model_v21.py         the previous submission: v20's channels, the ball-free channel and the stacker
 src/stack_model.py       the stacker: inputs, network, path model
@@ -88,6 +91,7 @@ src/model_v13.py         model_v10 + the verifier (src/short_verifier.py)
 src/model_v10.py         team classifier training + prediction, decoder settings
 models/ballfree_v1/      the ball-free channel's three checkpoints (open PFF data only)
 models/stack_v1/         the stacker's checkpoints, three seeds (the channels' outputs on the open games)
+models/stack_v2/         the width-128 stackers, three seeds (the same data and recipe), the source of v23's samples
 models/v10_seeds/        the team classifier's seeds 1 and 2
 models/v10_team.txt      the team classifier (LightGBM, trained on the open data only)
 models/short_verifier_*  the verifier's classifiers (LightGBM, open data only; *_j1m25s = v17's, *_c1m25s = v15's,

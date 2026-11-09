@@ -1,10 +1,10 @@
 """End-to-end, deterministic: provided data -> submission CSV.
 
-    .venv/Scripts/python.exe src/make_submission.py      # the submission: model_v22 -> submissions/candidate_v22.csv
+    .venv/Scripts/python.exe src/make_submission.py      # the submission: model_v23 -> submissions/candidate_v23.csv
     .venv/Scripts/python.exe src/make_submission.py --model model_v3 --out submissions/baseline_v3.csv
 
 Steps: parse ATD (cached), align the broadcast (fixed per-half lags), build per-frame features
-with the broadcast ball filling tactical gaps, score H/A/D evidence, min-duration Viterbi per half (v22: then the metric's Bayes decision on the stackers'
+with the broadcast ball filling tactical gaps, score H/A/D evidence, min-duration Viterbi per half (v22, v23: then the metric's Bayes decision on the stackers'
 posterior, src/stack_decode.py),
 write and validate the file, print the public-window score and full-match diagnostics.
 """
@@ -46,9 +46,9 @@ def merged_features(refresh=False):
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("--model", default="model_v22")
+    ap.add_argument("--model", default="model_v23")
     ap.add_argument("--params", default="{}", help="JSON overrides of the model's DEFAULT")
-    ap.add_argument("--out", default=os.path.join(ROOT, "submissions", "candidate_v22.csv"))
+    ap.add_argument("--out", default=os.path.join(ROOT, "submissions", "candidate_v23.csv"))
     ap.add_argument("--refresh", action="store_true", help="rebuild the feature cache")
     args = ap.parse_args()
     sys.stdout.reconfigure(encoding="utf-8")

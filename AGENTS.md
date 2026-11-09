@@ -37,13 +37,23 @@ User instructions carried forward from the 27 October 2026 continuation note.
   with learned and true dead ball); a candidate must lower their worst-case
   regret by >= 0.005. SkillCorner phase / pp and DFL trk count 2-3x more short
   possessions per match and are guards only: none may lose more than 0.01.
+  Update 9 November 2026 (user decision, rounds 95-96, with v23): the primary
+  cells are DFL evctrl and Metrica ctrl (learned dead ball) in two conditions,
+  the lab (every model in-provider) and the target's condition OPs (channels
+  and dead-ball models trained without the provider, the stacker knowing its
+  convention; `src/lab87/r95op.py`, `src/lab87/r96.py`); a candidate must
+  lower their worst-case regret by >= 0.005. Guards in both conditions: DFL
+  trk, SkillCorner phase / pp >= -0.01; SoccerTrack evctrl / native >= -0.002;
+  the stacker with its provider held out (LP, `src/lab87/foldnets.py lnets`)
+  >= -0.01.
 - Add each experiment at the end of the main table in `docs/RAPOR.md` section 3;
   put longer notes under a new round in section 4. Update section 1 when the
   default or established scores change. Do not promote an incomplete result.
 - Python command convention on Windows: `.venv/Scripts/python.exe -I src/<script>.py`.
   Scripts must add their own `src/` import path when using isolated mode.
 
-Current submission (8 November 2026, rounds 87-88, the user's decision): `model_v22` = v21's channels and stacker over three seeds (v10 `models/v10_team.txt` + `models/v10_seeds/`, J1 `models/kpu_j1/kpu_J1_s2026110{2,3,4}.pt`, stacker `models/stack_v1/stack_s{0,1,2}.pt`; BiGRU and ball-free means as in v21), and the labelling chosen by the metric's Bayes decision on the stackers' joint posterior (`src/stack_decode.py`): 3,000 samples from the three path models, candidates = their segments + the v21 recipe's path on the seed mean, each possession worth its mean chance of matching over the IoU thresholds - 0.5. The path model's samples are calibrated (possession counts and lengths like the truth); judge a stacker change by its held-out path likelihood (`r88f`-style NLL) and by the decision, not by the marginals alone; fold nets must be kept to read the posterior (`sheld` files hold marginals only). About half of v22's gain comes from longer dead stretches at stoppage edges (macroF1 -0.013, tie-break only); `--params '{"keep_dead": 1}'` keeps the reference's dead/alive call.
+Current submission (9 November 2026, rounds 94 and 96, the user's decision): `model_v23` = v22 with the decision's samples drawn from three width-128 stackers (`models/stack_v2/stack_w128_s{0,1,2}.pt`: the same inputs, training recipe, augmentation and seeds as `models/stack_v1/`, open games only; `src/model_v23.py`); v22's reference path (the width-64 stackers) and every channel are unchanged. Expected CSV MD5 `dfe55fb8ee8c450df4e6f79e27899dcc` (`submissions/candidate_v23.csv`). `stack_model.load` reads the width off the weights.
+`model_v22` (8 November 2026, rounds 87-88) = v21's channels and stacker over three seeds (v10 `models/v10_team.txt` + `models/v10_seeds/`, J1 `models/kpu_j1/kpu_J1_s2026110{2,3,4}.pt`, stacker `models/stack_v1/stack_s{0,1,2}.pt`; BiGRU and ball-free means as in v21), and the labelling chosen by the metric's Bayes decision on the stackers' joint posterior (`src/stack_decode.py`): 3,000 samples from the three path models, candidates = their segments + the v21 recipe's path on the seed mean, each possession worth its mean chance of matching over the IoU thresholds - 0.5. The path model's samples are calibrated (possession counts and lengths like the truth); judge a stacker change by its held-out path likelihood (`r88f`-style NLL) and by the decision, not by the marginals alone; fold nets must be kept to read the posterior (`sheld` files hold marginals only). About half of v22's gain comes from longer dead stretches at stoppage edges (macroF1 -0.013, tie-break only); `--params '{"keep_dead": 1}'` keeps the reference's dead/alive call.
 `model_v21` (7 November 2026, rounds 61, 65-69) = v20's channels and dead-ball evidence + a channel that never sees the ball (mean of three seeds, open PFF data only, `src/exp_ballfree.py`, `models/ballfree_v1/`) + a path-model stacker on the channels' outputs (open games only, `src/stack_model.py`, research code `src/exp_stack.py`, `models/stack_v1/`): team = logit mix 0.5 stacker + 0.5 v20's smoothed blend, alive evidence = 0.5 v20's + 0.5 the stacker's, decoder pen_team 6, B2 c 24. A stacker must also be judged with its provider held out (`src/exp_stack.py lopo`), on SoccerTrack and on several seeds of the ball-free channel. On the CPU, small GRU fits are faster with one thread per process (`OMP_NUM_THREADS=1`, `CRF_WORKERS`).
 `model_v20` = J1 at weight 0.5 in the team probability (0.25 v10 + 0.25
 shared BiGRU + 0.5 J1) and dead-ball evidence 0.25 x open-data rules (`models/dead_rules_open_v2.json`) + 0.375 x a multi-source dead model
@@ -60,8 +70,8 @@ on it; `model_v16` = `model_v15` with its dead-ball boundaries (stops and
 restarts) moved onto the learned all-DFL dead model's own decode within +-2 s (`src/dead_timing.py`,
 `models/dead_base_v3.txt`); `model_v15` = v14's blend (0.5 v10 + 0.5 shared BiGRU) mixed 0.75 / 0.25 with the
 short-possession specialist C1 (open PFF data only, `models/kpu_c1/`) + the verifier retrained on that base with
-target-convention labels. Expected CSV MD5 `b4c1a9e50638da8a268b1fc0d0506ff0` (`submissions/candidate_v22.csv`). With `--model` always
-pass `--out`, the default path is v22's. v21 (`--model model_v21`, MD5 `10ee3c08e6a5d5de1d3951652eca26f2`), v20 (`--model model_v20`, MD5 `d909212952998c76568b09c17b76b5d5`), v19 (`--model model_v19`, MD5 `45096061ebdc3aac6e2087d8a047246a`), v18 (`--model model_v18`, MD5 `b6101389cd877edec44bbe64cd00c4b3`), v17 (`--model model_v17`, MD5 `55dfc08216c344f7077d4fac88c51a86`), v16 (`--model model_v16`, MD5 `c89208a3a034ee73bb41f3fb28390f87`),
+target-convention labels. With `--model` always
+pass `--out`, the default path is v23's. v22 (`--model model_v22`, MD5 `b4c1a9e50638da8a268b1fc0d0506ff0`), v21 (`--model model_v21`, MD5 `10ee3c08e6a5d5de1d3951652eca26f2`), v20 (`--model model_v20`, MD5 `d909212952998c76568b09c17b76b5d5`), v19 (`--model model_v19`, MD5 `45096061ebdc3aac6e2087d8a047246a`), v18 (`--model model_v18`, MD5 `b6101389cd877edec44bbe64cd00c4b3`), v17 (`--model model_v17`, MD5 `55dfc08216c344f7077d4fac88c51a86`), v16 (`--model model_v16`, MD5 `c89208a3a034ee73bb41f3fb28390f87`),
 v15 (`--model model_v15`, MD5 `6081216bcf484049d8e6e84b27fc85dd`), v14 (`--model model_v14`, MD5
 `5e7363fc83c6f56a923033894a28d3a1`), v13 (`--model model_v13`, MD5 `ed8ad739207f367017bb8d8c8204c82a`) and v10
 (`--model model_v10`, MD5 `ca20c5b657a395d2f7c0e310cdaabd64`) stay reproducible. Recheck this after integration changes.

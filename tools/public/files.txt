@@ -1,5 +1,5 @@
 # Files of the public repository (tools/export_public.py). Source modules: the import closure of
-# src/make_submission.py with model_v22 = model_v21 over three seeds and the metric's Bayes decision on the stackers' posterior (src/stack_decode.py); model_v21 = model_v20 plus a channel that never sees the ball (open PFF data only) and a stacker on the channels' outputs (open games only);
+# src/make_submission.py with model_v23 = model_v22 with the decision's samples from three width-128 stackers (models/stack_v2, open games only); model_v22 = model_v21 over three seeds and the metric's Bayes decision on the stackers' posterior (src/stack_decode.py); model_v21 = model_v20 plus a channel that never sees the ball (open PFF data only) and a stacker on the channels' outputs (open games only);
 # model_v20 = the v10 / shared BiGRU blend mixed with the short-possession specialist J1,
 # decoded with open-data rules + a multi-source dead model + a sequence dead model + view terms (incl. lazily imported option
 # modules, the feature plugins named in model_v7.VERSION, src/reproduce_shared_bigru.py, which rebuilds the shared
@@ -58,6 +58,7 @@ src/model_v19.py
 src/model_v20.py
 src/model_v21.py
 src/model_v22.py
+src/model_v23.py
 src/stack_decode.py
 src/stack_model.py
 src/exp_ballfree.py
@@ -117,6 +118,10 @@ models/stack_v1/README.md
 models/stack_v1/stack_s0.pt
 models/stack_v1/stack_s1.pt
 models/stack_v1/stack_s2.pt
+models/stack_v2/README.md
+models/stack_v2/stack_w128_s0.pt
+models/stack_v2/stack_w128_s1.pt
+models/stack_v2/stack_w128_s2.pt
 models/v10_seeds/README.md
 models/v10_seeds/v10_team_s1.txt
 models/v10_seeds/v10_team_s2.txt

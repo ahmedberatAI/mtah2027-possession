@@ -57,6 +57,23 @@ class StackTests(unittest.TestCase):
         self.assertEqual(float(A[2, 1]), sm._FIX)
         self.assertEqual(float(A[3, 1]), sm._FIX)
 
+    def test_load_reads_the_width_off_the_weights(self):
+        import tempfile
+        d_in = sm.N_OWN + 4 + 1 + 1
+        torch.manual_seed(0)
+        net = sm.build_net(d_in, width=32, e=1).eval()
+        own, com, bl, al = self.x()
+        x = np.hstack([own, own[:, ::-1], com, bl, -bl, al])
+        with tempfile.TemporaryDirectory() as d:
+            path = os.path.join(d, "wide.pt")
+            torch.save(dict(state=net.state_dict(), d_in=d_in, e=1), path)
+            back = sm.load(path)
+        self.assertEqual(back.front[0].weight.shape[0], 32)
+        qa, ala = sm.score_half(net, x, 400)
+        qb, alb = sm.score_half(back, x, 400)
+        self.assertEqual(np.abs(qa - qb).max(), 0.0)
+        self.assertEqual(np.abs(ala - alb).max(), 0.0)
+
 
 class BallFreeTests(unittest.TestCase):
     def blocks(self, n=500):

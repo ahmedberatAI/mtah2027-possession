@@ -118,7 +118,7 @@ def build_net(d_in, width=64, drop=0.1, e=0):
 
 def load(path):
     ck = torch.load(path, map_location="cpu", weights_only=False)
-    net = build_net(ck["d_in"], e=ck.get("e", 0))
+    net = build_net(ck["d_in"], width=int(ck["state"]["front.0.weight"].shape[0]), e=ck.get("e", 0))
     net.load_state_dict(ck["state"])
     return net.eval()
 
